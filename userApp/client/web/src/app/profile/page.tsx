@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { fetchProfile, ApiResponse, UserProfile } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -12,49 +11,15 @@ import {
   ArrowLeft, 
   User, 
   Shield, 
-  Clock, 
-  RefreshCw, 
-  Cpu, 
   LogOut, 
   Check, 
-  Globe, 
-  Terminal,
-  Activity
+  RefreshCw
 } from "lucide-react";
 
 export default function UserProfilePage() {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
   const activeSession = sessionData?.session;
-
-  // State to fetch direct Express profile details
-  const [profileData, setProfileData] = useState<UserProfile | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [errorLog, setErrorLog] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (activeUser) {
-      loadExpressProfile();
-    }
-  }, [activeUser]);
-
-  const loadExpressProfile = async () => {
-    setIsLoadingProfile(true);
-    setErrorLog(null);
-    try {
-      const response = await fetchProfile();
-      if (response.status === "success" && response.data) {
-        setProfileData(response.data);
-      } else {
-        setErrorLog("Backend server responded but did not return profile metadata.");
-      }
-    } catch (err: any) {
-      console.error("Error fetching Express profile:", err);
-      setErrorLog(err.message || "Failed to establish database connection with server.");
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
 
   const triggerGoogleLogin = async () => {
     try {
@@ -70,7 +35,6 @@ export default function UserProfilePage() {
   const handleLogout = async () => {
     await signOut();
     refetch();
-    setProfileData(null);
   };
 
   return (
@@ -114,7 +78,7 @@ export default function UserProfilePage() {
                 Your Developer Profile
               </h1>
               <p className="text-sm text-[#6c6a64]">
-                Manage your authenticated connection, database settings, and active sessions.
+                Manage your authenticated connection and active sessions.
               </p>
             </div>
 
@@ -230,46 +194,6 @@ export default function UserProfilePage() {
                     </CardContent>
                   </Card>
                 )}
-
-                {/* Secure DB Endpoint Response Payload */}
-                <Card className="border border-[#e6dfd8] bg-[#faf9f5]">
-                  <CardHeader className="bg-[#f5f0e8]/50 border-b border-[#e6dfd8] p-4.5 flex flex-row items-center justify-between">
-                    <CardTitle className="font-serif text-lg font-normal text-[#141413] flex items-center gap-2">
-                      <Terminal className="h-4.5 w-4.5 text-[#cc785c]" />
-                      Express API Verification
-                    </CardTitle>
-                    <Button 
-                      size="xs" 
-                      variant="outline" 
-                      onClick={loadExpressProfile} 
-                      disabled={isLoadingProfile}
-                      className="border-[#e6dfd8] text-[10px] h-6"
-                    >
-                      <RefreshCw className={`h-3 w-3 mr-1 ${isLoadingProfile ? "animate-spin" : ""}`} />
-                      Sync
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="p-5">
-                    {isLoadingProfile ? (
-                      <div className="text-center py-6 text-xs text-[#6c6a64]">Querying Database...</div>
-                    ) : errorLog ? (
-                      <div className="p-4 rounded-lg bg-[#c64545]/5 border border-[#c64545]/10 text-xs text-[#c64545] flex items-start gap-2">
-                        <Activity className="h-4 w-4 mt-0.5 shrink-0" />
-                        <div>
-                          <strong>Database Connection Issue:</strong>
-                          <p className="mt-1 leading-relaxed">{errorLog}</p>
-                        </div>
-                      </div>
-                    ) : profileData ? (
-                      <div className="relative rounded-lg border border-[#e6dfd8] bg-[#181715] p-4 text-[#faf9f5] font-mono text-[10px] overflow-x-auto">
-                        <pre className="max-h-56 overflow-y-auto">
-                          {JSON.stringify(profileData, null, 2)}
-                        </pre>
-                        <span className="absolute top-2 right-2 rounded bg-neutral-800 text-[8px] text-neutral-400 px-1.5 py-0.5 uppercase tracking-wider">db payload</span>
-                      </div>
-                    ) : null}
-                  </CardContent>
-                </Card>
 
               </div>
             </div>
