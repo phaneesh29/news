@@ -39,6 +39,7 @@ export async function fetchHealth(): Promise<{ status: string }> {
 export async function fetchProfile(headers?: HeadersInit): Promise<ApiResponse<UserProfile>> {
   const response = await fetch(`${API_BASE_URL}/auth/profile`, {
     method: "GET",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(headers || {}),
