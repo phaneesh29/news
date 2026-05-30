@@ -1,8 +1,8 @@
-import express from 'express';
+import {Router} from 'express';
 import AppError from '../utils/appError.js';
 import healthRouter from './health.route.js';
 
-const router = express.Router();
+const router = Router();
 
 
 router.use('/health', healthRouter);

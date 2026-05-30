@@ -75,4 +75,19 @@ npm start
 
 ## Default Endpoints
 - **Health Check**: `GET /api/health`
-- **Trigger Test Error**: `GET /api/test-error` (useful to verify development vs production error responses)
+- **Better Auth Health**: `GET /api/auth/ok`
+- **Google Sign In / Sign Up**: `POST /api/auth/sign-in/social`
+  ```json
+  { "provider": "google", "callbackURL": "http://localhost:3000/profile" }
+  ```
+- **OAuth Callback**: `GET /api/auth/callback/google`
+- **Current Session**: `GET /api/auth/session`
+- **Profile**: `GET /api/auth/profile`
+- **Logout**: `POST /api/auth/sign-out`
+
+Google OAuth creates the user on first sign-in, so sign-in and sign-up use the same Better Auth social endpoint.
+
+Configure this redirect URI in Google Cloud:
+```text
+http://localhost:5000/api/auth/callback/google
+```
