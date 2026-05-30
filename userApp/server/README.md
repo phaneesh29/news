@@ -1,93 +1,101 @@
-# Minimalistic Production-Ready Express.js Server Setup
+# DevBits Curation Server
 
-A structured, minimalistic, and production-ready Express.js server template configured with modern JavaScript (ES Modules).
-
-## Features
-
-- **ES Modules**: Modern import/export syntax for clean, modular JavaScript code.
-- **Security (Helmet)**: Sets secure HTTP headers out of the box to prevent common security vulnerabilities.
-- **CORS**: Enabled and configurable via `.env` configuration.
-- **Compression**: Gzip compression enabled for optimized bandwidth usage.
-- **Structured Logging (Winston & Morgan)**: 
-  - Standard Morgan HTTP request logger streaming automatically to Winston.
-  - Development logs are beautifully formatted and colorized.
-  - Production logs are printed in JSON format for easy ingestion by log management systems (Datadog, CloudWatch, etc.).
-- **Rate Limiting**: IP-based rate limiting configured to mitigate brute force / basic DDoS attacks.
-- **Robust Error Handling**:
-  - Global Express JSON error handling middleware separating production and development response formats.
-  - Custom `AppError` operational error class for clean and standardized error responses.
-  - Process event listeners tracking and logging `uncaughtException`, `unhandledRejection`, `SIGTERM`, and `SIGINT` for graceful server shutdown.
+A production-ready, highly secure, and minimalistic Express.js backend server designed to power the DevBits AI Curation Platform. Built with modern ES Modules, structured database adapters, and seamless authentication layers.
 
 ---
 
-## Directory Structure
+## 🚀 Key Features
 
-```
+*   **Authentication (Better Auth):** Implements node-native middleware adapter linking Google Social OAuth credentials to session databases.
+*   **Database (Drizzle ORM & Neon Serverless PG):** Schema-driven, typed SQL table mapping supporting migration setups and branch connections.
+*   **Security (Helmet & CORS):** Enforces strict HTTP headers, parameterized CORS origins, and credentials handshakes.
+*   **Structured Logging (Pino):** Optimized JSON logging formats for production monitoring alongside colorized development streams.
+*   **Rate Limiting:** Protects endpoints from DDoS/brute-force abuse via dynamic window limiting.
+*   **Production Error Boundaries:** Standardized operational exceptions mapping using custom `AppError` rules.
+
+---
+
+## 📂 Project Directory Structure
+
+```text
 .
 ├── src/
-│   ├── app.js                  # Express app middleware registration & routes
-│   ├── index.js                # Server entrypoint and process lifecycles
+│   ├── app.js                  # Express application pipeline & middleware configuration
+│   ├── index.js                # Core server entry point & process shutdown handlers
 │   ├── config/
-│   │   └── env.js              # Reads and checks environment variables
+│   │   └── env.js              # Environment schemas parsing and validation (Zod)
+│   ├── controllers/
+│   │   └── auth.controller.js  # Controller endpoints for session profiles queries
+│   ├── db/
+│   │   ├── index.js            # Neon HTTP serverless client initialization
+│   │   └── schema.js           # Drizzle schema definitions for Users, Sessions, and Accounts
+│   ├── lib/
+│   │   └── auth.js             # Better Auth server configurations (social providers)
 │   ├── middlewares/
-│   │   ├── errorHandler.js     # Global HTTP JSON error handler
-│   │   └── rateLimiter.js      # rate-limiting middleware (express-rate-limit)
+│   │   ├── errorHandler.js     # Global HTTP JSON exception interceptor
+│   │   ├── rateLimiter.js      # Endpoint rate-limiting policies
+│   │   └── requireAuth.js      # Session verification route guard
 │   ├── routes/
-│   │   └── index.js            # Router mapping for root and health checks
+│   │   ├── auth.route.js       # Authenticated profile routing mapping
+│   │   ├── health.route.js     # Health check diagnostics route
+│   │   └── index.js            # Main API routing index
 │   └── utils/
 │       ├── appError.js         # Custom AppError operational exception class
-│       └── logger.js           # Winston logger configuration
-├── .env                        # Local secret configurations (gitignored)
-├── .env.example                # Example template config
-├── .gitignore                  # Git ignore definitions
-└── package.json                # Project configurations & dependencies
+│       └── logger.js           # Pino logger wrapper configuration
+├── drizzle.config.js           # Drizzle generating and schema targets
+├── package.json                # Server script and library manifest
+└── .env                        # Local secrets repository (ignored from git)
 ```
 
 ---
 
-## Getting Started
+## 💻 Getting Started
 
-### 1. Installation
-Install project dependencies:
+### 1. Prerequisite Installations
+Verify your Node.js runtime version, then install dependencies:
 ```bash
 npm install
 ```
 
-### 2. Environment Setup
-Copy the environment variables template and configure the variables as needed:
+### 2. Configure Local Environment Variables
+Create a local `.env` configuration mapping your Neon DB endpoints and Google credentials:
 ```bash
 cp .env.example .env
 ```
+Ensure you provide definitions for:
+*   `PORT` (defaults to `5000`)
+*   `DATABASE_URL` (Neon Postgres Connection String)
+*   `BETTER_AUTH_SECRET` (cryptographic secret)
+*   `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
 
-### 3. Run in Development
-Start the application with hot-reloading (via `nodemon`):
+### 3. Database Schema Migrations
+Generate SQL files and push schemas directly to the Neon database instance:
 ```bash
-npm run dev
+# Generate database schema models
+npm run db:generate
+
+# Execute migrations to Neon database
+npm run db:migrate
+
+# Open database studio GUI
+npm run db:studio
 ```
 
-### 4. Run in Production
-Start the server in standard production mode:
+### 4. Running the Server
 ```bash
-npm start
+# Run in development hot-reload mode
+npm run dev
+
+# Run in production optimized mode
+npm run start
 ```
 
 ---
 
-## Default Endpoints
-- **Health Check**: `GET /api/health`
-- **Better Auth Health**: `GET /api/auth/ok`
-- **Google Sign In / Sign Up**: `POST /api/auth/sign-in/social`
-  ```json
-  { "provider": "google", "callbackURL": "http://localhost:3000/profile" }
-  ```
-- **OAuth Callback**: `GET /api/auth/callback/google`
-- **Current Session**: `GET /api/auth/session`
-- **Profile**: `GET /api/auth/profile`
-- **Logout**: `POST /api/auth/sign-out`
+## 🔌 API Route Specifications
 
-Google OAuth creates the user on first sign-in, so sign-in and sign-up use the same Better Auth social endpoint.
-
-Configure this redirect URI in Google Cloud:
-```text
-http://localhost:5000/api/auth/callback/google
-```
+*   **GET `/api/health`** — Ingests a quick JSON health-check verification (Uptime, Environment state).
+*   **GET `/api/auth/session`** — Inspects active cookie session credentials.
+*   **GET `/api/auth/profile`** — *(Protected)* Queries verified database user profiles.
+*   **POST `/api/auth/sign-in/social`** — Initiates Better Auth Google provider social redirect.
+*   **POST `/api/auth/sign-out`** — Purges active session cookies.
