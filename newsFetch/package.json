@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",
+    "@exalabs/ai-sdk": "^2.1.0",
     "ai": "^6.0.200",
     "dotenv": "^17.4.2",
     "zod": "^4.4.3"

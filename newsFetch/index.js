@@ -1,14 +1,14 @@
-import { memoryAgent } from './agent.js';
+import { mainAgent } from './agent.js';
 
 const run = async () => {
     console.log('Sending prompt to the agent...');
-    const result = await memoryAgent.generate({
-        prompt: 'Hi! Please remember that my name is Phaneesh and my favorite color is ocean blue.',
+    const result = await mainAgent.generate({
+        prompt: 'Please fetch the latest AI developer news (including new model releases, acquisitions, investments, and tech releases), store it in news.md, and confirm that it has been stored.',
     });
 
     console.log('\n--- AGENT RESPONSE ---');
     console.log(result.text);
-    console.log(result.steps);
+    console.log(JSON.stringify(result.steps, null, 2));
 };
 
 run().catch(console.error);
