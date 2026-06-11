@@ -1,17 +1,14 @@
-# AI Developer News: June 9–11, 2026
+Last flow execution: 6/11/2026, 4:50:37 PM GMT+5:30
 
-## Model Releases
-*   **Google DiffusionGemma:** Released on June 10, 2026, this model uses a text diffusion architecture, enabling it to generate text four times faster than traditional LLMs. It utilizes a mixture-of-experts approach (26B parameters, 3.8B active) and is optimized for both server-grade (H100) and consumer GPUs (RTX 5090).
-*   **HRM-Text (by Sapient Intelligence):** A 1-billion-parameter open-weight model released on June 11, 2026. Built from scratch for approximately $1,500 using a Hierarchical Recurrent Model (HRM) architecture, it is trained specifically on instruction-response pairs rather than raw internet-scale text.
-*   **Resemble AI Chatterbox Multilingual v3:** Released June 10, 2026, this TTS model supports 25 languages/dialects. It includes built-in neural watermarking (PerTh) to ensure provenance and provenance verification, addressing upcoming regulations like the EU AI Act.
-*   **Decart Oasis 3:** Launched June 10, 2026, this is a real-time world model for driving simulation. It generates photorealistic driving environments via API at $0.02 per second and is targeted at autonomous vehicle developers and physical AI applications.
+# AI Developer News (June 9-11, 2026)
 
-## Acquisitions & Investments
-*   **Neura Robotics:** Raising up to $1.4 billion from a consortium including Amazon, Nvidia, Qualcomm, and Tether. The funding will support the development of their humanoid and industrial robotics systems and the "Neuraverse" platform.
-*   **Anthropic Infrastructure Financing:** Reported on June 9, 2026, Google is backstopping a $35 billion debt financing deal led by Apollo Global Management. The deal secures Anthropic's long-term access to custom TPU compute resources across five U.S. data centers.
-*   **Anthropic Social Impact Commitments:** On June 11, 2026, Anthropic announced a $350 million initiative comprising a $200 million Economic Futures Research Fund and a $150 million fellowship program to study the economic impacts of AI.
 
-## Tech & Feature Releases
-*   **Visa x ChatGPT Integration:** Announced June 11, 2026, Visa has embedded its payment network directly into ChatGPT. This allows AI agents to securely shop and complete transactions on behalf of users at merchants accepting Visa, with built-in fraud monitoring.
-*   **Xiaomi MiMo Code:** Announced June 11, 2026, an open-source terminal-based AI coding agent. It features a persistent memory system and maintenance subagents designed to manage context and state over long-running software projects.
-*   **Microsoft Foundry Updates:** On June 11, 2026, Microsoft added Cohere Labs' Command A+ (W4A4 quantized), Datalab's Chandra OCR 2, and Z.ai's GLM-OCR to its Foundry catalog, simplifying the deployment of open-weight models with integrated networking and access controls.
+### Model Releases
+*   **Anthropic Claude Fable 5 (June 9, 2026):** Anthropic launched Claude Fable 5, the first publicly available model from its 'Mythos' class. It is capable in software engineering and vision, but includes hard safety limits in high-risk areas like cybersecurity and biology. [Source](https://techcrunch.com/2026/06/09/anthropic-released-claude-fable-5-its-most-powerful-model-publicly-days-after-warning-ai-is-getting-too-dangerous/)
+*   **Google DiffusionGemma (June 10, 2026):** Google released DiffusionGemma, an open-source text-diffusion model that generates 256 tokens at once, offering speeds four times faster than traditional LLMs and running on consumer GPUs. [Source](https://siliconangle.com/2026/06/10/google-open-sources-speedy-diffusiongemma-text-diffusion-model/)
+
+### Tech Releases & Developer Tools
+*   **Apple WWDC26 & iOS 27 AI Architecture (June 9, 2026):** Apple introduced a new Siri built on a 1.2-trillion-parameter model architecture utilizing a three-tier system: on-device, Apple's Private Cloud Compute, and Google Cloud with Nvidia Blackwell GPUs. Apple clarified that no Gemini assistant code or Google search infrastructure is used, though Gemini models were used to distill the Apple Foundation Models (AFM). Additionally, the Foundation Models framework now supports third-party cloud providers, allowing developers to call cloud-hosted Gemini models via the Firebase Apple SDK. [Source](https://www.macrumors.com/2026/06/09/apples-new-ai-contains-no-gemini/), [Source](https://thenextweb.com/news/apple-siri-google-gemini-nvidia-privacy-wwdc), [Source](https://blog.google/innovation-and-ai/technology/developers-tools/bringing-gemini-models-to-apple-developers/)
+
+### Acquisitions & Investments
+*   **Google-Anthropic $35B Chip Financing (June 10, 2026):** Google agreed to backstop lease payments for a $35 billion financing deal led by Apollo Global Management, ensuring Anthropic's continued use of Google's custom TPU ecosystem for training and inference. [Source](https://opentools.ai/news/google-backstops-35-billion-chip-deal-anthropic-tpu/)

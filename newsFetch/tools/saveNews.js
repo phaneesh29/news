@@ -12,8 +12,17 @@ export const saveNews = tool({
   }),
   execute: async ({ content }) => {
     try {
-      await fs.writeFile(NEWS_FILE, content, 'utf-8');
-      return { success: true, message: 'News successfully saved to news.md.' };
+      const now = new Date();
+      const timestamp = now.toLocaleString('en-US', { timeZoneName: 'short' });
+      const cleanContent = content.replace(/^Last flow execution:.*$/gim, '').trim();
+      const contentWithTimestamp = `Last flow execution: ${timestamp}\n\n${cleanContent}`;
+      
+      await fs.writeFile(NEWS_FILE, contentWithTimestamp, 'utf-8');
+      return { 
+        success: true, 
+        message: `News successfully saved to news.md.`,
+        lastFlowExecution: timestamp
+      };
     } catch (error) {
       return { error: `Failed to save news to news.md: ${error.message}` };
     }
