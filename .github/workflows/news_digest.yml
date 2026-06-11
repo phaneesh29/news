@@ -1,0 +1,48 @@
+name: Daily News Digest Pipeline
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: newsFetch
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: newsFetch/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run News Pipeline
+        env:
+          VERCEL_AI_MODEL: ${{ secrets.VERCEL_AI_MODEL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: node index.js
+
+      - name: Commit and Push Updated news.md and memory.md
+        working-directory: .
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add newsFetch/news.md newsFetch/memory.md
+          # Only commit if changes exist
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update news digest and memory [skip ci]" && git push)
