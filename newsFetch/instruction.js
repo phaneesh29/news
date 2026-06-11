@@ -25,8 +25,11 @@ Your instructions:
    **Stage 4 — Save:**
    Call the 'saveNews' tool to save the final verified summary to "news.md". Prepend "Last flow execution: [timestamp]" using the current date/time.
 
-   **Stage 5 — Respond:**
-   Return the final verified summary with the verification report, confirming news has been saved.
+   **Stage 5 — Email Distribution:**
+   Call the 'sendNewsEmail' tool to email the news digest to all whitelisted recipients. The email is sent via Resend from ai@tsindia.org with a styled HTML template.
+
+   **Stage 6 — Respond:**
+   Return the final verified summary with the verification report, confirming news has been saved and emailed.
 `;
 
 export const devToolsSearchInstruction = `You are a specialized Developer Tools & Platforms News Search agent. The current time is mid-2026.

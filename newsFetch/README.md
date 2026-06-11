@@ -1,6 +1,6 @@
 # 🗞️ NewsFetch — AI-Powered Developer News Agent
 
-An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, and verifies the latest developer-focused news using AI agents. Built with [Vercel AI SDK](https://ai-sdk.dev) and powered by Google Gemini + [Exa](https://exa.ai) search.
+An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, verifies, and emails the latest developer-focused news using AI agents. Built with [Vercel AI SDK](https://ai-sdk.dev) and powered by Google Gemini + [Exa](https://exa.ai) search + [Resend](https://resend.com) email.
 
 ## ✨ Features
 
@@ -11,6 +11,7 @@ An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, and 
 - **📈 Trend Detection** — Identifies themes appearing across multiple categories
 - **📋 TL;DR Generation** — Auto-generated executive summary of top stories
 - **⏰ 12-Hour Freshness** — Strict filtering ensures no stale news (enforced at API + prompt level)
+- **📧 Email Distribution** — Sends a styled HTML digest to whitelisted recipients via Resend
 - **🧠 Persistent Memory** — Remembers user preferences across runs
 
 ## 🏗️ Architecture
@@ -61,6 +62,16 @@ An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, and 
                 │  - Trends section  │
                 │  - Ranked items    │
                 │  - Stats footer    │
+                └─────────┬──────────┘
+                          │
+                   Stage 5: Email
+                          │
+                ┌─────────▼──────────┐
+                │  📧 Email Digest   │
+                │  - Styled HTML     │
+                │  - All recipients  │
+                │    in single call  │
+                │  - via Resend      │
                 └────────────────────┘
 ```
 
@@ -71,9 +82,11 @@ newsFetch/
 ├── index.js                  # Entry point — kicks off the pipeline
 ├── agent.js                  # Main orchestrator agent definition
 ├── instruction.js            # All agent instructions (6 specialized prompts)
+├── whitelistEmails.js        # Array of email recipients for the digest
 ├── tools/
 │   ├── newsTools.js          # searchNewsParallel, deduplicateAndRank, verifyNews
 │   ├── saveNews.js           # Saves final output to news.md with rich formatting
+│   ├── emailTools.js         # sendNewsEmail — Resend-powered email distribution
 │   └── memoryTools.js        # getMemory / saveMemory for persistent user context
 ├── subagents/
 │   ├── searchSubagent.js     # 3 parallel search agents (Dev, AI, Funding)
@@ -81,7 +94,7 @@ newsFetch/
 │   └── verifySubagent.js     # Cross-referencing verification agent
 ├── news.md                   # Output — the latest verified news digest
 ├── memory.md                 # Persistent memory store
-├── .env                      # API keys (Gemini + Exa)
+├── .env                      # API keys (Gemini + Exa + Resend)
 └── package.json
 ```
 
@@ -92,6 +105,8 @@ newsFetch/
 - **Node.js** 18+
 - **Google Gemini API key** — [Get one here](https://aistudio.google.com/apikey)
 - **Exa API key** — [Get one here](https://dashboard.exa.ai/api-keys)
+- **Resend API key** — [Get one here](https://resend.com/api-keys)
+- **Verified domain on Resend** — The `from` address (`ai@tsindia.org`) must belong to a domain verified in your Resend account
 
 ### Installation
 
@@ -109,7 +124,21 @@ Create a `.env` file in the root:
 VERCEL_AI_MODEL=gemini-3.1-flash-lite
 GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
 EXA_API_KEY=your_exa_api_key
+RESEND_API_KEY=your_resend_api_key
 ```
+
+### Adding Email Recipients
+
+Edit `whitelistEmails.js` to add or remove recipients:
+
+```js
+export const whitelistedEmails = [
+  'sreephaneesha2005@gmail.com',
+  // Add more emails here
+];
+```
+
+All recipients receive the digest in a **single API call** — no per-recipient looping.
 
 ## 🚀 Usage
 
@@ -123,6 +152,7 @@ The pipeline will:
 2. **Deduplicate & Rank** — Merge duplicates, score, tag, detect trends (~10s)
 3. **Verify** — Cross-reference each claim with independent searches (~15-20s)
 4. **Save** — Write the final digest to `news.md`
+5. **Email** — Send styled HTML digest to all whitelisted recipients via Resend
 
 Total runtime: ~60-90 seconds depending on API response times.
 
@@ -166,6 +196,15 @@ Open-source text-diffusion model generating text 4x faster than traditional LLMs
 | 🔍 Cross-Referenced | 5 |
 | ⏰ Freshness Window | Last 12 hours |
 ```
+
+### Example Email
+
+Recipients receive a styled HTML email with:
+- Gradient header with "🗞️ NewsFetch Digest" branding
+- Full news content rendered from Markdown to HTML
+- Clean typography and clickable source links
+- Footer with branding and sender info
+- Sent from `ai@tsindia.org`
 
 ## 🧩 How Each Stage Works
 
@@ -212,6 +251,15 @@ Writes `news.md` with:
 - Ranked & verified news items
 - Stats footer (confidence breakdown, cross-reference count)
 
+### Stage 5 — Email Distribution
+
+Sends the digest to all whitelisted emails:
+- **Single Resend API call** — all recipients in the `to` field
+- **Markdown → styled HTML** conversion with gradient header/footer
+- **From address**: `ai@tsindia.org`
+- **Subject**: Auto-generated with date (e.g., "🗞️ Dev News Digest — Wednesday, June 11, 2026")
+- Add/remove recipients in `whitelistEmails.js`
+
 ## 🧠 Memory System
 
 The agent persists user preferences in `memory.md`. You can extend the prompt in `index.js` to include conversational context, and the agent will remember details across runs.
@@ -223,6 +271,7 @@ The agent persists user preferences in `memory.md`. You can extend the prompt in
 | `ai` | Vercel AI SDK — ToolLoopAgent, tools, structured output |
 | `@ai-sdk/google` | Google Gemini model provider |
 | `@exalabs/ai-sdk` | Exa web search tool for AI SDK |
+| `resend` | Email delivery via Resend API |
 | `zod` | Schema validation for structured outputs |
 | `dotenv` | Environment variable management |
 

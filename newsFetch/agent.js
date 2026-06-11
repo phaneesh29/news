@@ -5,6 +5,7 @@ import { systemInstruction } from './instruction.js';
 import { getMemory, saveMemory } from './tools/memoryTools.js';
 import { searchNewsParallel, deduplicateAndRank, verifyNews } from './tools/newsTools.js';
 import { saveNews } from './tools/saveNews.js';
+import { sendNewsEmail } from './tools/emailTools.js';
 
 export const mainAgent = new ToolLoopAgent({
   model: google(process.env.VERCEL_AI_MODEL),
@@ -16,5 +17,6 @@ export const mainAgent = new ToolLoopAgent({
     deduplicateAndRank,
     verifyNews,
     saveNews,
+    sendNewsEmail,
   },
 });

@@ -1,42 +1,42 @@
-Last flow execution: 6/11/2026, 5:50:23 PM GMT+5:30
+Last flow execution: 6/11/2026, 6:07:59 PM GMT+5:30
 
 ## 📋 TL;DR
-The technology landscape is shifting toward physical AI infrastructure, with massive capital infusions like Broadcom's $35B platform and NEURA Robotics' $1.4B raise. Simultaneously, the developer ecosystem is pivoting toward autonomous agentic coding tools while implementing stricter security protocols to manage these new capabilities.
+June 11, 2026, marks a major pivot toward securing and operationalizing AI coding agents with significant releases from Microsoft, JFrog, and Rubrik. Meanwhile, massive capital continues to flow into AI infrastructure, highlighted by a $10B initiative from Helix Digital and notable funding rounds for agentic context and execution platforms.
 
 ---
 
 ## 📈 Trends Detected
-- Massive scale-up of physical AI and data center infrastructure
-- Maturation of autonomous coding agent workflows and security governance
-- Rise of Physical AI (robotics and simulation) partnerships and funding
+- Proliferation of enterprise-grade security and governance tools for AI coding agents
+- Massive capital investment into AI physical infrastructure and thermal management
+- Strategic shift toward production-ready 'agentic' workflows and context-management layers
 
 ---
 
-### ⚡ Breaking
-- **[Confidence: High] Broadcom Launches $35B AI XPV Platform** (Score: 5) - Massive investment to power 20GW of AI compute capacity. [Source](https://www.thefastmode.com/technology-solutions/48949-broadcom-launches-ai-xpv-platform-with-apollo-and-blackstone-to-power-20gw-ai-compute-expansion)
-- **[Confidence: High] NEURA Robotics Raises $1.4B Series C** (Score: 5) - Backed by Amazon, NVIDIA, and Tether to scale humanoid robotics and physical AI. [Source](https://techfundingnews.com/neura-robotics-1-4b-series-c-tether-amazon-nvidia/)
+# Verified AI & Developer News Digest: June 11, 2026
 
-### 🔥 Trending
-- **[Confidence: High] Autonomous Coding & Agentic Tooling Updates** (Score: 4) - Includes Xiaomi's MiMo Code (persistent memory), Cursor's 90s Bugbot updates, and Nous Research's Hermes Profile Builder. [Sources](https://www.opensourceforu.com/2026/06/xiaomi-open-sources-ai-coding-agent-with-persistent-memory/), [Source](https://www.digitalapplied.com/blog/cursor-bugbot-90-second-reviews-june-2026-release), [Source](https://www.marktechpost.com/2026/06/11/nous-research-ships-hermes-agent-profile-builder-identity-model-skills-and-mcp-servers-in-one-dashboard-flow/)
-- **[Confidence: High] Agent Governance & Security Tools** (Score: 4) - New security frameworks from Zscaler, JFrog (Claude Code plugin), and GitLab for securing agent activity. [Sources](https://securitybrief.com.au/story/zscaler-launches-zero-trust-tools-to-secure-ai-agents), [Source](https://securitybrief.com.au/story/jfrog-adds-claude-code-plugin-for-security-oversight), [Source](https://cyberriskleaders.com/gitlab-adds-agent-focused-devsecops-features-and-expands-managed-offering-on-google-cloud/)
+## ⚡ Breaking
+- **[Confidence: High] AI Infrastructure Expansion & Investment** (Score: 5): Helix Digital Infrastructure launched with $10B+ in capital to boost data center capacity; OpenAI and Nvidia announced a 10-gigawatt infrastructure partnership. [Sources: KKK/Helix Launch](https://markets.financialcontent.com/stocks/article/bizwire-2026-6-11-kkr-launches-helix-digital-infrastructure-a-new-company-to-finance-and-deliver-the-next-generation-of-ai-infrastructure)
+- **[Confidence: Medium] Meta/Manus Deal Collapse** (Score: 4): Meta finalized the operational split from Manus following regulatory intervention in China, requiring a systematic unwind of integrated AI agent technology. [Source: Meta/Manus](https://cryptobriefing.com/meta-manus-operational-split-data-sharing/)
 
-### 📌 Notable
-- **[Confidence: High] Figure Acquires Kiavi for $717M** (Score: 4) - Strategic AI real estate finance expansion. [Source](https://www.archynewsy.com/figure-figr-acquires-ai-real-estate-lender-kiavi-for-717m-in-blockchain-expansion/)
-- **[Confidence: High] TensorWave Raises $350M** (Score: 4) - Series B funding to scale AMD-based data center infrastructure. [Source](https://siliconangle.com/2026/06/10/data-center-infrastructure-startup-tensorwave-raises-350m-help-break-nvidias-ai-chip-monopoly/)
-- **[Confidence: High] Reka and Moonvalley Merge** (Score: 3) - Consolidation to advance physical AI models. [Source](https://www.morningstar.com/news/pr-newswire/20260611cn81518/reka-and-moonvalley-join-forces-to-advance-models-and-infrastructure-for-physical-ai-302797869.html)
-- **[Confidence: High] npm v12 Security Updates** (Score: 3) - Disabling install-time scripts by default. [Source](https://gbhackers.com/github-introduces-automatic-controls-to-prevent-malicious-npm/)
-- **[Confidence: High] Databricks/Linux Foundation OpenSharing** (Score: 3) - New standard for sharing AI assets and models. [Source](https://itbrief.asia/story/databricks-linux-foundation-launch-opensharing-ai-standard)
-- **[Confidence: High] Google Open-sources DiffusionGemma** (Score: 2) - New high-efficiency text diffusion model. [Source](https://siliconangle.com/2026/06/10/google-open-sources-speedy-diffusiongemma-text-diffusion-model/)
+## 🔥 Trending
+- **[Confidence: High] AI Agent Security & Governance Ecosystem** (Score: 4): Multiple vendors launched security plugins for Claude Code, including JFrog (governance/scanning) and Rubrik (agent rewind/recovery). Zscaler also introduced zero-trust tools for agent data lineage. [Sources: JFrog](https://securitybrief.com.au/story/jfrog-adds-claude-code-plugin-for-security-oversight), [Rubrik](https://cxotoday.com/media-coverage/rubrik-launches-rubrik-agent-cloud-for-anthropics-claude-code/), [Zscaler](https://securitybrief.com.au/story/zscaler-launches-zero-trust-tools-to-secure-ai-agents)
+- **[Confidence: High] Next-Gen AI Coding Tools** (Score: 4): Microsoft launched 'Agent Harness' for production-ready agents, while Xiaomi open-sourced 'MiMo Code' featuring persistent memory. Nous Research released 'Hermes Agent Profile Builder' and TestSprite introduced automated QA for agents. [Sources: Microsoft](https://dev.to/brucewong001/microsoft-build-2026-agent-harness-is-about-making-agents-production-ready-1alb), [Xiaomi](https://www.opensourceforu.com/2026/06/xiaomi-open-sources-ai-coding-agent-with-persistent-memory/), [Nous](https://www.marktechpost.com/2026/06/11/nous-research-ships-hermes-agent-profile-builder-identity-model-skills-and-mcp-servers-in-one-dashboard-flow/), [TestSprite](https://siliconangle.com/2026/06/11/testsprite-launches-open-source-command-line-tool-help-ai-agents-check-work/)
+- **[Confidence: Medium] Startup Funding & Growth** (Score: 3): Significant raises for Jedify ($24M), Capsa AI ($18M), and Rivvun AI ($7.55M). Cursor expands to London with reports of SpaceX acquisition interest. [Sources: Jedify](https://www.citybiz.co/article/859035/jedify-raises-24m-as-enterprises-seek-better-context-for-ai-agents/), [Capsa AI](https://www.uktech.news/ai/capsa-ai-secures-13-4m-to-build-ai-platform-for-private-capital-20260611), [Rivvun](https://businessnewsthisweek.com/business/usd-2-trillion-a-year-never-makes-it-from-obligation-to-settlement-rivvun-ai-is-built-to-recover-it/), [Cursor](https://techfundingnews.com/cursor-opens-london-hq-and-plans-200-emea-hires-as-spacex-circles-with-60b-acquisition-offer/)
+
+## 📌 Notable
+- **[Confidence: High] DiffusionGemma Model Release** (Score: 4): Google released an open-weights text-diffusion model offering 4x faster generation throughput. [Source: Google](https://siliconangle.com/2026/06/10/google-open-sources-speedy-diffusiongemma-text-diffusion-model/)
+- **[Confidence: High] Hardware & Cooling M&A** (Score: 3): TDK acquired Fabric8Labs for $400M to advance GPU cooling tech; TensorWave raised $350M for AMD-based cloud infrastructure; NVIDIA shipping co-packaged optics switches. [Sources: TDK](https://startupfortune.com/tdks-400-million-acquisition-of-fabric8labs-proves-that-keeping-ai-chips-cool-has-become-as-strategically-important-as-building-them/), [TensorWave](https://siliconangle.com/2026/06/10/data-center-infrastructure-startup-tensorwave-raises-350m-help-break-nvidias-ai-chip-monopoly/), [NVIDIA](https://wccftech.com/nvidia-first-co-packaged-optics-switch-lands-at-lambda-cutting-3kw-per-rack/)
+- **[Confidence: High] Platform Integrations** (Score: 2): GitLab integrates Gemini 3.5/Gemma; Qt introduces Figma extraction skills; Anthropic partners with TCS for enterprise scaling. [Sources: GitLab](https://www.tradingview.com/news/tradingview:71bc3574142da:0-key-facts-gitlab-adds-gemini-3-5-gemma-boosts-ai-security-gc-tie/), [Qt](https://www.qt.io/blog/introducing-the-agentic-figma-design-extraction-skills), [Anthropic/TCS](https://techcrunch.com/2026/06/11/anthropic-taps-tcs-to-scale-its-enterprise-ai-deployments/)
 
 ---
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 10 |
-| ✅ High Confidence | 10 |
-| ⚠️ Medium Confidence | 0 |
+| Total Items Verified | 8 |
+| ✅ High Confidence | 6 |
+| ⚠️ Medium Confidence | 2 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 3 |
+| 🔍 Cross-Referenced | 8 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | 6/11/2026, 5:50:23 PM GMT+5:30 |
+| 🕐 Generated At | 6/11/2026, 6:07:59 PM GMT+5:30 |
