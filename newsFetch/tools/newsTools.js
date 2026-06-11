@@ -1,7 +1,14 @@
 import 'dotenv/config';
 import { tool } from 'ai';
 import { z } from 'zod';
-import { devToolsSearchSubagent, aiMlSearchSubagent, devFundingSearchSubagent } from '../subagents/searchSubagent.js';
+import { 
+  devToolsSearchSubagent, 
+  aiMlSearchSubagent, 
+  devFundingSearchSubagent,
+  devToolsTavilySearchSubagent,
+  aiMlTavilySearchSubagent,
+  devFundingTavilySearchSubagent
+} from '../subagents/searchSubagent.js';
 import { deduplicateRankSubagent } from '../subagents/deduplicateRankSubagent.js';
 import { verifySubagent } from '../subagents/verifySubagent.js';
 
@@ -26,21 +33,28 @@ Focus area: ${categoryFocus}`;
 }
 
 export const searchNewsParallel = tool({
-  description: 'Run 3 specialized news searches in parallel: Dev Tools, AI/ML, and Dev Ecosystem Funding. Returns merged results from all categories.',
+  description: 'Run 6 specialized news searches in parallel using Exa and Tavily: Dev Tools, AI/ML, and Dev Ecosystem Funding. Returns merged results from all categories.',
   inputSchema: z.object({
     additionalFocus: z.string().optional().describe('Optional additional topic to emphasize across all searches.'),
   }),
   execute: async ({ additionalFocus }, { abortSignal }) => {
     const focusSuffix = additionalFocus ? ` Also emphasize: ${additionalFocus}` : '';
 
-    console.log('🔍 Starting parallel news search across 3 categories...');
+    console.log('🔍 Starting parallel news search across 3 categories using both Exa and Tavily...');
 
-    const [devToolsResult, aiMlResult, devFundingResult] = await Promise.all([
+    const [
+      devToolsResult, 
+      aiMlResult, 
+      devFundingResult,
+      devToolsTavilyResult,
+      aiMlTavilyResult,
+      devFundingTavilyResult
+    ] = await Promise.all([
       devToolsSearchSubagent.generate({
         prompt: buildSearchPrompt('Developer Tools, IDEs, Frameworks, Libraries, Open Source, DevOps' + focusSuffix),
         abortSignal,
       }).then(r => {
-        console.log('  ✅ Dev Tools search complete');
+        console.log('  ✅ [Exa] Dev Tools search complete');
         return r;
       }),
 
@@ -48,7 +62,7 @@ export const searchNewsParallel = tool({
         prompt: buildSearchPrompt('AI Models, LLMs, AI Agents, ML Research, AI APIs and SDKs' + focusSuffix),
         abortSignal,
       }).then(r => {
-        console.log('  ✅ AI/ML search complete');
+        console.log('  ✅ [Exa] AI/ML search complete');
         return r;
       }),
 
@@ -56,18 +70,61 @@ export const searchNewsParallel = tool({
         prompt: buildSearchPrompt('AI startup funding rounds, developer tool acquisitions, AI infrastructure investments' + focusSuffix),
         abortSignal,
       }).then(r => {
-        console.log('  ✅ Dev Funding search complete');
+        console.log('  ✅ [Exa] Dev Funding search complete');
+        return r;
+      }),
+
+      devToolsTavilySearchSubagent.generate({
+        prompt: buildSearchPrompt('Developer Tools, IDEs, Frameworks, Libraries, Open Source, DevOps' + focusSuffix),
+        abortSignal,
+      }).then(r => {
+        console.log('  ✅ [Tavily] Dev Tools search complete');
+        return r;
+      }),
+
+      aiMlTavilySearchSubagent.generate({
+        prompt: buildSearchPrompt('AI Models, LLMs, AI Agents, ML Research, AI APIs and SDKs' + focusSuffix),
+        abortSignal,
+      }).then(r => {
+        console.log('  ✅ [Tavily] AI/ML search complete');
+        return r;
+      }),
+
+      devFundingTavilySearchSubagent.generate({
+        prompt: buildSearchPrompt('AI startup funding rounds, developer tool acquisitions, AI infrastructure investments' + focusSuffix),
+        abortSignal,
+      }).then(r => {
+        console.log('  ✅ [Tavily] Dev Funding search complete');
         return r;
       }),
     ]);
 
     // Merge all results
-    const mergedSummary = `## 🛠️ Developer Tools & Platforms\n${devToolsResult.output?.draftSummary || 'No results found.'}\n\n## 🤖 AI & Machine Learning\n${aiMlResult.output?.draftSummary || 'No results found.'}\n\n## 💰 Dev Ecosystem Funding & Acquisitions\n${devFundingResult.output?.draftSummary || 'No results found.'}`;
+    const mergedSummary = `## 🛠️ Developer Tools & Platforms (Exa)
+${devToolsResult.output?.draftSummary || 'No results found.'}
+
+## 🛠️ Developer Tools & Platforms (Tavily)
+${devToolsTavilyResult.output?.draftSummary || 'No results found.'}
+
+## 🤖 AI & Machine Learning (Exa)
+${aiMlResult.output?.draftSummary || 'No results found.'}
+
+## 🤖 AI & Machine Learning (Tavily)
+${aiMlTavilyResult.output?.draftSummary || 'No results found.'}
+
+## 💰 Dev Ecosystem Funding & Acquisitions (Exa)
+${devFundingResult.output?.draftSummary || 'No results found.'}
+
+## 💰 Dev Ecosystem Funding & Acquisitions (Tavily)
+${devFundingTavilyResult.output?.draftSummary || 'No results found.'}`;
 
     const mergedSources = [
       ...(devToolsResult.output?.sources || []),
+      ...(devToolsTavilyResult.output?.sources || []),
       ...(aiMlResult.output?.sources || []),
+      ...(aiMlTavilyResult.output?.sources || []),
       ...(devFundingResult.output?.sources || []),
+      ...(devFundingTavilyResult.output?.sources || []),
     ];
 
     console.log(`📊 Total sources gathered: ${mergedSources.length}`);
@@ -76,9 +133,12 @@ export const searchNewsParallel = tool({
       mergedSummary,
       mergedSources,
       categoryCounts: {
-        devTools: devToolsResult.output?.sources?.length || 0,
-        aiMl: aiMlResult.output?.sources?.length || 0,
-        devFunding: devFundingResult.output?.sources?.length || 0,
+        devToolsExa: devToolsResult.output?.sources?.length || 0,
+        devToolsTavily: devToolsTavilyResult.output?.sources?.length || 0,
+        aiMlExa: aiMlResult.output?.sources?.length || 0,
+        aiMlTavily: aiMlTavilyResult.output?.sources?.length || 0,
+        devFundingExa: devFundingResult.output?.sources?.length || 0,
+        devFundingTavily: devFundingTavilyResult.output?.sources?.length || 0,
       },
     };
   },

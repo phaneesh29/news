@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { ToolLoopAgent, Output } from 'ai';
 import { google } from '@ai-sdk/google';
 import { webSearch } from '@exalabs/ai-sdk';
+import { tavilySearch } from '@tavily/ai-sdk';
 import { devToolsSearchInstruction, aiMlSearchInstruction, devFundingSearchInstruction } from '../instruction.js';
 import { z } from 'zod';
 
@@ -18,7 +19,6 @@ const searchOutputSchema = Output.object({
     ).describe('List of web sources containing the raw facts.'),
   }),
 });
-
 
 function createSearchSubagent(instruction) {
   const twelveHoursAgo = new Date();
@@ -45,6 +45,26 @@ function createSearchSubagent(instruction) {
   });
 }
 
+function createTavilySearchSubagent(instruction) {
+  return new ToolLoopAgent({
+    model: google(process.env.VERCEL_AI_MODEL),
+    instructions: instruction,
+    tools: {
+      webSearch: tavilySearch({
+        searchDepth: 'basic',
+        topic: 'news',
+        maxResults: 10,
+        timeRange: 'day',
+      }),
+    },
+    output: searchOutputSchema,
+  });
+}
+
 export const devToolsSearchSubagent = createSearchSubagent(devToolsSearchInstruction);
 export const aiMlSearchSubagent = createSearchSubagent(aiMlSearchInstruction);
 export const devFundingSearchSubagent = createSearchSubagent(devFundingSearchInstruction);
+
+export const devToolsTavilySearchSubagent = createTavilySearchSubagent(devToolsSearchInstruction);
+export const aiMlTavilySearchSubagent = createTavilySearchSubagent(aiMlSearchInstruction);
+export const devFundingTavilySearchSubagent = createTavilySearchSubagent(devFundingSearchInstruction);

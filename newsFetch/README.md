@@ -94,7 +94,7 @@ newsFetch/
 │   └── verifySubagent.js     # Cross-referencing verification agent
 ├── news.md                   # Output — the latest verified news digest
 ├── memory.md                 # Persistent memory store
-├── .env                      # API keys (Gemini + Exa + Resend)
+├── .env                      # API keys (Gemini + Exa + Tavily + Resend)
 └── package.json
 ```
 
@@ -105,6 +105,7 @@ newsFetch/
 - **Node.js** 18+
 - **Google Gemini API key** — [Get one here](https://aistudio.google.com/apikey)
 - **Exa API key** — [Get one here](https://dashboard.exa.ai/api-keys)
+- **Tavily API key** — [Get one here](https://tavily.com)
 - **Resend API key** — [Get one here](https://resend.com/api-keys)
 - **Verified domain on Resend** — The `from` address (`ai@tsindia.org`) must belong to a domain verified in your Resend account
 
@@ -124,6 +125,7 @@ Create a `.env` file in the root:
 VERCEL_AI_MODEL=gemini-3.1-flash-lite
 GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
 EXA_API_KEY=your_exa_api_key
+TAVILY_API_KEY=your_tavily_api_key
 RESEND_API_KEY=your_resend_api_key
 ```
 
@@ -210,20 +212,19 @@ Recipients receive a styled HTML email with:
 
 ### Stage 1 — Parallel Search
 
-Three `ToolLoopAgent` instances run simultaneously via `Promise.all`:
+Six `ToolLoopAgent` instances run simultaneously via `Promise.all` (3 powered by Exa, 3 powered by Tavily):
 
-| Agent | Focus Areas |
-|-------|-------------|
-| **Dev Tools** | IDEs, frameworks, libraries, open-source, DevOps, CI/CD |
-| **AI/ML** | Model releases, AI agents, LLMs, research, AI APIs/SDKs |
-| **Dev Funding** | AI startup rounds, dev tool acquisitions, infra investments |
+| Agent | Focus Areas | Provider |
+|-------|-------------|----------|
+| **Dev Tools (Exa)** | IDEs, frameworks, libraries, open-source, DevOps, CI/CD | Exa |
+| **Dev Tools (Tavily)** | IDEs, frameworks, libraries, open-source, DevOps, CI/CD | Tavily |
+| **AI/ML (Exa)** | Model releases, AI agents, LLMs, research, AI APIs/SDKs | Exa |
+| **AI/ML (Tavily)** | Model releases, AI agents, LLMs, research, AI APIs/SDKs | Tavily |
+| **Dev Funding (Exa)** | AI startup rounds, dev tool acquisitions, infra investments | Exa |
+| **Dev Funding (Tavily)** | AI startup rounds, dev tool acquisitions, infra investments | Tavily |
 
-Each agent uses [Exa](https://exa.ai) web search with:
-- `category: "news"` — news-focused results
-- `numResults: 10` — broad coverage
-- `startPublishedDate` — dynamic 12-hour window (computed at runtime)
-- `livecrawl: "always"` — real-time freshness
-- `highlights` + `summary` — AI-extracted relevant snippets
+*   **Exa search** uses `category: "news"`, `numResults: 10`, `startPublishedDate` set to a dynamic 12-hour window, and `livecrawl: "always"` to get real-time highlights.
+*   **Tavily search** uses `topic: "news"`, `maxResults: 10`, and `timeRange: "day"`.
 
 ### Stage 2 — Deduplicate & Rank
 
