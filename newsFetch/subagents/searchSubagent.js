@@ -51,8 +51,9 @@ function createTavilySearchSubagent(instruction) {
     instructions: instruction,
     tools: {
       webSearch: tavilySearch({
-        searchDepth: 'basic',
+        searchDepth: 'advanced',
         topic: 'news',
+        includeAnswer: true,
         maxResults: 10,
         timeRange: 'day',
       }),
