@@ -8,5 +8,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.80",
+    "ai": "^6.0.200",
+    "dotenv": "^17.4.2",
+    "zod": "^4.4.3"
   }
 }
