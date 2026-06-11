@@ -24,4 +24,7 @@ Quality: Tag trending/breaking items, detect cross-category trends, include TL;D
     console.log(result.text);
 };
 
-run().catch(console.error);
+run().catch((err) => {
+    console.error(err);
+    process.exit(1);
+});
