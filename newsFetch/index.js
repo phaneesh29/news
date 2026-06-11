@@ -8,7 +8,6 @@ const run = async () => {
 
     console.log('\n--- AGENT RESPONSE ---');
     console.log(result.text);
-    console.log(JSON.stringify(result.steps, null, 2));
 };
 
 run().catch(console.error);
