@@ -1,43 +1,134 @@
 import 'dotenv/config';
 import { tool } from 'ai';
 import { z } from 'zod';
-import { searchSubagent } from '../subagents/searchSubagent.js';
+import { devToolsSearchSubagent, aiMlSearchSubagent, devFundingSearchSubagent } from '../subagents/searchSubagent.js';
+import { deduplicateRankSubagent } from '../subagents/deduplicateRankSubagent.js';
 import { verifySubagent } from '../subagents/verifySubagent.js';
 
-export const searchNews = tool({
-  description: 'Search for the latest AI/developer news from the last 12 hours. Returns a draft summary and a list of sources used.',
+
+function formatDateTime(date) {
+  return date.toLocaleString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short',
+  });
+}
+
+
+function buildSearchPrompt(categoryFocus) {
+  const now = new Date();
+  const twelveHoursAgo = new Date();
+  twelveHoursAgo.setHours(now.getHours() - 12);
+
+  return `Current time is ${formatDateTime(now)}.
+Search for the latest developer-focused news from the last 12 hours ONLY (since ${formatDateTime(twelveHoursAgo)}).
+Do NOT include anything published before ${formatDateTime(twelveHoursAgo)}.
+Focus area: ${categoryFocus}`;
+}
+
+export const searchNewsParallel = tool({
+  description: 'Run 3 specialized news searches in parallel: Dev Tools, AI/ML, and Dev Ecosystem Funding. Returns merged results from all categories.',
   inputSchema: z.object({
-    query: z.string().optional().describe('An optional search query or topic to focus the news search on.'),
+    additionalFocus: z.string().optional().describe('Optional additional topic to emphasize across all searches.'),
   }),
-  execute: async ({ query }, { abortSignal }) => {
-    const today = new Date();
-    const twelveHoursAgo = new Date();
-    twelveHoursAgo.setHours(today.getHours() - 12);
+  execute: async ({ additionalFocus }, { abortSignal }) => {
+    const focusSuffix = additionalFocus ? ` Also emphasize: ${additionalFocus}` : '';
 
-    const formatDateTime = (date) => {
-      return date.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
+    console.log('🔍 Starting parallel news search across 3 categories...');
+
+    const [devToolsResult, aiMlResult, devFundingResult] = await Promise.all([
+      devToolsSearchSubagent.generate({
+        prompt: buildSearchPrompt('Developer Tools, IDEs, Frameworks, Libraries, Open Source, DevOps' + focusSuffix),
+        abortSignal,
+      }).then(r => {
+        console.log('  ✅ Dev Tools search complete');
+        return r;
+      }),
+
+      aiMlSearchSubagent.generate({
+        prompt: buildSearchPrompt('AI Models, LLMs, AI Agents, ML Research, AI APIs and SDKs' + focusSuffix),
+        abortSignal,
+      }).then(r => {
+        console.log('  ✅ AI/ML search complete');
+        return r;
+      }),
+
+      devFundingSearchSubagent.generate({
+        prompt: buildSearchPrompt('AI startup funding rounds, developer tool acquisitions, AI infrastructure investments' + focusSuffix),
+        abortSignal,
+      }).then(r => {
+        console.log('  ✅ Dev Funding search complete');
+        return r;
+      }),
+    ]);
+
+    // Merge all results
+    const mergedSummary = `## 🛠️ Developer Tools & Platforms\n${devToolsResult.output?.draftSummary || 'No results found.'}\n\n## 🤖 AI & Machine Learning\n${aiMlResult.output?.draftSummary || 'No results found.'}\n\n## 💰 Dev Ecosystem Funding & Acquisitions\n${devFundingResult.output?.draftSummary || 'No results found.'}`;
+
+    const mergedSources = [
+      ...(devToolsResult.output?.sources || []),
+      ...(aiMlResult.output?.sources || []),
+      ...(devFundingResult.output?.sources || []),
+    ];
+
+    console.log(`📊 Total sources gathered: ${mergedSources.length}`);
+
+    return {
+      mergedSummary,
+      mergedSources,
+      categoryCounts: {
+        devTools: devToolsResult.output?.sources?.length || 0,
+        aiMl: aiMlResult.output?.sources?.length || 0,
+        devFunding: devFundingResult.output?.sources?.length || 0,
+      },
     };
+  },
+});
 
-    const todayStr = formatDateTime(today);
-    const twelveHoursAgoStr = formatDateTime(twelveHoursAgo);
 
-    const prompt = `Current time is ${todayStr}.
-Please search for and compile the latest AI news specifically from the last 12 hours, since ${twelveHoursAgoStr}. Do not include news from before ${twelveHoursAgoStr}.
-${query ? `Focus on: ${query}` : 'Include new model releases, acquisitions, investments, and new tech releases.'}`;
+export const deduplicateAndRank = tool({
+  description: 'Deduplicate merged news items, score them by impact, tag as Trending/Breaking/Notable, detect trends, and generate a TL;DR.',
+  inputSchema: z.object({
+    mergedSummary: z.string().describe('The merged Markdown summary from all category searches.'),
+    mergedSources: z.array(
+      z.object({
+        title: z.string(),
+        url: z.string(),
+        content: z.string(),
+      })
+    ).describe('The merged list of all sources.'),
+  }),
+  execute: async ({ mergedSummary, mergedSources }, { abortSignal }) => {
+    console.log('🔄 Deduplicating and ranking news items...');
 
-    const result = await searchSubagent.generate({
+    const now = new Date();
+    const prompt = `Current time: ${formatDateTime(now)}
+
+Here is the merged news from 3 category searches. Please deduplicate, rank, tag, score, detect trends, and write a TL;DR.
+
+--- MERGED NEWS ---
+${mergedSummary}
+
+--- ALL SOURCES ---
+${JSON.stringify(mergedSources, null, 2)}`;
+
+    const result = await deduplicateRankSubagent.generate({
       prompt,
       abortSignal,
     });
+
+    console.log(`  ✅ Dedup complete: ${result.output?.totalItems} unique items (${result.output?.duplicatesRemoved} duplicates merged)`);
 
     return result.output;
   },
 });
 
+
 export const verifyNews = tool({
-  description: 'Verify a draft news summary against its sources to check for hallucinations and ensure 100% grounding.',
+  description: 'Verify a ranked news summary against sources. The verifier can independently web-search to cross-reference claims.',
   inputSchema: z.object({
-    draftSummary: z.string().describe('The Markdown-formatted draft news summary to verify.'),
+    rankedSummary: z.string().describe('The Markdown-formatted ranked news summary to verify.'),
+    tldr: z.string().describe('The TL;DR executive summary.'),
+    trends: z.array(z.string()).describe('Detected trends to preserve.'),
     sources: z.array(
       z.object({
         title: z.string().describe('Title of the source.'),
@@ -46,20 +137,29 @@ export const verifyNews = tool({
       })
     ).describe('The list of sources containing the raw facts.'),
   }),
-  execute: async ({ draftSummary, sources }, { abortSignal }) => {
-    const prompt = `Please verify the following draft summary against the provided sources.
+  execute: async ({ rankedSummary, tldr, trends, sources }, { abortSignal }) => {
+    console.log('🔎 Verifying news items with cross-referencing...');
 
-Draft Summary:
-${draftSummary}
+    const prompt = `Please verify the following news summary against the provided sources. Use your web search tool to independently cross-reference any claims you are uncertain about.
+
+TL;DR:
+${tldr}
+
+Trends Detected:
+${trends.map(t => `- ${t}`).join('\n')}
+
+Ranked Summary:
+${rankedSummary}
 
 Sources:
-${JSON.stringify(sources, null, 2)}
-`;
+${JSON.stringify(sources, null, 2)}`;
 
     const result = await verifySubagent.generate({
       prompt,
       abortSignal,
     });
+
+    console.log(`  ✅ Verification complete: ${result.output?.stats?.totalItemsVerified} items verified, ${result.output?.stats?.crossReferencedCount} cross-referenced`);
 
     return result.output;
   },

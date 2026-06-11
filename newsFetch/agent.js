@@ -3,7 +3,7 @@ import { ToolLoopAgent } from 'ai';
 import { google } from '@ai-sdk/google';
 import { systemInstruction } from './instruction.js';
 import { getMemory, saveMemory } from './tools/memoryTools.js';
-import { searchNews, verifyNews } from './tools/newsTools.js';
+import { searchNewsParallel, deduplicateAndRank, verifyNews } from './tools/newsTools.js';
 import { saveNews } from './tools/saveNews.js';
 
 export const mainAgent = new ToolLoopAgent({
@@ -12,7 +12,8 @@ export const mainAgent = new ToolLoopAgent({
   tools: {
     getMemory,
     saveMemory,
-    searchNews,
+    searchNewsParallel,
+    deduplicateAndRank,
     verifyNews,
     saveNews,
   },
