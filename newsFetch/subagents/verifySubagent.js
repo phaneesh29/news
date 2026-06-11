@@ -10,13 +10,13 @@ export const verifySubagent = new ToolLoopAgent({
   tools: {},
   output: Output.object({
     schema: z.object({
-      verifiedSummary: z.string().describe('The final verified Markdown summary. Every fact in this summary MUST be fully supported by the provided sources. Unsupported claims MUST be removed.'),
+      verifiedSummary: z.string().describe('The final verified Markdown summary. Prepend "**[Confidence: High/Medium/Low]**" to each news item. Do not delete low-confidence items; keep them with their appropriate tag.'),
       verificationReport: z.array(
         z.object({
           fact: z.string().describe('The specific fact or claim that was checked.'),
-          isSupported: z.boolean().describe('Whether the claim is fully supported by the sources.'),
+          confidenceLevel: z.enum(['High', 'Medium', 'Low']).describe('Confidence rating for the claim based on source grounding.'),
           sourceUrl: z.string().optional().describe('The URL of the source supporting this claim, if supported.'),
-          explanation: z.string().describe('A brief explanation of how the claim is supported or why it was rejected/modified.'),
+          explanation: z.string().describe('Explanation of why this confidence level was assigned.'),
         })
       ).describe('A list of verification checks performed on key claims.'),
     }),

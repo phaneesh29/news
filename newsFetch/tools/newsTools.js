@@ -5,24 +5,24 @@ import { searchSubagent } from '../subagents/searchSubagent.js';
 import { verifySubagent } from '../subagents/verifySubagent.js';
 
 export const searchNews = tool({
-  description: 'Search for the latest AI/developer news. Returns a draft summary and a list of sources used.',
+  description: 'Search for the latest AI/developer news from the last 12 hours. Returns a draft summary and a list of sources used.',
   inputSchema: z.object({
     query: z.string().optional().describe('An optional search query or topic to focus the news search on.'),
   }),
   execute: async ({ query }, { abortSignal }) => {
     const today = new Date();
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(today.getDate() - 2);
+    const twelveHoursAgo = new Date();
+    twelveHoursAgo.setHours(today.getHours() - 12);
 
-    const formatDate = (date) => {
-      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const formatDateTime = (date) => {
+      return date.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
     };
 
-    const todayStr = formatDate(today);
-    const twoDaysAgoStr = formatDate(twoDaysAgo);
+    const todayStr = formatDateTime(today);
+    const twelveHoursAgoStr = formatDateTime(twelveHoursAgo);
 
-    const prompt = `Today's date is ${todayStr}.
-Please search for and compile the latest AI news specifically from ${twoDaysAgoStr} to ${todayStr} (inclusive). Do not include news from before ${twoDaysAgoStr}.
+    const prompt = `Current time is ${todayStr}.
+Please search for and compile the latest AI news specifically from the last 12 hours, since ${twelveHoursAgoStr}. Do not include news from before ${twelveHoursAgoStr}.
 ${query ? `Focus on: ${query}` : 'Include new model releases, acquisitions, investments, and new tech releases.'}`;
 
     const result = await searchSubagent.generate({

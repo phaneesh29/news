@@ -5,9 +5,8 @@ import { webSearch } from '@exalabs/ai-sdk';
 import { searchSubagentInstruction } from '../instruction.js';
 import { z } from 'zod';
 
-const twoDaysAgo = new Date();
-twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-twoDaysAgo.setHours(0, 0, 0, 0);
+const twelveHoursAgo = new Date();
+twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
 
 export const searchSubagent = new ToolLoopAgent({
   model: google(process.env.VERCEL_AI_MODEL),
@@ -15,7 +14,7 @@ export const searchSubagent = new ToolLoopAgent({
   tools: {
     webSearch: webSearch({
       category: "news",
-      startPublishedDate: twoDaysAgo.toISOString(),
+      startPublishedDate: twelveHoursAgo.toISOString(),
     }),
   },
   output: Output.object({
