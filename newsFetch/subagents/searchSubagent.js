@@ -29,6 +29,7 @@ function createSearchSubagent(instruction) {
     instructions: instruction,
     tools: {
       webSearch: webSearch({
+        type: 'deep',
         category: 'news',
         numResults: 10,
         startPublishedDate: twelveHoursAgo.toISOString(),
