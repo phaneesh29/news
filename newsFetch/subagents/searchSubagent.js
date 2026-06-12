@@ -1,10 +1,9 @@
 import 'dotenv/config';
 import { ToolLoopAgent, Output } from 'ai';
-import { mistral } from '@ai-sdk/mistral';
 import { webSearch } from '@exalabs/ai-sdk';
 import { tavilyExtract, tavilySearch } from '@tavily/ai-sdk';
 import { unifiedSearchInstruction } from '../instruction.js';
-import { MODELS } from '../config/models.js';
+import { getModel } from '../config/models.js';
 import { z } from 'zod';
 
 const searchOutputSchema = Output.object({
@@ -27,8 +26,13 @@ const twelveHoursAgo = new Date();
 twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
 
 export const unifiedSearchSubagent = new ToolLoopAgent({
-  model: mistral(MODELS.searchDefault),
+  model: getModel('searchDefault'),
   instructions: unifiedSearchInstruction,
+  providerOptions: {
+    mistral: {
+      parallelToolCalls: false,
+    },
+  },
   tools: {
     exaSearch: webSearch({
       type: 'deep',

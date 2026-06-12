@@ -1,24 +1,22 @@
 import 'dotenv/config';
 import { ToolLoopAgent, Output } from 'ai';
-import { mistral } from '@ai-sdk/mistral';
 import { webSearch } from '@exalabs/ai-sdk';
 import { deduplicateRankVerifyInstruction } from '../instruction.js';
-import { MODELS } from '../config/models.js';
+import { getModel } from '../config/models.js';
 import { z } from 'zod';
 
 const twelveHoursAgo = new Date();
 twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
 
-/**
- * Combined Dedup + Rank + Verify subagent.
- * Has web search for cross-referencing claims (previously done by the separate verify agent).
- * One LLM pass handles dedup, ranking, confidence tagging, and verification.
- */
 export const deduplicateRankSubagent = new ToolLoopAgent({
-  model: mistral(MODELS.rank),
+  model: getModel('rank'),
   instructions: deduplicateRankVerifyInstruction,
+  providerOptions: {
+    mistral: {
+      parallelToolCalls: false,
+    },
+  },
   tools: {
-    // Web search for cross-referencing uncertain claims
     webSearch: webSearch({
       category: 'news',
       numResults: 5,
