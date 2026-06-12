@@ -131,9 +131,9 @@ All models are configured centrally in `config/models.js`:
 
 ```js
 export const MODELS = {
-  orchestrator: 'mistral-small',   // Main pipeline orchestrator
-  searchDefault: 'mistral-small',  // Unified search agent
-  rank: 'mistral-small',           // Dedup, rank & verify agent
+  orchestrator: 'codestral-2508',  // Main pipeline orchestrator
+  searchDefault: 'codestral-2508', // Unified search agent
+  rank: 'codestral-2508',          // Dedup, rank & verify agent
 };
 ```
 
@@ -164,6 +164,16 @@ The pipeline will:
 4. **Email** — Send styled HTML digest to all whitelisted recipients via Resend
 
 Total runtime: ~30-60 seconds depending on API response times.
+
+### 🤖 GitHub Actions Automation
+
+The news pipeline is automated via a GitHub Actions workflow defined in [news_digest.yml](file:///home/phaneesh/development/news/.github/workflows/news_digest.yml). It is scheduled to run twice daily at `02:30` and `14:30` UTC.
+
+To enable the automated run, you need to add the following secrets in your GitHub repository's settings under **Settings > Secrets and variables > Actions**:
+* `MISTRAL_API_KEY` — Your Mistral API key
+* `EXA_API_KEY` — Your Exa API key
+* `TAVILY_API_KEY` — Your Tavily API key
+* `RESEND_API_KEY` — Your Resend API key
 
 ### Example Output (`news.md`)
 
