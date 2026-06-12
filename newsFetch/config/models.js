@@ -3,9 +3,9 @@ import { wrapLanguageModel } from 'ai';
 import { mistral } from '@ai-sdk/mistral';
 
 export const MODELS = {
-  orchestrator: 'codestral',
-  searchDefault: 'codestral',
-  rank: 'codestral',
+  orchestrator: 'codestral-2508',
+  searchDefault: 'codestral-2508',
+  rank: 'codestral-2508',
 };
 
 export function getModel(role) {
