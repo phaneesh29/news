@@ -1,14 +1,14 @@
-Last flow execution: 6/12/2026, 10:19:54 PM GMT+5:30
+Last flow execution: 6/12/2026, 5:20:48 PM UTC
 
 ## 📋 TL;DR
-Xiaomi open-sourced MiMo Code, an AI coding agent outperforming Claude Code on complex tasks, while OpenAI expanded Codex with cloud execution and browser debugging features. Prometheus raised $12B to build an 'artificial general engineer' for physical product design.
+Xiaomi's MiMo Code AI coding agent and Moonshot's Kimi Work are leading the charge in developer tools, while OpenAI's cloud expansion and Apple's SQUIRE prototype are transforming UI design workflows. The AI and ML sector is seeing significant advancements with these tools, and the developer ecosystem is experiencing a wave of funding and acquisitions, with Jeff Bezos' Prometheus raising $12 billion at a $41 billion valuation.
 
 ---
 
 ## 📈 Trends Detected
-- AI coding tools
-- AI-assisted development workflows
-- AI for physical engineering
+- Multiple AI coding tools released
+- Cloud infrastructure expansion for AI agents
+- UI design workflow transformation
 
 ---
 
@@ -16,65 +16,77 @@ Xiaomi open-sourced MiMo Code, an AI coding agent outperforming Claude Code on c
 
 ## 🔥 Breaking
 
-- **[Confidence: High]** **Xiaomi Open-Sources MiMo Code AI Coding Agent** (Impact: 4) | [Source](https://gadgetsnow.indiatimes.com/tech-news/xiaomi-open-sources-mimo-code-ai-coding-agent-claims-it-outperforms-claude-code-on-complex-200-step-software-tasks/articleshow/131677071.cms)
-  Summary: Xiaomi has open-sourced MiMo Code, an AI coding agent designed to handle complex, multi-step software engineering workflows. The tool claims to outperform Anthropic's Claude Code on tasks involving up to 200 sequential steps, built on Xiaomi's MiMo AI models and supports connecting third-party AI models. This matters for developers working on large-scale projects who need sustained context and potential flexibility to integrate external models.
+- **[Confidence: High]** **Xiaomi Open-Sources MiMo Code AI Coding Agent** (Impact: 4) | [Gadgets Now](https://gadgetsnow.indiatimes.com/tech-news/xiaomi-open-sources-mimo-code-ai-coding-agent-claims-it-outperforms-claude-code-on-complex-200-step-software-tasks/articleshow/131677071.cms)
+  Summary: Xiaomi has released MiMo Code, an open-source AI coding agent built on its MiMo AI models. It claims to outperform Anthropic's Claude Code on complex 200-step tasks and allows developers to connect third-party AI models. This tool is particularly useful for developers working on large, intricate projects.
 
-- **[Confidence: High]** **OpenAI is Making Codex More Useful in Chrome and the Cloud** (Impact: 4) | [Source](https://www.neowin.net/news/openai-is-making-codex-more-useful-in-chrome-and-the-cloud/)
-  Summary: OpenAI is expanding Codex with an acquisition and new developer features. It plans to acquire Ona to runtime Codex on secure cloud infrastructure for long-running agent workflows, enabling enterprise-grade persistence, governance, and credential control beyond local execution. They’re also boosting Codex with practical improvements: save-and-resume rate-limit resets, a referral feature, and a new developer mode for browser workflows that uses the Chrome DevTools Protocol to debug and profile web apps directly in Chrome and via the Codex in-app browser. This matters for developers building longer-running AI-enabled workflows and web apps, as it enables production-grade agent execution and deeper browser debugging/integration.
+- **[Confidence: High]** **Six Vulnerabilities in Open Source protobuf.js** (Impact: 4) | [Open Source For You](https://www.opensourceforu.com/2026/06/six-vulnerabilities-in-open-source-protobuf-js-impact-ai-and-cloud-infrastructure/)
+  Summary: Cyera researchers have disclosed six vulnerabilities in the protobuf.js library that could enable remote code execution, denial-of-service attacks, and supply-chain compromises. This affects Node.js applications, AI infrastructure, cloud services, and CI/CD pipelines, making it a critical issue for developers.
 
 ## 📈 Trending
 
-- **[Confidence: Medium]** **Six Vulnerabilities in Open Source protobuf.js Impact AI and Cloud Infrastructure** (Impact: 3) | [Source](https://www.opensourceforu.com/2026/06/six-vulnerabilities-in-open-source-protobuf-js-impact-ai-and-cloud-infrastructure/)
-  Summary: Cyera researchers have uncovered six vulnerabilities in the widely used open-source protobuf.js library, warning that flaws in schema handling could enable remote code execution, denial-of-service attacks, and supply-chain compromises across Node.js, AI, and cloud environments. This impacts services that deserialize Protobuf data or generate code from schemas, potentially affecting Node.js applications, Google Cloud client libraries, messaging frameworks, databases, AI inference pipelines, orchestration systems, cloud SDKs, and CI/CD environments.
+- **[Confidence: High]** **Moonshot AI Launches Kimi Work** (Impact: 4) | [MarkTechPost](https://www.marktechpost.com/2026/06/12/moonshot-ai-launches-kimi-work-a-local-desktop-agent-reportedly-running-on-kimi-k2-6-with-a-300-sub-agent-agent-swarm/)
+  Summary: Moonshot AI has introduced Kimi Work, a local desktop AI agent that runs on your machine. It features a 300-sub-agent swarm powered by the Kimi K2.6 model, which has a 256K-token context window. This tool includes WebBridge for browser integration, a Cron scheduling engine, and local file/code access, making it a powerful tool for developers.
 
-- **[Confidence: High]** **LangGraph Flaw Chain Exposes Self-Hosted AI Agents to Remote Code Execution** (Impact: 4) | [Source](https://news.lavx.hu/article/langgraph-flaw-chain-exposes-self-hosted-ai-agents-to-remote-code-execution)
-  Summary: Security researchers disclosed three patched vulnerabilities in LangChain's LangGraph framework, two of which chain together into remote code execution on self-hosted deployments. The bugs show how a textbook SQL injection turns dangerous when it lives inside an AI agent that already holds elevated trust and access. This chain specifically affects self-hosted LangGraph deployments with SQLite or Redis checkpointers using user-controlled filter input; LangChain's managed platform, LangSmith Deployment, is not affected. Developers should upgrade to langgraph-checkpoint-sqlite 3.0.1, langgraph 1.0.10, and @langchain/langgraph-checkpoint-redis 1.0.1, and avoid using user-supplied filter inputs in vulnerable checkpointer configurations.
+- **[Confidence: High]** **OpenAI Expands Codex with Cloud Infrastructure** (Impact: 4) | [Neowin](https://www.neowin.net/news/openai-is-making-codex-more-useful-in-chrome-and-the-cloud/)
+  Summary: OpenAI has acquired Ona, a cloud startup, to provide persistent cloud environments for Codex. This allows AI agents to run multi-step coding tasks over hours or days without being tied to a user's local machine, addressing Codex's limitation of stopping when a user's laptop is closed. This expansion is crucial for developers who need reliable cloud infrastructure for their AI agents.
 
-- **[Confidence: Medium]** **Meet AnyCoder: Kimi K2-Powered Tool for Rapid Web App Prototyping and Deployment** (Impact: 3) | [Source](https://xix.ai/ainews/meet-anycoder-kimi-k2powered-tool-fast-prototyping-deploying-web-apps.html)
-  Summary: AnyCoder is a free, open-source vibe-coding tool built on Hugging Face’s open-source Python framework Gradio that enables rapid frontend prototyping by generating HTML/CSS/JS from plain text prompts or UI images, powered by the Moonshot Kimi-K2 model (plus multiple other open-source models). It supports multimodal input (UI images, screenshots) via ERNIE-4.5-VL, instant live preview, and one-click deployment, with a website redesign feature that rebuilds public-site content using scraped structure and metadata and optional guidance like dark mode. The platform also integrates web search via Tavily to inform up-to-date tech practices before code generation and allows switching models (e.g., Moonshot Kimi-K2, DeepSeek, Qwen3-235B, GLM-4.1V, etc.), highlighting a flexible, open-source stack for rapid frontend prototyping and deployment.
+- **[Confidence: High]** **LangGraph Flaw Chain Exposes Self-Hosted AI Agents** (Impact: 4) | [LavX News](https://news.lavx.hu/article/langgraph-flaw-chain-exposes-self-hosted-ai-agents-to-remote-code-execution)
+  Summary: Check Point researchers have disclosed three vulnerabilities in LangChain's LangGraph framework that, when chained, enable remote code execution on self-hosted deployments. This affects services that deserialize Protobuf data or generate code from schemas, posing a significant risk to developers using self-hosted AI agents.
 
-- **[Confidence: Medium]** **Atsign Adds AI Architecture Tools for Enterprise Teams** (Impact: 3) | [Source](https://itbrief.asia/story/atsign-adds-ai-architecture-tools-for-enterprise-teams)
-  Summary: Atsign has expanded its AI Architect product with new tools for designing and governing enterprise AI systems. The update adds Model Context Protocol integration and native AI agent modeling to move AI-assisted software work beyond code generation and into earlier stages of system design, where architecture, security controls, and governance are defined. The additions are available immediately to developers and enterprise teams using the Atsign platform.
+## 📌 Notable
+
+- **[Confidence: High]** **Apple Unveils SQUIRE for UI Design Workflow** (Impact: 3) | [xix.ai](https://xix.ai/ainews/apple-unveils-squire-an-ai-prototype-to-transform-ui-design-workflow.html)
+  Summary: Apple has introduced SQUIRE, an AI prototype that transforms UI design workflows. It uses a Slot-Query Intermediate Representation to create a customizable component tree, allowing developers to adjust fonts, layers, and elements before generating HTML/CSS code. This tool is a significant step forward for developers in the UI design space.
 
 # 🤖 AI & Machine Learning
 
 ## 🔥 Breaking
 
-- **[Confidence: High]** **India's MeitY Launches Varya AI Video Model** (Impact: 4) | [Source](https://www.freepressjournal.in/tech/india-launches-varya-ai-video-model-heres-what-it-does-how-to-use-it)
-  Summary: India’s MeitY-backed Varya AI Video Model, developed by Avataar AI, distills Wan 2.2 into a lean, culture-aware video generator focused on Indian festivals, food, and clothing. It delivers ~10x faster generation and ~20x lower cost (Rs. 0.48 per second) using distillation, enabling rapid, affordable video synthesis on hosted service with access via India AI Kosh; performance benchmarks show a 5-second 720p clip in ~45 seconds on NVIDIA H200, versus Wan 2.2’s ~1,230 seconds. For developers, Varya is openly accessible for experimentation through its hosted API/try-now interface, emphasizing sovereign AI with localized context, and represents a cost- and speed-optimized alternative to Veo, Kling, Luma, and Runway.
-
-- **[Confidence: High]** **Apple Unveils SQUIRE, an AI Prototype to Transform UI Design Workflow** (Impact: 4) | [Source](https://xix.ai/ainews/apple-unveils-squire-an-ai-prototype-to-transform-ui-design-workflow.html)
-  Summary: Apple unveils SQUIRE, an AI prototype for UI design that shifts from “black box” generation to a white-box, component-tree workflow. Built on GPT-4o, SQUIRE lets developers iteratively customize a building-block UI tree (fonts, layers, elements) before generating HTML/CSS with a single click, improving control and reducing prompt-trial time; early trials with 11 front-end developers praised usability and control. The approach uses a Slot-Query Intermediate Representation to enable fine-tuning, and, alongside SafetyPairs for image generation safety, signals deeper integration into Apple’s toolchain (potential inclusion in Xcode 26.3 and WWDC 2026 tooling), with broader implications for on-device AI UI tooling and agentic coding support.
+- **[Confidence: High]** **Xiaomi Open-Sources MiMo Code AI Coding Agent** (Impact: 4) | [Gadgets Now](https://gadgetsnow.indiatimes.com/tech-news/xiaomi-open-sources-mimo-code-ai-coding-agent-claims-it-outperforms-claude-code-on-complex-200-step-software-tasks/articleshow/131677071.cms)
+  Summary: Xiaomi has released MiMo Code, an open-source AI coding agent built on its MiMo AI models. It claims to outperform Anthropic's Claude Code on complex 200-step tasks and allows developers to connect third-party AI models. This tool is particularly useful for developers working on large, intricate projects.
 
 ## 📈 Trending
 
-- **[Confidence: Medium]** **Zyphra Release Zamba2-VL: Hybrid Mamba2–Transformer Vision-Language Models** (Impact: 3) | [Source](https://www.marktechpost.com/2026/06/12/zyphra-release-zamba2-vl-hybrid-mamba2-transformer-vision-language-models-that-cut-time-to-first-token-by-about-an-order-of-magnitude/)
-  Summary: Zyphra releases Zamba2-VL, a family of open vision-language models in 1.2B, 2.7B, and 7B parameters, built on a hybrid Mamba2 state-space–Transformer backbone paired with a Qwen2.5-VL vision encoder. The key change is replacing a dense language model with a hybrid architecture: cheap Mamba2 linear-time layers plus a small set of shared attention blocks (each with its own LoRA), enabling lower latency while preserving in-context retrieval. This matters for developers aiming for faster time-to-first-token in vision-language tasks (charts, diagrams, documents); it uses the Mistral v0.1 tokenizer and was trained on about 100B vision-text and pure-text tokens from open sources, with evaluation across 14 benchmarks.
+- **[Confidence: High]** **Moonshot AI Launches Kimi Work** (Impact: 4) | [MarkTechPost](https://www.marktechpost.com/2026/06/12/moonshot-ai-launches-kimi-work-a-local-desktop-agent-reportedly-running-on-kimi-k2-6-with-a-300-sub-agent-agent-swarm/)
+  Summary: Moonshot AI has introduced Kimi Work, a local desktop AI agent that runs on your machine. It features a 300-sub-agent swarm powered by the Kimi K2.6 model, which has a 256K-token context window. This tool includes WebBridge for browser integration, a Cron scheduling engine, and local file/code access, making it a powerful tool for developers.
+
+- **[Confidence: High]** **OpenAI Expands Codex with Cloud Infrastructure** (Impact: 4) | [Neowin](https://www.neowin.net/news/openai-is-making-codex-more-useful-in-chrome-and-the-cloud/)
+  Summary: OpenAI has acquired Ona, a cloud startup, to provide persistent cloud environments for Codex. This allows AI agents to run multi-step coding tasks over hours or days without being tied to a user's local machine, addressing Codex's limitation of stopping when a user's laptop is closed. This expansion is crucial for developers who need reliable cloud infrastructure for their AI agents.
+
+## 📌 Notable
+
+- **[Confidence: High]** **Apple Unveils SQUIRE for UI Design Workflow** (Impact: 3) | [xix.ai](https://xix.ai/ainews/apple-unveils-squire-an-ai-prototype-to-transform-ui-design-workflow.html)
+  Summary: Apple has introduced SQUIRE, an AI prototype that transforms UI design workflows. It uses a Slot-Query Intermediate Representation to create a customizable component tree, allowing developers to adjust fonts, layers, and elements before generating HTML/CSS code. This tool is a significant step forward for developers in the UI design space.
 
 # 💰 Dev Ecosystem Funding & Acquisitions
 
 ## 🔥 Breaking
 
-- **[Confidence: High]** **Jeff Bezos Prometheus Raises $12B: Building AI That Replaces Engineers in 2026** (Impact: 5) | [Source](https://techibe.com/jeff-bezos-prometheus-ai-startup-12b-2026/)
-  Summary: Prometheus, the AI startup co-founded by Jeff Bezos, has raised $12B in a new round (valuing the company at $41B) from Bezos, JPMorgan Chase, Goldman Sachs, BlackRock, DST Global, and ARCH. The company is building an “artificial general engineer” (AGE) that can design and optimize complex physical products—from jet engines to skyscrapers. This shifts AI focus from digital tasks to engineering-scale problems, aiming to accelerate product development across industries by integrating AI with real-world physics, materials, and production constraints. For developers, the article highlights a shift toward engineering-enabled AI, but it does not provide concrete APIs, SDKs, specific model names, infrastructure details, or adoption timelines.
+- **[Confidence: High]** **Jeff Bezos-Led AI Startup Prometheus Raises $12B at $41B Valuation** (Impact: 5) | [New York Post](https://nypost.com/2026/06/11/business/jeff-bezos-led-ai-startup-prometheus-valued-at-41b-in-blockbuster-fundraising/)
+  Summary: Jeff Bezos-led AI startup Prometheus has secured a $41 billion valuation in a new funding round, raising $12 billion from investors including Goldman Sachs, BlackRock, and JPMorgan Chase. The company aims to streamline the process of building complex products through advanced AI tools. This is a significant development in the AI and developer ecosystem.
+
+## 📈 Trending
+
+- **[Confidence: High]** **UK Financial Institutions Back Sovereign AI Model** (Impact: 4) | [FinTech Futures](https://www.fintechfutures.com/fintech/fintech-futures-top-five-news-stories-of-the-week-12-june-2026)
+  Summary: A coalition of UK financial institutions, including HSBC, Lloyds, and NatWest, has backed London-based AI start-up Cosine in developing Lumen Sovereign, Britain's first sovereign frontier AI model. The project aims to create a model fully trained on UK soil and available in air-gapped environments. This is a significant step towards developing a sovereign AI model in the UK.
 
 ## 📌 Notable
 
-- **[Confidence: Medium]** **Vibe-Coding Startup Nabs $100M Valuation, Hitting $2M ARR in Two Weeks** (Impact: 3) | [Source](https://xix.ai/ainews/vibecoding-startup-nabs-100m-valuation-hitting-2m-arr-weeks.html)
-  Summary: Anything, a vibe-coding startup, announced an $11 million funding round at a $100 million valuation, led by Footwork with participation from Uncork, Bessemer, and M13. The company enables non-technical creators to build and monetize complete web and mobile apps in one AI-powered platform, aiming to be the “Shopify of vibe-coding,” and cites live, revenue-generating apps (e.g., habit tracker, CPR training course, virtual hairstyle try-on) built without heavy third-party tool integration. Why it matters for developers: it promises an all-in-one toolchain to go from prototype to live product quickly, reducing reliance on multiple integrations; the founders’ pivot from a human+AI dev marketplace to a pure AI app-builder highlights a shift toward rapid, accessible app creation and potential new infrastructure/API/SDK capabilities hidden in the platform. Funding details: $11M round at a $100M valuation, with notable investors (Footwork, Uncork, Bessemer, M13). Adoption signals: early apps deployed and monetizing on the platform.
+- **[Confidence: Medium]** **KPMG Report Faces Criticism for AI Hallucinations** (Impact: 3) | [Substack](https://garymarcus.substack.com/p/you-cant-get-more-2026-than-that)
+  Summary: A KPMG report on the successful use of AI by businesses was criticized for containing AI-generated hallucinations. The report's case studies were found to be fabricated by AI, raising concerns about the reliability of AI-generated content. This is a notable issue for developers who rely on such reports for insights into AI adoption.
 
-- **[Confidence: Medium]** **Coram AI Raises $35 Million Series B to Modernize Physical** (Impact: 3) | [Source](https://startuppoint.in/coram-ai-raises-35-million-series-b-to-modernize/)
-  Summary: Coram AI raised $35M in a Series B (total funding now $66M) led by Ansa Capital and Battery Ventures, with UP.Partners, 8VC, and Mosaic Ventures participating. The funding will accelerate AI product development, expand go-to-market and customer success, and scale engineering in Bengaluru to power its physical security platform—built to detect and prevent risks earlier by applying autonomous-vehicle-grade perception to security environments. Key adoption highlights include 1,500+ sites across US/Canada and customers like Hershey’s Ice Cream, 1-800-GOT-JUNK?, and World YMCA, signaling growing enterprise traction; the company emphasizes integrating multiple security silos (video, access, logs) via its AI-driven platform for proactive incident prevention.
+- **[Confidence: High]** **InnSure Launches Decarbonization Risk Management Innovation Prize** (Impact: 3) | [PropertyCasualty360](https://www.propertycasualty360.com/amp/2026/06/12/making-a-difference-june-12-2026/)
+  Summary: InnSure has launched a $600,000 Decarbonization Risk Management Innovation Prize, funded by the Schmidt Family Foundation and Builders Vision Philanthropy. The prize aims to award up to $200,000 in non-dilutive funding to early to growth stage companies developing data-powered underwriting solutions for clean energy projects. This initiative is notable for its focus on sustainable energy solutions.
 
 ---
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 12 |
-| ✅ High Confidence | 6 |
-| ⚠️ Medium Confidence | 6 |
+| Total Items Verified | 10 |
+| ✅ High Confidence | 9 |
+| ⚠️ Medium Confidence | 1 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 0 |
+| 🔍 Cross-Referenced | 1 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | 6/12/2026, 10:19:54 PM GMT+5:30 |
+| 🕐 Generated At | 6/12/2026, 5:20:48 PM UTC |
