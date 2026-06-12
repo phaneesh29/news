@@ -17,15 +17,22 @@ export const verifySubagent = new ToolLoopAgent({
       numResults: 5,
       startPublishedDate: twelveHoursAgo.toISOString(),
       contents: {
-        text: { maxCharacters: 1000 },
-        highlights: { numSentences: 2, highlightsPerUrl: 1 },
+        text: { maxCharacters: 2000 },
+        highlights: {
+          numSentences: 3,
+          highlightsPerUrl: 1,
+          query: 'developer impact, API, SDK, model capability, infrastructure, release details',
+        },
+        summary: {
+          query: 'Summarize the article in 2-3 sentences for software developers. Include what changed and why it matters to builders.',
+        },
         livecrawl: 'always',
       },
     }),
   },
   output: Output.object({
     schema: z.object({
-      verifiedSummary: z.string().describe('The final verified Markdown summary with confidence tags, trending/breaking/notable tags, impact scores, TL;DR, and trends preserved. Prepend "**[Confidence: High/Medium/Low]**" to each news item.'),
+      verifiedSummary: z.string().describe('The final verified Markdown summary with confidence tags, trending/breaking/notable tags, impact scores, TL;DR, trends, citations, and a short developer-focused Summary paragraph under every headline. Prepend "**[Confidence: High/Medium/Low]**" to each news item.'),
       verificationReport: z.array(
         z.object({
           fact: z.string().describe('The specific fact or claim that was checked.'),

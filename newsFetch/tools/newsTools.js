@@ -1,25 +1,28 @@
 import 'dotenv/config';
 import { tool } from 'ai';
 import { z } from 'zod';
-import { 
-  devToolsSearchSubagent, 
-  aiMlSearchSubagent, 
+import {
+  devToolsSearchSubagent,
+  aiMlSearchSubagent,
   devFundingSearchSubagent,
   devToolsTavilySearchSubagent,
   aiMlTavilySearchSubagent,
-  devFundingTavilySearchSubagent
+  devFundingTavilySearchSubagent,
 } from '../subagents/searchSubagent.js';
 import { deduplicateRankSubagent } from '../subagents/deduplicateRankSubagent.js';
 import { verifySubagent } from '../subagents/verifySubagent.js';
 
-
 function formatDateTime(date) {
   return date.toLocaleString('en-US', {
-    month: 'long', day: 'numeric', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
   });
 }
-
 
 function buildSearchPrompt(categoryFocus) {
   const now = new Date();
@@ -32,6 +35,14 @@ Do NOT include anything published before ${formatDateTime(twelveHoursAgo)}.
 Focus area: ${categoryFocus}`;
 }
 
+const sourceSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  content: z.string(),
+  publishedDate: z.string().optional(),
+  aiSummary: z.string().optional(),
+});
+
 export const searchNewsParallel = tool({
   description: 'Run 6 specialized news searches in parallel using Exa and Tavily: Dev Tools, AI/ML, and Dev Ecosystem Funding. Returns merged results from all categories.',
   inputSchema: z.object({
@@ -43,12 +54,12 @@ export const searchNewsParallel = tool({
     console.log('🔍 Starting parallel news search across 3 categories using both Exa and Tavily...');
 
     const [
-      devToolsResult, 
-      aiMlResult, 
+      devToolsResult,
+      aiMlResult,
       devFundingResult,
       devToolsTavilyResult,
       aiMlTavilyResult,
-      devFundingTavilyResult
+      devFundingTavilyResult,
     ] = await Promise.all([
       devToolsSearchSubagent.generate({
         prompt: buildSearchPrompt('Developer Tools, IDEs, Frameworks, Libraries, Open Source, DevOps' + focusSuffix),
@@ -99,7 +110,6 @@ export const searchNewsParallel = tool({
       }),
     ]);
 
-    // Merge all results
     const mergedSummary = `## 🛠️ Developer Tools & Platforms (Exa)
 ${devToolsResult.output?.draftSummary || 'No results found.'}
 
@@ -144,18 +154,11 @@ ${devFundingTavilyResult.output?.draftSummary || 'No results found.'}`;
   },
 });
 
-
 export const deduplicateAndRank = tool({
   description: 'Deduplicate merged news items, score them by impact, tag as Trending/Breaking/Notable, detect trends, and generate a TL;DR.',
   inputSchema: z.object({
     mergedSummary: z.string().describe('The merged Markdown summary from all category searches.'),
-    mergedSources: z.array(
-      z.object({
-        title: z.string(),
-        url: z.string(),
-        content: z.string(),
-      })
-    ).describe('The merged list of all sources.'),
+    mergedSources: z.array(sourceSchema).describe('The merged list of all sources.'),
   }),
   execute: async ({ mergedSummary, mergedSources }, { abortSignal }) => {
     console.log('🔄 Deduplicating and ranking news items...');
@@ -164,6 +167,7 @@ export const deduplicateAndRank = tool({
     const prompt = `Current time: ${formatDateTime(now)}
 
 Here is the merged news from 3 category searches. Please deduplicate, rank, tag, score, detect trends, and write a TL;DR.
+Every final headline must be followed by a concise "Summary:" paragraph using the source content, Exa AI summaries, and Tavily extracted/raw content. Make the summary developer-focused so the reader does not need to open the source article.
 
 --- MERGED NEWS ---
 ${mergedSummary}
@@ -182,25 +186,19 @@ ${JSON.stringify(mergedSources, null, 2)}`;
   },
 });
 
-
 export const verifyNews = tool({
   description: 'Verify a ranked news summary against sources. The verifier can independently web-search to cross-reference claims.',
   inputSchema: z.object({
     rankedSummary: z.string().describe('The Markdown-formatted ranked news summary to verify.'),
     tldr: z.string().describe('The TL;DR executive summary.'),
     trends: z.array(z.string()).describe('Detected trends to preserve.'),
-    sources: z.array(
-      z.object({
-        title: z.string().describe('Title of the source.'),
-        url: z.string().describe('URL of the source.'),
-        content: z.string().describe('Key snippets or content from the source.'),
-      })
-    ).describe('The list of sources containing the raw facts.'),
+    sources: z.array(sourceSchema).describe('The list of sources containing the raw facts.'),
   }),
   execute: async ({ rankedSummary, tldr, trends, sources }, { abortSignal }) => {
     console.log('🔎 Verifying news items with cross-referencing...');
 
     const prompt = `Please verify the following news summary against the provided sources. Use your web search tool to independently cross-reference any claims you are uncertain about.
+Ensure each verified item still has a short "Summary:" paragraph after the headline. The summary should be grounded in Exa/Tavily content and should explain why the story matters to developers.
 
 TL;DR:
 ${tldr}
