@@ -13,8 +13,8 @@ const searchOutputSchema = Output.object({
       z.object({
         title: z.string().describe('Title of the source article/webpage.'),
         url: z.string().describe('URL of the source.'),
-        content: z.string().describe('Extracted article text, Exa AI summary, Tavily extract content, or key snippets used to write the item summary.'),
-        aiSummary: z.string().optional().describe('A 2-3 sentence AI-generated summary of the source, focused on developer impact.'),
+        content: z.string().optional().describe('Short snippet or quote (max 100 characters) if relevant.'),
+        aiSummary: z.string().describe('A 2-3 sentence AI-generated summary of the source, focused on developer impact.'),
         publishedDate: z.string().optional().describe('Published date of the source if available.'),
         category: z.enum(['devTools', 'aiMl', 'devFunding']).describe('Which category this source belongs to.'),
       })
@@ -30,17 +30,17 @@ export const unifiedSearchSubagent = new ToolLoopAgent({
   instructions: unifiedSearchInstruction,
   providerOptions: {
     mistral: {
-      parallelToolCalls: false,
+      parallelToolCalls: true,
     },
   },
   tools: {
     exaSearch: webSearch({
-      type: 'deep',
+      type: 'neural',
       category: 'news',
-      numResults: 10,
+      numResults: 7,
       startPublishedDate: twelveHoursAgo.toISOString(),
       contents: {
-        text: { maxCharacters: 4000 },
+        text: { maxCharacters: 2500 },
         highlights: {
           numSentences: 4,
           highlightsPerUrl: 2,
@@ -57,7 +57,7 @@ export const unifiedSearchSubagent = new ToolLoopAgent({
       topic: 'news',
       includeAnswer: true,
       includeRawContent: 'markdown',
-      maxResults: 10,
+      maxResults: 7,
       timeRange: 'day',
     }),
     extract: tavilyExtract({
@@ -66,4 +66,5 @@ export const unifiedSearchSubagent = new ToolLoopAgent({
     }),
   },
   output: searchOutputSchema,
+  maxSteps: 10,
 });

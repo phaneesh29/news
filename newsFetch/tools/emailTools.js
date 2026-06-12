@@ -107,10 +107,31 @@ function markdownToHtml(md) {
     else if (block.startsWith('- ') || block.startsWith('* ')) {
       const lines = block.split('\n');
       let listHtml = '<ul style="margin:16px 0;padding-left:20px;color:#3d3d3a;">';
+      let currentLi = '';
+
       for (const line of lines) {
-        const cleanLine = line.replace(/^[*-]\s+/, '').trim();
-        if (!cleanLine) continue;
-        listHtml += `<li style="margin-bottom:12px;padding-left:4px;color:#3d3d3a;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">${cleanLine}</li>`;
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+          if (currentLi) {
+            listHtml += `<li style="margin-bottom:12px;padding-left:4px;color:#3d3d3a;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">${currentLi}</li>`;
+          }
+          currentLi = trimmed.replace(/^[*-]\s+/, '');
+        } else {
+          if (currentLi) {
+            if (trimmed.startsWith('Summary:')) {
+              currentLi += `<br><span style="display:block; margin-top:4px; font-size:13.5px; color:#5c5a54; line-height:1.5;">${trimmed}</span>`;
+            } else {
+              currentLi += ' ' + trimmed;
+            }
+          } else {
+            currentLi = trimmed;
+          }
+        }
+      }
+      if (currentLi) {
+        listHtml += `<li style="margin-bottom:12px;padding-left:4px;color:#3d3d3a;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">${currentLi}</li>`;
       }
       listHtml += '</ul>';
       htmlBlocks.push(listHtml);

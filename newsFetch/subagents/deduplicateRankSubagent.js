@@ -13,13 +13,13 @@ export const deduplicateRankSubagent = new ToolLoopAgent({
   instructions: deduplicateRankVerifyInstruction,
   providerOptions: {
     mistral: {
-      parallelToolCalls: false,
+      parallelToolCalls: true,
     },
   },
   tools: {
     webSearch: webSearch({
       category: 'news',
-      numResults: 5,
+      numResults: 3,
       startPublishedDate: twelveHoursAgo.toISOString(),
       contents: {
         text: { maxCharacters: 2000 },
@@ -42,15 +42,6 @@ export const deduplicateRankSubagent = new ToolLoopAgent({
       rankedSummary: z.string().describe('The full Markdown summary organized by tags (Breaking -> Trending -> Notable), with impact scores, confidence levels, deduplication applied, all citations preserved, and a short developer-focused Summary paragraph under every headline.'),
       totalItems: z.number().describe('Total unique news items after deduplication.'),
       duplicatesRemoved: z.number().describe('Number of duplicate items merged.'),
-      sources: z.array(
-        z.object({
-          title: z.string().describe('Title of the source.'),
-          url: z.string().describe('URL of the source.'),
-          content: z.string().describe('Key content from the source.'),
-          publishedDate: z.string().optional().describe('Published date of the source if available.'),
-          aiSummary: z.string().optional().describe('AI-generated summary of the source if available.'),
-        })
-      ).describe('Consolidated list of all unique sources.'),
       verificationStats: z.object({
         totalItemsVerified: z.number().describe('Total number of news items verified.'),
         highConfidenceCount: z.number().describe('Number of High confidence items.'),
@@ -60,4 +51,5 @@ export const deduplicateRankSubagent = new ToolLoopAgent({
       }).describe('Summary statistics of the verification process.'),
     }),
   }),
+  maxSteps: 8,
 });

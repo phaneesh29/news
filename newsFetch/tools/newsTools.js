@@ -22,7 +22,7 @@ const sourceSchema = z.object({
   url: z.string(),
   content: z.string(),
   publishedDate: z.string().optional(),
-  aiSummary: z.string().optional(),
+  aiSummary: z.string(),
   category: z.enum(['devTools', 'aiMl', 'devFunding']).optional(),
 });
 
