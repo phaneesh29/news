@@ -4,6 +4,7 @@ import { google } from '@ai-sdk/google';
 import { webSearch } from '@exalabs/ai-sdk';
 import { tavilyExtract, tavilySearch } from '@tavily/ai-sdk';
 import { devToolsSearchInstruction, aiMlSearchInstruction, devFundingSearchInstruction } from '../instruction.js';
+import { GEMINI_MODELS } from '../config/models.js';
 import { z } from 'zod';
 
 const searchOutputSchema = Output.object({
@@ -21,12 +22,12 @@ const searchOutputSchema = Output.object({
   }),
 });
 
-function createSearchSubagent(instruction) {
+function createSearchSubagent(instruction, modelName = GEMINI_MODELS.searchDefault) {
   const twelveHoursAgo = new Date();
   twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
 
   return new ToolLoopAgent({
-    model: google(process.env.VERCEL_AI_MODEL),
+    model: google(modelName),
     instructions: instruction,
     tools: {
       webSearch: webSearch({
@@ -56,9 +57,9 @@ function createSearchSubagent(instruction) {
   });
 }
 
-function createTavilySearchSubagent(instruction) {
+function createTavilySearchSubagent(instruction, modelName = GEMINI_MODELS.searchDefault) {
   return new ToolLoopAgent({
-    model: google(process.env.VERCEL_AI_MODEL),
+    model: google(modelName),
     instructions: instruction,
     tools: {
       webSearch: tavilySearch({
@@ -78,10 +79,10 @@ function createTavilySearchSubagent(instruction) {
   });
 }
 
-export const devToolsSearchSubagent = createSearchSubagent(devToolsSearchInstruction);
-export const aiMlSearchSubagent = createSearchSubagent(aiMlSearchInstruction);
-export const devFundingSearchSubagent = createSearchSubagent(devFundingSearchInstruction);
+export const devToolsSearchSubagent = createSearchSubagent(devToolsSearchInstruction, GEMINI_MODELS.searchDefault);
+export const aiMlSearchSubagent = createSearchSubagent(aiMlSearchInstruction, GEMINI_MODELS.searchAiMl);
+export const devFundingSearchSubagent = createSearchSubagent(devFundingSearchInstruction, GEMINI_MODELS.searchFunding);
 
-export const devToolsTavilySearchSubagent = createTavilySearchSubagent(devToolsSearchInstruction);
-export const aiMlTavilySearchSubagent = createTavilySearchSubagent(aiMlSearchInstruction);
-export const devFundingTavilySearchSubagent = createTavilySearchSubagent(devFundingSearchInstruction);
+export const devToolsTavilySearchSubagent = createTavilySearchSubagent(devToolsSearchInstruction, GEMINI_MODELS.searchDefault);
+export const aiMlTavilySearchSubagent = createTavilySearchSubagent(aiMlSearchInstruction, GEMINI_MODELS.searchAiMl);
+export const devFundingTavilySearchSubagent = createTavilySearchSubagent(devFundingSearchInstruction, GEMINI_MODELS.searchFunding);

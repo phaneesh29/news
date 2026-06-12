@@ -2,10 +2,11 @@ import 'dotenv/config';
 import { ToolLoopAgent, Output } from 'ai';
 import { google } from '@ai-sdk/google';
 import { deduplicateRankInstruction } from '../instruction.js';
+import { GEMINI_MODELS } from '../config/models.js';
 import { z } from 'zod';
 
 export const deduplicateRankSubagent = new ToolLoopAgent({
-  model: google(process.env.VERCEL_AI_MODEL),
+  model: google(GEMINI_MODELS.rank),
   instructions: deduplicateRankInstruction,
   tools: {},
   output: Output.object({

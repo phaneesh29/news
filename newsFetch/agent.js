@@ -6,9 +6,10 @@ import { getMemory, saveMemory } from './tools/memoryTools.js';
 import { searchNewsParallel, deduplicateAndRank, verifyNews } from './tools/newsTools.js';
 import { saveNews } from './tools/saveNews.js';
 import { sendNewsEmail } from './tools/emailTools.js';
+import { GEMINI_MODELS } from './config/models.js';
 
 export const mainAgent = new ToolLoopAgent({
-  model: google(process.env.VERCEL_AI_MODEL),
+  model: google(GEMINI_MODELS.orchestrator),
   instructions: systemInstruction,
   tools: {
     getMemory,

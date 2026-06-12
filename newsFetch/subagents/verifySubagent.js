@@ -3,13 +3,14 @@ import { ToolLoopAgent, Output } from 'ai';
 import { google } from '@ai-sdk/google';
 import { webSearch } from '@exalabs/ai-sdk';
 import { verifySubagentInstruction } from '../instruction.js';
+import { GEMINI_MODELS } from '../config/models.js';
 import { z } from 'zod';
 
 const twelveHoursAgo = new Date();
 twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
 
 export const verifySubagent = new ToolLoopAgent({
-  model: google(process.env.VERCEL_AI_MODEL),
+  model: google(GEMINI_MODELS.verify),
   instructions: verifySubagentInstruction,
   tools: {
     webSearch: webSearch({
