@@ -1,13 +1,13 @@
 # 🗞️ NewsFetch — AI-Powered Developer News Agent
 
-An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, verifies, and emails the latest developer-focused news using AI agents. Built with [Vercel AI SDK](https://ai-sdk.dev) and powered by Google Gemini + [Exa](https://exa.ai) search + [Resend](https://resend.com) email.
+An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, verifies, and emails the latest developer-focused news using AI agents. Built with [Vercel AI SDK](https://ai-sdk.dev) and powered by Mistral AI + [Exa](https://exa.ai) search + [Tavily](https://tavily.com) search + [Resend](https://resend.com) email.
 
 ## ✨ Features
 
-- **🔍 Parallel Multi-Category Search** — 3 specialized AI agents search simultaneously across Dev Tools, AI/ML, and Dev Ecosystem Funding
+- **🔍 Unified Multi-Category Search** — A single AI agent searches across Dev Tools, AI/ML, and Dev Ecosystem Funding in one pass using both Exa and Tavily
 - **🧹 Smart Deduplication** — Merges duplicate stories from different sources into single items with multiple citations
 - **📊 Impact Ranking** — Scores each item (1-5) and tags as 🔥 Trending, ⚡ Breaking, or 📌 Notable
-- **✅ Cross-Referenced Verification** — Verification agent independently web-searches to fact-check claims
+- **✅ Cross-Referenced Verification** — Independently web-searches to fact-check uncertain claims and assigns confidence levels
 - **📈 Trend Detection** — Identifies themes appearing across multiple categories
 - **📋 TL;DR Generation** — Auto-generated executive summary of top stories
 - **⏰ 12-Hour Freshness** — Strict filtering ensures no stale news (enforced at API + prompt level)
@@ -19,60 +19,56 @@ An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, veri
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Main Orchestrator                     │
-│              (ToolLoopAgent + Gemini)                    │
+│              (ToolLoopAgent + Mistral)                   │
 └──────────┬──────────────┬───────────────┬───────────────┘
            │              │               │
-     Stage 1: Parallel Search (Promise.all)
-           │              │               │
-    ┌──────▼──────┐ ┌────▼─────┐ ┌───────▼────────┐
-    │  🛠️ Dev     │ │ 🤖 AI/ML │ │ 💰 Dev Funding │
-    │  Tools      │ │ Search   │ │   Search       │
-    │  Search     │ │ Agent    │ │   Agent        │
-    └──────┬──────┘ └────┬─────┘ └───────┬────────┘
-           │              │               │
-           └──────────────┼───────────────┘
-                          │
-                   Stage 2: Deduplicate & Rank
-                          │
-                ┌─────────▼──────────┐
-                │  🔄 Dedup & Rank   │
-                │  - Merge dupes     │
-                │  - Impact scores   │
-                │  - Tag 🔥⚡📌      │
-                │  - Detect trends   │
-                │  - Write TL;DR     │
-                └─────────┬──────────┘
-                          │
-                   Stage 3: Verify
-                          │
-                ┌─────────▼──────────┐
-                │  🔎 Verification   │
-                │  - Check sources   │
-                │  - Cross-reference │
-                │  - Confidence tags │
-                │    High/Med/Low    │
-                └─────────┬──────────┘
-                          │
-                   Stage 4: Save
-                          │
-                ┌─────────▼──────────┐
-                │  💾 Save to        │
-                │  news.md           │
-                │  - TL;DR section   │
-                │  - Trends section  │
-                │  - Ranked items    │
-                │  - Stats footer    │
-                └─────────┬──────────┘
-                          │
-                   Stage 5: Email
-                          │
-                ┌─────────▼──────────┐
-                │  📧 Email Digest   │
-                │  - Styled HTML     │
-                │  - All recipients  │
-                │    in single call  │
-                │  - via Resend      │
-                └────────────────────┘
+    Stage 1: Unified Search (single LLM pass)
+           │
+    ┌──────▼──────────────────────────────────┐
+    │  🔍 Unified Search Agent                │
+    │  Covers all 3 categories in one pass:   │
+    │  - 🛠️ Dev Tools & Platforms             │
+    │  - 🤖 AI & Machine Learning             │
+    │  - 💰 Dev Ecosystem Funding             │
+    │                                         │
+    │  Tools: Exa Search + Tavily Search      │
+    │         + Tavily Extract                │
+    └──────────────────┬──────────────────────┘
+                       │
+                Stage 2: Deduplicate, Rank & Verify
+                       │
+             ┌─────────▼──────────┐
+             │  🔄 Dedup & Rank   │
+             │  - Merge dupes     │
+             │  - Impact scores   │
+             │  - Tag 🔥⚡📌      │
+             │  - Detect trends   │
+             │  - Write TL;DR     │
+             │  - Verify claims   │
+             │  - Confidence tags │
+             │    High/Med/Low    │
+             └─────────┬──────────┘
+                       │
+                Stage 3: Save
+                       │
+             ┌─────────▼──────────┐
+             │  💾 Save to        │
+             │  news.md           │
+             │  - TL;DR section   │
+             │  - Trends section  │
+             │  - Ranked items    │
+             │  - Stats footer    │
+             └─────────┬──────────┘
+                       │
+                Stage 4: Email
+                       │
+             ┌─────────▼──────────┐
+             │  📧 Email Digest   │
+             │  - Styled HTML     │
+             │  - All recipients  │
+             │    in single call  │
+             │  - via Resend      │
+             └────────────────────┘
 ```
 
 ## 📁 Project Structure
@@ -81,20 +77,21 @@ An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, veri
 newsFetch/
 ├── index.js                  # Entry point — kicks off the pipeline
 ├── agent.js                  # Main orchestrator agent definition
-├── instruction.js            # All agent instructions (6 specialized prompts)
+├── instruction.js            # All agent instructions (unified search + dedup/rank/verify)
 ├── whitelistEmails.js        # Array of email recipients for the digest
 ├── tools/
-│   ├── newsTools.js          # searchNewsParallel, deduplicateAndRank, verifyNews
+│   ├── newsTools.js          # searchNewsParallel, deduplicateAndRank tools
 │   ├── saveNews.js           # Saves final output to news.md with rich formatting
 │   ├── emailTools.js         # sendNewsEmail — Resend-powered email distribution
 │   └── memoryTools.js        # getMemory / saveMemory for persistent user context
 ├── subagents/
-│   ├── searchSubagent.js     # 3 parallel search agents (Dev, AI, Funding)
-│   ├── deduplicateRankSubagent.js  # Dedup, rank, trend detection
-│   └── verifySubagent.js     # Cross-referencing verification agent
+│   ├── searchSubagent.js     # Unified search agent (all 3 categories, Exa + Tavily)
+│   └── deduplicateRankSubagent.js  # Dedup, rank, verify & trend detection
+├── config/
+│   └── models.js             # Centralized model configuration
 ├── news.md                   # Output — the latest verified news digest
 ├── memory.md                 # Persistent memory store
-├── .env                      # API keys (Gemini + Exa + Tavily + Resend)
+├── .env                      # API keys (Mistral + Exa + Tavily + Resend)
 └── package.json
 ```
 
@@ -103,7 +100,7 @@ newsFetch/
 ### Prerequisites
 
 - **Node.js** 18+
-- **Google Gemini API key** — [Get one here](https://aistudio.google.com/apikey)
+- **Mistral API key** — [Get one here](https://console.mistral.ai/api-keys)
 - **Exa API key** — [Get one here](https://dashboard.exa.ai/api-keys)
 - **Tavily API key** — [Get one here](https://tavily.com)
 - **Resend API key** — [Get one here](https://resend.com/api-keys)
@@ -122,11 +119,22 @@ npm install
 Create a `.env` file in the root:
 
 ```env
-VERCEL_AI_MODEL=gemini-3.1-flash-lite
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+MISTRAL_API_KEY=your_mistral_api_key
 EXA_API_KEY=your_exa_api_key
 TAVILY_API_KEY=your_tavily_api_key
 RESEND_API_KEY=your_resend_api_key
+```
+
+### Model Configuration
+
+All models are configured centrally in `config/models.js`:
+
+```js
+export const MODELS = {
+  orchestrator: 'mistral-small',   // Main pipeline orchestrator
+  searchDefault: 'mistral-small',  // Unified search agent
+  rank: 'mistral-small',           // Dedup, rank & verify agent
+};
 ```
 
 ### Adding Email Recipients
@@ -150,13 +158,12 @@ node index.js
 
 The pipeline will:
 
-1. **Search** — 3 agents search in parallel (~15-30s)
-2. **Deduplicate & Rank** — Merge duplicates, score, tag, detect trends (~10s)
-3. **Verify** — Cross-reference each claim with independent searches (~15-20s)
-4. **Save** — Write the final digest to `news.md`
-5. **Email** — Send styled HTML digest to all whitelisted recipients via Resend
+1. **Search** — 1 unified agent searches all 3 categories using Exa + Tavily (~15-30s)
+2. **Deduplicate, Rank & Verify** — Merge duplicates, score, tag, detect trends, cross-reference claims (~10-20s)
+3. **Save** — Write the final digest to `news.md`
+4. **Email** — Send styled HTML digest to all whitelisted recipients via Resend
 
-Total runtime: ~60-90 seconds depending on API response times.
+Total runtime: ~30-60 seconds depending on API response times.
 
 ### Example Output (`news.md`)
 
@@ -210,40 +217,34 @@ Recipients receive a styled HTML email with:
 
 ## 🧩 How Each Stage Works
 
-### Stage 1 — Parallel Search
+### Stage 1 — Unified Search
 
-Six `ToolLoopAgent` instances run simultaneously via `Promise.all` (3 powered by Exa, 3 powered by Tavily):
+A single `ToolLoopAgent` searches all 3 categories in one LLM pass, using both Exa and Tavily as tools:
 
-| Agent | Focus Areas | Provider |
-|-------|-------------|----------|
-| **Dev Tools (Exa)** | IDEs, frameworks, libraries, open-source, DevOps, CI/CD | Exa |
-| **Dev Tools (Tavily)** | IDEs, frameworks, libraries, open-source, DevOps, CI/CD | Tavily |
-| **AI/ML (Exa)** | Model releases, AI agents, LLMs, research, AI APIs/SDKs | Exa |
-| **AI/ML (Tavily)** | Model releases, AI agents, LLMs, research, AI APIs/SDKs | Tavily |
-| **Dev Funding (Exa)** | AI startup rounds, dev tool acquisitions, infra investments | Exa |
-| **Dev Funding (Tavily)** | AI startup rounds, dev tool acquisitions, infra investments | Tavily |
+| Category | Focus Areas |
+|----------|-------------|
+| **🛠️ Dev Tools & Platforms** | IDEs, frameworks, libraries, open-source, DevOps, CI/CD |
+| **🤖 AI & Machine Learning** | Model releases, AI agents, LLMs, research, AI APIs/SDKs |
+| **💰 Dev Ecosystem Funding** | AI startup rounds, dev tool acquisitions, infra investments |
 
-*   **Exa search** uses `category: "news"`, `numResults: 10`, `startPublishedDate` set to a dynamic 12-hour window, and `livecrawl: "always"` to get real-time highlights.
-*   **Tavily search** uses `topic: "news"`, `maxResults: 10`, and `timeRange: "day"`.
+The agent has access to 3 tools:
+- **Exa Search** — `category: "news"`, `numResults: 10`, `startPublishedDate` set to a dynamic 12-hour window, `livecrawl: "always"` for real-time content with AI summaries
+- **Tavily Search** — `topic: "news"`, `maxResults: 10`, `timeRange: "day"`, with advanced search depth and raw markdown content
+- **Tavily Extract** — For extracting full content from URLs with thin search snippets
 
-### Stage 2 — Deduplicate & Rank
+Each source is tagged with its category (`devTools`, `aiMl`, or `devFunding`) in the structured output.
 
-A dedicated agent processes the merged results:
+### Stage 2 — Deduplicate, Rank & Verify
+
+A single combined agent handles deduplication, ranking, and verification in one pass:
 - **Deduplication** — Same event from 3 sources → 1 item with 3 citations
 - **Tagging** — 🔥 Trending (multi-source) / ⚡ Breaking (<2hrs) / 📌 Notable
 - **Impact Scoring** — 1 (minor update) to 5 (industry-changing)
 - **Trend Detection** — Cross-category theme identification
 - **TL;DR** — 2-3 sentence executive summary
+- **Verification** — Cross-references uncertain claims via web search, assigns **High** / **Medium** / **Low** confidence
 
-### Stage 3 — Verification
-
-The verification agent:
-- Checks each claim against provided sources
-- **Independently web-searches** to cross-reference uncertain claims
-- Assigns confidence: **High** / **Medium** / **Low**
-- Produces a detailed verification report with explanations
-
-### Stage 4 — Save
+### Stage 3 — Save
 
 Writes `news.md` with:
 - Timestamp header
@@ -252,7 +253,7 @@ Writes `news.md` with:
 - Ranked & verified news items
 - Stats footer (confidence breakdown, cross-reference count)
 
-### Stage 5 — Email Distribution
+### Stage 4 — Email Distribution
 
 Sends the digest to all whitelisted emails:
 - **Single Resend API call** — all recipients in the `to` field
@@ -270,8 +271,9 @@ The agent persists user preferences in `memory.md`. You can extend the prompt in
 | Package | Purpose |
 |---------|---------|
 | `ai` | Vercel AI SDK — ToolLoopAgent, tools, structured output |
-| `@ai-sdk/google` | Google Gemini model provider |
+| `@ai-sdk/mistral` | Mistral AI model provider |
 | `@exalabs/ai-sdk` | Exa web search tool for AI SDK |
+| `@tavily/ai-sdk` | Tavily search & extract tools for AI SDK |
 | `resend` | Email delivery via Resend API |
 | `zod` | Schema validation for structured outputs |
 | `dotenv` | Environment variable management |

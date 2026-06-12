@@ -7,11 +7,10 @@ const run = async () => {
     const result = await mainAgent.generate({
         prompt: `Run the full multi-stage news pipeline now:
 
-1. Execute parallel search across all 3 categories (Dev Tools, AI/ML, Dev Ecosystem Funding)
-2. Deduplicate & rank the merged results with impact scores and tags
-3. Verify every item with cross-referencing
-4. Save the final output to news.md
-5. Email the news digest to all whitelisted recipients
+1. Execute parallel search across all 3 categories (Dev Tools, AI/ML, Dev Ecosystem Funding) — each uses both Exa and Tavily
+2. Deduplicate, rank, verify & assign confidence levels to the merged results
+3. Save the final output to news.md
+4. Email the news digest to all whitelisted recipients
 
 Focus: Developer-centric news only. All finance/funding must be AI & dev related.
 Freshness: Last 12 hours only — reject anything stale.

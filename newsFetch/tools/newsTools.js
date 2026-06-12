@@ -1,16 +1,8 @@
 import 'dotenv/config';
 import { tool } from 'ai';
 import { z } from 'zod';
-import {
-  devToolsSearchSubagent,
-  aiMlSearchSubagent,
-  devFundingSearchSubagent,
-  devToolsTavilySearchSubagent,
-  aiMlTavilySearchSubagent,
-  devFundingTavilySearchSubagent,
-} from '../subagents/searchSubagent.js';
+import { unifiedSearchSubagent } from '../subagents/searchSubagent.js';
 import { deduplicateRankSubagent } from '../subagents/deduplicateRankSubagent.js';
-import { verifySubagent } from '../subagents/verifySubagent.js';
 
 function formatDateTime(date) {
   return date.toLocaleString('en-US', {
@@ -24,16 +16,6 @@ function formatDateTime(date) {
   });
 }
 
-function buildSearchPrompt(categoryFocus) {
-  const now = new Date();
-  const twelveHoursAgo = new Date();
-  twelveHoursAgo.setHours(now.getHours() - 12);
-
-  return `Current time is ${formatDateTime(now)}.
-Search for the latest developer-focused news from the last 12 hours ONLY (since ${formatDateTime(twelveHoursAgo)}).
-Do NOT include anything published before ${formatDateTime(twelveHoursAgo)}.
-Focus area: ${categoryFocus}`;
-}
 
 const sourceSchema = z.object({
   title: z.string(),
@@ -41,132 +23,67 @@ const sourceSchema = z.object({
   content: z.string(),
   publishedDate: z.string().optional(),
   aiSummary: z.string().optional(),
+  category: z.enum(['devTools', 'aiMl', 'devFunding']).optional(),
 });
 
 export const searchNewsParallel = tool({
-  description: 'Run 6 specialized news searches in parallel using Exa and Tavily: Dev Tools, AI/ML, and Dev Ecosystem Funding. Returns merged results from all categories.',
+  description: 'Run a unified news search covering all 3 categories (Dev Tools, AI/ML, Dev Ecosystem Funding) in a single pass. Uses both Exa and Tavily internally. Returns categorized results.',
   inputSchema: z.object({
     additionalFocus: z.string().optional().describe('Optional additional topic to emphasize across all searches.'),
   }),
   execute: async ({ additionalFocus }, { abortSignal }) => {
-    const focusSuffix = additionalFocus ? ` Also emphasize: ${additionalFocus}` : '';
+    const now = new Date();
+    const twelveHoursAgo = new Date();
+    twelveHoursAgo.setHours(now.getHours() - 12);
 
-    console.log('🔍 Starting parallel news search across 3 categories using both Exa and Tavily...');
+    const focusSuffix = additionalFocus ? `\nAlso emphasize: ${additionalFocus}` : '';
 
-    const [
-      devToolsResult,
-      aiMlResult,
-      devFundingResult,
-      devToolsTavilyResult,
-      aiMlTavilyResult,
-      devFundingTavilyResult,
-    ] = await Promise.all([
-      devToolsSearchSubagent.generate({
-        prompt: buildSearchPrompt('Developer Tools, IDEs, Frameworks, Libraries, Open Source, DevOps' + focusSuffix),
-        abortSignal,
-      }).then(r => {
-        console.log('  ✅ [Exa] Dev Tools search complete');
-        return r;
-      }),
+    console.log('🔍 Starting unified news search across all 3 categories (single LLM pass, Exa + Tavily)...');
 
-      aiMlSearchSubagent.generate({
-        prompt: buildSearchPrompt('AI Models, LLMs, AI Agents, ML Research, AI APIs and SDKs' + focusSuffix),
-        abortSignal,
-      }).then(r => {
-        console.log('  ✅ [Exa] AI/ML search complete');
-        return r;
-      }),
+    const prompt = `Current time is ${formatDateTime(now)}.
+Search for the latest developer-focused news from the last 12 hours ONLY (since ${formatDateTime(twelveHoursAgo)}).
+Do NOT include anything published before ${formatDateTime(twelveHoursAgo)}.
 
-      devFundingSearchSubagent.generate({
-        prompt: buildSearchPrompt('AI startup funding rounds, developer tool acquisitions, AI infrastructure investments' + focusSuffix),
-        abortSignal,
-      }).then(r => {
-        console.log('  ✅ [Exa] Dev Funding search complete');
-        return r;
-      }),
+Cover ALL 3 categories in this single search pass:
+1. Developer Tools & Platforms — IDEs, Frameworks, Libraries, Open Source, DevOps
+2. AI & Machine Learning — AI Models, LLMs, AI Agents, ML Research, AI APIs and SDKs
+3. Dev Ecosystem Funding — AI startup funding rounds, developer tool acquisitions, AI infrastructure investments
+${focusSuffix}`;
 
-      devToolsTavilySearchSubagent.generate({
-        prompt: buildSearchPrompt('Developer Tools, IDEs, Frameworks, Libraries, Open Source, DevOps' + focusSuffix),
-        abortSignal,
-      }).then(r => {
-        console.log('  ✅ [Tavily] Dev Tools search complete');
-        return r;
-      }),
+    const result = await unifiedSearchSubagent.generate({ prompt, abortSignal });
 
-      aiMlTavilySearchSubagent.generate({
-        prompt: buildSearchPrompt('AI Models, LLMs, AI Agents, ML Research, AI APIs and SDKs' + focusSuffix),
-        abortSignal,
-      }).then(r => {
-        console.log('  ✅ [Tavily] AI/ML search complete');
-        return r;
-      }),
+    console.log('  ✅ Unified search complete');
 
-      devFundingTavilySearchSubagent.generate({
-        prompt: buildSearchPrompt('AI startup funding rounds, developer tool acquisitions, AI infrastructure investments' + focusSuffix),
-        abortSignal,
-      }).then(r => {
-        console.log('  ✅ [Tavily] Dev Funding search complete');
-        return r;
-      }),
-    ]);
+    const sources = result.output?.sources || [];
+    const categoryCounts = {
+      devTools: sources.filter(s => s.category === 'devTools').length,
+      aiMl: sources.filter(s => s.category === 'aiMl').length,
+      devFunding: sources.filter(s => s.category === 'devFunding').length,
+    };
 
-    const mergedSummary = `## 🛠️ Developer Tools & Platforms (Exa)
-${devToolsResult.output?.draftSummary || 'No results found.'}
-
-## 🛠️ Developer Tools & Platforms (Tavily)
-${devToolsTavilyResult.output?.draftSummary || 'No results found.'}
-
-## 🤖 AI & Machine Learning (Exa)
-${aiMlResult.output?.draftSummary || 'No results found.'}
-
-## 🤖 AI & Machine Learning (Tavily)
-${aiMlTavilyResult.output?.draftSummary || 'No results found.'}
-
-## 💰 Dev Ecosystem Funding & Acquisitions (Exa)
-${devFundingResult.output?.draftSummary || 'No results found.'}
-
-## 💰 Dev Ecosystem Funding & Acquisitions (Tavily)
-${devFundingTavilyResult.output?.draftSummary || 'No results found.'}`;
-
-    const mergedSources = [
-      ...(devToolsResult.output?.sources || []),
-      ...(devToolsTavilyResult.output?.sources || []),
-      ...(aiMlResult.output?.sources || []),
-      ...(aiMlTavilyResult.output?.sources || []),
-      ...(devFundingResult.output?.sources || []),
-      ...(devFundingTavilyResult.output?.sources || []),
-    ];
-
-    console.log(`📊 Total sources gathered: ${mergedSources.length}`);
+    console.log(`📊 Total sources gathered: ${sources.length} (DevTools: ${categoryCounts.devTools}, AI/ML: ${categoryCounts.aiMl}, Funding: ${categoryCounts.devFunding})`);
 
     return {
-      mergedSummary,
-      mergedSources,
-      categoryCounts: {
-        devToolsExa: devToolsResult.output?.sources?.length || 0,
-        devToolsTavily: devToolsTavilyResult.output?.sources?.length || 0,
-        aiMlExa: aiMlResult.output?.sources?.length || 0,
-        aiMlTavily: aiMlTavilyResult.output?.sources?.length || 0,
-        devFundingExa: devFundingResult.output?.sources?.length || 0,
-        devFundingTavily: devFundingTavilyResult.output?.sources?.length || 0,
-      },
+      mergedSummary: result.output?.draftSummary || 'No results found.',
+      mergedSources: sources,
+      categoryCounts,
     };
   },
 });
 
 export const deduplicateAndRank = tool({
-  description: 'Deduplicate merged news items, score them by impact, tag as Trending/Breaking/Notable, detect trends, and generate a TL;DR.',
+  description: 'Deduplicate merged news items, score them by impact, tag as Trending/Breaking/Notable, verify claims with cross-referencing, assign confidence levels, detect trends, and generate a TL;DR.',
   inputSchema: z.object({
     mergedSummary: z.string().describe('The merged Markdown summary from all category searches.'),
     mergedSources: z.array(sourceSchema).describe('The merged list of all sources.'),
   }),
   execute: async ({ mergedSummary, mergedSources }, { abortSignal }) => {
-    console.log('🔄 Deduplicating and ranking news items...');
+    console.log('🔄 Deduplicating, ranking, and verifying news items...');
 
     const now = new Date();
     const prompt = `Current time: ${formatDateTime(now)}
 
-Here is the merged news from 3 category searches. Please deduplicate, rank, tag, score, detect trends, and write a TL;DR.
+Here is the merged news from the unified category search. Please deduplicate, rank, verify, tag, score, detect trends, assign confidence levels, and write a TL;DR.
 Every final headline must be followed by a concise "Summary:" paragraph using the source content, Exa AI summaries, and Tavily extracted/raw content. Make the summary developer-focused so the reader does not need to open the source article.
 
 --- MERGED NEWS ---
@@ -175,49 +92,13 @@ ${mergedSummary}
 --- ALL SOURCES ---
 ${JSON.stringify(mergedSources, null, 2)}`;
 
-    const result = await deduplicateRankSubagent.generate({
-      prompt,
-      abortSignal,
-    });
+    const result = await deduplicateRankSubagent.generate({ prompt, abortSignal });
 
-    console.log(`  ✅ Dedup complete: ${result.output?.totalItems} unique items (${result.output?.duplicatesRemoved} duplicates merged)`);
-
-    return result.output;
-  },
-});
-
-export const verifyNews = tool({
-  description: 'Verify a ranked news summary against sources. The verifier can independently web-search to cross-reference claims.',
-  inputSchema: z.object({
-    rankedSummary: z.string().describe('The Markdown-formatted ranked news summary to verify.'),
-    tldr: z.string().describe('The TL;DR executive summary.'),
-    trends: z.array(z.string()).describe('Detected trends to preserve.'),
-    sources: z.array(sourceSchema).describe('The list of sources containing the raw facts.'),
-  }),
-  execute: async ({ rankedSummary, tldr, trends, sources }, { abortSignal }) => {
-    console.log('🔎 Verifying news items with cross-referencing...');
-
-    const prompt = `Please verify the following news summary against the provided sources. Use your web search tool to independently cross-reference any claims you are uncertain about.
-Ensure each verified item still has a short "Summary:" paragraph after the headline. The summary should be grounded in Exa/Tavily content and should explain why the story matters to developers.
-
-TL;DR:
-${tldr}
-
-Trends Detected:
-${trends.map(t => `- ${t}`).join('\n')}
-
-Ranked Summary:
-${rankedSummary}
-
-Sources:
-${JSON.stringify(sources, null, 2)}`;
-
-    const result = await verifySubagent.generate({
-      prompt,
-      abortSignal,
-    });
-
-    console.log(`  ✅ Verification complete: ${result.output?.stats?.totalItemsVerified} items verified, ${result.output?.stats?.crossReferencedCount} cross-referenced`);
+    console.log(`  ✅ Dedup + verify complete: ${result.output?.totalItems} unique items (${result.output?.duplicatesRemoved} duplicates merged)`);
+    if (result.output?.verificationStats) {
+      const stats = result.output.verificationStats;
+      console.log(`  📊 Confidence: ${stats.highConfidenceCount} High, ${stats.mediumConfidenceCount} Medium, ${stats.lowConfidenceCount} Low | ${stats.crossReferencedCount} cross-referenced`);
+    }
 
     return result.output;
   },
