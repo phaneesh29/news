@@ -1,65 +1,76 @@
-Last flow execution: 6/12/2026, 9:43:13 PM GMT+5:30
+Last flow execution: 6/12/2026, 10:12:48 PM GMT+5:30
 
 ## 📋 TL;DR
-Xiaomi's MiMo Code AI coding agent, released under the MIT license, outperforms Claude Code on complex 200-step software tasks, featuring persistent project memory and a 'Dream' workflow that periodically refreshes its internal model. Moonshot AI's Kimi Work is a local desktop AI agent leveraging the Kimi K2.6 model, enabling a 300-sub-agent swarm, WebBridge browser automation, and local file/code access. Zyphra's Zamba2-VL is a family of open vision-language models built on a hybrid Mamba2 state-space–Transformer backbone, offering competitive accuracy at lower latency. India's MeitY launched Varya, a distilled AI video model from Avataar AI, designed to understand Indian culture and run 10x faster at ~20x lower cost than global peers. OpenAI's Codex now has over 5 million users and has acquired Ona to enable persistent cloud execution for long-running agentic workflows. Equal AI, an Indian AI call assistant app, raised $30 million in a Series B round to expand its call assistant capabilities and become India's AI assistant for everyday needs. Prometheus AI, co-founded by Jeff Bezos, raised $12 billion at a $41 billion valuation to build an 'artificial general engineer' software designed to automate the design and manufacture of complex physical systems. Anything, a vibe-coding startup, announced an $11 million funding round at a $100 million valuation to enable non-technical creators to build complete web and mobile applications.
+GitHub’s npm v12 update introduces critical security defaults to block supply chain attacks, while Jeff Bezos’s Prometheus AI startup raises $12B at a $41B valuation to accelerate engineering design. The UK’s £1.1B AI Hardware Plan and Cosine’s Lumen Sovereign model signal a major push for sovereign AI infrastructure.
 
 ---
 
 ## 📈 Trends Detected
-- Multiple AI coding tools released
-- AI video models for cultural understanding
-- AI call assistant apps for spam screening
-- AI for physical system design and manufacturing
+- AI-driven engineering design acceleration (Prometheus, autonomous engineering systems)
+- Sovereign AI models and infrastructure (UK’s £1.1B AI Hardware Plan, Cosine’s Lumen Sovereign)
+- Security-focused developer tooling (GitHub npm v12, supply chain attack prevention)
+- Institutional adoption of blockchain for regulated finance (Digital Asset’s $355M funding for Canton Network)
 
 ---
 
 # 🛠️ Developer Tools & Platforms
 
 ## 🔥 Breaking
+- **[Confidence: High]** **GitHub to Block npm Install Scripts, Git Dependencies, and Remote URLs by Default in v12** (Impact: 5) | [Infosecurity Magazine](https://www.infosecurity-magazine.com/news/github-update-npm-supply-chain/) [CodeZine](https://codezine.jp/news/detail/24527)
+  Summary: GitHub’s npm v12 (July 2026) flips three security defaults: blocking automatic install scripts (pre/postinstall, node-gyp), Git dependencies, and remote URLs/tarballs unless explicitly allowed. Developers must use `npm approve-scripts` to audit and allowlist trusted scripts. This shift from implicit trust to explicit opt-in directly mitigates supply chain attacks by preventing malicious code execution during installation, but requires workflow adjustments to avoid breaking builds.
 
-- **[Confidence: High]** **Xiaomi Open-Sources MiMo Code AI Coding Agent** (Impact: 5) | [Source](https://gadgetsnow.indiatimes.com/tech-news/xiaomi-open-sources-mimo-code-ai-coding-agent-claims-it-outperforms-claude-code-on-complex-200-step-software-tasks/articleshow/131677071.cms) [Source](https://indianexpress.com/article/technology/artificial-intelligence/xiaomis-latest-ai-coding-tool-claims-to-outperform-claude-code-on-complex-tasks-10736639/) [Source](https://pub.towardsai.net/xiaomis-new-coding-agent-dreams-every-7-days-and-it-s-beating-claude-code-past-200-steps-282c75ce4bf5)
-  Summary: Xiaomi's MiMo Code is an open-source AI coding agent that claims to outperform Claude Code on complex 200-step software tasks. It is designed for long-horizon software engineering workflows and is built on Xiaomi's MiMo AI models. The tool is released under the MIT open-source license and allows developers to connect third-party AI models to the platform. This tool is particularly useful for developers working on large-scale projects that require maintaining context and consistency across extended development sessions.
-
-- **[Confidence: High]** **Moonshot AI Launches Kimi Work, a Local Desktop Agent** (Impact: 4) | [Source](https://www.marktechpost.com/2026/06/12/moonshot-ai-launches-kimi-work-a-local-desktop-agent-reportedly-running-on-kimi-k2-6-with-a-300-sub-agent-agent-swarm/)
-  Summary: Moonshot AI has launched Kimi Work, a local desktop AI agent that runs entirely on the user's machine (macOS and Windows). It leverages Moonshot's Kimi K2.6 model and enables a 300-sub-agent swarm, WebBridge browser automation, a cron scheduler, and local file/code access. Tasks are executed using real browser sessions and local files rather than cloud sandboxes. This tool is particularly useful for developers who need an AI agent that runs locally and can access their files and sessions without relying on cloud infrastructure.
-
-## 📈 Trending
-
-- **[Confidence: High]** **Zyphra Release Zamba2-VL: Hybrid Mamba2–Transformer Vision-Language Models** (Impact: 4) | [Source](https://www.marktechpost.com/2026/06/12/zyphra-release-zamba2-vl-hybrid-mamba2-transformer-vision-language-models-that-cut-time-to-first-token-by-about-an-order-of-magnitude/)
-  Summary: Zamba2-VL is Zyphra's family of open vision-language models (1.2B, 2.7B, 7B) built on a hybrid Mamba2 state-space–Transformer backbone that interleaves a few shared attention blocks with linear-time Mamba2 layers, enabling lower latency while preserving in-context retrieval. The models pair a Qwen2.5-VL Vision Transformer encoder with a two-layer MLP adapter and use a Mistral v0.1 tokenizer, trained on 100B vision-text and text tokens; they support single and multi-image understanding and grounding, evaluated across 14 benchmarks (charts, diagrams, documents). This tool is particularly useful for developers who need faster time-to-first-token and efficient vision-language models at multiple sizes.
 
 # 🤖 AI & Machine Learning
 
 ## 🔥 Breaking
+- **[Confidence: High]** **Jeff Bezos’s Prometheus Raises $12B at $41B Valuation to Build ‘Artificial General Engineer’** (Impact: 5) | [New York Post](https://nypost.com/2026/06/11/business/jeff-bezos-led-ai-startup-prometheus-valued-at-41b-in-blockbuster-fundraising/) [Tech Funding News](https://techfundingnews.com/bezos-prometheus-lands-12b-series-b-at-41b-valuation-to-build-ai-that-compresses-the-engineering-design-cycle/) [Indian Express](https://indianexpress.com/article/technology/tech-news-technology/jeff-bezoss-prometheus-raises-12bn-to-build-ai-engineer-heres-what-it-means-10736501/)
+  Summary: Prometheus, co-led by Jeff Bezos and ex-Google exec Vik Bajaj, raised $12B in a Series B at a $41B valuation to build an “artificial general engineer” platform. The AI targets pre-production design for complex hardware (jet engines, medical devices, microchips) by simulating physical laws and automating end-to-end design cycles, aiming to compress the “dream-build loop” 10x. Backed by Goldman Sachs, BlackRock, and JPMorgan, the funding will scale computing capacity and training data repositories.
 
-- **[Confidence: High]** **India's MeitY Launches Varya AI Video Model** (Impact: 5) | [Source](https://www.freepressjournal.in/tech/india-launches-varya-ai-video-model-heres-what-it-does-how-to-use-it)
-  Summary: India's MeitY-launched Varya AI is a distilled video model from Avataar AI, designed to understand Indian culture (festivals, food, clothing) and run 10x faster at ~20x lower cost than global peers. It's built from Wan 2.2 via distillation, delivering a four-step video generation pipeline on hosted service with a price of Rs 0.48 per second and faster throughput (5-second 720p clip in 45s on NVIDIA H200). For developers, access is via India AI Kosh/MeitY ecosystem (try-it-now on the project site), highlighting a sovereign, culturally tuned alternative to Veo/Kling/Luma/Runway. This tool is particularly useful for developers who need a culturally aware and cost-effective AI video model.
+- **[Confidence: High]** **UK Unveils £1.1B AI Hardware Plan to Boost Sovereign AI Infrastructure** (Impact: 4) | [Raconteur](https://www.raconteur.net/finance/uk-ai-growth-funding-inside-the-1-1bn-plan) [IT Brief](https://itbrief.co.uk/story/uk-unveils-gbp-1-1-billion-ai-hardware-investment)
+  Summary: The UK Government announced a £1.1B AI Hardware Plan, allocating £750M for a national AI supercomputer (£400M for next-gen inference chips), £120M for UK chip R&D, and £150M for local hardware providers via the British Business Bank. The plan also funds doctoral training and partnerships with Arm to expand the AI workforce. This aims to position the UK as a leader in sovereign AI infrastructure, accelerating access to cutting-edge hardware for developers.
 
-- **[Confidence: High]** **OpenAI is making Codex more useful in Chrome and the cloud** (Impact: 4) | [Source](https://www.neowin.net/news/openai-is-making-codex-more-useful-in-chrome-and-the-cloud/)
-  Summary: OpenAI is expanding Codex with an Ona acquisition to run Codex in persistent cloud infrastructure, enabling long-running agent workflows beyond a developer's local machine—beneficial for enterprises needing controlled security, logging, and credential boundaries. In addition, OpenAI rolled out practical Codex updates: saveable rate-limit resets with a new referral option, and a browser-focused developer mode that uses the Chrome DevTools Protocol for debugging web apps, profiling JavaScript, and inspecting page state via the Codex in-app browser. These changes aim to improve reliability, collaboration, and browser-based development workflows, while the Ona deal (subject to closing) would formally bring cloud execution and orchestration capabilities to Codex at scale. This tool is particularly useful for developers who need a more reliable and scalable AI coding assistant.
+## 📈 Trending
+- **[Confidence: High]** **Cosine Partners with UK Financial Institutions to Build Lumen Sovereign, Britain’s First Sovereign AI Model** (Impact: 4) | [FinTech Futures](https://www.fintechfutures.com/fintech/fintech-futures-top-five-news-stories-of-the-week-12-june-2026)
+  Summary: London-based AI startup Cosine is collaborating with HSBC, Lloyds, NatWest, and other UK financial and defense institutions to co-design Lumen Sovereign, a sovereign frontier AI model fully trained on UK soil. The model promises deployment in air-gapped environments at a lower cost than OpenAI/Anthropic alternatives, with readiness forecast by late 2026. This initiative aligns with the UK’s broader push for AI sovereignty and could standardize AI tooling for regulated sectors.
+
+- **[Confidence: High]** **LTIMindtree Launches AI 1000 Workforce Training Programme to Certify 1,000+ AI Engineers** (Impact: 3) | [Let’s Data Science](https://letsdatascience.com/news/ltm-launches-ai-1000-workforce-training-programme-6c91c841)
+  Summary: LTIMindtree’s AI 1000 initiative aims to certify 1,000+ AI engineers, including Forward Deployed Engineers (FDEs), using a four-stage framework (Identify, Enable, Deploy, Govern). The program includes a proprietary AI Readiness Index, curated learning journeys, hackathons, and performance tracking. This addresses the growing demand for AI talent and could standardize AI upskilling in enterprise environments.
+
+- **[Confidence: Medium]** **Deep Finance Analytics Launches NEXT, an AI-Native Intelligence Framework for Financial Institutions** (Impact: 3) | [Business Insider](https://markets.businessinsider.com/news/stocks/deep-finance-analytics-launches-next---an-ai-native-intelligence-framework-for-financial-institutions-and-global-investors-1036244988)
+  Summary: Deep Finance Analytics introduced NEXT, a framework of 25 AI-native products spanning standalone tools, APIs, autonomous agents, and enterprise solutions for institutional finance. Anchored by PortIQ and Epsilon, the framework delivers explainable, governed intelligence for professionals. This could standardize AI adoption in finance, offering developers modular, auditable AI components for regulated workflows.
+
 
 # 💰 Dev Ecosystem Funding & Acquisitions
 
-## 🔥 Breaking
+## 📈 Trending
+- **[Confidence: High]** **Digital Asset Raises $355M in a16z Crypto-Led Round to Expand Canton Network for Institutional Finance** (Impact: 4) | [FinTech Futures](https://www.fintechfutures.com/venture-capital-funding/digital-asset-355m-funding-round) [Unchained](https://unchainedcrypto.com/canton-network-developer-digital-asset-raises-355-million-led-by-a16z-crypto-to-bring-wall-street-onchain/) [The Trade](https://www.thetradenews.com/digital-asset-raises-355-million-to-expand-canton-network-as-institutional-onchain-infrastructure/)
+  Summary: Digital Asset secured $355M in a funding round led by a16z crypto to scale its Canton Network, a public Layer-1 blockchain designed for regulated financial institutions. Backed by HSBC, BNP Paribas, Citadel Securities, and others, the funding will expand the ecosystem, deepen developer engagement, and onboard more assets/workflows. Canton’s privacy-enabled infrastructure targets tokenization, collateral mobility, and settlement, offering developers a compliant on-chain stack for capital markets.
 
-- **[Confidence: High]** **Keshav Reddy's Equal AI raises $30 million in round led by Prosus, Tomales Bay Capital** (Impact: 5) | [Source](https://economictimes.indiatimes.com/tech/funding/keshav-reddys-equal-ai-raises-30-million-in-round-led-by-prosus-tomales-bay-capital/articleshow/131674910.cms) [Source](https://www.wownews24x7.com/indias-equal-ai-secures-us-30m-series-b-to-scale-voice-assistant) [Source](https://thenextweb.com/news/equal-ai-india-call-screening-30m-series-b)
-  Summary: Equal AI, the AI call assistant app founded by Keshav Reddy, raised $30 million in a Series B led by Prosus Ventures and Tomales Bay Capital, with participation from Think Investments, Valiant Fund, Sameer Nigam, and Zubin Bharti Mittal. The funds will deepen call-assistant capabilities and expand into adjacent areas like communications, financial services, lifestyle, and concierge, aiming to become India's default AI assistant for everyday needs; the user base includes over 1M MAU and 350k DAU since launching in Oct 2025. Previously pivoting from a data-sharing/identity infrastructure serving 350+ enterprises, Equal AI now targets consumer-scale adoption and integration with multiple identity databases and APIs (1B+ enterprise transactions processed annually in its prior model) to support its consumer-facing features. This funding is particularly useful for developers who need a scalable and multilingual AI call assistant that can handle a high volume of calls and provide a seamless user experience.
 
-- **[Confidence: High]** **Prometheus AI Raises $12B At A $41 Billion Valuation** (Impact: 5) | [Source](https://www.squaredtech.co/jeff-bezoss-prometheus-raises-12b-to-build-ai-that-designs-physical) [Source](https://techibe.com/jeff-bezos-prometheus-ai-startup-12b-2026/) [Source](https://www.finsmes.com/2026/06/prometheus-raises-12-billion-at-approx-41-billion-valuation.html)
-  Summary: Prometheus, a physical AI startup co-founded by Jeff Bezos, raised $12B (valued at $41B) from investors including Bezos, JPMorgan, Goldman Sachs, and BlackRock, accelerating its push to create an “artificial general engineer” that autonomously designs and optimizes complex physical systems (e.g., jet engines, drug compounds) rather than just software. The core shift is moving from narrow AI tools to a cross-domain, engineering-reasoning platform capable of handling material properties, tolerances, and chemical interactions, effectively automating high-level design across domains. This funding is particularly useful for developers who need a scalable and automated AI system that can design and manufacture complex physical systems.
+## 📌 Notable
+- **[Confidence: Low]** **KPMG Report on AI Business Use Cases Found to Contain AI Hallucinations** (Impact: 2) | [Marcus on AI](https://garymarcus.substack.com/p/you-cant-get-more-2026-than-that)
+  Summary: A KPMG report touting successful AI use cases in businesses was later revealed to include AI-generated inaccuracies, with case studies identified as hallucinations. This underscores the risks of unvalidated AI outputs in enterprise contexts and highlights the need for rigorous verification in AI-driven research.
 
-- **[Confidence: High]** **Vibe-coding startup Anything hits $2M ARR in two weeks, lands $100M valuation** (Impact: 4) | [Source](https://xix.ai/ainews/vibecoding-startup-nabs-100m-valuation-hitting-2m-arr-weeks.html)
-  Summary: Anything, a vibe-coding startup founded by Dhruv Amin and Marcus Lowe, announced an $11M funding round at a $100M valuation led by Footwork with participation from Uncork, Bessemer, and M13. The company positions itself as an all-in-one, AI-powered app builder aimed at non-technical creators, enabling rapid from-prototype-to-live apps without third-party tool glue, with existing live apps like a habit tracker and CPR training course already monetizing. For developers, the key takeaway is a potential platform that consolidates AI tooling, hosting, and app publishing into a single workflow (branding itself as the “Shopify of vibe-coding”), though concrete API/SDK details, infrastructure specs, or developer tooling were not disclosed in the excerpt. This funding is particularly useful for developers who need a scalable and automated AI system that can build complete web and mobile applications.
+
+--- **Developer-Focused Summary**
+
+- **npm v12’s security defaults** mark a paradigm shift in dependency management, forcing developers to explicitly approve scripts and sources. This reduces attack surface but requires immediate action to audit and allowlist trusted packages to avoid breaking builds. The change reflects broader industry trends toward zero-trust supply chain security.
+
+- **Prometheus’s $12B raise** signals a major bet on AI-driven engineering design, with implications for toolchains, simulation workflows, and hardware prototyping. Developers in aerospace, medical devices, and semiconductors may soon integrate Prometheus’s “artificial general engineer” into their design cycles, potentially accelerating iteration and reducing time-to-market.
+
+- **The UK’s £1.1B AI Hardware Plan** and **Cosine’s Lumen Sovereign** model represent a concerted push for sovereign AI infrastructure. For developers, this could mean easier access to state-backed AI hardware, standardized tooling for regulated sectors, and a stronger domestic AI ecosystem. The focus on inference chips and supercomputing may also lower barriers to deploying large-scale AI workloads.
+
+- **Digital Asset’s $355M funding** for Canton Network highlights growing institutional adoption of blockchain for regulated finance. Developers building tokenization, settlement, or collateral mobility solutions can leverage Canton’s privacy-enabled infrastructure to meet compliance requirements while operating on-chain.
 
 ---
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 8 |
-| ✅ High Confidence | 8 |
-| ⚠️ Medium Confidence | 0 |
-| ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 3 |
+| Total Items Verified | 10 |
+| ✅ High Confidence | 6 |
+| ⚠️ Medium Confidence | 1 |
+| ❌ Low Confidence | 1 |
+| 🔍 Cross-Referenced | 4 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | 6/12/2026, 9:43:13 PM GMT+5:30 |
+| 🕐 Generated At | 6/12/2026, 10:12:48 PM GMT+5:30 |
