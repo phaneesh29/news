@@ -7,7 +7,7 @@ This project is a premium **Multi-Agent News System** built using the official `
 ## 📂 Project Directory Structure
 
 ```text
-D:/news/newsAgentOpenAI/
+D:/news/newsAgent/
 ├── .env                  # Local API keys and model configuration (git-ignored)
 ├── .env.example          # Sample environment template
 ├── .gitignore            # Git exclusions
@@ -91,4 +91,4 @@ Run the pipeline using npm:
 npm start
 ```
 
-The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[news.md](file:///D:/news/newsAgentOpenAI/news.md)**.
+The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[news.md](file:///D:/news/newsAgent/news.md)**.

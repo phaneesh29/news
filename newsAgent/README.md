@@ -65,7 +65,7 @@ Specialized tools are implemented in `tools/agentTools.js` and registered with t
 ## 📂 Project Structure
 
 ```text
-D:/news/newsAgentOpenAI/
+D:/news/newsAgent/
 ├── .env                  # Local API keys (git-ignored)
 ├── .env.example          # Sample environment template
 ├── .gitignore            # Git exclusions
@@ -99,4 +99,4 @@ D:/news/newsAgentOpenAI/
    ```bash
    npm start
    ```
-The newsletter will be saved directly in the project directory as [news.md](file:///D:/news/newsAgentOpenAI/news.md).
+The newsletter will be saved directly in the project directory as [news.md](file:///D:/news/newsAgent/news.md).
