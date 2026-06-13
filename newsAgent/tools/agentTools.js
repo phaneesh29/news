@@ -50,10 +50,10 @@ export const searchGitHubReleasesTool = tool({
   execute: async ({ repo }) => {
     const query = `site:github.com/${repo}/releases latest release changelog`;
     console.log(`[GitHub Releases Tool] Searching for releases of ${repo} (last 12h)...`);
-    
+
     let searchResults = [];
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
-    
+
     if (config.exaApiKey) {
       try {
         const exa = new Exa(config.exaApiKey);
@@ -73,7 +73,7 @@ export const searchGitHubReleasesTool = tool({
       try {
         const tvly = tavily({ apiKey: config.tavilyApiKey });
         const searchRes = await tvly.search(query, { maxResults: 2 });
-        
+
         // Programmatic 12h filter for Tavily results
         const twelveHoursAgoMs = twelveHoursAgo.getTime();
         searchResults = (searchRes.results || []).filter((result) => {
@@ -165,7 +165,7 @@ export const fetchGitHubTrendingTool = tool({
     try {
       const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString().split('.')[0] + 'Z';
       const url = `https://api.github.com/search/repositories?q=created:>${twelveHoursAgo}&sort=stars&order=desc&per_page=${limit}`;
-      
+
       console.log(`[GitHub Trending] Fetching repositories created since: ${twelveHoursAgo}...`);
       const response = await fetch(url, {
         headers: {
@@ -207,10 +207,10 @@ export const fetchHackerNewsTool = tool({
     try {
       const past12h = Math.floor((Date.now() - 12 * 60 * 60 * 1000) / 1000);
       const url = `https://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>${past12h},points>=${minPoints}&hitsPerPage=20`;
-      
+
       console.log(`[Hacker News] Fetching stories with >=${minPoints} points from past 12h...`);
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Algolia HN API returned status ${response.status}`);
       }
@@ -246,7 +246,7 @@ export const searchRedditSignalsTool = tool({
   execute: async ({ subreddit, query }) => {
     const searchQuery = `site:reddit.com/r/${subreddit} ${query}`;
     console.log(`[Reddit Signals] Searching r/${subreddit} (12h limit) for: "${query}"...`);
-    
+
     let results = await exaSearch(searchQuery);
     if (!results || results.length === 0) {
       results = await tavilySearch(searchQuery);
@@ -268,7 +268,7 @@ export const searchSecurityAdvisoriesTool = tool({
     } else if (ecosystem === 'pypi') {
       query = 'site:github.com/advisories "pypi" malware compromise exploit 2026';
     }
-    
+
     console.log(`[Security Advisories] Searching for security alerts (12h limit) in ecosystem: ${ecosystem}...`);
     let results = await exaSearch(query);
     if (!results || results.length === 0) {
@@ -287,24 +287,29 @@ export const fetchAcademicPapersTool = tool({
   }),
   execute: async ({ limit, date }) => {
     try {
-      const url = date 
+      const url = date
         ? `https://huggingface.co/api/daily_papers?date=${date}`
         : 'https://huggingface.co/api/daily_papers';
       console.log(`[Academic Papers] Fetching curated Hugging Face Daily Papers (date: ${date || 'latest'})...`);
       let response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Hugging Face API returned status ${response.status}`);
-      }
+      let data;
 
-      let data = await response.json();
-      
-      // If date was specified but no papers were found, fallback to the latest papers
-      if (date && (!data || data.length === 0)) {
-        console.log(`[Academic Papers] No papers found for date ${date}. Falling back to the latest curated papers...`);
+      if (!response.ok) {
+        console.warn(`[Academic Papers] Hugging Face API returned status ${response.status} for URL ${url}. Falling back to the latest curated papers...`);
         const fallbackResponse = await fetch('https://huggingface.co/api/daily_papers');
-        if (fallbackResponse.ok) {
-          data = await fallbackResponse.json();
+        if (!fallbackResponse.ok) {
+          throw new Error(`Hugging Face API fallback returned status ${fallbackResponse.status}`);
+        }
+        data = await fallbackResponse.json();
+      } else {
+        data = await response.json();
+        
+        if (date && (!data || data.length === 0)) {
+          console.log(`[Academic Papers] No papers found for date ${date}. Falling back to the latest curated papers...`);
+          const fallbackResponse = await fetch('https://huggingface.co/api/daily_papers');
+          if (fallbackResponse.ok) {
+            data = await fallbackResponse.json();
+          }
         }
       }
 
