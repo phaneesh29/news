@@ -1,0 +1,21 @@
+{
+  "name": "newsagentopenai",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.11.6",
+    "@tavily/core": "^0.7.6",
+    "dotenv": "^17.4.2",
+    "exa-js": "^2.13.0",
+    "openai": "^6.42.0",
+    "zod": "^4.4.3"
+  }
+}
