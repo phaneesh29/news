@@ -3,6 +3,10 @@ import { saveNews } from './tools/saveNews.js';
 import { sendNewsEmail } from './tools/emailTools.js';
 
 const run = async () => {
+    console.warn('\x1b[33m%s\x1b[0m', '⚠️  WARNING: This pipeline (newsFetch) is deprecated.');
+    console.warn('\x1b[33m%s\x1b[0m', '⚠️  Please use the newer newsAgentOpenAI pipeline instead.');
+    console.warn('\x1b[33m%s\x1b[0m', '⚠️  Usage: cd newsAgentOpenAI && npm start\n');
+
     console.log('🚀 Starting Programmatic News Agent Pipeline...\n');
     const startTime = Date.now();
 

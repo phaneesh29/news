@@ -1,4 +1,9 @@
-# 🗞️ NewsFetch — AI-Powered Developer News Agent
+# 🗞️ NewsFetch — AI-Powered Developer News Agent (DEPRECATED)
+
+> [!WARNING]
+> **This repository/folder is DEPRECATED.**
+> It has been replaced by the superior parent-child subagent implementation in **[newsAgentOpenAI](file:///D:/news/newsAgentOpenAI)**.
+> All future features, updates, and maintenance will take place there. Please transition to using the new pipeline.
 
 An intelligent multi-stage news pipeline that fetches, deduplicates, ranks, verifies, and emails the latest developer-focused news using AI agents. Built with [Vercel AI SDK](https://ai-sdk.dev) and powered by Mistral AI + [Exa](https://exa.ai) search + [Tavily](https://tavily.com) search + [Resend](https://resend.com) email.
 
