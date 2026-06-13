@@ -23,11 +23,11 @@ D:/news/newsAgentOpenAI/
 │   ├── searchAgent.js    # SearchAgent (General Web/News search)
 │   ├── enrichAgent.js    # EnrichAgent (GitHub releases, trending, HN, Reddit, exploits, academic papers)
 │   ├── synthesisAgent.js # SynthesisAgent (Deduplication, Scoring, Clustering)
-│   └── editorAgent.js    # EditorAgent (nws.md writing)
+│   └── editorAgent.js    # EditorAgent (news.md writing)
 ├── tools/
 │   ├── exaSearch.js      # Primary Exa search client
 │   ├── tavilySearch.js   # Fallback Tavily search client
-│   ├── fileWriter.js     # Helper to write nws.md
+│   ├── fileWriter.js     # Helper to write news.md
 │   └── agentTools.js     # Wrapped agent-ready tools with Zod parameters
 └── utils/
     └── llm.js            # Registers default model provider globally
@@ -64,7 +64,7 @@ graph TD
     
     %% Step 4: Formatting
     Manager -->|Structured JSON| EditorAgent[EditorAgent]
-    EditorAgent -->|write_news_bulletin| Format[nws.md Output File]
+    EditorAgent -->|write_news_bulletin| Format[news.md Output File]
     EditorAgent -->|Confirmation| Manager
 ```
 
@@ -91,4 +91,4 @@ Run the pipeline using npm:
 npm start
 ```
 
-The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[`nws.md`](file:///D:/news/newsAgentOpenAI/nws.md)**.
+The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[news.md](file:///D:/news/newsAgentOpenAI/news.md)**.

@@ -27,7 +27,7 @@ export const managerAgent = new Agent({
     }),
     editorAgent.asTool({
       toolName: 'invoke_EditorAgent',
-      toolDescription: 'Asks the EditorAgent to take structured ranked JSON and format it into a premium nws.md bulletin.'
+      toolDescription: 'Asks the EditorAgent to take structured ranked JSON and format it into a premium news.md bulletin.'
     })
   ],
 });
