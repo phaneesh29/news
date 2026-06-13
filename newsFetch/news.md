@@ -1,14 +1,14 @@
-Last flow execution: 6/13/2026, 6:36:52 AM UTC
+Last flow execution: 6/13/2026, 3:56:29 PM UTC
 
 ## 📋 TL;DR
-Google has confirmed exploitation of an Oracle PeopleSoft zero-day vulnerability, and Chrome 149 has been released to patch 28 vulnerabilities. The IndiaAI Mission launched the Varya video AI model, and OpenAI reported a Chinese operation using ChatGPT for malicious purposes. The AI token price is expected to plummet due to new GPU systems.
+Apple's upcoming macOS Golden Gate and iOS 27 updates bring significant AI enhancements, including Siri AI and new Apple Intelligence features. Mistral AI is rumored to be raising €3B at a €20B valuation, positioning itself as a European alternative to American tech giants. Anthropic has blocked all public access to its most powerful models, Fable 5 and Mythos 5, after a US government export-control order.
 
 ---
 
 ## 📈 Trends Detected
-- AI model releases
-- Security vulnerabilities
-- AI funding and acquisitions
+- Apple's AI enhancements
+- Mistral AI funding
+- Anthropic model restrictions
 
 ---
 
@@ -16,62 +16,49 @@ Google has confirmed exploitation of an Oracle PeopleSoft zero-day vulnerability
 
 ## 🔥 Breaking
 
-- **[Confidence: High]** **Google Confirms Exploitation of Oracle PeopleSoft Zero-Day by ShinyHunters** (Impact: 5) | [Source](https://www.securityweek.com/google-confirms-exploitation-of-oracle-peoplesoft-zero-day-by-shinyhunters/)
-  Summary: Google has confirmed that a PeopleSoft vulnerability mitigated by Oracle has been exploited by ShinyHunters as a zero-day to steal data from organizations. Oracle has released an out-of-band advisory and security alert for CVE-2026-35273, a critical unauthenticated remote code execution vulnerability impacting PeopleSoft Enterprise PeopleTools versions 8.61 and 8.62, as well as PeopleSoft Enterprise Applications. This highlights the ongoing need for robust security measures and timely patching to prevent unauthorized access and data breaches.
+- **[Confidence: High]** **Apple's macOS Golden Gate and iOS 27 Updates** (Impact: 5) | [Source](https://www.macrumors.com/2026/06/12/macos-golden-gate-hands-on/)
+  Summary: Apple's upcoming macOS Golden Gate and iOS 27 updates bring significant AI enhancements, including Siri AI, design refinements, and new Apple Intelligence features. The updates also introduce new keyboards and typing improvements, supporting languages like Afrikaans, Galician, and Indigenous languages.
 
-## 📈 Trending
-
-- **[Confidence: High]** **Chrome 149 Update Patches 28 Vulnerabilities** (Impact: 4) | [Source](https://www.securityweek.com/chrome-149-update-patches-28-vulnerabilities/)
-  Summary: Google has released Chrome 149, which resolves 28 critical and high-severity security defects, including a dozen use-after-free bugs. This update addresses critical security vulnerabilities that could be exploited for remote code execution, data corruption, or denial-of-service.
-
-## 📌 Notable
-
-- **[Confidence: Medium]** **Google Wants to Release Millions of Mosquitoes** (Impact: 2) | [Source](https://www.foxnews.com/tech/google-wants-release-millions-mosquitoes)
-  Summary: Google's Debug project is asking federal regulators for permission to release sterile male mosquitoes in New Jersey, California, and Florida. The goal is to reduce mosquito populations that can spread disease. This highlights the intersection of technology and public health, with potential implications for data privacy and environmental impact.
+- **[Confidence: High]** **Siri AI and Gemini Integration** (Impact: 5) | [Source](https://www.cnet.com/tech/services-and-software/every-apple-intelligence-reveal-apple-wwdc-2026-news/)
+  Summary: Apple's WWDC showcased new AI features in its Photos app, including enhanced photo editing and a new Image Playground for creative AI-generated images. The integration of Siri AI and Gemini models promises to revolutionize user interactions with Apple devices.
 
 # 🤖 AI & Machine Learning
 
-## 🔥 Breaking
-
-- **[Confidence: High]** **IndiaAI Mission Launches Varya Video AI Model** (Impact: 4) | [Source](https://www.newkerala.com/news/a/india-ai-mission-launches-video-story-generating-ai-580.htm)
-  Summary: The IndiaAI Mission-backed Varya video generation model was launched by Avataar. It uses a distillation technique to reduce video generation steps from 50 to 4, making it highly cost-efficient at Rs 0.48 per second. The model is designed to generate culturally relevant visual outputs for Indian contexts, showcasing the potential of AI in creating culturally relevant content and highlighting the role of government support in funding foundational models.
-
 ## 📈 Trending
 
-- **[Confidence: High]** **OpenAI Reports Chinese Operation Using ChatGPT for Malicious Purposes** (Impact: 4) | [Source](https://www.pcgamer.com/software/ai/openai-says-it-busted-a-shadowy-chinese-operation-that-used-chatgpt-to-whip-up-data-centre-hate-and-that-achieved-basically-nothing/)
-  Summary: OpenAI has published a new security report alleging that China-based actors are using ChatGPT to whip up anti-data-centre, anti-tariff, and anti-US sentiment online. This highlights the potential for AI to be used for malicious purposes and the need for robust security measures to prevent such activities.
+- **[Confidence: High]** **AI in Agriculture** (Impact: 4) | [Source](https://www.newsweek.com/agri-techs-climate-revolution-is-securing-our-wellness-future-12062557)
+  Summary: AI applications in precision agriculture are optimizing productivity and sustainability, with tools like Plantix and Prospera detecting plant and pest diseases early. Major indices are adapting their rules to include AI giants like SpaceX, Anthropic, and OpenAI, reflecting the growing influence of AI in the market.
 
-## 📌 Notable
-
-- **[Confidence: Medium]** **AI Token Prices Expected to Plummet** (Impact: 3) | [Source](https://www.businessinsider.com/ai-token-price-crash-nvidia-blackwell-gpus-2026-6)
-  Summary: The price of AI tokens is likely to plummet due to the cost efficiency of new GPU systems like Blackwell. This highlights the potential for significant cost savings in AI model training and deployment.
+- **[Confidence: High]** **AI in Healthcare** (Impact: 4) | [Source](https://www.innervision.co.jp/sp/products/release/20260618)
+  Summary: ai& and GENSHI AI announced a partnership to build a secure medical AI infrastructure in Japan, focusing on AI-driven diagnostics and treatment planning. This collaboration aims to enhance the accuracy and efficiency of medical services while ensuring patient data privacy.
 
 # 💰 Dev Ecosystem Funding & Acquisitions
 
 ## 🔥 Breaking
 
-- **[Confidence: High]** **Korean Startup Weekly News #122: AI Meets Industry** (Impact: 4) | [Source](https://en.wowtale.net/2026/06/13/234244/)
-  Summary: Korea's AI startup ecosystem is maturing beyond consumer applications and into mission-critical enterprise infrastructure. This highlights the growing investment in AI infrastructure and the strategic partnerships between corporate investors and startups.
-
-## 📈 Trending
-
-- **[Confidence: High]** **Top Five News Stories of the Week – 12 June 2026** (Impact: 4) | [Source](https://www.fintechfutures.com/fintech/fintech-futures-top-five-news-stories-of-the-week-12-june-2026)
-  Summary: This week's top fintech news stories include HSBC, Lloyds, and NatWest backing UK's first sovereign AI model, Intesa Sanpaolo launching a $35bn bid for Banca Monte dei Paschi di Siena, Temenos acquiring Additiv to build out its wealth offering, Digital Asset landing $355m in a16z crypto-led funding round, and iAltA consolidating recent wealthtech acquisitions to launch Field. This highlights the growing investment in fintech and the strategic acquisitions and partnerships in the industry.
+- **[Confidence: Medium]** **Mistral AI Funding** (Impact: 5) | [Source](https://techcrunch.com/2026/06/12/mistral-is-rumored-to-be-raising-e3b-at-e20-valuation/)
+  Summary: Mistral AI is rumored to be raising €3B at a €20B valuation, positioning itself as a European alternative to American tech giants. This funding round reflects the growing confidence in Mistral's AI capabilities and its strategic partnerships with European companies and governments.
 
 ## 📌 Notable
 
-- **[Confidence: Medium]** **Future Alpha 2027: The Future of Quant Investing** (Impact: 3) | [Source](https://fintechmagazine.com/events/future-alpha-2027-the-future-of-quant-investing)
-  Summary: Future Alpha is a leading multi-asset investing event for quantitative, systematic, and data-driven investment leaders. This highlights the growing interest in AI and other innovations in the investment industry.
+- **[Confidence: Medium]** **ROMA Green Finance Investment Vertical** (Impact: 3) | [Source](https://www.manilatimes.net/2026/06/13/tmt-newswire/globenewswire/roma-green-finance-establishes-dedicated-artificial-intelligence-and-high-performance-computing-infrastructure-investment-vertical/2364759/amp)
+  Summary: ROMA Green Finance established a dedicated investment vertical for Artificial Intelligence and High-Performance Computing infrastructure, focusing on sustainable, energy-efficient digital infrastructure. This initiative aims to drive innovation in the AI and HPC sectors while promoting environmental sustainability.
+
+- **[Confidence: Medium]** **AI Export Controls** (Impact: 4) | [Source](https://www.washingtonpost.com/wp-intelligence/ai-tech-brief/2026/06/12/ai-tech-brief-wall-street-rewrites-rules-ai-giants/)
+  Summary: The Washington Post reported that Wall Street is redesigning rules to include AI giants like SpaceX, Anthropic, and OpenAI. The tech community reacted strongly to Trump's export controls on Anthropic's new AI models, expressing concerns about future access and regulation.
+
+- **[Confidence: High]** **AI Model Restrictions** (Impact: 4) | [Source](https://www.businessinsider.com/anthropic-freaked-out-ai-industry-mythos-fable-open-source-models-2026-6)
+  Summary: Anthropic changed course after a developer backlash, restricting the use of its most powerful public model for certain AI development work. This move aims to protect the company's business from intelligence extraction and ensure safety.
 
 ---
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 8 |
-| ✅ High Confidence | 6 |
+| Total Items Verified | 7 |
+| ✅ High Confidence | 5 |
 | ⚠️ Medium Confidence | 2 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 2 |
+| 🔍 Cross-Referenced | 1 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | 6/13/2026, 6:36:52 AM UTC |
+| 🕐 Generated At | 6/13/2026, 3:56:29 PM UTC |
