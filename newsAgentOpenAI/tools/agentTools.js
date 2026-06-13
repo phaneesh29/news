@@ -278,6 +278,61 @@ export const searchSecurityAdvisoriesTool = tool({
   },
 });
 
+export const fetchAcademicPapersTool = tool({
+  name: 'fetch_academic_papers',
+  description: 'Fetches recent frontier AI academic papers and preprints from Hugging Face Daily Papers (with optional date YYYY-MM-DD).',
+  parameters: z.object({
+    limit: z.number().optional().default(15).describe('Max number of papers to return'),
+    date: z.string().optional().describe('Optional date to fetch papers for (YYYY-MM-DD)'),
+  }),
+  execute: async ({ limit, date }) => {
+    try {
+      const url = date 
+        ? `https://huggingface.co/api/daily_papers?date=${date}`
+        : 'https://huggingface.co/api/daily_papers';
+      console.log(`[Academic Papers] Fetching curated Hugging Face Daily Papers (date: ${date || 'latest'})...`);
+      let response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Hugging Face API returned status ${response.status}`);
+      }
+
+      let data = await response.json();
+      
+      // If date was specified but no papers were found, fallback to the latest papers
+      if (date && (!data || data.length === 0)) {
+        console.log(`[Academic Papers] No papers found for date ${date}. Falling back to the latest curated papers...`);
+        const fallbackResponse = await fetch('https://huggingface.co/api/daily_papers');
+        if (fallbackResponse.ok) {
+          data = await fallbackResponse.json();
+        }
+      }
+
+      if (!data || data.length === 0) return 'No academic papers found.';
+
+      const papers = data.slice(0, limit).map(item => {
+        const paperId = item.paper?.id || '';
+        return {
+          title: item.title,
+          summary: item.paper?.summary || item.summary || 'No summary available.',
+          upvotes: item.paper?.upvotes || 0,
+          url: paperId ? `https://huggingface.co/papers/${paperId}` : '',
+          pdfUrl: paperId ? `https://arxiv.org/pdf/${paperId}.pdf` : '',
+          publishedAt: item.publishedAt || item.paper?.publishedAt || '',
+          submittedOnDailyAt: item.paper?.submittedOnDailyAt || '',
+          authors: item.paper?.authors?.map(a => a.name) || [],
+          source: 'Hugging Face Daily Papers / arXiv'
+        };
+      });
+
+      return JSON.stringify(papers, null, 2);
+    } catch (error) {
+      console.error('[Academic Papers] Failed to fetch academic papers:', error.message);
+      return `Error: Failed to retrieve academic papers. ${error.message}`;
+    }
+  },
+});
+
 export const writeFileTool = tool({
   name: 'write_news_bulletin',
   description: 'Saves the final formatted markdown news bulletin to news.md.',

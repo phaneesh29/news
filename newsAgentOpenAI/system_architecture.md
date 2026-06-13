@@ -21,7 +21,7 @@ D:/news/newsAgentOpenAI/
 ├── agents/
 │   ├── managerAgent.js   # NewsManagerAgent (Parent Orchestrator)
 │   ├── searchAgent.js    # SearchAgent (General Web/News search)
-│   ├── enrichAgent.js    # EnrichAgent (GitHub releases, trending, HN, Reddit, exploits)
+│   ├── enrichAgent.js    # EnrichAgent (GitHub releases, trending, HN, Reddit, exploits, academic papers)
 │   ├── synthesisAgent.js # SynthesisAgent (Deduplication, Scoring, Clustering)
 │   └── editorAgent.js    # EditorAgent (nws.md writing)
 ├── tools/
@@ -55,6 +55,7 @@ graph TD
     EnrichAgent --> HN[Hacker News Algolia: Stories >150 points]
     EnrichAgent --> Reddit[Exa/Tavily search of target subreddits]
     EnrichAgent --> CVE[Exa/Tavily search of NVD & GitHub Advisories]
+    EnrichAgent --> HF_Papers[Hugging Face Daily Papers API: Academic Papers & Preprints]
     
     %% Step 3: Synthesis
     Manager -->|Combine Raw Data| SynthesisAgent[SynthesisAgent]

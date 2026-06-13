@@ -26,6 +26,7 @@ graph TD
     EnrichAgent --> HN[Hacker News Algolia: Stories >150 points]
     EnrichAgent --> Reddit[Exa/Tavily search of target subreddits]
     EnrichAgent --> CVE[Exa/Tavily search of NVD & GitHub Advisories]
+    EnrichAgent --> HF_Papers[Hugging Face Daily Papers API: Academic Papers & Preprints]
     
     %% Step 3: Synthesis
     Manager -->|Combine Raw Data| SynthesisAgent[SynthesisAgent]
@@ -41,7 +42,7 @@ graph TD
 ### 1. Centralized Subagent Orchestration
 *   **NewsManagerAgent**: Parent agent that calls specialized subagents in a strict sequence.
 *   **SearchAgent**: Retrieves general AI and dev company blog news.
-*   **EnrichAgent**: Gathers GitHub releases, trending repositories, Hacker News stories with >150 points (using a public JSON endpoint), Reddit signals (r/LocalLLaMA, r/MachineLearning, etc.), and package compromises/CVEs.
+*   **EnrichAgent**: Gathers GitHub releases, trending repositories, Hacker News stories with >150 points (using a public JSON endpoint), Reddit signals (r/LocalLLaMA, r/MachineLearning, etc.), package compromises/CVEs, and Hugging Face Daily Papers/arXiv preprints.
 *   **SynthesisAgent**: Deduplicates news and runs the **Scoring & Ranking Layer**.
 *   **EditorAgent**: Formats details and writes the final markdown file.
 
@@ -67,7 +68,7 @@ D:/news/newsAgentOpenAI/
 ├── agents/
 │   ├── managerAgent.js   # NewsManagerAgent (Parent Orchestrator)
 │   ├── searchAgent.js    # SearchAgent subagent (General Web/News search)
-│   ├── enrichAgent.js    # EnrichAgent subagent (Releases, HN, Reddit, exploits)
+│   ├── enrichAgent.js    # EnrichAgent subagent (Releases, HN, Reddit, exploits, academic papers)
 │   ├── synthesisAgent.js # SynthesisAgent subagent (Deduplication & Scoring)
 │   └── editorAgent.js    # EditorAgent subagent (nws.md writing)
 ├── tools/
