@@ -13,6 +13,7 @@ export const searchAgent = new Agent({
   name: 'SearchAgent',
   instructions: SEARCH_AGENT_INSTRUCTIONS,
   model: config.llmModel, 
+  modelSettings: config.llmModelSettings,
   tools: [
     searchWebTool,
     searchNewsTool,

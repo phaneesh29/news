@@ -8,6 +8,7 @@ export const editorAgent = new Agent({
   name: 'EditorAgent',
   instructions: EDITOR_AGENT_INSTRUCTIONS,
   model: config.llmModel, 
+  modelSettings: config.llmModelSettings,
   tools: [writeFileTool],
-  handoffDescription: 'Use this agent to take structured news, format them into premium markdown, and write the final nws.md file.',
+  handoffDescription: 'Use this agent to take structured news, format them into premium markdown, and write the final news.md file.',
 });

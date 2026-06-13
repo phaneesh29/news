@@ -8,7 +8,10 @@ export const config = {
   llmProvider: 'ollama',
   llmBaseUrl: 'https://ollama.com/v1',
   llmApiKey: process.env.OLLAMA_API_KEY || '',
-  llmModel: 'nemotron-3-ultra',
+  llmModel: 'gemma4:31b',
+  llmModelSettings: {
+    reasoning: { effort: 'none' }
+  },
 
   outputFile: path.resolve('news.md'),
 };

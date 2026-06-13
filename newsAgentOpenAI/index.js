@@ -1,3 +1,4 @@
+import './utils/disable-tracing.js';
 import { run } from '@openai/agents';
 import './utils/llm.js';
 import { managerAgent } from './agents/managerAgent.js';
@@ -15,11 +16,14 @@ async function main() {
     console.log('🔄 Launching NewsManagerAgent...');
     console.log('   (Orchestrator will invoke subagents as tools to complete the pipeline)\n');
 
-    const prompt = `Run the full developer and AI news briefing pipeline:
-1. Retrieve general dev and AI company news using the SearchAgent tool.
-2. Retrieve GitHub releases, trending repos, HN discussions, Reddit signals, and security alerts using the EnrichAgent tool.
-3. Combine all raw findings and pass them to the SynthesisAgent tool to deduplicate, categorize, and rank them.
-4. Pass the ranked JSON results to the EditorAgent tool to format and write the nws.md file.`;
+    const nowUtc = new Date().toUTCString();
+    const twelveHoursAgoUtc = new Date(Date.now() - 12 * 60 * 60 * 1000).toUTCString();
+    const prompt = `Today's date is strictly ${nowUtc}.
+Run the full developer and AI news briefing pipeline:
+1. Retrieve general dev and AI company news using the SearchAgent tool. Ensure all retrieved news items are strictly published in the last 12 hours (since ${twelveHoursAgoUtc}).
+2. Retrieve GitHub releases, trending repos, HN discussions, Reddit signals, and security alerts using the EnrichAgent tool. Ensure all items are strictly from the last 12 hours.
+3. Combine all raw findings and pass them to the SynthesisAgent tool to deduplicate, categorize, and rank them. Verify and enforce the 12-hour freshness limit for all items.
+4. Pass the ranked JSON results to the EditorAgent tool to format and write the news.md file, using ${nowUtc} as the "Current Date/Time in UTC" and "Last updated" date.`;
 
     const result = await run(managerAgent, prompt);
 

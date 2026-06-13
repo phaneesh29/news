@@ -11,6 +11,7 @@ export const managerAgent = new Agent({
   name: 'NewsManagerAgent',
   instructions: MANAGER_AGENT_INSTRUCTIONS,
   model: config.llmModel, // Centralized model from config.js
+  modelSettings: config.llmModelSettings,
   tools: [
     searchAgent.asTool({
       toolName: 'invoke_SearchAgent',

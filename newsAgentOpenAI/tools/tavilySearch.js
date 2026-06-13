@@ -7,28 +7,37 @@ export async function tavilySearch(query) {
     return [];
   }
 
-  console.log(`[Tavily Search] Querying with includeAnswer enabled: "${query}"`);
+  console.log(`[Tavily Search] Querying (12h Freshness Filter): "${query}"`);
   try {
     const tvly = tavily({ apiKey: config.tavilyApiKey });
     const response = await tvly.search(query, {
       searchDepth: 'advanced',
-      maxResults: 5,
+      maxResults: 8,
       includeAnswer: true,
     });
 
     if (!response || !response.results) return [];
 
-    const results = response.results.map((result) => {
-      return {
-        title: result.title || 'Untitled',
-        url: result.url,
-        date: result.publishedDate || result.published_date || new Date().toISOString(),
-        snippet: result.content || '',
-        source: 'Tavily',
-      };
-    });
+    const twelveHoursAgoMs = Date.now() - 12 * 60 * 60 * 1000;
+    
+    const results = response.results
+      .filter((result) => {
+        const dateStr = result.publishedDate || result.published_date;
+        if (!dateStr) return true;
+        const pubTime = new Date(dateStr).getTime();
+        return pubTime >= twelveHoursAgoMs;
+      })
+      .map((result) => {
+        return {
+          title: result.title || 'Untitled',
+          url: result.url,
+          date: result.publishedDate || result.published_date || new Date().toISOString(),
+          snippet: result.content || '',
+          source: 'Tavily',
+        };
+      });
 
-    if (response.answer) {
+    if (response.answer && results.length > 0) {
       results.unshift({
         title: 'Tavily Global Search Synthesis Answer',
         url: 'https://tavily.com',

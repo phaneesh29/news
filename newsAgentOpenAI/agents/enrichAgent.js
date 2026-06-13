@@ -15,6 +15,7 @@ export const enrichAgent = new Agent({
   name: 'EnrichAgent',
   instructions: ENRICH_AGENT_INSTRUCTIONS,
   model: config.llmModel,
+  modelSettings: config.llmModelSettings,
   tools: [
     fetchHackerNewsTool,
     fetchGitHubTrendingTool,

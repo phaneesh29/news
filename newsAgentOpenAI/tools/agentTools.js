@@ -7,7 +7,6 @@ import { tavilySearch } from './tavilySearch.js';
 import { writeNewsFile } from './fileWriter.js';
 import { config } from '../config/config.js';
 
-// 1. Unified Search Tool (Exa Search / Tavily Fallback)
 export const searchWebTool = tool({
   name: 'search_web',
   description: 'Search the web for general tech and AI news updates. Returns AI-generated summaries and raw results.',
@@ -24,7 +23,6 @@ export const searchWebTool = tool({
   },
 });
 
-// 2. News Search Tool (Filter for recent news/articles)
 export const searchNewsTool = tool({
   name: 'search_news',
   description: 'Searches specifically for recent news stories, blog posts, and articles on a topic.',
@@ -42,7 +40,6 @@ export const searchNewsTool = tool({
   },
 });
 
-// 3. GitHub Release Tracking Tool (Search releases, then extract content)
 export const searchGitHubReleasesTool = tool({
   name: 'search_github_releases',
   description: 'Finds and extracts release logs or changelogs for a specific repository. Repo must be "owner/repo" (e.g. "facebook/react").',
@@ -51,15 +48,18 @@ export const searchGitHubReleasesTool = tool({
   }),
   execute: async ({ repo }) => {
     const query = `site:github.com/${repo}/releases latest release changelog`;
-    console.log(`[GitHub Releases Tool] Searching for releases of ${repo}...`);
+    console.log(`[GitHub Releases Tool] Searching for releases of ${repo} (last 12h)...`);
     
     let searchResults = [];
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    
     if (config.exaApiKey) {
       try {
         const exa = new Exa(config.exaApiKey);
         const searchRes = await exa.searchAndContents(query, {
           type: 'keyword',
           numResults: 2,
+          startPublishedDate: twelveHoursAgo.toISOString(), // 12h freshness filter
           contents: { summary: true, text: true }
         });
         searchResults = searchRes.results || [];
@@ -72,14 +72,21 @@ export const searchGitHubReleasesTool = tool({
       try {
         const tvly = tavily({ apiKey: config.tavilyApiKey });
         const searchRes = await tvly.search(query, { maxResults: 2 });
-        searchResults = searchRes.results || [];
+        
+        // Programmatic 12h filter for Tavily results
+        const twelveHoursAgoMs = twelveHoursAgo.getTime();
+        searchResults = (searchRes.results || []).filter((result) => {
+          const dateStr = result.publishedDate || result.published_date;
+          if (!dateStr) return true;
+          return new Date(dateStr).getTime() >= twelveHoursAgoMs;
+        });
       } catch (e) {
         console.warn('[GitHub Releases Tool] Tavily search failed:', e.message);
       }
     }
 
     if (searchResults.length === 0) {
-      return `No release information found for ${repo} on GitHub.`;
+      return `No release announcements found in the last 12 hours for ${repo} on GitHub.`;
     }
 
     const formatted = searchResults.map(res => ({
@@ -93,7 +100,6 @@ export const searchGitHubReleasesTool = tool({
   },
 });
 
-// 4. SDK Web Content Extractor (Exa getContents with Tavily extract fallback)
 export const extractPageContentTool = tool({
   name: 'extract_page_content',
   description: 'Scrapes and extracts clean, LLM-ready text content and AI summaries from a specific URL.',
@@ -148,19 +154,18 @@ export const extractPageContentTool = tool({
   },
 });
 
-// 5. GitHub Trending Repositories Tool
 export const fetchGitHubTrendingTool = tool({
   name: 'fetch_github_trending',
-  description: 'Fetches the top trending repositories created in the past 7 days using GitHub Search API.',
+  description: 'Fetches the top trending repositories created in the past 24 hours using GitHub Search API.',
   parameters: z.object({
     limit: z.number().optional().default(10).describe('Max number of repositories to return'),
   }),
   execute: async ({ limit }) => {
     try {
-      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      const url = `https://api.github.com/search/repositories?q=created:>${oneWeekAgo}&sort=stars&order=desc&per_page=${limit}`;
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString().split('.')[0] + 'Z';
+      const url = `https://api.github.com/search/repositories?q=created:>${twelveHoursAgo}&sort=stars&order=desc&per_page=${limit}`;
       
-      console.log(`[GitHub Trending] Fetching repositories created since ${oneWeekAgo}...`);
+      console.log(`[GitHub Trending] Fetching repositories created since: ${twelveHoursAgo}...`);
       const response = await fetch(url, {
         headers: {
           'User-Agent': 'Multi-Agent-News-Briefing-System',
@@ -191,20 +196,18 @@ export const fetchGitHubTrendingTool = tool({
   },
 });
 
-// 6. Hacker News Points Filter Tool
 export const fetchHackerNewsTool = tool({
   name: 'fetch_hacker_news',
-  description: 'Fetches stories from the front page or stories that have hit >150 points on Hacker News in the past 48 hours.',
+  description: 'Fetches stories that have hit >150 points on Hacker News in the past 12 hours.',
   parameters: z.object({
     minPoints: z.number().optional().default(150).describe('Minimum HN points threshold'),
   }),
   execute: async ({ minPoints }) => {
     try {
-      // Fetch HN items from past 48 hours using the Algolia Search API
-      const past48h = Math.floor((Date.now() - 48 * 60 * 60 * 1000) / 1000);
-      const url = `https://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>${past48h},points>=${minPoints}&hitsPerPage=20`;
+      const past12h = Math.floor((Date.now() - 12 * 60 * 60 * 1000) / 1000);
+      const url = `https://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>${past12h},points>=${minPoints}&hitsPerPage=20`;
       
-      console.log(`[Hacker News] Fetching stories with >=${minPoints} points from past 48h...`);
+      console.log(`[Hacker News] Fetching stories with >=${minPoints} points from past 12h...`);
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -212,7 +215,7 @@ export const fetchHackerNewsTool = tool({
       }
 
       const data = await response.json();
-      if (!data.hits) return 'No high-scoring Hacker News stories found.';
+      if (!data.hits) return 'No high-scoring Hacker News stories found in the past 12 hours.';
 
       const stories = data.hits.map(hit => ({
         title: hit.title,
@@ -232,18 +235,16 @@ export const fetchHackerNewsTool = tool({
   },
 });
 
-// 7. Reddit Signals search tool
 export const searchRedditSignalsTool = tool({
   name: 'search_reddit_signals',
-  description: 'Searches developer subreddits (r/LocalLLaMA, r/MachineLearning, r/programming, r/webdev, r/selfhosted) for hot discussions and rising AI stories.',
+  description: 'Searches developer subreddits (r/LocalLLaMA, r/MachineLearning, r/programming, r/webdev, r/selfhosted) for hot discussions in the last 12 hours.',
   parameters: z.object({
     subreddit: z.enum(['LocalLLaMA', 'MachineLearning', 'artificial', 'programming', 'webdev', 'selfhosted']).describe('The subreddit to monitor'),
     query: z.string().optional().default('launch OR release OR new model').describe('Target query within subreddit'),
   }),
   execute: async ({ subreddit, query }) => {
-    // Construct a targeted search query for the specific subreddit
     const searchQuery = `site:reddit.com/r/${subreddit} ${query}`;
-    console.log(`[Reddit Signals] Searching r/${subreddit} for: "${query}"...`);
+    console.log(`[Reddit Signals] Searching r/${subreddit} (12h limit) for: "${query}"...`);
     
     let results = await exaSearch(searchQuery);
     if (!results || results.length === 0) {
@@ -253,10 +254,9 @@ export const searchRedditSignalsTool = tool({
   },
 });
 
-// 8. Security Advisories search tool
 export const searchSecurityAdvisoriesTool = tool({
   name: 'search_security_advisories',
-  description: 'Searches GitHub Advisories, NVD, and CVE databases for recent PyPI/npm compromises, malware, or critical vulnerabilities.',
+  description: 'Searches GitHub Advisories, NVD, and CVE databases for package compromises or critical vulnerabilities in the last 12 hours.',
   parameters: z.object({
     ecosystem: z.enum(['npm', 'pypi', 'general']).optional().default('general').describe('Filter by package ecosystem'),
   }),
@@ -268,7 +268,7 @@ export const searchSecurityAdvisoriesTool = tool({
       query = 'site:github.com/advisories "pypi" malware compromise exploit 2026';
     }
     
-    console.log(`[Security Advisories] Searching for security alerts in ecosystem: ${ecosystem}...`);
+    console.log(`[Security Advisories] Searching for security alerts (12h limit) in ecosystem: ${ecosystem}...`);
     let results = await exaSearch(query);
     if (!results || results.length === 0) {
       results = await tavilySearch(query);
@@ -277,10 +277,9 @@ export const searchSecurityAdvisoriesTool = tool({
   },
 });
 
-// 9. Write File Tool
 export const writeFileTool = tool({
   name: 'write_news_bulletin',
-  description: 'Saves the final formatted markdown news bulletin to nws.md.',
+  description: 'Saves the final formatted markdown news bulletin to news.md.',
   parameters: z.object({
     content: z.string().describe('The complete markdown news bulletin content to write to the file'),
   }),

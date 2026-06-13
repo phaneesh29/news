@@ -1,8 +1,9 @@
+import './disable-tracing.js';
 import OpenAI from 'openai';
-import { setDefaultModelProvider, OpenAIProvider } from '@openai/agents';
+import { setDefaultModelProvider, OpenAIProvider, setTracingDisabled } from '@openai/agents';
 import { config } from '../config/config.js';
 
-process.env.OPENAI_TRACING_DISABLED = 'true';
+setTracingDisabled(true);
 
 const client = new OpenAI({
   apiKey: config.llmApiKey || 'ollama',

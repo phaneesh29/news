@@ -8,12 +8,15 @@ export async function exaSearch(query) {
     return [];
   }
 
-  console.log(`[Exa Search] Querying with AI Summary enabled: "${query}"`);
+  const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+  console.log(`[Exa Search] Querying (12h Freshness Filter): "${query}"`);
+  
   try {
     const exa = new Exa(config.exaApiKey);
     const response = await exa.searchAndContents(query, {
-      type: 'deep',
-      numResults: 5,
+      type: 'auto',
+      numResults: 8,
+      startPublishedDate: twelveHoursAgo.toISOString(),
       contents: {
         text: true,
         summary: true,
@@ -22,17 +25,24 @@ export async function exaSearch(query) {
 
     if (!response || !response.results) return [];
 
-    return response.results.map((result) => {
-      const snippet = result.summary || (result.text ? result.text.substring(0, 300) + '...' : '');
+    const twelveHoursAgoMs = twelveHoursAgo.getTime();
+    return response.results
+      .filter((result) => {
+        if (!result.publishedDate) return true;
+        const pubTime = new Date(result.publishedDate).getTime();
+        return pubTime >= twelveHoursAgoMs;
+      })
+      .map((result) => {
+        const snippet = result.summary || (result.text ? result.text.substring(0, 300) + '...' : '');
 
-      return {
-        title: result.title || 'Untitled',
-        url: result.url,
-        date: result.publishedDate || new Date().toISOString(),
-        snippet: snippet,
-        source: 'Exa',
-      };
-    });
+        return {
+          title: result.title || 'Untitled',
+          url: result.url,
+          date: result.publishedDate || new Date().toISOString(),
+          snippet: snippet,
+          source: 'Exa',
+        };
+      });
   } catch (error) {
     console.error(`[Exa Search] Failed for query "${query}":`, error.message);
     return [];
