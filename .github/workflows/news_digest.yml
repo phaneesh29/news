@@ -7,7 +7,7 @@ on:
 
 defaults:
   run:
-    working-directory: newsFetch
+    working-directory: newsAgent
 
 jobs:
   run-pipeline:
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: newsFetch/package-lock.json
+          cache-dependency-path: newsAgent/package-lock.json
 
       - name: Install Dependencies
         run: npm ci
@@ -33,16 +33,16 @@ jobs:
       - name: Run News Pipeline
         env:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: node index.js
 
-      - name: Commit and Push Updated news.md and memory.md
+      - name: Commit and Push Updated news.md
         working-directory: .
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add newsFetch/news.md newsFetch/memory.md
+          git add newsAgent/news.md
           # Only commit if changes exist
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update news digest and memory [skip ci]" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update news digest [skip ci]" && git push)
