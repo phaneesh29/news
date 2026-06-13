@@ -10,33 +10,39 @@ It is designed for personal use, hardcoded to connect to **Ollama Cloud** (`http
 
 The project utilizes the **Agents as Tools (Subagents)** pattern where a parent `NewsManagerAgent` orchestrates specialized subagents exposed as tools.
 
-```mermaid
-graph TD
-    User([User Request]) -->|npm start| Manager[NewsManagerAgent]
-    
-    %% Step 1: Search
-    Manager -->|Call Tool| SearchAgent[SearchAgent]
-    SearchAgent --> Exa[Exa Search API (with AI summary)]
-    SearchAgent -.-->|Fallback| Tavily[Tavily Search API (with global answer)]
-    
-    %% Step 2: Enrich
-    Manager -->|Call Tool| EnrichAgent[EnrichAgent]
-    EnrichAgent --> ExaContent[Exa Search & Contents: GitHub Releases]
-    EnrichAgent --> GH_Trending[GitHub Search API: Trending Repos]
-    EnrichAgent --> HN[Hacker News Algolia: Stories >150 points]
-    EnrichAgent --> Reddit[Exa/Tavily search of target subreddits]
-    EnrichAgent --> CVE[Exa/Tavily search of NVD & GitHub Advisories]
-    EnrichAgent --> HF_Papers[Hugging Face Daily Papers API: Academic Papers & Preprints]
-    
-    %% Step 3: Synthesis
-    Manager -->|Combine Raw Data| SynthesisAgent[SynthesisAgent]
-    SynthesisAgent --> Dedupe[Deduplication & Clustering]
-    SynthesisAgent --> Score[Scoring Rank Layer]
-    
-    %% Step 4: Formatting
-    Manager -->|Structured JSON| EditorAgent[EditorAgent]
-    EditorAgent -->|write_news_bulletin| Format[news.md Output File]
-    EditorAgent -->|Confirmation| Manager
+```text
+┌──────────────────┐
+│   User Request   │
+└────────┬─────────┘
+         │ (npm start)
+         ▼
+┌──────────────────┐
+│ NewsManagerAgent │
+└────────┬─────────┘
+         │
+         ├─► Step 1: Search
+         │   └─► [SearchAgent]
+         │       ├─► Exa Search API (with AI summary)
+         │       └─► Tavily Search API (Fallback)
+         │
+         ├─► Step 2: Enrich
+         │   └─► [EnrichAgent]
+         │       ├─► Exa: GitHub Releases
+         │       ├─► GitHub API: Trending Repos
+         │       ├─► Hacker News: Stories >150 points
+         │       ├─► Exa/Tavily: Target Subreddits
+         │       ├─► Exa/Tavily: Security Advisories
+         │       └─► HF Daily Papers API
+         │
+         ├─► Step 3: Synthesis
+         │   └─► [SynthesisAgent]
+         │       ├─► Deduplication & Clustering
+         │       └─► Scoring Rank Layer
+         │
+         └─► Step 4: Formatting
+             └─► [EditorAgent]
+                 ├─► Write news.md Output File
+                 └─► Confirmation to Manager
 ```
 
 ### 1. Centralized Subagent Orchestration
