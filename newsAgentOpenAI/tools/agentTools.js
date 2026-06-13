@@ -6,6 +6,7 @@ import { exaSearch } from './exaSearch.js';
 import { tavilySearch } from './tavilySearch.js';
 import { writeNewsFile } from './fileWriter.js';
 import { config } from '../config/config.js';
+import { sendEmail } from '../utils/emailHelper.js';
 
 export const searchWebTool = tool({
   name: 'search_web',
@@ -285,8 +286,15 @@ export const writeFileTool = tool({
   }),
   execute: async ({ content }) => {
     const success = await writeNewsFile(config.outputFile, content);
-    return success 
-      ? `Successfully saved news bulletin to ${config.outputFile}`
-      : `Error: Failed to write news bulletin to ${config.outputFile}`;
+    if (success) {
+      console.log('[Agent Tool] News bulletin written successfully. Sending email digest...');
+      const emailResult = await sendEmail(content);
+      if (emailResult.success) {
+        return `Successfully saved news bulletin to ${config.outputFile} and sent email digest successfully to whitelisted recipients.`;
+      } else {
+        return `Successfully saved news bulletin to ${config.outputFile}, but email sending failed: ${emailResult.error}`;
+      }
+    }
+    return `Error: Failed to write news bulletin to ${config.outputFile}`;
   },
 });

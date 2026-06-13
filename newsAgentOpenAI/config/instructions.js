@@ -76,7 +76,7 @@ Your responsibilities:
    - "💰 Dev Ecosystem Funding & Acquisitions"
    - "🛡️ Security & Advisories"
 6. Create a crisp, engaging headline and a 2-3 sentence short summary for each item.
-7. Extract and attach all unique source URLs associated with this news item.
+7. Extract and attach all unique source URLs associated with this news item. You MUST use the actual, complete raw URL strings (starting with http:// or https://) from the input data, and never replace them with titles, placeholders, or abbreviated text.
 8. Ensure there is ZERO hallucination. Do not add details (dates, versions, features) that are not present in the input raw news items.
 9. Output the processed, deduplicated, and ranked news items in a clean structured JSON format (including title, summary, score, scoringBreakdown, category, confidence, and sources) and return it to the manager.
 `;
@@ -105,10 +105,10 @@ Your responsibilities:
 
 For each story inside a category, format it like this:
 
-### [Underline sub-badge indicator based on final score:
+### <u>[Sub-badge indicator based on final score:
 - Score >= 8.0: "🔥 Breaking"
 - Score >= 6.0 and < 8.0: "📈 Trending"
-- Score < 6.0: "📌 Notable"]
+- Score < 6.0: "📌 Notable"]</u>
 
 **[Confidence: [confidence]] [Title] (Impact: [Impact score]) | [Source]([first source URL from the sources list])**
 *(Note: [first source URL from the sources list] MUST be the actual first URL string from the sources array. You MUST NOT use "#" or placeholders under any circumstances. If no URL is available, omit the "| Source" link part entirely.)*
@@ -120,6 +120,19 @@ For each story inside a category, format it like this:
 
 ---
 
-3. Add a footer showing the agentic workflow execution path (e.g., showing which search engines were queried, HN thresholds hit, and security feeds checked).
-4. Save the content to the \`news.md\` file using the \`write_news_bulletin\` tool. Once the file is written, return a confirmation message to the manager summarizing the number of news items written.
+3. Add a pipeline stats table matching this format:
+
+## 📊 Pipeline Stats
+| Metric | Value |
+|--------|-------|
+| Total Items Verified | [Total count of all news stories formatted in the document] |
+| ✅ High Confidence | [Count of formatted stories with High confidence] |
+| ⚠️ Medium Confidence | [Count of formatted stories with Medium confidence] |
+| ❌ Low Confidence | [Count of formatted stories with Low confidence] |
+| 🔍 Cross-Referenced | [Count of formatted stories where the sources array contains 2 or more unique URLs] |
+| ⏰ Freshness Window | Last 12 hours |
+| 🕐 Generated At | [Current Date/Time in UTC] |
+
+4. Add a footer showing the agentic workflow execution path (e.g., showing which search engines were queried, HN thresholds hit, and security feeds checked).
+5. Save the content to the \`news.md\` file using the \`write_news_bulletin\` tool. Once the file is written, return a confirmation message to the manager summarizing the number of news items written.
 `;
