@@ -1,149 +1,68 @@
 import 'dotenv/config';
 import { Resend } from 'resend';
+import { marked } from 'marked';
 import { whitelistedEmails } from '../whitelistEmails.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL = 'NewsFetch Digest <ai@tsindia.org>';
 
 function markdownToHtml(md) {
-  // Strip main headers
+  let metaBadge = '';
+  const lastUpdatedMatch = md.match(/✦ Last updated:\s*([^\n]+)/i);
+  if (lastUpdatedMatch) {
+    const timeStr = lastUpdatedMatch[1].trim();
+    metaBadge = `
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div style="background-color:#141516; border:1px solid #23252a; border-radius:9999px; padding:6px 14px; display:inline-block; font-family:Inter,system-ui,sans-serif; font-size:12px; color:#d0d6e0;">
+          <span style="color:#5e6ad2; font-weight:600; margin-right:4px;">✦</span> Last updated: ${timeStr}
+        </div>
+      </div>
+    `;
+  }
+
   md = md.replace(/# ✦ NewsFetch Digest[^\n]*/gi, '');
   md = md.replace(/### Developer-Focused AI News[^\n]*/gi, '');
   md = md.replace(/✦ Last updated:[^\n]*/gi, '');
 
-  md = md.replace(/^(#+ .+)$/gm, '\n\n$1\n\n');
-  md = md.replace(/((?:^\|.+\n?)+)/gm, '\n\n$1\n\n');
-  md = md.replace(/((?:^[*-] .+\n?)+)/gm, '\n\n$1\n\n');
-  md = md.replace(/\n{3,}/g, '\n\n');
+  let html = marked.parse(md);
 
-  const blocks = md.split(/\n\s*\n/);
-  const htmlBlocks = [];
-
-  let metaBadge = '';
-
-  for (let block of blocks) {
-    block = block.trim();
-    if (!block) continue;
-
-    if (block.includes('Last updated:')) {
-      const timeStr = block.replace('✦ Last updated:', '').trim();
-      metaBadge = `
-        <div style="text-align: center; margin-bottom: 28px;">
-          <div style="background-color:#141516; border:1px solid #23252a; border-radius:9999px; padding:6px 14px; display:inline-block; font-family:Inter,system-ui,sans-serif; font-size:12px; color:#d0d6e0;">
-            <span style="color:#5e6ad2; font-weight:600; margin-right:4px;">✦</span> Last updated: ${timeStr}
-          </div>
-        </div>
-      `;
-      continue;
+  html = html.replace(/<h2>([\s\S]+?)<\/h2>/gi, (match, p1) => {
+    const text = p1.trim();
+    if (text.startsWith('📊 Pipeline Stats') || text === '📊 Pipeline Stats') {
+      return `
+        <div style="margin-top: 48px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
+          <h2 style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:600;color:#f7f8f8;margin:0;letter-spacing:-0.3px;display:inline-block;vertical-align:middle;">📊 Pipeline Stats</h2>
+        </div>`;
     }
+    return `<h2 style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:500;color:#f7f8f8;margin:36px 0 16px;border-bottom:1px solid #23252a;padding-bottom:8px;letter-spacing:-0.3px;">${text}</h2>`;
+  });
 
-    if (block.startsWith('#')) {
-      if (block.startsWith('#### ')) {
-        const text = block.replace(/^####\s+/, '');
-        htmlBlocks.push(`<h4 style="font-family:Inter,system-ui,sans-serif;font-size:16px;font-weight:600;color:#f7f8f8;margin:20px 0 8px;letter-spacing:-0.1px;">${text}</h4>`);
-      } else if (block.startsWith('### ')) {
-        const text = block.replace(/^###\s+/, '');
-        const cleanText = text.replace(/<\/?u>/g, '').trim();
 
-        if (cleanText === '⚡ Breaking' || cleanText.startsWith('⚡ Breaking') || cleanText === '🔥 Breaking' || cleanText.startsWith('🔥 Breaking')) {
-          htmlBlocks.push(`
-            <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-              <span style="background-color: #5e6ad2; color: #ffffff; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle;">🔥 Breaking</span>
-            </div>`);
-        } else if (cleanText === '🔥 Trending' || cleanText.startsWith('🔥 Trending') || cleanText === '📈 Trending' || cleanText.startsWith('📈 Trending')) {
-          htmlBlocks.push(`
-            <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-              <span style="background-color: #141516; color: #f7f8f8; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle; border: 1px solid #34343a;">📈 Trending</span>
-            </div>`);
-        } else if (cleanText === '📌 Notable' || cleanText.startsWith('📌 Notable')) {
-          htmlBlocks.push(`
-            <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-              <span style="background-color: #0f1011; color: #8a8f98; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle; border: 1px solid #23252a;">📌 Notable</span>
-            </div>`);
-        } else {
-          htmlBlocks.push(`<h3 style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:500;color:#f7f8f8;margin:28px 0 12px;letter-spacing:-0.2px;">${text}</h3>`);
-        }
-      } else if (block.startsWith('## ')) {
-        const text = block.replace(/^##\s+/, '');
-        if (text === '📊 Pipeline Stats' || text.startsWith('📊 Pipeline Stats')) {
-          htmlBlocks.push(`
-            <div style="margin-top: 48px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-              <h2 style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:600;color:#f7f8f8;margin:0;letter-spacing:-0.3px;display:inline-block;vertical-align:middle;">📊 Pipeline Stats</h2>
-            </div>`);
-        } else {
-          htmlBlocks.push(`<h2 style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:500;color:#f7f8f8;margin:36px 0 16px;border-bottom:1px solid #23252a;padding-bottom:8px;letter-spacing:-0.3px;">${text}</h2>`);
-        }
-      } else if (block.startsWith('# ')) {
-        const text = block.replace(/^#\s+/, '');
-        htmlBlocks.push(`<h1 style="font-family:Inter,system-ui,sans-serif;font-size:26px;font-weight:500;color:#f7f8f8;margin:28px 0 20px;letter-spacing:-0.5px;line-height:1.2;text-align:center;">${text}</h1>`);
-      }
-    }
-    else if (block === '---') {
-      htmlBlocks.push('<hr style="border:none;border-top:1px solid #23252a;margin:28px 0;">');
-    }
-    else if (block.startsWith('|')) {
-      const lines = block.split('\n');
-      let tableHtml = '<table style="width:100%;border-collapse:collapse;margin:24px 0;font-family:Inter,system-ui,sans-serif;font-size:14px;color:#d0d6e0;border:1px solid #23252a;border-radius:8px;overflow:hidden;">';
-      let rowCount = 0;
-      for (const line of lines) {
-        if (!line.trim().startsWith('|')) continue;
-        const content = line.trim().slice(1, -1);
-        const cells = content.split('|').map(c => c.trim());
-        if (cells.every(c => /^[-:]+$/.test(c))) continue;
-        
-        const isHeader = rowCount === 0;
-        const cellTag = isHeader ? 'th' : 'td';
-        const cellStyle = isHeader
-          ? 'padding:12px 14px;background-color:#0f1011;font-weight:600;text-align:left;border-bottom:1px solid #23252a;color:#f7f8f8;'
-          : 'padding:12px 14px;border-bottom:1px solid #23252a;color:#d0d6e0;';
-        const cellHtml = cells.map(c => `<${cellTag} style="${cellStyle}">${c}</${cellTag}>`).join('');
-        tableHtml += `<tr style="${!isHeader ? 'background-color:#010102;' : ''}">${cellHtml}</tr>`;
-        rowCount++;
-      }
-      tableHtml += '</table>';
-      htmlBlocks.push(tableHtml);
-    }
-    else if (block.startsWith('- ') || block.startsWith('* ')) {
-      const lines = block.split('\n');
-      let listHtml = '<ul style="margin:16px 0;padding-left:20px;color:#d0d6e0;">';
-      let currentLi = '';
+  html = html.replace(/<h3>([\s\S]+?)<\/h3>/gi, (match, p1) => {
+    const text = p1.trim();
+    const cleanText = text.replace(/<\/?u>/g, '').trim();
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) continue;
-
-        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-          if (currentLi) {
-            listHtml += `<li style="margin-bottom:12px;padding-left:4px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">${currentLi}</li>`;
-          }
-          currentLi = trimmed.replace(/^[*-]\s+/, '');
-        } else {
-          if (currentLi) {
-            if (trimmed.startsWith('Summary:')) {
-              currentLi += `<br><span style="display:block; margin-top:4px; font-size:13.5px; color:#8a8f98; line-height:1.5;">${trimmed}</span>`;
-            } else {
-              currentLi += ' ' + trimmed;
-            }
-          } else {
-            currentLi = trimmed;
-          }
-        }
-      }
-      if (currentLi) {
-        listHtml += `<li style="margin-bottom:12px;padding-left:4px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">${currentLi}</li>`;
-      }
-      listHtml += '</ul>';
-      htmlBlocks.push(listHtml);
+    if (cleanText === '⚡ Breaking' || cleanText.startsWith('⚡ Breaking') || cleanText === '🔥 Breaking' || cleanText.startsWith('🔥 Breaking')) {
+      return `
+        <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
+          <span style="background-color: #5e6ad2; color: #ffffff; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle;">🔥 Breaking</span>
+        </div>`;
+    } else if (cleanText === '🔥 Trending' || cleanText.startsWith('🔥 Trending') || cleanText === '📈 Trending' || cleanText.startsWith('📈 Trending')) {
+      return `
+        <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
+          <span style="background-color: #141516; color: #f7f8f8; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle; border: 1px solid #34343a;">📈 Trending</span>
+        </div>`;
+    } else if (cleanText === '📌 Notable' || cleanText.startsWith('📌 Notable')) {
+      return `
+        <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
+          <span style="background-color: #0f1011; color: #8a8f98; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle; border: 1px solid #23252a;">📌 Notable</span>
+        </div>`;
     }
-    else {
-      htmlBlocks.push(`<p style="margin:0 0 16px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">${block}</p>`);
-    }
-  }
-
-  let html = htmlBlocks.join('\n');
+    return `<h3 style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:500;color:#f7f8f8;margin:28px 0 12px;letter-spacing:-0.2px;">${text}</h3>`;
+  });
 
   // Format Executive Summary (TL;DR)
-  html = html.replace(/<h2 style="[^"]*">📋 Executive Summary \(TL;DR\)<\/h2>\s*<p style="[^"]*">([\s\S]+?)<\/p>/gi, (match, p1) => {
+  html = html.replace(/<h2[^>]*>📋 Executive Summary \(TL;DR\)<\/h2>\s*<p[^>]*>([\s\S]+?)<\/p>/gi, (match, p1) => {
     return `
       <div style="background-color: #0f1011; border: 1px solid #23252a; border-left: 4px solid #5e6ad2; border-radius: 8px; padding: 20px 24px; margin: 24px 0 32px;">
         <h3 style="margin: 0 0 10px; font-family: Inter, system-ui, sans-serif; font-size: 18px; font-weight: 600; color: #f7f8f8; letter-spacing: -0.3px;">📋 Executive Summary (TL;DR)</h3>
@@ -153,7 +72,7 @@ function markdownToHtml(md) {
   });
 
   // Format Key Industry Trends
-  html = html.replace(/<h2 style="[^"]*">📈 Key Industry Trends<\/h2>\s*<ul style="[^"]*">([\s\S]+?)<\/ul>/gi, (match, p1) => {
+  html = html.replace(/<h2[^>]*>📈 Key Industry Trends<\/h2>\s*<ul>([\s\S]+?)<\/ul>/gi, (match, p1) => {
     return `
       <div style="background-color: #0f1011; border: 1px solid #23252a; border-radius: 8px; padding: 20px 24px; margin: 24px 0 32px;">
         <h3 style="margin: 0 0 12px; font-family: Inter, system-ui, sans-serif; font-size: 18px; font-weight: 600; color: #f7f8f8; letter-spacing: -0.3px;">📈 Key Industry Trends</h3>
@@ -162,22 +81,33 @@ function markdownToHtml(md) {
     `;
   });
 
-  // Strong & Emphasis formatting
-  html = html
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#f7f8f8;font-weight:600;">$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em style="color:#8a8f98;">$1</em>');
+  html = html.replace(/<table>/gi, '<table style="width:100%;border-collapse:collapse;margin:24px 0;font-family:Inter,system-ui,sans-serif;font-size:14px;color:#d0d6e0;border:1px solid #23252a;border-radius:8px;overflow:hidden;">');
+  html = html.replace(/<th>/gi, '<th style="padding:12px 14px;background-color:#0f1011;font-weight:600;text-align:left;border-bottom:1px solid #23252a;color:#f7f8f8;">');
+  html = html.replace(/<td>/gi, '<td style="padding:12px 14px;border-bottom:1px solid #23252a;color:#d0d6e0;">');
+  html = html.replace(/<tr>/gi, '<tr style="background-color:#010102;">');
 
-  // Impact formatting: (Impact: 7.1) or (Impact: 7)
-  html = html.replace(/\(Impact:\s*([0-9.]+)\)/g, (match, p1) => {
-    const score = parseFloat(p1);
-    const bgColor = score >= 7.0 ? '#5e6ad2' : '#141516';
+  html = html.replace(/<p>/gi, '<p style="margin:0 0 16px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">');
+  html = html.replace(/<ul>/gi, '<ul style="margin:16px 0;padding-left:20px;color:#d0d6e0;">');
+  html = html.replace(/<li>/gi, '<li style="margin-bottom:12px;padding-left:4px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">');
+  html = html.replace(/<strong>/gi, '<strong style="color:#f7f8f8;font-weight:600;">');
+  html = html.replace(/<em>/gi, '<em style="color:#8a8f98;">');
+  html = html.replace(/<a href="([^"]+)">/gi, '<a href="$1" style="color:#828fff;text-decoration:none;border-bottom:1px solid rgba(130,143,255,0.3);padding-bottom:1px;font-weight:500;">');
+
+  html = html.replace(/\(Impact:\s*([^)]+)\)/g, (match, p1) => {
+    const val = p1.trim();
+    const score = parseFloat(val);
+    let isHigh = false;
+    if (!isNaN(score)) {
+      isHigh = score >= 7.0;
+    } else {
+      const lower = val.toLowerCase();
+      isHigh = lower === 'high' || lower === 'critical' || lower === 'breaking';
+    }
+    const bgColor = isHigh ? '#5e6ad2' : '#141516';
     const textColor = '#ffffff';
-    const border = score >= 7.0 ? 'none' : '1px solid #23252a';
-    return `<span style="font-size:11px; font-family:Inter,system-ui,sans-serif; background-color:${bgColor}; color:${textColor}; border:${border}; padding:2px 6px; border-radius:4px; font-weight:600; margin-left:6px; vertical-align:middle; display:inline-block; letter-spacing:0.5px;">Impact: ${p1}/10</span>`;
+    const border = isHigh ? 'none' : '1px solid #23252a';
+    return `<span style="font-size:11px; font-family:Inter,system-ui,sans-serif; background-color:${bgColor}; color:${textColor}; border:${border}; padding:2px 6px; border-radius:4px; font-weight:600; margin-left:6px; vertical-align:middle; display:inline-block; letter-spacing:0.5px;">Impact: ${val}</span>`;
   });
-
-  // Links formatting
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#828fff;text-decoration:none;border-bottom:1px solid rgba(130,143,255,0.3);padding-bottom:1px;font-weight:500;">$1</a>');
 
   if (metaBadge) {
     html = metaBadge + html;

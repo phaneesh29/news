@@ -9,9 +9,7 @@ export const config = {
   llmBaseUrl: 'https://ollama.com/v1',
   llmApiKey: process.env.OLLAMA_API_KEY || '',
   llmModel: 'gemma4:31b',
-  llmModelSettings: {
-    reasoning: { effort: 'none' }
-  },
+  llmModelSettings: {},
 
   outputFile: path.resolve('news.md'),
 };
