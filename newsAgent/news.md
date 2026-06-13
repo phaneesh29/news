@@ -1,104 +1,89 @@
 # ✦ NewsFetch Digest
-### Developer-Focused AI News • Sat, 13 Jun 2026 17:45:41 GMT
+### Developer-Focused AI News • 2026-06-13 14:30 UTC
 
-✦ Last updated: Sat, 13 Jun 2026 17:45:41 GMT
+✦ Last updated: 2026-06-13 14:30 UTC
 
 ## 📋 Executive Summary (TL;DR)
-The AI landscape is facing significant volatility as Anthropic disables its flagship Fable and Mythos 5 models globally due to US export controls. Simultaneously, a critical security crisis has hit the Arch Linux community with a massive AUR malware outbreak, alongside a high-severity RCE vulnerability discovered in esbuild.
+A critical day for AI safety and supply chain security, marked by the US government-ordered shutdown of Anthropic's Fable and Mythos 5 models. Simultaneously, severe malware detections in PyTorch Lightning and Guardrails-AI, alongside an RCE vulnerability in LangGraph, highlight an escalating threat landscape for AI developers.
 
 ## 📈 Key Industry Trends
-- **AI Geopolitical Regulation:** National security directives are now directly impacting the global availability of high-end frontier models.
-- **Supply Chain Security Risks:** Persistent vulnerabilities in package managers (AUR) and build tools (esbuild) continue to threaten developer environments.
-- **AI-Augmented Systems Engineering:** The debate over AI-driven core rewrites (Bun) highlights a shift in how low-level systems are being developed.
+- **AI Supply Chain Weaponization:** A surge in targeted attacks on popular ML frameworks and package managers.
+- **Regulatory AI Intervention:** Increasing government oversight and direct enforcement of model availability based on security vulnerabilities.
+- **Agentic Interoperability:** Movement toward "meta-harnesses" to unify fragmented AI agent SDKs.
 
 ## 🛠️ Developer Tools & Platforms
 
-### <u>📈 Trending</u>
-**[Confidence: High] Bun's Controversial Core Rewrite (Impact: 7.8) | [Source](https://dev.to)**
-**Summary:** Reports emerge that Bun's core was rewritten from Zig to Rust in 9 days using an LLM, sparking debate over AI-driven systems programming.
-**Scoring Breakdown:** `Score: 7.8/10` (Impact: 7.8, Community: 8.0, Freshness: 7.5, Authority: 8.0)
+### <u>🔥 Breaking</u>
+**[Confidence: High] npm v12 Security Overhaul: CI/CD Install Scripts Blocked (Impact: 8.5) | [Source](http://www.techtimes.com/articles/318328/20260613/npm-v12-security-overhaul-blocks-install-scripts-default-july-deadline-ci-migration.htm)**
+**Summary:** npm v12 introduces a major security shift, blocking install scripts by default in CI/CD environments to prevent supply chain attacks. Approval now requires `npm approve-scripts`.
+**Scoring Breakdown:** `Score: 8.5/10` (Impact: 8.5, Community: 8.0, Freshness: 9.0, Authority: 9.0)
 **Sources:**
-* [dev.to](https://dev.to)
+* [TechTimes](http://www.techtimes.com/articles/318328/20260613/npm-v12-security-overhaul-blocks-install-scripts-default-july-deadline-ci-migration.htm)
+
+### <u>📈 Trending</u>
+**[Confidence: High] Bun's AI-Driven Rust Rewrite (Impact: 7.5) | [Source](https://dev.to/adioof/bun-rewrote-itself-from-zig-to-rust-in-9-days-with-an-llm-thats-terrifying-1n1f)**
+**Summary:** Reports emerge of Bun rewriting its runtime from Zig to Rust in just 9 days using LLM assistance, sparking a industry-wide debate on the reliability of AI-generated systems code.
+**Scoring Breakdown:** `Score: 7.5/10` (Impact: 7.0, Community: 8.5, Freshness: 8.0, Authority: 7.0)
+**Sources:**
+* [Dev.to](https://dev.to/adioof/bun-rewrote-itself-from-zig-to-rust-in-9-days-with-an-llm-thats-terrifying-1n1f)
 
 ## 🤖 AI & Machine Learning
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Anthropic Disables Claude Fable 5 & Mythos 5 Globally (Impact: 9.8) | [Source](https://marktechpost.com)**
-**Summary:** Effective June 13, 2026, Anthropic has disabled its newest high-end models following a US government export-control directive to block foreign national access.
-**Scoring Breakdown:** `Score: 9.8/10` (Impact: 10, Community: 9.5, Freshness: 10, Authority: 10)
+**[Confidence: High] Anthropic Disables Claude Fable 5 & Mythos 5 (Impact: 9.2) | [Source](https://www.marktechpost.com/2026/06/13/anthropic-disables-claude-fable-5-and-mythos-5-after-us-government-order/)**
+**Summary:** Anthropic has globally disabled the Fable 5 and Mythos 5 models following a US government export control order triggered by a critical jailbreak vulnerability.
+**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.5, Community: 9.0, Freshness: 9.0, Authority: 9.0)
 **Sources:**
-* [Dawn](https://dawn.com)
-* [MarkTechPost](https://marktechpost.com)
+* [MarkTechPost](https://www.marktechpost.com/2026/06/13/anthropic-disables-claude-fable-5-and-mythos-5-after-us-government-order/)
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Google DeepMind Gemini 3.5 Flash & Omni Deployment (Impact: 9.2) | [Source](https://nbot.ai)**
-**Summary:** Gemini 3.5 Flash is now default in the Gemini app; Gemini Omni introduces multimodal video conversational editing and physics simulation.
-**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.0, Community: 9.0, Freshness: 9.5, Authority: 9.5)
+**[Confidence: High] Databricks Launches Omnigent Meta-Harness (Impact: 8.2) | [Source](https://www.databricks.com/blog/introducing-omnigent-meta-harness-combine-control-and-share-your-agents)**
+**Summary:** Omnigent is a new open-source framework designed to unify fragmented agent SDKs (OpenAI, Claude Code, etc.), allowing developers to compose agents with consistent policy guardrails.
+**Scoring Breakdown:** `Score: 8.2/10` (Impact: 8.0, Community: 7.5, Freshness: 8.5, Authority: 9.0)
 **Sources:**
-* [nbot.ai](https://nbot.ai)
-* [dev.to](https://dev.to)
-
-### <u>🔥 Breaking</u>
-**[Confidence: High] OpenAI GPT-5.5 vs Claude Sonnet 4.6 (Impact: 8.5) | [Source](https://padiso.co)**
-**Summary:** GPT-5.5 demonstrates superior multi-step planning and orchestration capabilities, though it carries a ~44% higher token cost compared to Sonnet 4.6.
-**Scoring Breakdown:** `Score: 8.5/10` (Impact: 8.0, Community: 8.5, Freshness: 8.5, Authority: 8.5)
-**Sources:**
-* [padiso.co](https://padiso.co)
+* [Databricks Blog](https://www.databricks.com/blog/introducing-omnigent-meta-harness-combine-control-and-share-your-agents)
 
 ### <u>📈 Trending</u>
-**[Confidence: Medium] Mac Local Agent Stack: Gemma 4 26B + MTP (Impact: 6.8) | [Source](https://dev.to)**
-**Summary:** The current recommended stack for Apple Silicon users is Gemma 4 26B (Q4_K_XL GGUF) utilizing Multi-Token Prediction (MTP) draft heads via MLX.
-**Scoring Breakdown:** `Score: 6.8/10` (Impact: 6.0, Community: 7.5, Freshness: 7.0, Authority: 6.5)
+**[Confidence: High] Google Releases Gemma 4 QAT Checkpoints (Impact: 7.9) | [Source](https://dev.to/pueding/google-ships-gemma-4-qat-checkpoints-quantization-aware-training-njk)**
+**Summary:** Google has shipped Quantization-Aware Training (QAT) checkpoints for Gemma 4, including 4-bit (Q4_0) and a specialized 2-bit mobile schema to optimize token generation on edge devices.
+**Scoring Breakdown:** `Score: 7.9/10` (Impact: 7.5, Community: 8.0, Freshness: 8.0, Authority: 9.0)
 **Sources:**
-* [dev.to](https://dev.to)
-
-## 💰 Dev Ecosystem Funding & Acquisitions
-
-### <u>📈 Trending</u>
-**[Confidence: High] Supabase Raises $500M Series F (Impact: 7.5) | [Source](https://nbot.ai)**
-**Summary:** Supabase secures funding at a $10.5B valuation to scale 'vibe-coding' infrastructure and developer experience.
-**Scoring Breakdown:** `Score: 7.5/10` (Impact: 7.5, Community: 7.0, Freshness: 8.0, Authority: 8.0)
-**Sources:**
-* [nbot.ai](https://nbot.ai)
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] TensorZero Pivot to Open Core (Impact: 6.5) | [Source](https://news.ycombinator.com)**
-**Summary:** The AI OSS tool repository tensorzero has been archived following a $7.3M Seed round as the company pivots to an Open Core model.
-**Scoring Breakdown:** `Score: 6.5/10` (Impact: 6.0, Community: 7.0, Freshness: 6.0, Authority: 7.0)
-**Sources:**
-* [Hacker News](https://news.ycombinator.com)
+* [Dev.to](https://dev.to/pueding/google-ships-gemma-4-qat-checkpoints-quantization-aware-training-njk)
 
 ## 🛡️ Security & Advisories
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Critical Malware Outbreak in Arch Linux AUR (Impact: 9.0) | [Source](https://news.ycombinator.com)**
-**Summary:** Over 1,500 AUR packages have been affected by a massive malware incident, prompting urgent security warnings for Arch Linux users.
-**Scoring Breakdown:** `Score: 9.0/10` (Impact: 9.5, Community: 9.0, Freshness: 9.0, Authority: 8.5)
+**[Confidence: High] Critical Supply Chain Compromises: PyTorch Lightning & Guardrails-AI (Impact: 8.8)**
+**Summary:** Severe security alerts: PyTorch Lightning v2.6.2/2.6.3 (CVE-2026-44484) and Guardrails-AI v0.10.1 contain credential-harvesting malware. Immediate updates or downgrades are required.
+**Scoring Breakdown:** `Score: 8.8/10` (Impact: 9.5, Community: 8.0, Freshness: 9.0, Authority: 8.5)
 **Sources:**
-* [Hacker News](https://news.ycombinator.com)
-* [Phoronix](https://phoronix.com)
-
-### <u>🔥 Breaking</u>
-**[Confidence: High] esbuild RCE Vulnerability (GHSA-gv7w-rqvm-qjhr) (Impact: 8.2) | [Source](https://github.com/advisories)**
-**Summary:** A critical security flaw in esbuild allows Remote Code Execution via NPM_CONFIG_REGISTRY due to missing binary integrity verification.
-**Scoring Breakdown:** `Score: 8.2/10` (Impact: 9.0, Community: 7.0, Freshness: 8.0, Authority: 9.0)
-**Sources:**
-* [GitHub Security Advisories](https://github.com/advisories)
+* [EnrichAgent Security Feed]
 
 ### <u>📈 Trending</u>
-**[Confidence: Medium] LangGraph Tool-Calling RCE Risk (Impact: 7.2) | [Source](https://dev.to)**
-**Summary:** A vulnerability chain in LangGraph's tool-calling mechanism can allow malicious input context to escalate to full host compromise.
-**Scoring Breakdown:** `Score: 7.2/10` (Impact: 7.5, Community: 6.5, Freshness: 7.0, Authority: 7.0)
+**[Confidence: Medium] LangGraph RCE via Tool-Calling Vulnerability (Impact: 7.2) | [Source](https://dev.to/coridev/langgraph-rce-chain-how-malicious-tool-calls-escalate-to-full-host-compromise-2moo)**
+**Summary:** A vulnerability in the LangGraph tool-calling mechanism has been identified, potentially allowing Remote Code Execution (RCE) when adversarial content is injected into the agent context.
+**Scoring Breakdown:** `Score: 7.2/10` (Impact: 8.0, Community: 6.5, Freshness: 7.0, Authority: 7.0)
 **Sources:**
-* [dev.to](https://dev.to)
+* [Dev.to](https://dev.to/coridev/langgraph-rce-chain-how-malicious-tool-calls-escalate-to-full-host-compromise-2moo)
+
+## 🌐 Web Development
+
+### <u>📌 Notable</u>
+**[Confidence: High] Next.js 14 Performance: 5s to 50ms Query Reduction (Impact: 6.8) | [Source](https://dev.to/akashpattnaik/from-5-seconds-to-50ms-how-i-stopped-nuking-my-database-every-time-i-deleted-an-order-30l0)**
+**Summary:** Case study demonstrating the use of write-time pre-aggregation in Next.js 14 and Supabase to drastically reduce database query latency from 5 seconds to 50ms.
+**Scoring Breakdown:** `Score: 6.8/10` (Impact: 6.0, Community: 7.0, Freshness: 7.0, Authority: 7.0)
+**Sources:**
+* [Dev.to](https://dev.to/akashpattnaik/from-5-seconds-to-50ms-how-i-stopped-nuking-my-database-every-time-i-deleted-an-order-30l0)
+
+---
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 10 |
+| Total Items Verified | 8 |
 | ✅ High Confidence | 7 |
-| ⚠️ Medium Confidence | 3 |
+| ⚠️ Medium Confidence | 1 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 3 |
+| 🔍 Cross-Referenced | 0 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | Sat, 13 Jun 2026 17:45:41 GMT |
+| 🕐 Generated At | 2026-06-13 14:30 UTC |
