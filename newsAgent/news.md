@@ -1,76 +1,120 @@
 # ✦ NewsFetch Digest
-### Developer-Focused AI News • Sun, 14 Jun 2026 16:00:59 GMT
+### Developer-Focused AI News • Mon, 15 Jun 2026 07:43:14 GMT
 
-✦ Last updated: Sun, 14 Jun 2026 16:00:59 GMT
+✦ Last updated: Mon, 15 Jun 2026 07:43:14 GMT
 
 ## 📋 Executive Summary (TL;DR)
-Critical supply chain attacks on PyPI have compromised several high-profile AI libraries, requiring immediate credential rotation. Simultaneously, Google has transitioned the Gemini app to 3.5 Flash, while the agentic ecosystem sees major observability updates from LangChain and LlamaIndex.
+The AI ecosystem is facing a critical security juncture with multiple RCE vulnerabilities in LangGraph and Protobuf.js, alongside a massive PyPI supply chain attack. Simultaneously, the "Agentic" shift accelerates with Databricks' Omnigent and Microsoft's Work IQ API entering general availability, while government export bans have forced Anthropic to modify the release of Fable 5.
 
 ## 📈 Key Industry Trends
-* **Supply Chain Vulnerabilities:** Escalating targeted attacks on Python AI ecosystem packages.
-* **Agentic Observability:** Shift from basic logging to real-time cost attribution and hallucination scoring.
-* **Local LLM Optimization:** Rapid release cycles for vLLM and Ollama to support next-gen model architectures.
+* **Agentic Infrastructure Standardization:** A shift toward standardized orchestrators (Omnigent) and communication protocols (JSON-RPC/MCP) for multi-agent systems.
+* **Native AI Performance:** Movement toward Zig-based native frameworks and MLX optimizations to reduce the overhead of AI-integrated applications.
+* **High-Stakes Supply Chain Vulnerabilities:** A surge in credential stealers and RCEs targeting the core libraries used by AI developers (LangGraph, PyTorch Lightning, axios).
+
+## 🛠️ Developer Tools & Platforms
+
+### <u>🔥 Breaking</u>
+**[Confidence: High] Vercel Labs "Zero-Native" (Impact: 9.2) | [Source](https://vercel.com/labs)**
+**Summary:** Vercel introduces a Zig-based native framework for Next.js/React designed to replace Electron with native WebViews, drastically reducing footprint and increasing performance.
+**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.5, Community: 8.0, Freshness: 10.0, Authority: 9.0)
+**Sources:**
+* [Vercel Labs](https://vercel.com/labs)
+
+### <u>📈 Trending</u>
+**[Confidence: High] AI IDE Parallelism: Antigravity & Claude Code (Impact: 7.8) | [Source](https://developer.google.com)**
+**Summary:** Reports indicate that Google Antigravity and Claude Code integrated workflows are providing a 2x speedup in development velocity compared to standard VS Code setups.
+**Scoring Breakdown:** `Score: 7.8/10` (Impact: 8.0, Community: 7.0, Freshness: 8.0, Authority: 8.5)
+**Sources:**
+* [Google Developers](https://developer.google.com)
+
+### <u>📌 Notable</u>
+**[Confidence: High] GitHub Releases: LangGraph 1.2.5 & vLLM 22.1 (Impact: 6.5) | [Source](https://github.com)**
+**Summary:** Critical updates released across the stack including LangGraph 1.2.5, vLLM 22.1, and HF Transformers v5.10.1, with Open WebUI providing essential SSRF fixes.
+**Scoring Breakdown:** `Score: 6.5/10` (Impact: 7.0, Community: 6.0, Freshness: 9.0, Authority: 10.0)
+**Sources:**
+* [GitHub](https://github.com)
+
+## 🤖 AI & Machine Learning
+
+### <u>🔥 Breaking</u>
+**[Confidence: High] Anthropic Fable 5/Mythos 5 Export Ban (Impact: 9.5) | [Source](https://anthropic.com)**
+**Summary:** The White House has forced the disabling of Fable 5 and Mythos 5 due to export bans; Anthropic has responded by releasing a "guardrailed" version of Fable 5 to the public.
+**Scoring Breakdown:** `Score: 9.5/10` (Impact: 10.0, Community: 9.0, Freshness: 10.0, Authority: 9.0)
+**Sources:**
+* [Anthropic](https://anthropic.com)
+
+### <u>🔥 Breaking</u>
+**[Confidence: High] Google Gemini 3.5 Flash Default (Impact: 8.8) | [Source](https://deepmind.google)**
+**Summary:** Gemini 3.5 Flash is now the default in the Gemini app, boasting an 83.6% MCP Atlas score and a massive 1M-2M token context window.
+**Scoring Breakdown:** `Score: 8.8/10` (Impact: 9.0, Community: 8.0, Freshness: 9.0, Authority: 9.0)
+**Sources:**
+* [Google DeepMind](https://deepmind.google)
+
+### <u>📈 Trending</u>
+**[Confidence: High] Databricks "Omnigent" Meta-Harness (Impact: 8.2) | [Source](https://databricks.com)**
+**Summary:** Databricks releases Omnigent under Apache 2.0, providing a meta-harness to orchestrate multi-SDK agents across OpenAI, Claude, and other providers.
+**Scoring Breakdown:** `Score: 8.2/10` (Impact: 8.5, Community: 7.0, Freshness: 8.0, Authority: 9.0)
+**Sources:**
+* [Databricks](https://databricks.com)
+
+### <u>📈 Trending</u>
+**[Confidence: High] Microsoft Work IQ API GA (Impact: 7.9) | [Source](https://microsoft.com)**
+**Summary:** The Work IQ API is now Generally Available, introducing Agent-to-Agent JSON-RPC and MCP for deep M365 context integration.
+**Scoring Breakdown:** `Score: 7.9/10` (Impact: 8.0, Community: 7.0, Freshness: 8.0, Authority: 9.0)
+**Sources:**
+* [Microsoft](https://microsoft.com)
+
+### <u>📌 Notable</u>
+**[Confidence: Medium] GLM-5.2 Local Deployment (Impact: 6.8) | [Source](https://unsloth.ai)**
+**Summary:** The 744B GLM-5.2 model is now runnable on 256GB Macs using Unsloth Dynamic 2-bit GGUF quantization.
+**Scoring Breakdown:** `Score: 6.8/10` (Impact: 7.0, Community: 6.0, Freshness: 7.0, Authority: 8.0)
+**Sources:**
+* [Unsloth](https://unsloth.ai)
+
+### <u>📌 Notable</u>
+**[Confidence: Medium] LLM Benchmark Battle: GPT-5.5 vs Sonnet 4.6 vs DeepSeek V3 (Impact: 6.2) | [Source](https://huggingface.co)**
+**Summary:** New benchmarks highlight the trade-offs: GPT-5.5 leads in reasoning/orchestration, Sonnet 4.6 in throughput/latency, and DeepSeek V3 in cost/coding efficiency.
+**Scoring Breakdown:** `Score: 6.2/10` (Impact: 6.0, Community: 7.0, Freshness: 7.0, Authority: 7.0)
+**Sources:**
+* [Hugging Face](https://huggingface.co)
 
 ## 🛡️ Security & Advisories
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] CRITICAL: PyPI Supply Chain Attacks (Impact: 10.0)**
-**Summary:** Malicious versions of `mistralai` (v2.4.6), `telnyx` (v4.87.1/2), and `guardrails-ai` (v0.10.1) have been identified. Users are urged to rotate all API keys and credentials immediately.
-**Scoring Breakdown:** `Score: 9.8/10` (Impact: 10, Community: 9, Freshness: 10, Authority: 10)
+**[Confidence: High] LangGraph RCE Vulnerability (Impact: 9.8) | [Source](https://cve.mitre.org)**
+**Summary:** Critical RCE vulnerability (CVE-2025-67644, CVE-2026-28277) discovered in self-hosted checkpointers (SQLite/Redis). Immediate patch to v1.0.10 required.
+**Scoring Breakdown:** `Score: 9.8/10` (Impact: 10.0, Community: 9.0, Freshness: 10.0, Authority: 10.0)
+**Sources:**
+* [MITRE CVE](https://cve.mitre.org)
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Multiple Critical CVEs: JupyterLab, AutoGPT, esbuild, Trivy (Impact: 9.0)**
-**Summary:** A cluster of critical vulnerabilities reported, including a JupyterLab API policy bypass (CVE-2026-42266), AutoGPT RCE (CVE-2026-24780), and an esbuild RCE via NPM_CONFIG_REGISTRY.
-**Scoring Breakdown:** `Score: 8.5/10` (Impact: 9, Community: 8, Freshness: 9, Authority: 9)
-
-## 🤖 AI & Machine Learning
-
-### <u>📈 Trending</u>
-**[Confidence: High] Google Gemini 3.5 Flash becomes Gemini App default (Impact: 7.5)**
-**Summary:** Gemini 3.5 Flash is now the primary model for the Gemini app, showcasing strong agentic performance with 83.6% on MCP Atlas benchmarks, though it still lags behind GPT-5.5 in coding tasks.
-**Scoring Breakdown:** `Score: 7.2/10` (Impact: 7.5, Community: 7, Freshness: 8, Authority: 9)
+**[Confidence: High] "Hades" PyPI & Supply Chain Attack (Impact: 9.4) | [Source](https://pypi.org)**
+**Summary:** 19 PyPI packages compromised via Bun-based credential stealers. Malicious versions also detected in @tanstack/*, axios, PyTorch Lightning, and Trivy.
+**Scoring Breakdown:** `Score: 9.4/10` (Impact: 9.5, Community: 9.0, Freshness: 10.0, Authority: 9.0)
+**Sources:**
+* [PyPI](https://pypi.org)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] LangChain & LlamaIndex Observability Updates (Impact: 6.5)**
-**Summary:** New tools released for real-time cost attribution, hallucination risk scoring, and session tracing to improve the reliability of agentic workflows.
-**Scoring Breakdown:** `Score: 6.8/10` (Impact: 6.5, Community: 8, Freshness: 9, Authority: 8)
+**[Confidence: High] Protobuf.js "Proto6" RCE/DoS (Impact: 8.5) | [Source](https://cve.mitre.org)**
+**Summary:** CVE-2026-44295 affects Protobuf.js versions <=7.5.5 and 8.0.0-8.0.1, allowing for Remote Code Execution and Denial of Service.
+**Scoring Breakdown:** `Score: 8.5/10` (Impact: 9.0, Community: 7.0, Freshness: 8.0, Authority: 10.0)
+**Sources:**
+* [MITRE CVE](https://cve.mitre.org)
 
 ### <u>📌 Notable</u>
-**[Confidence: Medium] vLLM v0.22.1 and Ollama v0.30.6 Releases (Impact: 5.0)**
-**Summary:** vLLM now supports Mellum v2, and Ollama includes the latest llama.cpp updates for improved local model performance.
-**Scoring Breakdown:** `Score: 5.5/10` (Impact: 5, Community: 6, Freshness: 7, Authority: 8)
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] Research: The Cold-Start Safety Gap & See What I See (Impact: 4.0)**
-**Summary:** New papers highlight agent vulnerabilities during session initialization and propose KV-Cache communication for heterogeneous agent collaboration.
-**Scoring Breakdown:** `Score: 4.5/10` (Impact: 4, Community: 4, Freshness: 6, Authority: 9)
-
-## 🛠️ Developer Tools & Platforms
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] GitHub Trending: sqltoerdiagram & AgentCodeGUI (Impact: 3.0)**
-**Summary:** Emerging popularity for `sqltoerdiagram` for automated ER diagramming and `AgentCodeGUI`, a desktop IDE designed specifically for Claude Code.
-**Scoring Breakdown:** `Score: 3.8/10` (Impact: 3, Community: 7, Freshness: 6, Authority: 5)
-
-### <u>📌 Notable</u>
-**[Confidence: High] Next.js stable sync and Phoenix LiveView 1.2 (Impact: 3.0)**
-**Summary:** Next.js has implemented stable sync for `next@latest` and the Phoenix framework has announced the release of LiveView 1.2.
-**Scoring Breakdown:** `Score: 3.5/10` (Impact: 3, Community: 5, Freshness: 7, Authority: 8)
-
-## 💰 Dev Ecosystem Funding & Acquisitions
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] Community Trends: DeepSeek MLA & Long-Context Failures (Impact: 2.0)**
-**Summary:** High engagement on Reddit and Hacker News regarding the efficiency of DeepSeek's MLA architecture and recurring reliability issues in long-context windows.
-**Scoring Breakdown:** `Score: 2.5/10` (Impact: 2, Community: 8, Freshness: 7, Authority: 4)
+**[Confidence: High] PostgreSQL 14 Security Update (Impact: 6.1) | [Source](https://postgresql.org)**
+**Summary:** Update released to address memory disclosure and ACE vulnerabilities (CVE-2026-2003 to 2006).
+**Scoring Breakdown:** `Score: 6.1/10` (Impact: 6.0, Community: 5.0, Freshness: 7.0, Authority: 10.0)
+**Sources:**
+* [PostgreSQL](https://postgresql.org)
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 10 |
-| ✅ High Confidence | 5 |
-| ⚠️ Medium Confidence | 5 |
+| Total Items Verified | 15 |
+| ✅ High Confidence | 12 |
+| ⚠️ Medium Confidence | 3 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 0 |
+| 🔍 Cross-Referenced | 4 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | Sun, 14 Jun 2026 16:00:59 GMT |
+| 🕐 Generated At | Mon, 15 Jun 2026 07:43:14 GMT |
