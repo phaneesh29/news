@@ -1,120 +1,85 @@
 # ✦ NewsFetch Digest
-### Developer-Focused AI News • Mon, 15 Jun 2026 07:43:14 GMT
+### Developer-Focused AI News • Mon, 15 Jun 2026 18:49:29 GMT
 
-✦ Last updated: Mon, 15 Jun 2026 07:43:14 GMT
+✦ Last updated: Mon, 15 Jun 2026 18:49:29 GMT
 
 ## 📋 Executive Summary (TL;DR)
-The AI ecosystem is facing a critical security juncture with multiple RCE vulnerabilities in LangGraph and Protobuf.js, alongside a massive PyPI supply chain attack. Simultaneously, the "Agentic" shift accelerates with Databricks' Omnigent and Microsoft's Work IQ API entering general availability, while government export bans have forced Anthropic to modify the release of Fable 5.
+A critical security alert has been issued for multiple high-profile libraries including @tanstack, AutoGPT, and PyTorch Lightning, requiring immediate updates to prevent credential theft and RCE. Simultaneously, the AI landscape sees significant movement with the brief appearance of Anthropic's Mythos 5 and the release of Iroh 1.0.
 
 ## 📈 Key Industry Trends
-* **Agentic Infrastructure Standardization:** A shift toward standardized orchestrators (Omnigent) and communication protocols (JSON-RPC/MCP) for multi-agent systems.
-* **Native AI Performance:** Movement toward Zig-based native frameworks and MLX optimizations to reduce the overhead of AI-integrated applications.
-* **High-Stakes Supply Chain Vulnerabilities:** A surge in credential stealers and RCEs targeting the core libraries used by AI developers (LangGraph, PyTorch Lightning, axios).
+- **Supply Chain Vulnerability:** A spike in critical vulnerabilities across widely used AI and JS frameworks.
+- **Agentic Infrastructure:** A push toward standardized protocols (MCP) and specialized runtimes (3va, ArrowJS) for agentic UI and execution.
+- **Edge & P2P Networking:** Increased adoption of decentralized data transfer stacks for developer tools.
 
 ## 🛠️ Developer Tools & Platforms
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Vercel Labs "Zero-Native" (Impact: 9.2) | [Source](https://vercel.com/labs)**
-**Summary:** Vercel introduces a Zig-based native framework for Next.js/React designed to replace Electron with native WebViews, drastically reducing footprint and increasing performance.
-**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.5, Community: 8.0, Freshness: 10.0, Authority: 9.0)
+**[Confidence: High] Iroh 1.0 Officially Released (Impact: 8.2) | [Source](https://www.iroh.computer/blog/v1)**
+**Summary:** The peer-to-peer networking stack Iroh has hit 1.0, gaining massive traction for its innovative approach to decentralized data transfer.
+**Scoring Breakdown:** `Score: 8.2/10` (Impact: 8.2, Community: 9.0, Freshness: 8.0, Authority: 8.0)
 **Sources:**
-* [Vercel Labs](https://vercel.com/labs)
+* [Iroh Blog](https://www.iroh.computer/blog/v1)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] AI IDE Parallelism: Antigravity & Claude Code (Impact: 7.8) | [Source](https://developer.google.com)**
-**Summary:** Reports indicate that Google Antigravity and Claude Code integrated workflows are providing a 2x speedup in development velocity compared to standard VS Code setups.
-**Scoring Breakdown:** `Score: 7.8/10` (Impact: 8.0, Community: 7.0, Freshness: 8.0, Authority: 8.5)
+**[Confidence: High] ArrowJS 1.0 & 3va Runtime Launch (Impact: 7.5) | [Source](https://www.infoq.com/news/2026/06/arrowjs-v1-agentic/)**
+**Summary:** ArrowJS 1.0 introduces a <5KB agentic UI framework with WASM sandboxing, while 3va launches as a security-first Rust-based JS/TS runtime that blocks all capabilities by default.
+**Scoring Breakdown:** `Score: 7.5/10` (Impact: 7.5, Community: 7.0, Freshness: 8.0, Authority: 7.0)
 **Sources:**
-* [Google Developers](https://developer.google.com)
+* [InfoQ](https://www.infoq.com/news/2026/06/arrowjs-v1-agentic/)
 
-### <u>📌 Notable</u>
-**[Confidence: High] GitHub Releases: LangGraph 1.2.5 & vLLM 22.1 (Impact: 6.5) | [Source](https://github.com)**
-**Summary:** Critical updates released across the stack including LangGraph 1.2.5, vLLM 22.1, and HF Transformers v5.10.1, with Open WebUI providing essential SSRF fixes.
-**Scoring Breakdown:** `Score: 6.5/10` (Impact: 7.0, Community: 6.0, Freshness: 9.0, Authority: 10.0)
+### <u>📈 Trending</u>
+**[Confidence: High] Next.js 14 RSC Performance Analysis (Impact: 6.8) | [Source](https://dev.to/paradane/react-server-components-in-production-what-we-learned-after-migrating-a-client-dashboard-2e0g)**
+**Summary:** A production case study demonstrates that React Server Components (RSC) significantly improve FCP (2.1s to 0.4s) and TTI (3.2s to 1.1s) in real-world dashboard environments.
+**Scoring Breakdown:** `Score: 6.8/10` (Impact: 6.8, Community: 7.0, Freshness: 6.0, Authority: 7.0)
 **Sources:**
-* [GitHub](https://github.com)
+* [Dev.to](https://dev.to/paradane/react-server-components-in-production-what-we-learned-after-migrating-a-client-dashboard-2e0g)
 
 ## 🤖 AI & Machine Learning
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Anthropic Fable 5/Mythos 5 Export Ban (Impact: 9.5) | [Source](https://anthropic.com)**
-**Summary:** The White House has forced the disabling of Fable 5 and Mythos 5 due to export bans; Anthropic has responded by releasing a "guardrailed" version of Fable 5 to the public.
-**Scoring Breakdown:** `Score: 9.5/10` (Impact: 10.0, Community: 9.0, Freshness: 10.0, Authority: 9.0)
+**[Confidence: High] Anthropic Claude Fable 5 / Mythos 5 Brief Release (Impact: 8.5) | [Source](https://www.explosion.com/193440/anthropics-most-powerful-ai-is-free-to-use-for-now/)**
+**Summary:** Anthropic briefly provided free access to Claude Fable 5 (a safety-restricted version of Mythos 5) before disabling it due to US export-control directives.
+**Scoring Breakdown:** `Score: 8.5/10` (Impact: 9.0, Community: 8.0, Freshness: 9.0, Authority: 8.0)
 **Sources:**
-* [Anthropic](https://anthropic.com)
-
-### <u>🔥 Breaking</u>
-**[Confidence: High] Google Gemini 3.5 Flash Default (Impact: 8.8) | [Source](https://deepmind.google)**
-**Summary:** Gemini 3.5 Flash is now the default in the Gemini app, boasting an 83.6% MCP Atlas score and a massive 1M-2M token context window.
-**Scoring Breakdown:** `Score: 8.8/10` (Impact: 9.0, Community: 8.0, Freshness: 9.0, Authority: 9.0)
-**Sources:**
-* [Google DeepMind](https://deepmind.google)
+* [Explosion](https://www.explosion.com/193440/anthropics-most-powerful-ai-is-free-to-use-for-now/)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] Databricks "Omnigent" Meta-Harness (Impact: 8.2) | [Source](https://databricks.com)**
-**Summary:** Databricks releases Omnigent under Apache 2.0, providing a meta-harness to orchestrate multi-SDK agents across OpenAI, Claude, and other providers.
-**Scoring Breakdown:** `Score: 8.2/10` (Impact: 8.5, Community: 7.0, Freshness: 8.0, Authority: 9.0)
+**[Confidence: High] LangGraph Resilience & MCP Adoption (Impact: 7.9) | [Source](https://dev.to/richard_dillon_b9c238186e/langgraph-fault-tolerance-building-resilient-agents-with-retries-timeouts-and-error-handlers-29pa)**
+**Summary:** New fault tolerance patterns (retries, timeouts) have been introduced to LangGraph, alongside a shift toward the Model Context Protocol (MCP) to decouple tools from orchestrators.
+**Scoring Breakdown:** `Score: 7.9/10` (Impact: 8.0, Community: 7.0, Freshness: 8.0, Authority: 8.0)
 **Sources:**
-* [Databricks](https://databricks.com)
+* [Dev.to](https://dev.to/richard_dillon_b9c238186e/langgraph-fault-tolerance-building-resilient-agents-with-retries-timeouts-and-error-handlers-29pa)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] Microsoft Work IQ API GA (Impact: 7.9) | [Source](https://microsoft.com)**
-**Summary:** The Work IQ API is now Generally Available, introducing Agent-to-Agent JSON-RPC and MCP for deep M365 context integration.
-**Scoring Breakdown:** `Score: 7.9/10` (Impact: 8.0, Community: 7.0, Freshness: 8.0, Authority: 9.0)
+**[Confidence: High] vLLM v0.22.1 and WebWorld GGUFs (Impact: 7.2) | [Source](https://huggingface.co/Dhptl/WebWorld-8B-GGUF)**
+**Summary:** vLLM v0.22.1 adds support for JetBrains Mellum v2, and high-quality GGUF quants for WebWorld-8B/14B are now available for Ollama and llama.cpp.
+**Scoring Breakdown:** `Score: 7.2/10` (Impact: 7.0, Community: 7.0, Freshness: 8.0, Authority: 7.0)
 **Sources:**
-* [Microsoft](https://microsoft.com)
+* [Hugging Face](https://huggingface.co/Dhptl/WebWorld-8B-GGUF)
 
 ### <u>📌 Notable</u>
-**[Confidence: Medium] GLM-5.2 Local Deployment (Impact: 6.8) | [Source](https://unsloth.ai)**
-**Summary:** The 744B GLM-5.2 model is now runnable on 256GB Macs using Unsloth Dynamic 2-bit GGUF quantization.
-**Scoring Breakdown:** `Score: 6.8/10` (Impact: 7.0, Community: 6.0, Freshness: 7.0, Authority: 8.0)
+**[Confidence: High] Agentic Research: OmniDirector & APPO (Impact: 6.5) | [Source](https://huggingface.co/papers)**
+**Summary:** Recent research highlights OmniDirector for multi-shot camera cloning and Agentic Procedural Policy Optimization (APPO) for improved RL credit assignment.
+**Scoring Breakdown:** `Score: 6.5/10` (Impact: 6.0, Community: 6.0, Freshness: 7.0, Authority: 9.0)
 **Sources:**
-* [Unsloth](https://unsloth.ai)
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] LLM Benchmark Battle: GPT-5.5 vs Sonnet 4.6 vs DeepSeek V3 (Impact: 6.2) | [Source](https://huggingface.co)**
-**Summary:** New benchmarks highlight the trade-offs: GPT-5.5 leads in reasoning/orchestration, Sonnet 4.6 in throughput/latency, and DeepSeek V3 in cost/coding efficiency.
-**Scoring Breakdown:** `Score: 6.2/10` (Impact: 6.0, Community: 7.0, Freshness: 7.0, Authority: 7.0)
-**Sources:**
-* [Hugging Face](https://huggingface.co)
+* [Hugging Face Papers](https://huggingface.co/papers)
 
 ## 🛡️ Security & Advisories
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] LangGraph RCE Vulnerability (Impact: 9.8) | [Source](https://cve.mitre.org)**
-**Summary:** Critical RCE vulnerability (CVE-2025-67644, CVE-2026-28277) discovered in self-hosted checkpointers (SQLite/Redis). Immediate patch to v1.0.10 required.
+**[Confidence: High] Critical Supply Chain Alerts: @tanstack, AutoGPT, and PyTorch Lightning (Impact: 9.8) | [Source](https://github.com/advisories)**
+**Summary:** Critical vulnerabilities including CVE-2026-45321 (@tanstack) for credential stealing, CVE-2026-24780 (AutoGPT) for RCE, and CVE-2026-44484 (PyTorch Lightning) for credential harvesting. Update immediately.
 **Scoring Breakdown:** `Score: 9.8/10` (Impact: 10.0, Community: 9.0, Freshness: 10.0, Authority: 10.0)
 **Sources:**
-* [MITRE CVE](https://cve.mitre.org)
-
-### <u>🔥 Breaking</u>
-**[Confidence: High] "Hades" PyPI & Supply Chain Attack (Impact: 9.4) | [Source](https://pypi.org)**
-**Summary:** 19 PyPI packages compromised via Bun-based credential stealers. Malicious versions also detected in @tanstack/*, axios, PyTorch Lightning, and Trivy.
-**Scoring Breakdown:** `Score: 9.4/10` (Impact: 9.5, Community: 9.0, Freshness: 10.0, Authority: 9.0)
-**Sources:**
-* [PyPI](https://pypi.org)
-
-### <u>📈 Trending</u>
-**[Confidence: High] Protobuf.js "Proto6" RCE/DoS (Impact: 8.5) | [Source](https://cve.mitre.org)**
-**Summary:** CVE-2026-44295 affects Protobuf.js versions <=7.5.5 and 8.0.0-8.0.1, allowing for Remote Code Execution and Denial of Service.
-**Scoring Breakdown:** `Score: 8.5/10` (Impact: 9.0, Community: 7.0, Freshness: 8.0, Authority: 10.0)
-**Sources:**
-* [MITRE CVE](https://cve.mitre.org)
-
-### <u>📌 Notable</u>
-**[Confidence: High] PostgreSQL 14 Security Update (Impact: 6.1) | [Source](https://postgresql.org)**
-**Summary:** Update released to address memory disclosure and ACE vulnerabilities (CVE-2026-2003 to 2006).
-**Scoring Breakdown:** `Score: 6.1/10` (Impact: 6.0, Community: 5.0, Freshness: 7.0, Authority: 10.0)
-**Sources:**
-* [PostgreSQL](https://postgresql.org)
+* [GitHub Advisories](https://github.com/advisories)
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 15 |
-| ✅ High Confidence | 12 |
-| ⚠️ Medium Confidence | 3 |
+| Total Items Verified | 8 |
+| ✅ High Confidence | 8 |
+| ⚠️ Medium Confidence | 0 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 4 |
+| 🔍 Cross-Referenced | 0 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | Mon, 15 Jun 2026 07:43:14 GMT |
+| 🕐 Generated At | Mon, 15 Jun 2026 18:49:29 GMT |
