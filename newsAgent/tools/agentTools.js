@@ -338,6 +338,47 @@ export const fetchAcademicPapersTool = tool({
   },
 });
 
+export const fetchOpenRouterModelsTool = tool({
+  name: 'fetch_openrouter_models',
+  description: 'Fetches recently added or updated AI models from OpenRouter API.',
+  parameters: z.object({
+    limit: z.number().optional().default(5).describe('Max number of recent models to return'),
+  }),
+  execute: async ({ limit }) => {
+    try {
+      console.log(`[OpenRouter] Fetching latest models...`);
+      const response = await fetch('https://openrouter.ai/api/v1/models');
+      
+      if (!response.ok) {
+        throw new Error(`OpenRouter API returned status ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.data || data.data.length === 0) return 'No models found on OpenRouter.';
+
+      const sortedModels = data.data
+        .filter(m => m.created)
+        .sort((a, b) => b.created - a.created)
+        .slice(0, limit);
+
+      const models = sortedModels.map(model => ({
+        id: model.id,
+        name: model.name,
+        description: model.description || 'No description.',
+        context_length: model.context_length,
+        pricing: model.pricing,
+        created: new Date(model.created * 1000).toISOString(),
+        source: 'OpenRouter'
+      }));
+
+      return JSON.stringify(models, null, 2);
+    } catch (error) {
+      console.error('[OpenRouter] Failed to fetch models:', error.message);
+      return `Error: Failed to retrieve OpenRouter models. ${error.message}`;
+    }
+  },
+});
+
 export const writeFileTool = tool({
   name: 'write_news_bulletin',
   description: 'Saves the final formatted markdown news bulletin to news.md.',

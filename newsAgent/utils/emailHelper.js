@@ -4,121 +4,78 @@ import { marked } from 'marked';
 import { whitelistedEmails } from '../whitelistEmails.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = 'NewsFetch Digest <ai@tsindia.org>';
+const FROM_EMAIL = 'NewsFetch Dispatch <ai@tsindia.org>';
 
 function markdownToHtml(md) {
-  let metaBadge = '';
-  const lastUpdatedMatch = md.match(/✦ Last updated:\s*([^\n]+)/i);
-  if (lastUpdatedMatch) {
-    const timeStr = lastUpdatedMatch[1].trim();
-    metaBadge = `
-      <div style="text-align: center; margin-bottom: 28px;">
-        <div style="background-color:#141516; border:1px solid #23252a; border-radius:9999px; padding:6px 14px; display:inline-block; font-family:Inter,system-ui,sans-serif; font-size:12px; color:#d0d6e0;">
-          <span style="color:#5e6ad2; font-weight:600; margin-right:4px;">✦</span> Last updated: ${timeStr}
-        </div>
-      </div>
-    `;
-  }
-
   md = md.replace(/# ✦ NewsFetch Digest[^\n]*/gi, '');
   md = md.replace(/### Developer-Focused AI News[^\n]*/gi, '');
   md = md.replace(/✦ Last updated:[^\n]*/gi, '');
 
+  md = md.replace(/[\u{1F300}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}]/gu, '');
+
   let html = marked.parse(md);
+
+  const ink = '#181513';
+  const fontBody = "'Alegreya', serif";
+  const fontHeadline = "'Old Standard TT', serif";
+  const fontSans = "'Arial', sans-serif";
 
   html = html.replace(/<h2>([\s\S]+?)<\/h2>/gi, (match, p1) => {
     const text = p1.trim();
-    if (text.startsWith('📊 Pipeline Stats') || text === '📊 Pipeline Stats') {
-      return `
-        <div style="margin-top: 48px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-          <h2 style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:600;color:#f7f8f8;margin:0;letter-spacing:-0.3px;display:inline-block;vertical-align:middle;">📊 Pipeline Stats</h2>
-        </div>`;
-    }
-    return `<h2 style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:500;color:#f7f8f8;margin:36px 0 16px;border-bottom:1px solid #23252a;padding-bottom:8px;letter-spacing:-0.3px;">${text}</h2>`;
+    return `<div style="font-family:${fontHeadline};font-size:32px;font-weight:700;line-height:1.05;text-transform:uppercase;text-align:center;margin:20px 0 10px 0;border-bottom:1px solid ${ink};padding-bottom:4px;color:${ink};">${text}</div>`;
   });
-
 
   html = html.replace(/<h3>([\s\S]+?)<\/h3>/gi, (match, p1) => {
     const text = p1.trim();
     const cleanText = text.replace(/<\/?u>/g, '').trim();
 
-    if (cleanText === '⚡ Breaking' || cleanText.startsWith('⚡ Breaking') || cleanText === '🔥 Breaking' || cleanText.startsWith('🔥 Breaking')) {
+    if (cleanText.includes('Breaking')) {
       return `
-        <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-          <span style="background-color: #5e6ad2; color: #ffffff; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle;">🔥 Breaking</span>
+        <div style="margin-top: 20px; margin-bottom: 6px; border-bottom: 1px dashed ${ink}; padding-bottom: 2px;">
+          <span style="font-family:${fontSans}; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #781a1a; display: block; margin-bottom: 2px;">NOTICE: BREAKING</span>
+          <span style="font-family:${fontHeadline}; font-size: 20px; font-weight: 700; text-transform: uppercase; color: ${ink};">${text}</span>
         </div>`;
-    } else if (cleanText === '🔥 Trending' || cleanText.startsWith('🔥 Trending') || cleanText === '📈 Trending' || cleanText.startsWith('📈 Trending')) {
+    } else if (cleanText.includes('Trending') || cleanText.includes('Notable')) {
       return `
-        <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-          <span style="background-color: #141516; color: #f7f8f8; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle; border: 1px solid #34343a;">📈 Trending</span>
-        </div>`;
-    } else if (cleanText === '📌 Notable' || cleanText.startsWith('📌 Notable')) {
-      return `
-        <div style="margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid #23252a; padding-bottom: 8px;">
-          <span style="background-color: #0f1011; color: #8a8f98; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; vertical-align: middle; border: 1px solid #23252a;">📌 Notable</span>
+        <div style="margin-top: 20px; margin-bottom: 6px; border-bottom: 1px dashed ${ink}; padding-bottom: 2px;">
+          <span style="font-family:${fontSans}; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: ${ink}; display: block; margin-bottom: 2px;">DISPATCH UPDATE</span>
+          <span style="font-family:${fontHeadline}; font-size: 20px; font-weight: 700; text-transform: uppercase; color: ${ink};">${text}</span>
         </div>`;
     }
-    return `<h3 style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:500;color:#f7f8f8;margin:28px 0 12px;letter-spacing:-0.2px;">${text}</h3>`;
+    return `<div style="font-family:${fontHeadline};font-size:20px;font-weight:700;text-transform:uppercase;margin:15px 0 6px 0;border-bottom:1px dashed ${ink};padding-bottom:2px;color:${ink};">${text}</div>`;
   });
 
-  // Format Executive Summary (TL;DR)
-  html = html.replace(/<h2[^>]*>📋 Executive Summary \(TL;DR\)<\/h2>\s*<p[^>]*>([\s\S]+?)<\/p>/gi, (match, p1) => {
-    return `
-      <div style="background-color: #0f1011; border: 1px solid #23252a; border-left: 4px solid #5e6ad2; border-radius: 8px; padding: 20px 24px; margin: 24px 0 32px;">
-        <h3 style="margin: 0 0 10px; font-family: Inter, system-ui, sans-serif; font-size: 18px; font-weight: 600; color: #f7f8f8; letter-spacing: -0.3px;">📋 Executive Summary (TL;DR)</h3>
-        <p style="margin: 0; font-family: Inter, system-ui, sans-serif; font-size: 14.5px; line-height: 1.6; color: #d0d6e0;">${p1.trim()}</p>
-      </div>
-    `;
+  html = html.replace(/<div[^>]*>([\s\S]*?)<\/div>/gi, (match, p1) => {
+      return `<div>${p1}</div>`;
   });
 
-  // Format Key Industry Trends
-  html = html.replace(/<h2[^>]*>📈 Key Industry Trends<\/h2>\s*<ul>([\s\S]+?)<\/ul>/gi, (match, p1) => {
-    return `
-      <div style="background-color: #0f1011; border: 1px solid #23252a; border-radius: 8px; padding: 20px 24px; margin: 24px 0 32px;">
-        <h3 style="margin: 0 0 12px; font-family: Inter, system-ui, sans-serif; font-size: 18px; font-weight: 600; color: #f7f8f8; letter-spacing: -0.3px;">📈 Key Industry Trends</h3>
-        <ul style="margin: 0; padding-left: 20px; color: #d0d6e0;">${p1.trim()}</ul>
-      </div>
-    `;
-  });
+  html = html.replace(/<table>/gi, `<table style="width:100%;border-collapse:collapse;margin:15px 0;font-family:${fontSans};font-size:12px;color:${ink};border:2px solid ${ink};">`);
+  html = html.replace(/<th>/gi, `<th style="padding:8px;background-color:transparent;font-weight:bold;text-align:left;border-bottom:2px solid ${ink};border-right:1px solid ${ink};color:${ink};text-transform:uppercase;">`);
+  html = html.replace(/<td>/gi, `<td style="padding:8px;border-bottom:1px solid ${ink};border-right:1px solid ${ink};color:${ink};">`);
+  html = html.replace(/<tr>/gi, `<tr>`);
 
-  html = html.replace(/<table>/gi, '<table style="width:100%;border-collapse:collapse;margin:24px 0;font-family:Inter,system-ui,sans-serif;font-size:14px;color:#d0d6e0;border:1px solid #23252a;border-radius:8px;overflow:hidden;">');
-  html = html.replace(/<th>/gi, '<th style="padding:12px 14px;background-color:#0f1011;font-weight:600;text-align:left;border-bottom:1px solid #23252a;color:#f7f8f8;">');
-  html = html.replace(/<td>/gi, '<td style="padding:12px 14px;border-bottom:1px solid #23252a;color:#d0d6e0;">');
-  html = html.replace(/<tr>/gi, '<tr style="background-color:#010102;">');
-
-  html = html.replace(/<p>/gi, '<p style="margin:0 0 16px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">');
-  html = html.replace(/<ul>/gi, '<ul style="margin:16px 0;padding-left:20px;color:#d0d6e0;">');
-  html = html.replace(/<li>/gi, '<li style="margin-bottom:12px;padding-left:4px;color:#d0d6e0;font-family:Inter,system-ui,sans-serif;font-size:14.5px;line-height:1.6;">');
-  html = html.replace(/<strong>/gi, '<strong style="color:#f7f8f8;font-weight:600;">');
-  html = html.replace(/<em>/gi, '<em style="color:#8a8f98;">');
-  html = html.replace(/<a href="([^"]+)">/gi, '<a href="$1" style="color:#828fff;text-decoration:none;border-bottom:1px solid rgba(130,143,255,0.3);padding-bottom:1px;font-weight:500;">');
+  html = html.replace(/<p>/gi, `<p style="margin:0 0 10px 0;text-indent:12px;color:${ink};font-family:${fontBody};font-size:15px;line-height:1.35;text-align:justify;">`);
+  
+  html = html.replace(/<ul>/gi, `<ul style="margin:10px 0;padding-left:20px;color:${ink};font-family:${fontBody};font-size:15px;">`);
+  html = html.replace(/<ol>/gi, `<ol style="margin:10px 0;padding-left:20px;color:${ink};font-family:${fontBody};font-size:15px;">`);
+  html = html.replace(/<li>/gi, `<li style="margin-bottom:6px;padding-left:4px;color:${ink};line-height:1.35;text-align:justify;">`);
+  
+  html = html.replace(/<strong>/gi, `<strong style="font-weight:bold;color:${ink};">`);
+  html = html.replace(/<em>/gi, `<em style="font-style:italic;color:${ink};">`);
+  html = html.replace(/<a href="([^"]+)">/gi, `<a href="$1" style="color:${ink};text-decoration:underline;font-weight:bold;">`);
 
   html = html.replace(/\(Impact:\s*([^)]+)\)/g, (match, p1) => {
-    const val = p1.trim();
-    const score = parseFloat(val);
-    let isHigh = false;
-    if (!isNaN(score)) {
-      isHigh = score >= 7.0;
-    } else {
-      const lower = val.toLowerCase();
-      isHigh = lower === 'high' || lower === 'critical' || lower === 'breaking';
-    }
-    const bgColor = isHigh ? '#5e6ad2' : '#141516';
-    const textColor = '#ffffff';
-    const border = isHigh ? 'none' : '1px solid #23252a';
-    return `<span style="font-size:11px; font-family:Inter,system-ui,sans-serif; background-color:${bgColor}; color:${textColor}; border:${border}; padding:2px 6px; border-radius:4px; font-weight:600; margin-left:6px; vertical-align:middle; display:inline-block; letter-spacing:0.5px;">Impact: ${val}</span>`;
+    return `<span style="font-family:${fontSans}; font-size:10px; border:1px solid ${ink}; padding:1px 4px; font-weight:bold; text-transform:uppercase; margin-left:4px;">Impact: ${p1.trim()}</span>`;
   });
-
-  if (metaBadge) {
-    html = metaBadge + html;
-  }
 
   return html;
 }
 
 export function buildEmailHtml(markdownContent) {
   const bodyHtml = markdownToHtml(markdownContent);
-  const now = new Date().toLocaleString('en-US', { timeZoneName: 'short' });
+  const now = new Date().toLocaleString('en-US', { timeZoneName: 'short' }).toUpperCase();
+  const ink = '#181513';
+  const paper = '#e4d8bc';
 
   return `
 <!DOCTYPE html>
@@ -126,52 +83,32 @@ export function buildEmailHtml(markdownContent) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NewsAgent Digest</title>
+  <title>The Daily Dispatch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    @media only screen and (max-width: 600px) {
-      .email-container {
-        padding: 16px !important;
-      }
-      .email-card {
-        padding: 24px 16px !important;
-      }
-      .email-header {
-        padding: 24px 16px !important;
-      }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,700;1,400;1,700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;padding:0;background-color:#010102;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;">
-  <div class="email-container" style="max-width:640px;margin:0 auto;padding:40px 20px;">
-    <div style="background-color:#0f1011;border:1px solid #23252a;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
-      
-      <div class="email-header" style="background-color:#0f1011;padding:32px 40px 24px;text-align:center;border-bottom:1px solid #23252a;">
-        <div style="color:#5e6ad2;font-size:24px;line-height:1;margin-bottom:8px;">✦</div>
-        <h1 style="margin:0;color:#f7f8f8;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:26px;font-weight:600;letter-spacing:-0.8px;line-height:1.2;">NewsAgent Digest</h1>
-        <p style="margin:6px 0 0;color:#8a8f98;font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase;">Developer-Focused AI News &bull; ${now}</p>
-      </div>
-
-      <div class="email-card" style="padding:40px;color:#d0d6e0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-        ${bodyHtml}
-      </div>
-
-      <div style="background-color:#010102;padding:32px 40px;text-align:center;color:#8a8f98;font-family:Inter,system-ui,sans-serif;border-top:1px solid #23252a;">
-        <div style="color:#f7f8f8;font-size:18px;margin-bottom:12px;line-height:1;">✦</div>
-        <p style="margin:0;font-size:13px;font-weight:500;line-height:1.5;color:#f7f8f8;">
-          Powered by <strong style="color:#5e6ad2;">NewsAgent OpenAI</strong>
-        </p>
-        <p style="margin:6px 0 0;font-size:12px;line-height:1.5;color:#8a8f98;">
-          AI-curated, cross-verified developer ecosystem intelligence.
-        </p>
-        <p style="margin:16px 0 0;font-size:11px;color:#62666d;letter-spacing:0.5px;">
-          Sent from ai@tsindia.org
-        </p>
-      </div>
+<body style="margin:0;padding:0;background-color:${paper};">
+  
+  <div style="width:100%; margin:0; padding:2px 8px; background-color:${paper}; color:${ink}; font-family:'Alegreya',serif; font-size:15px; line-height:1.35; border:none; text-align:justify; box-sizing:border-box;">
+    
+    <div style="text-align:center;border-bottom:4px double ${ink};padding-bottom:8px;margin-bottom:4px;">
+        <div style="font-family:'Playfair Display',serif;font-size:52px;font-weight:900;text-transform:uppercase;line-height:1;letter-spacing:0px;color:${ink};">The Daily Dispatch</div>
     </div>
+    
+    <div style="text-align:center;border-bottom:1px solid ${ink};border-top:1px solid ${ink};padding:4px 0;margin-bottom:15px;font-family:'Arial',sans-serif;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:${ink};">
+        Vol. I — No. 1 &nbsp;|&nbsp; DELIVERED VIA POST &nbsp;|&nbsp; ${now}
+    </div>
+
+    ${bodyHtml}
+
+    <div style="text-align:center;font-family:'Arial',sans-serif;font-size:9px;text-transform:uppercase;border-top:4px double ${ink};padding-top:10px;margin-top:20px;color:${ink};">
+        Printed and Published by the NewsAgent Dispatch Service.<br>
+        Delivered electronically via telegraphic channels. All Rights Reserved © 2026.
+    </div>
+
   </div>
+
 </body>
 </html>`;
 }
@@ -196,7 +133,7 @@ export async function sendEmail(content, subject) {
     const today = new Date().toLocaleDateString('en-US', {
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
     });
-    const emailSubject = subject || `🗞️ Dev News Digest — ${today}`;
+    const emailSubject = subject || `The Daily Dispatch — ${today}`;
     const htmlContent = buildEmailHtml(content);
 
     console.log(`📧 Sending news digest to ${whitelistedEmails.length} recipient(s) via Resend...`);

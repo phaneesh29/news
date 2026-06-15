@@ -32,7 +32,7 @@ Ignore consumer gadgets, Apple/iPhone rumors, gaming, celebrity tech, crypto pri
 
 Execution Steps:
 1. Retrieve general dev and AI company news using the SearchAgent tool. Ensure all retrieved news items are strictly published in the last 12 hours (since ${twelveHoursAgoUtc}).
-2. Retrieve GitHub releases, trending repos, HN discussions, Reddit signals, security alerts, and Hugging Face daily papers/arXiv preprints using the EnrichAgent tool. Ensure all items are strictly from the last 12 hours.
+2. Retrieve GitHub releases, trending repos, HN discussions, Reddit signals, security alerts, Hugging Face daily papers/arXiv preprints, and newly added OpenRouter AI models using the EnrichAgent tool. Ensure all items are strictly from the last 12 hours.
 3. Combine all raw findings and pass them to the SynthesisAgent tool to deduplicate, categorize, and rank them. Verify and enforce the 12-hour freshness limit.
 4. Pass the ranked JSON results to the EditorAgent tool to format and write the news.md file, using ${nowUtc} as the "Current Date/Time in UTC" and "Last updated" date.`;
 
