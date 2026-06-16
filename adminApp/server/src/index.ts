@@ -10,6 +10,7 @@ import { requestId } from 'hono/request-id'
 import { env } from './config/env.js'
 import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
+import { whitelistRoutes } from './routes/whitelist.js'
 
 type Bindings = {
   Variables: {
@@ -42,6 +43,7 @@ app.use('*', logger())
 
 app.route('/api/health', healthRoutes)
 app.route('/api/auth', authRoutes)
+app.route('/api/whitelist', whitelistRoutes)
 
 app.notFound((c) => {
   return c.json(
