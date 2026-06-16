@@ -1,27 +1,51 @@
 import { Context } from 'hono'
-import { eq, desc } from 'drizzle-orm'
-import { setCookie, deleteCookie } from 'hono/cookie'
+import { and, desc, eq, gt, sql } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { adminUsers, adminWhitelist, adminOtps, adminSessions } from '../db/schema.js'
 import { sendEmail } from '../utils/email.js'
-import { env } from '../config/env.js'
-import crypto from 'crypto'
+import {
+  OTP_TTL_MS,
+  SESSION_TTL_MS,
+  clearSessionCookie,
+  consumeRateLimit,
+  generateOtp,
+  generateSessionToken,
+  getClientIp,
+  hashOtp,
+  hashToken,
+  normalizeEmail,
+  requestOtpLimits,
+  secureCompare,
+  setSessionCookie,
+  verifyOtpLimits
+} from '../lib/auth.js'
 
 export const requestOtp = async (c: Context) => {
   try {
-    const { email } = await c.req.json() as { email: string }
+    const body = await c.req.json() as { email: string }
+    const email = normalizeEmail(body.email)
+    const ipAddress = getClientIp(c)
 
+    const requestKey = `${email}:${ipAddress ?? 'unknown'}`
+    if (!consumeRateLimit(requestOtpLimits, requestKey, 5, OTP_TTL_MS)) {
+      return c.json({ error: 'Too many OTP requests. Please try again later.' }, 429)
+    }
 
-    const whitelisted = await db.select().from(adminWhitelist).where(eq(adminWhitelist.email, email)).limit(1)
+    const whitelisted = await db.select()
+      .from(adminWhitelist)
+      .where(sql`lower(${adminWhitelist.email}) = ${email}`)
+      .limit(1)
 
     if (whitelisted.length === 0) {
       return c.json({ error: 'Email is not authorized' }, 403)
     }
 
-    let users = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1)
+    const users = await db.select()
+      .from(adminUsers)
+      .where(sql`lower(${adminUsers.email}) = ${email}`)
+      .limit(1)
 
     let user = users[0]
-
     if (!user) {
       const insertedUsers = await db.insert(adminUsers)
         .values({ email })
@@ -29,25 +53,27 @@ export const requestOtp = async (c: Context) => {
       user = insertedUsers[0]
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString()
-    
-    const codeHash = crypto.createHash('sha256').update(otp).digest('hex')
-
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
-
     if (!user) {
       return c.json({ error: 'User could not be created' }, 500)
     }
 
+    if (user.status !== 'active') {
+      return c.json({ error: 'User account is not active' }, 403)
+    }
+
+    const otp = generateOtp()
+    const codeHash = hashOtp(email, otp)
+    const expiresAt = new Date(Date.now() + OTP_TTL_MS)
+
     await db.delete(adminOtps).where(eq(adminOtps.adminId, user.id))
 
     await db.insert(adminOtps).values({
-        adminId: user.id,
-        codeHash,
-        expiresAt,
-        ipAddress: c.req.header('x-forwarded-for') || null,
-        userAgent: c.req.header('user-agent') || null
-      })
+      adminId: user.id,
+      codeHash,
+      expiresAt,
+      ipAddress,
+      userAgent: c.req.header('user-agent') || null
+    })
 
     const emailRes = await sendEmail({
       to: email,
@@ -68,17 +94,34 @@ export const requestOtp = async (c: Context) => {
 
 export const verifyOtp = async (c: Context) => {
   try {
-    const { email, otp } = await c.req.json() as { email: string, otp: string }
+    const body = await c.req.json() as { email: string, otp: string }
+    const email = normalizeEmail(body.email)
+    const otp = body.otp.trim()
+    const ipAddress = getClientIp(c)
 
-    const users = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1)
+    const verifyKey = `${email}:${ipAddress ?? 'unknown'}`
+    if (!consumeRateLimit(verifyOtpLimits, verifyKey, 10, OTP_TTL_MS)) {
+      return c.json({ error: 'Too many verification attempts. Please try again later.' }, 429)
+    }
 
-    const user = users[0]
+    const whitelisted = await db.select()
+      .from(adminWhitelist)
+      .where(sql`lower(${adminWhitelist.email}) = ${email}`)
+      .limit(1)
 
-    if (!user) {
+    if (whitelisted.length === 0) {
       return c.json({ error: 'Invalid credentials' }, 401)
     }
 
-    const codeHash = crypto.createHash('sha256').update(otp).digest('hex')
+    const users = await db.select()
+      .from(adminUsers)
+      .where(sql`lower(${adminUsers.email}) = ${email}`)
+      .limit(1)
+
+    const user = users[0]
+    if (!user || user.status !== 'active') {
+      return c.json({ error: 'Invalid credentials' }, 401)
+    }
 
     const otps = await db.select()
       .from(adminOtps)
@@ -100,7 +143,8 @@ export const verifyOtp = async (c: Context) => {
       return c.json({ error: 'Maximum attempts reached. Please request a new OTP.' }, 401)
     }
 
-    if (latestOtp.codeHash !== codeHash) {
+    const codeHash = hashOtp(email, otp)
+    if (!secureCompare(latestOtp.codeHash, codeHash)) {
       await db.update(adminOtps)
         .set({ attempts: latestOtp.attempts + 1 })
         .where(eq(adminOtps.id, latestOtp.id))
@@ -109,38 +153,33 @@ export const verifyOtp = async (c: Context) => {
 
     await db.delete(adminOtps).where(eq(adminOtps.adminId, user.id))
 
-    const token = crypto.randomBytes(32).toString('hex')
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
-    const sessionExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    const token = generateSessionToken()
+    const tokenHash = hashToken(token)
+    const sessionExpiresAt = new Date(Date.now() + SESSION_TTL_MS)
 
     await db.insert(adminSessions)
       .values({
         adminId: user.id,
         tokenHash,
         expiresAt: sessionExpiresAt,
-        ipAddress: c.req.header('x-forwarded-for') || null,
+        ipAddress,
         userAgent: c.req.header('user-agent') || null
       })
 
     await db.update(adminUsers)
-      .set({ lastLoginAt: new Date() })
+      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
       .where(eq(adminUsers.id, user.id))
 
-    setCookie(c, 'admin_session', token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/'
-    })
+    setSessionCookie(c, token)
 
-    return c.json({ 
+    return c.json({
       message: 'Logged in successfully',
       token,
       user: {
         id: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
+        status: user.status
       }
     })
   } catch (error: any) {
@@ -152,16 +191,14 @@ export const verifyOtp = async (c: Context) => {
 export const logout = async (c: Context) => {
   try {
     const session = c.get('session')
-    
+
     if (session) {
       await db.update(adminSessions)
-        .set({ isValid: false })
+        .set({ isValid: false, updatedAt: new Date() })
         .where(eq(adminSessions.id, session.id))
     }
 
-    deleteCookie(c, 'admin_session', {
-      path: '/'
-    })
+    clearSessionCookie(c)
 
     return c.json({ message: 'Logged out successfully' })
   } catch (error: any) {
@@ -179,7 +216,9 @@ export const getProfile = async (c: Context) => {
         email: user.email,
         role: user.role,
         status: user.status,
-        lastLoginAt: user.lastLoginAt
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
       }
     })
   } catch (error: any) {
@@ -200,15 +239,43 @@ export const getSessions = async (c: Context) => {
       isValid: adminSessions.isValid,
       expiresAt: adminSessions.expiresAt,
       createdAt: adminSessions.createdAt,
+      updatedAt: adminSessions.updatedAt,
       isCurrent: eq(adminSessions.id, currentSession.id)
     })
-    .from(adminSessions)
-    .where(eq(adminSessions.adminId, user.id))
-    .orderBy(desc(adminSessions.createdAt))
+      .from(adminSessions)
+      .where(eq(adminSessions.adminId, user.id))
+      .orderBy(desc(adminSessions.createdAt))
 
     return c.json({ sessions })
   } catch (error: any) {
     console.error('Get Sessions Error:', error)
+    return c.json({ error: 'Internal server error' }, 500)
+  }
+}
+
+export const revokeAllSessions = async (c: Context) => {
+  try {
+    const user = c.get('user')
+
+    const revokedSessions = await db.update(adminSessions)
+      .set({ isValid: false, updatedAt: new Date() })
+      .where(
+        and(
+          eq(adminSessions.adminId, user.id),
+          eq(adminSessions.isValid, true),
+          gt(adminSessions.expiresAt, new Date())
+        )
+      )
+      .returning({ id: adminSessions.id })
+
+    clearSessionCookie(c)
+
+    return c.json({
+      message: 'All sessions revoked successfully',
+      revokedCount: revokedSessions.length
+    })
+  } catch (error: any) {
+    console.error('Revoke All Sessions Error:', error)
     return c.json({ error: 'Internal server error' }, 500)
   }
 }
