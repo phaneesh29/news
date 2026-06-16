@@ -70,7 +70,6 @@ export const verifyOtp = async (c: Context) => {
   try {
     const { email, otp } = await c.req.json() as { email: string, otp: string }
 
-
     const users = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1)
 
     const user = users[0]

@@ -7,11 +7,11 @@ import { requireAuth } from '../middlewares/auth.js'
 export const authRoutes = new Hono()
 
 const requestOtpSchema = z.object({
-  email: z.string().email('Invalid email address')
+  email: z.email('Invalid email address')
 })
 
 const verifyOtpSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.email('Invalid email address'),
   otp: z.string().length(6, 'OTP must be 6 digits')
 })
 
