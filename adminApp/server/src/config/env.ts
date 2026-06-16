@@ -11,7 +11,8 @@ const envSchema = z.object({
       .filter(Boolean)
   ),
   DATABASE_URL: z.url(),
-  DB_POOL_MAX: z.coerce.number().int().positive().default(10)
+  DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+  RESEND_API_KEY: z.string().min(1, 'Resend API Key is required')
 })
 
 const result = envSchema.safeParse(process.env)

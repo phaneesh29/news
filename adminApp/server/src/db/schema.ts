@@ -9,7 +9,6 @@ export const adminStatusEnum = pgEnum('admin_status', ['active', 'suspended'])
 export const adminUsers = pgTable('admin_users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  name: varchar('name', { length: 120 }).notNull(),
   role: adminRoleEnum('role').notNull().default('admin'),
   status: adminStatusEnum('status').notNull().default('active'),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),

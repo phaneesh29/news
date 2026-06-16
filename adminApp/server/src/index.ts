@@ -9,6 +9,7 @@ import { requestId } from 'hono/request-id'
 
 import { env } from './config/env.js'
 import { healthRoutes } from './routes/health.js'
+import { authRoutes } from './routes/auth.js'
 
 type Bindings = {
   Variables: {
@@ -38,15 +39,9 @@ app.use('*', cors({
 )
 app.use('*', logger())
 
-app.get('/', (c) => {
-  return c.json({
-    name: 'admin-app-server',
-    status: 'ok',
-    requestId: c.get('requestId')
-  })
-})
 
-app.route('/health', healthRoutes)
+app.route('/api/health', healthRoutes)
+app.route('/api/auth', authRoutes)
 
 app.notFound((c) => {
   return c.json(
