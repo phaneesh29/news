@@ -193,8 +193,7 @@ export const logout = async (c: Context) => {
     const session = c.get('session')
 
     if (session) {
-      await db.update(adminSessions)
-        .set({ isValid: false, updatedAt: new Date() })
+      await db.delete(adminSessions)
         .where(eq(adminSessions.id, session.id))
     }
 
@@ -257,8 +256,7 @@ export const revokeAllSessions = async (c: Context) => {
   try {
     const user = c.get('user')
 
-    const revokedSessions = await db.update(adminSessions)
-      .set({ isValid: false, updatedAt: new Date() })
+    const revokedSessions = await db.delete(adminSessions)
       .where(
         and(
           eq(adminSessions.adminId, user.id),

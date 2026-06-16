@@ -1,4 +1,5 @@
 import { Context } from 'hono'
+import { getConnInfo } from '@hono/node-server/conninfo'
 import { deleteCookie, setCookie } from 'hono/cookie'
 import crypto from 'crypto'
 import { env } from '../config/env.js'
@@ -22,7 +23,23 @@ export const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
 export const getClientIp = (c: Context) => {
   const forwardedFor = c.req.header('x-forwarded-for')
-  return forwardedFor?.split(',')[0]?.trim() || c.req.header('cf-connecting-ip') || c.req.header('x-real-ip') || null
+  if (forwardedFor) return forwardedFor.split(',')[0]?.trim()
+
+  const cfIp = c.req.header('cf-connecting-ip')
+  if (cfIp) return cfIp
+
+  const realIp = c.req.header('x-real-ip')
+  if (realIp) return realIp
+
+  try {
+    const info = getConnInfo(c)
+    if (info.remote.address) {
+      return info.remote.address === '::1' ? '127.0.0.1' : info.remote.address.replace(/^.*:/, '')
+    }
+  } catch (e) {
+  }
+
+  return null
 }
 
 export const consumeRateLimit = (

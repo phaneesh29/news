@@ -17,6 +17,7 @@
   --color-cyber-green: #00ff41;
   --color-cyber-green-dim: #008f11;
   --color-cyber-alert: #ff003c;
+  --color-cyber-cyan: #00f0ff;
   --color-cd-rom: #c0c0c0;
   
   --font-playfair: var(--font-playfair);
@@ -180,3 +181,12 @@ body::after {
 
 .hud-brackets::before { content: "["; color: var(--color-cyber-green-dim); margin-right: 5px; }
 .hud-brackets::after { content: "]"; color: var(--color-cyber-green-dim); margin-left: 5px; }
+
+@keyframes bounce-slight {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-bounce-slight {
+  animation: bounce-slight 4s ease-in-out infinite;
+}
