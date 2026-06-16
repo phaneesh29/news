@@ -1,26 +1,182 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: #e4d8bc;
+  --color-paper-stain: #cfbe9a;
+  --color-ink: #181513;
+  --color-ink-faded: #312a26;
+  --color-blood-red: #781a1a;
+  
+  --color-manila: #E7C9A9;
+  --color-manila-dark: #D4A574;
+  --color-aged-paper: #F2EFE6;
+  --color-army-green: #454B1B;
+  --color-secret-red: #7F2020;
+
+  --color-cyber-black: #050505;
+  --color-cyber-green: #00ff41;
+  --color-cyber-green-dim: #008f11;
+  --color-cyber-alert: #ff003c;
+  --color-cd-rom: #c0c0c0;
+  
+  --font-playfair: var(--font-playfair);
+  --font-old-standard: var(--font-old-standard);
+  --font-alegreya: var(--font-alegreya);
+  --font-courier: var(--font-courier);
+  --font-vt323: var(--font-vt323);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: var(--color-cyber-black);
+  --foreground: var(--color-cyber-green);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-vt323), monospace;
+  background-image: 
+    linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  overflow-x: hidden;
 }
+
+/* Intense CRT & Glitch Overlay */
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 999;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  animation: crtFlicker 0.15s infinite;
+}
+
+@keyframes crtFlicker {
+  0% { opacity: 0.95; }
+  50% { opacity: 0.85; }
+  100% { opacity: 0.95; }
+}
+
+/* Y2K Magazine "CD-ROM" Window styling */
+.cd-rom-window {
+  background: var(--color-cd-rom);
+  border-top: 2px solid white;
+  border-left: 2px solid white;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+  box-shadow: 10px 10px 0px rgba(0,0,0,0.5);
+  color: black;
+  font-family: 'Arial', sans-serif;
+}
+.cd-rom-titlebar {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: white;
+  font-weight: bold;
+  padding: 2px 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Torn Paper Brutalism */
+.torn-paper {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-alegreya), serif;
+  background-image: 
+    url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.15"/></svg>'), 
+    radial-gradient(circle at 50% 50%, var(--color-paper) 0%, var(--color-paper-stain) 100%);
+  text-shadow: 0.5px 0.5px 1px rgba(24, 21, 19, 0.4), -0.5px -0.5px 0px rgba(24, 21, 19, 0.1);
+  clip-path: polygon(0% 0%, 100% 2%, 98% 100%, 2% 98%, 0% 50%);
+  box-shadow: 0 0 30px var(--color-cyber-green);
+}
+
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before, .glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -1px 0 red;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -1px 0 blue;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim 2.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(10px, 9999px, 31px, 0); transform: skew(0.8deg); }
+  20% { clip: rect(62px, 9999px, 16px, 0); transform: skew(0.1deg); }
+  40% { clip: rect(34px, 9999px, 88px, 0); transform: skew(0.5deg); }
+  60% { clip: rect(98px, 9999px, 21px, 0); transform: skew(0.2deg); }
+  80% { clip: rect(12px, 9999px, 56px, 0); transform: skew(0.9deg); }
+  100% { clip: rect(45px, 9999px, 76px, 0); transform: skew(0.3deg); }
+}
+@keyframes glitch-anim-2 {
+  0% { clip: rect(65px, 9999px, 100px, 0); transform: skew(0.5deg); }
+  20% { clip: rect(2px, 9999px, 45px, 0); transform: skew(0.2deg); }
+  40% { clip: rect(89px, 9999px, 12px, 0); transform: skew(0.8deg); }
+  60% { clip: rect(34px, 9999px, 76px, 0); transform: skew(0.1deg); }
+  80% { clip: rect(15px, 9999px, 98px, 0); transform: skew(0.6deg); }
+  100% { clip: rect(78px, 9999px, 34px, 0); transform: skew(0.4deg); }
+}
+
+.typewriter-input {
+  font-family: var(--font-courier), monospace;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px dashed var(--color-ink-faded);
+  color: var(--color-ink);
+  outline: none;
+}
+.typewriter-input:focus {
+  background-color: rgba(255,255,255,0.2);
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.cyber-input {
+  background: black;
+  border: 1px solid var(--color-cyber-green-dim);
+  color: var(--color-cyber-green);
+  font-family: var(--font-vt323), monospace;
+  outline: none;
+}
+.cyber-input:focus {
+  border-color: var(--color-cyber-green);
+  box-shadow: inset 0 0 10px var(--color-cyber-grid), 0 0 10px var(--color-cyber-green-dim);
+}
+
+.stamp-button {
+  font-family: var(--font-old-standard), serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--color-secret-red);
+  border: 5px solid var(--color-secret-red);
+  background: transparent;
+  padding: 10px 20px;
+  transform: rotate(-3deg);
+  transition: all 0.1s;
+  cursor: pointer;
+}
+.stamp-button:hover {
+  transform: rotate(0deg) scale(1.1);
+  background: var(--color-secret-red);
+  color: var(--color-paper);
+}
+
+.hud-brackets::before { content: "["; color: var(--color-cyber-green-dim); margin-right: 5px; }
+.hud-brackets::after { content: "]"; color: var(--color-cyber-green-dim); margin-left: 5px; }
