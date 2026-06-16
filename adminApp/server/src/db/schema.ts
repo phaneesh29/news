@@ -69,3 +69,10 @@ export const adminSessionsRelations = relations(adminSessions, ({ one }) => ({
   })
 }))
 
+export const adminWhitelist = pgTable('admin_whitelist', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+}, (table) => [
+  index('admin_whitelist_email_idx').on(table.email)
+])
