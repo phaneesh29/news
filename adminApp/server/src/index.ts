@@ -11,6 +11,7 @@ import { env } from './config/env.js'
 import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
 import { whitelistRoutes } from './routes/whitelist.js'
+import { newsRoutes } from './routes/news.js'
 import { globalRateLimiter } from './middlewares/rateLimit.js'
 
 type Bindings = {
@@ -46,6 +47,7 @@ app.use('/api/*', globalRateLimiter)
 app.route('/api/health', healthRoutes)
 app.route('/api/auth', authRoutes)
 app.route('/api/whitelist', whitelistRoutes)
+app.route('/api/news', newsRoutes)
 
 app.notFound((c) => {
   return c.json(
