@@ -1,5 +1,6 @@
 "use client";
 
+import { API_BASE_URL } from "../config";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -9,7 +10,7 @@ export default function Home() {
   const [isDecrypted, setIsDecrypted] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/health")
+    fetch(`${API_BASE_URL}/health`)
       .then(res => res.json())
       .then(data => setServerHealth(data))
       .catch(() => setServerHealth({ status: "UNREACHABLE", timestamp: new Date(), requestId: "ERR_0x08F" }));

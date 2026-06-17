@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "../../config";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ export default function LoginPage() {
     setStatus("loading");
     
     try {
-      const res = await fetch("http://localhost:8000/api/auth/request-otp", {
+      const res = await fetch(`${API_BASE_URL}/auth/request-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

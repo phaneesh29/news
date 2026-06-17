@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { API_BASE_URL } from "../../config";
 
 function VerifyContent() {
   const [otp, setOtp] = useState("");
@@ -23,7 +24,7 @@ function VerifyContent() {
     setStatus("loading");
     
     try {
-      const res = await fetch("http://localhost:8000/api/auth/verify-otp", {
+      const res = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),

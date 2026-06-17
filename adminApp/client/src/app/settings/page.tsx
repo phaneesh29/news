@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_BASE_URL } from "../../config";
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const profileRes = await fetch("http://localhost:8000/api/auth/profile", { credentials: "include" });
+        const profileRes = await fetch(`${API_BASE_URL}/auth/profile`, { credentials: "include" });
         
         if (!profileRes.ok) {
           router.push("/login");
@@ -35,8 +36,8 @@ export default function SettingsPage() {
 
         // Fetch other configuration data only after verifying admin role
         const [sessionsRes, whitelistRes] = await Promise.all([
-          fetch("http://localhost:8000/api/auth/sessions", { credentials: "include" }),
-          fetch("http://localhost:8000/api/whitelist", { credentials: "include" })
+          fetch(`${API_BASE_URL}/auth/sessions`, { credentials: "include" }),
+          fetch(`${API_BASE_URL}/whitelist`, { credentials: "include" })
         ]);
 
         const sessionsData = await sessionsRes.json();
@@ -57,7 +58,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:8000/api/auth/logout", { method: "POST", credentials: "include" });
+      await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
       router.push("/login");
     } catch (err) {
       console.error(err);
@@ -66,7 +67,7 @@ export default function SettingsPage() {
 
   const handleRevokeAll = async () => {
     try {
-      await fetch("http://localhost:8000/api/auth/sessions/revoke-all", { method: "POST", credentials: "include" });
+      await fetch(`${API_BASE_URL}/auth/sessions/revoke-all`, { method: "POST", credentials: "include" });
       router.push("/login");
     } catch (err) {
       console.error(err);
@@ -79,7 +80,7 @@ export default function SettingsPage() {
     setWhitelistStatus({ type: "loading", msg: "REGISTERING CARD INDICES..." });
 
     try {
-      const res = await fetch("http://localhost:8000/api/whitelist", {
+      const res = await fetch(`${API_BASE_URL}/whitelist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: newEmail }),
@@ -105,7 +106,7 @@ export default function SettingsPage() {
     setWhitelistStatus({ type: "loading", msg: "WIPING CLEARANCE KEY..." });
 
     try {
-      const res = await fetch(`http://localhost:8000/api/whitelist/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/whitelist/${id}`, {
         method: "DELETE",
         credentials: "include"
       });

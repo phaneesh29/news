@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_BASE_URL } from "../../config";
 
 interface NewsItem {
   id: string;
@@ -42,6 +43,17 @@ export default function DashboardPage() {
   // Clock state
   const [systemTime, setSystemTime] = useState("");
 
+  // Filter state
+  const [selectedPriority, setSelectedPriority] = useState<string>("ALL");
+
+  // Editing State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editTags, setEditTags] = useState("");
+  const [editPriority, setEditPriority] = useState("");
+  const [editSourceUrl, setEditSourceUrl] = useState("");
+
   // Live Terminal Log System
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     "SYS_INIT: mounting secure decryption deck...",
@@ -59,10 +71,10 @@ export default function DashboardPage() {
       setFetchLoading(true);
       let url = "";
       if (query) {
-        url = `http://localhost:8000/api/news/search?q=${encodeURIComponent(query)}&limit=10`;
+        url = `${API_BASE_URL}/news/search?q=${encodeURIComponent(query)}&limit=10`;
         addLog(`DB_QUERY: scanning news nodes for query '${query}'`);
       } else {
-        url = `http://localhost:8000/api/news?limit=10${cursor ? `&cursor=${cursor}` : ""}`;
+        url = `${API_BASE_URL}/news?limit=10${cursor ? `&cursor=${cursor}` : ""}`;
         addLog(cursor ? `DB_DECK: pulling next cursor block ${cursor.slice(0, 8)}...` : "DB_DECK: synchronizing active broadcasts feed...");
       }
 
@@ -94,7 +106,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/auth/profile", { credentials: "include" });
+        const res = await fetch(`${API_BASE_URL}/auth/profile`, { credentials: "include" });
         if (!res.ok) {
           router.push("/login");
           return;
@@ -140,7 +152,7 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     try {
       addLog("SEC_DECK: aborting session, purging local cookie keys...");
-      await fetch("http://localhost:8000/api/auth/logout", { method: "POST", credentials: "include" });
+      await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
       router.push("/login");
     } catch (err) {
       console.error(err);
@@ -168,7 +180,7 @@ export default function DashboardPage() {
         sourceUrl: sourceUrl || null
       };
 
-      const res = await fetch("http://localhost:8000/api/news", {
+      const res = await fetch(`${API_BASE_URL}/news`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -220,10 +232,53 @@ export default function DashboardPage() {
     }
   };
 
+  const handleUpdatePayload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTitle || !editContent || !selectedNews) return;
+
+    try {
+      let mappedPriority: 'low' | 'medium' | 'high' | 'critical' = 'low';
+      if (editPriority === "CRITICAL_OVERRIDE" || editPriority === "critical") mappedPriority = 'critical';
+      else if (editPriority === "WARNING_LEVEL" || editPriority === "high") mappedPriority = 'high';
+      else if (editPriority === "NOTICE_LEVEL" || editPriority === "medium") mappedPriority = 'medium';
+
+      const payload = {
+        title: editTitle.toUpperCase(),
+        content: editContent,
+        priority: mappedPriority,
+        tags: editTags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
+        sourceUrl: editSourceUrl || null
+      };
+
+      const res = await fetch(`${API_BASE_URL}/news/${selectedNews.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("Failed to update news");
+      const data = await res.json();
+      
+      const updatedItem = {
+        ...data.news,
+        status: "SYNCED"
+      };
+
+      setNewsList(prev => prev.map(item => item.id === selectedNews.id ? updatedItem : item));
+      setSelectedNews(updatedItem);
+      setIsEditing(false);
+      addLog(`SYS_UPDATE: successfully updated node record ${selectedNews.id.slice(0, 8)}`);
+    } catch (err) {
+      console.error("Update error:", err);
+      addLog("WARNING: payload update failure");
+    }
+  };
+
   const handlePurge = async (id: string) => {
     try {
       addLog(`SEC_DECK: initializing purge coordinates for record ${id.slice(0, 8)}`);
-      const res = await fetch(`http://localhost:8000/api/news/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/news/${id}`, {
         method: "DELETE",
         credentials: "include"
       });
@@ -508,8 +563,33 @@ export default function DashboardPage() {
                 {/* Grid Scanlines */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none z-0"></div>
 
+                {/* Priority Selector Filter Bar */}
+                <div className="flex flex-wrap gap-2.5 pb-3 border-b border-zinc-900/60 mb-3 relative z-10 font-mono text-[9px] uppercase tracking-wider">
+                  <span className="text-zinc-500 font-bold self-center mr-1">FILTER LEVEL:</span>
+                  {["ALL", "CRITICAL", "WARNING", "NOTICE", "INFO"].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => {
+                        setSelectedPriority(level);
+                        addLog(`FILTER: set broadcast priority filter to '${level}'`);
+                      }}
+                      className={`px-2 py-0.5 border rounded-sm font-black transition-all cursor-pointer ${selectedPriority === level ? "border-emerald-500 text-emerald-400 bg-emerald-950/40 shadow-[0_0_8px_rgba(16,185,129,0.25)]" : "border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"}`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar relative z-10">
-                  {newsList.map((item) => {
+                  {newsList.filter(item => {
+                    if (selectedPriority === "ALL") return true;
+                    const lowerPriority = item.priority.toLowerCase();
+                    if (selectedPriority === "CRITICAL" && (lowerPriority === "critical" || lowerPriority === "critical_override")) return true;
+                    if (selectedPriority === "WARNING" && (lowerPriority === "high" || lowerPriority === "warning_level")) return true;
+                    if (selectedPriority === "NOTICE" && (lowerPriority === "medium" || lowerPriority === "notice_level")) return true;
+                    if (selectedPriority === "INFO" && (lowerPriority === "low" || lowerPriority === "info_level")) return true;
+                    return false;
+                  }).map((item) => {
                     const getPriorityColors = (pr: string) => {
                       if (pr === "CRITICAL_OVERRIDE" || pr === "critical") return "border-red-700 text-red-500 bg-red-950/40";
                       if (pr === "WARNING_LEVEL" || pr === "high") return "border-amber-700 text-amber-500 bg-amber-950/40";
@@ -522,6 +602,12 @@ export default function DashboardPage() {
                         key={item.id} 
                         onClick={() => {
                           setSelectedNews(item);
+                          setIsEditing(false);
+                          setEditTitle(item.title);
+                          setEditContent(item.content);
+                          setEditPriority(item.priority);
+                          setEditSourceUrl(item.sourceUrl || "");
+                          setEditTags(item.tags.join(", "));
                           addLog(`INSPECTOR: mounting node record ${item.id.slice(0, 8)}`);
                         }}
                         className="bg-black/85 border border-zinc-900/60 p-3.5 rounded-lg hover:border-red-800/40 hover:bg-stone-950/90 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer"
@@ -637,69 +723,174 @@ export default function DashboardPage() {
             {/* Parchment inspection sheet inside dossier */}
             <div className="flex-1 bg-[#f4ecd8] border border-stone-300 rounded p-6 sm:p-8 overflow-y-auto custom-paper-scrollbar mt-4 text-stone-900">
               
-              <div className="border-b-2 border-stone-900 pb-2.5 mb-5 text-center relative">
-                
-                {/* Stain */}
-                <div className="coffee-stain -top-6 -right-6 w-20 h-20 opacity-30"></div>
-                
-                <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
-                  CLEARANCE FILE // NODE IDENTIFIER: {selectedNews.id.slice(0, 8)}
-                </span>
-                <h3 className="font-serif text-2xl font-black uppercase tracking-tight leading-none text-stone-950">
-                  {selectedNews.title}
-                </h3>
-              </div>
+              {isEditing ? (
+                <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-serif text-stone-900">
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      TRANSMISSION HEADLINE
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none font-bold text-base text-stone-950 placeholder-stone-600/40 font-serif"
+                    />
+                  </div>
 
-              <div className="font-serif text-[14px] leading-relaxed text-justify space-y-4">
-                <p className="indent-6 text-stone-900">
-                  {selectedNews.content}
-                </p>
-              </div>
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      SOURCE LINK
+                    </label>
+                    <input
+                      type="url"
+                      value={editSourceUrl}
+                      onChange={(e) => setEditSourceUrl(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono"
+                    />
+                  </div>
 
-              {selectedNews.sourceUrl && (
-                <div className="mt-6 border-t border-stone-300 pt-3">
-                  <span className="font-mono text-[9px] text-stone-600 font-bold uppercase block mb-1">DATA VERIFICATION MATRIX (URL)</span>
-                  <a
-                    href={selectedNews.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-[10px] text-red-800 hover:underline break-all font-bold"
-                  >
-                    {selectedNews.sourceUrl}
-                  </a>
-                </div>
+                  <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      DRAFT CHRONICLE DETAILS
+                    </label>
+                    <textarea
+                      required
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar"
+                      rows={6}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <span className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest">
+                      ALERT URGENCY
+                    </span>
+                    <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
+                      {[
+                        { key: "low", text: "INFO", color: "bg-emerald-500", border: "border-emerald-600" },
+                        { key: "medium", text: "NOTICE", color: "bg-blue-500", border: "border-blue-600" },
+                        { key: "high", text: "WARNING", color: "bg-amber-500", border: "border-amber-600" },
+                        { key: "critical", text: "CRITICAL", color: "bg-red-500", border: "border-red-600" },
+                      ].map((pr) => (
+                        <button
+                          key={pr.key}
+                          type="button"
+                          onClick={() => setEditPriority(pr.key)}
+                          className={`py-1.5 rounded-lg border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${editPriority.toLowerCase() === pr.key ? "bg-stone-900 text-[#f4ecd8] border-stone-950 font-bold scale-[1.04]" : "bg-stone-300/40 text-stone-700 border-stone-400/50 hover:bg-stone-300"}`}
+                        >
+                          <span className={`w-2 h-2 rounded-full border ${pr.color} ${pr.border} ${editPriority.toLowerCase() === pr.key ? "animate-pulse" : "opacity-60"}`}></span>
+                          <span>{pr.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      ROUTING LABELS (COMMA SEPARATED)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="AI, SECURITY, GLITCH..."
+                      value={editTags}
+                      onChange={(e) => setEditTags(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono font-bold"
+                    />
+                  </div>
+
+                  <div className="mt-4 flex gap-4">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-emerald-800 text-stone-200 hover:bg-emerald-900 border-2 border-stone-900 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:shadow-[0_0_0_#000] flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="flex-1 bg-stone-400 text-stone-900 hover:bg-stone-500 border-2 border-stone-900 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:shadow-[0_0_0_#000] flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <div className="border-b-2 border-stone-900 pb-2.5 mb-5 text-center relative">
+                    {/* Stain */}
+                    <div className="coffee-stain -top-6 -right-6 w-20 h-20 opacity-30"></div>
+                    
+                    <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
+                      CLEARANCE FILE // NODE IDENTIFIER: {selectedNews.id.slice(0, 8)}
+                    </span>
+                    <h3 className="font-serif text-2xl font-black uppercase tracking-tight leading-none text-stone-950">
+                      {selectedNews.title}
+                    </h3>
+                  </div>
+
+                  <div className="font-serif text-[14px] leading-relaxed text-justify space-y-4">
+                    <p className="indent-6 text-stone-900">
+                      {selectedNews.content}
+                    </p>
+                  </div>
+
+                  {selectedNews.sourceUrl && (
+                    <div className="mt-6 border-t border-stone-300 pt-3">
+                      <span className="font-mono text-[9px] text-stone-600 font-bold uppercase block mb-1">DATA VERIFICATION MATRIX (URL)</span>
+                      <a
+                        href={selectedNews.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[10px] text-red-800 hover:underline break-all font-bold"
+                      >
+                        {selectedNews.sourceUrl}
+                      </a>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 mt-6 border-t border-stone-300 pt-4 font-mono text-[10px] text-stone-600 font-bold">
+                    <div>
+                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST PRIORITY</span>
+                      <span className="text-stone-950 uppercase">{selectedNews.priority}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span>
+                      <span className="text-stone-950">{new Date(selectedNews.createdAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-1.5 border-t border-stone-300 pt-4">
+                    {selectedNews.tags.map((tag) => (
+                      <span key={tag} className="font-mono text-[9px] bg-stone-300 text-stone-800 border border-stone-400 px-2 py-0.5 rounded font-bold uppercase">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Action Purge inside inspector */}
+                  <div className="mt-8 border-t-2 border-stone-900 pt-4 flex flex-wrap justify-between items-center gap-4">
+                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">SECURE COORDINATES CONTROL</span>
+                    <div className="flex gap-3">
+                      {(profile?.role === "admin" || profile?.role === "editor") && (
+                        <button
+                          onClick={() => setIsEditing(true)}
+                          className="vintage-stamp text-xs py-2 bg-transparent text-emerald-850 border-emerald-800 hover:bg-emerald-800 hover:text-white"
+                        >
+                          EDIT PAYLOAD
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handlePurge(selectedNews.id)}
+                        className="vintage-stamp text-xs py-2 bg-transparent text-red-800 border-red-800 hover:bg-red-800 hover:text-white"
+                      >
+                        PURGE TRANSMISSION
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
-
-              <div className="grid grid-cols-2 gap-4 mt-6 border-t border-stone-300 pt-4 font-mono text-[10px] text-stone-600 font-bold">
-                <div>
-                  <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST PRIORITY</span>
-                  <span className="text-stone-950 uppercase">{selectedNews.priority}</span>
-                </div>
-                <div>
-                  <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span>
-                  <span className="text-stone-950">{new Date(selectedNews.createdAt).toLocaleString()}</span>
-                </div>
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-1.5 border-t border-stone-300 pt-4">
-                {selectedNews.tags.map((tag) => (
-                  <span key={tag} className="font-mono text-[9px] bg-stone-300 text-stone-800 border border-stone-400 px-2 py-0.5 rounded font-bold uppercase">
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Action Purge inside inspector */}
-              <div className="mt-8 border-t-2 border-stone-900 pt-4 flex justify-between items-center">
-                <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">SECURE COORDINATES CONTROL</span>
-                <button
-                  onClick={() => handlePurge(selectedNews.id)}
-                  className="vintage-stamp text-xs py-2 bg-transparent text-red-800 border-red-800 hover:bg-red-800 hover:text-white"
-                >
-                  PURGE TRANSMISSION
-                </button>
-              </div>
-
             </div>
           </div>
         </div>
