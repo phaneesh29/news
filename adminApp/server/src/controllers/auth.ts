@@ -65,14 +65,16 @@ export const requestOtp = async (c: Context) => {
     const codeHash = hashOtp(email, otp)
     const expiresAt = new Date(Date.now() + OTP_TTL_MS)
 
-    await db.delete(adminOtps).where(eq(adminOtps.adminId, user.id))
+    await db.transaction(async (tx) => {
+      await tx.delete(adminOtps).where(eq(adminOtps.adminId, user.id))
 
-    await db.insert(adminOtps).values({
-      adminId: user.id,
-      codeHash,
-      expiresAt,
-      ipAddress,
-      userAgent: c.req.header('user-agent') || null
+      await tx.insert(adminOtps).values({
+        adminId: user.id,
+        codeHash,
+        expiresAt,
+        ipAddress,
+        userAgent: c.req.header('user-agent') || null
+      })
     })
 
     const emailRes = await sendEmail({
@@ -151,24 +153,26 @@ export const verifyOtp = async (c: Context) => {
       return c.json({ error: 'Invalid OTP' }, 401)
     }
 
-    await db.delete(adminOtps).where(eq(adminOtps.adminId, user.id))
-
     const token = generateSessionToken()
     const tokenHash = hashToken(token)
     const sessionExpiresAt = new Date(Date.now() + SESSION_TTL_MS)
 
-    await db.insert(adminSessions)
-      .values({
-        adminId: user.id,
-        tokenHash,
-        expiresAt: sessionExpiresAt,
-        ipAddress,
-        userAgent: c.req.header('user-agent') || null
-      })
+    await db.transaction(async (tx) => {
+      await tx.delete(adminOtps).where(eq(adminOtps.adminId, user.id))
 
-    await db.update(adminUsers)
-      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
-      .where(eq(adminUsers.id, user.id))
+      await tx.insert(adminSessions)
+        .values({
+          adminId: user.id,
+          tokenHash,
+          expiresAt: sessionExpiresAt,
+          ipAddress,
+          userAgent: c.req.header('user-agent') || null
+        })
+
+      await tx.update(adminUsers)
+        .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+        .where(eq(adminUsers.id, user.id))
+    })
 
     setSessionCookie(c, token)
 
