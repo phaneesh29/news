@@ -285,7 +285,7 @@ body::after {
 
 /* Customized scrollbar design */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
@@ -299,7 +299,7 @@ body::after {
 }
 
 .custom-paper-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .custom-paper-scrollbar::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);

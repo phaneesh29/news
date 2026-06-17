@@ -132,7 +132,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#060608] flex flex-col p-4 sm:p-6 overflow-hidden relative selection:bg-emerald-500/30 selection:text-emerald-200 text-white font-mono">
+    <div className="min-h-screen w-screen bg-[#060608] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-emerald-500/30 selection:text-emerald-200 text-white font-mono">
       
       {/* Desk surface grid */}
       <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
@@ -165,17 +165,17 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10 max-w-[1600px] mx-auto w-full h-full pb-4 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 relative z-10 max-w-[1600px] mx-auto w-full pb-8">
         
         {/* TILE 1: Operative Dossier Binder (Left Column) */}
-        <div className="lg:col-span-1 lg:row-span-2 flex flex-col relative h-full">
+        <div className="lg:col-span-1 lg:row-span-2 flex flex-col relative">
           <div className="absolute inset-0 bg-[#000]/65 rounded-2xl transform translate-x-1.5 translate-y-2 pointer-events-none z-0"></div>
           
           {/* Manila tab */}
           <div className="absolute top-0 right-12 w-36 h-5 bg-[#e2c091] border-t-2 border-l border-r border-[#b89b65] -mt-5 rounded-t-lg z-0"></div>
 
           {/* Dossier Body */}
-          <div className="bg-[#e2c091] border-2 border-[#b89b65] rounded-2xl p-5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] flex flex-col h-full relative z-10 overflow-hidden text-stone-900">
+          <div className="bg-[#e2c091] border-2 border-[#b89b65] rounded-2xl p-6 md:p-8 shadow-[0_15px_30px_rgba(0,0,0,0.6)] flex flex-col relative z-10 text-stone-900">
             
             {/* Spine seam */}
             <div className="absolute top-0 bottom-0 left-0 w-2 bg-gradient-to-r from-black/10 to-transparent border-r border-stone-800/10"></div>
@@ -184,7 +184,7 @@ export default function SettingsPage() {
             <div className="absolute -top-3 right-10 w-4 h-16 bg-gradient-to-b from-stone-400 to-stone-500 border border-stone-600 rounded-full transform rotate-[25deg] shadow z-30 pointer-events-none"></div>
 
             {/* Inner Parchment Sheet */}
-            <div className="flex-1 bg-[#f4ecd8] border border-stone-300 rounded shadow-[inset_0_0_20px_rgba(139,90,43,0.15)] flex flex-col p-6 overflow-y-auto custom-paper-scrollbar font-serif">
+            <div className="flex-1 bg-[#f4ecd8] border border-stone-300 rounded shadow-[inset_0_0_20px_rgba(139,90,43,0.15)] flex flex-col p-6 sm:p-8 font-serif">
               
               {/* Coffee Stain */}
               <div className="coffee-stain top-2 left-2 w-20 h-20 opacity-30"></div>
@@ -194,7 +194,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="mt-8 border-b-2 border-stone-900 pb-3 mb-6">
-                <h2 className="font-playfair text-xl sm:text-2xl font-black leading-none uppercase">OPERATIVE DOSSIER</h2>
+                <h2 className="font-playfair text-xl sm:text-2xl font-black leading-tight uppercase">OPERATIVE DOSSIER</h2>
                 <p className="font-mono text-[9.5px] font-bold text-stone-600 mt-2 truncate">DATABASE ID: {profile?.id || "UNKNOWN"}</p>
               </div>
 
@@ -235,10 +235,10 @@ export default function SettingsPage() {
         </div>
 
         {/* TILE 2: Live Synapse Tethers (Sessions) */}
-        <div className="lg:col-span-2 flex flex-col relative h-[45%] lg:h-full overflow-hidden">
+        <div className="lg:col-span-2 flex flex-col relative">
           <div className="absolute inset-0 bg-[#000]/65 rounded-2xl transform translate-x-1.5 translate-y-2 pointer-events-none z-0"></div>
 
-          <div className="bg-[#050508]/95 backdrop-blur-3xl border border-emerald-500/20 rounded-2xl p-5 shadow-[0_0_40px_rgba(0,255,100,0.06)] flex flex-col h-full relative z-10 overflow-hidden">
+          <div className="bg-[#050508]/95 backdrop-blur-3xl border border-emerald-500/20 rounded-2xl p-6 md:p-8 shadow-[0_0_40px_rgba(0,255,100,0.06)] flex flex-col relative z-10">
             
             {/* Dynamic Sweep Scanline */}
             <div className="scanline-sweep absolute top-0 left-0 right-0 pointer-events-none z-20"></div>
@@ -257,7 +257,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Sessions Tethers feed list */}
-            <div className="flex-1 overflow-y-auto space-y-2.5 pr-2 custom-scrollbar">
+            <div className="space-y-3 pr-2">
               {sessions.map((session: any, idx: number) => (
                 <div key={session.id} className="bg-black/55 border border-zinc-850 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-emerald-500/30 transition-all">
                   <div>
@@ -283,10 +283,10 @@ export default function SettingsPage() {
         </div>
 
         {/* TILE 3: Mainframe Access Whitelist Registry */}
-        <div className="lg:col-span-2 flex flex-col relative h-[50%] lg:h-full overflow-hidden">
+        <div className="lg:col-span-2 flex flex-col relative">
           <div className="absolute inset-0 bg-[#000]/65 rounded-2xl transform translate-x-1.5 translate-y-2 pointer-events-none z-0"></div>
 
-          <div className="bg-[#111115] border-2 border-red-950 p-5 shadow-[8px_8px_0_#7f1d1d] flex flex-col h-full relative z-10 overflow-hidden">
+          <div className="bg-[#111115] border-2 border-red-950 p-6 md:p-8 shadow-[8px_8px_0_#7f1d1d] flex flex-col relative z-10">
             
             {/* Scanlines visual */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,0,0.015)_1px,transparent_1px)] bg-[size:100%_5px] pointer-events-none z-0"></div>
@@ -298,7 +298,7 @@ export default function SettingsPage() {
               <span className="font-mono text-zinc-500 text-[10px]">&gt;&gt; AUTH_PROTOCOL_O9</span>
             </div>
 
-            <div className="flex-1 flex flex-col gap-5 relative z-10 min-h-0">
+            <div className="flex flex-col gap-5 relative z-10">
               
               {/* Form card details */}
               <div className="bg-black/45 border border-zinc-900 p-4 rounded-lg">
@@ -330,14 +330,14 @@ export default function SettingsPage() {
               </div>
 
               {/* whitelist ID cards container */}
-              <div className="flex-1 bg-black/70 border border-zinc-900 rounded-lg p-3 flex flex-col overflow-hidden">
+              <div className="bg-black/70 border border-zinc-900 rounded-lg p-4 flex flex-col">
                 <h4 className="font-mono text-red-500 text-[10px] border-b border-red-950 pb-1.5 mb-2.5 font-bold">
                   AUTHORIZED CLEARANCE LOG
                 </h4>
-                <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                <div className="space-y-2.5">
                   {whitelist.map((w) => (
                     <div key={w.id} className="font-mono text-[11px] text-zinc-300 flex justify-between items-center group/wl hover:bg-red-950/20 px-2 py-1.5 border border-zinc-900 rounded">
-                      <span className="truncate max-w-[200px]">{w.email}</span>
+                      <span className="truncate flex-1 min-w-0 mr-2">{w.email}</span>
                       <button
                         onClick={() => handleDeleteWhitelist(w.id)}
                         className="text-[9px] text-red-500 hover:text-red-400 font-bold opacity-0 group-hover/wl:opacity-100 transition-opacity border border-red-900/45 px-1.5 py-0.5 bg-black"

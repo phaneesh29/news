@@ -251,7 +251,7 @@ export default function DashboardPage() {
       };
 
       const res = await fetch(`${API_BASE_URL}/news/${selectedNews.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         credentials: "include"
@@ -306,7 +306,7 @@ export default function DashboardPage() {
   const isAdmin = profile?.role === "admin";
 
   return (
-    <div className="h-screen w-screen bg-[#060608] flex flex-col p-4 sm:p-6 overflow-hidden relative selection:bg-emerald-500/30 selection:text-emerald-200 text-white font-mono">
+    <div className="min-h-screen w-screen bg-[#060608] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-emerald-500/30 selection:text-emerald-200 text-white font-mono">
       
       {/* Visual Desk Grid Surface */}
       <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
@@ -323,7 +323,7 @@ export default function DashboardPage() {
               NEXUS <span className="text-red-600">CORE</span>
             </span>
           </div>
-          <span className="font-mono text-[9px] text-zinc-500 tracking-wider mt-1 uppercase">
+          <span className="font-mono text-[11px] text-zinc-400 tracking-wider mt-1 uppercase">
             OPERATIVE: <span className="text-red-500/90 font-bold">{profile?.email}</span> // ROLE: <span className="text-zinc-300 font-bold">{profile?.role?.toUpperCase()}</span>
           </span>
         </div>
@@ -331,11 +331,11 @@ export default function DashboardPage() {
         {/* Wireframe Spinning Compass Radar */}
         <div className="hidden md:flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity cursor-crosshair">
           <svg className="w-10 h-10 text-emerald-500/80 animate-[spin_12s_linear_infinite]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="0.8" stroke-dasharray="3 3"/>
-            <circle cx="50" cy="50" r="30" stroke="currentColor" stroke-width="0.8"/>
-            <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="0.6"/>
-            <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="0.6"/>
-            <path d="M50 50 L80 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3 3"/>
+            <circle cx="50" cy="50" r="30" stroke="currentColor" strokeWidth="0.8"/>
+            <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" strokeWidth="0.6"/>
+            <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" strokeWidth="0.6"/>
+            <path d="M50 50 L80 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
         </div>
 
@@ -358,14 +358,14 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-6 relative z-10 max-w-[1600px] mx-auto w-full h-full pb-4 overflow-hidden">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-10 relative z-10 max-w-[1600px] mx-auto w-full pb-8">
         
         {/* LEFT FOLDER: Cognitive Payload Typewriter (2 Cols) */}
-        <div className="lg:col-span-2 flex flex-col relative h-full">
+        <div className="lg:col-span-2 flex flex-col relative">
           <div className="absolute inset-0 bg-[#000]/65 rounded-2xl transform translate-x-1.5 translate-y-2 pointer-events-none z-0"></div>
 
           {/* Folder Body */}
-          <div className="bg-[#e2c091] border-2 border-[#b89b65] rounded-2xl p-5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] flex flex-col h-full relative z-10 overflow-hidden">
+          <div className="bg-[#e2c091] border-2 border-[#b89b65] rounded-2xl p-6 md:p-8 shadow-[0_15px_30px_rgba(0,0,0,0.6)] flex flex-col relative z-10">
             
             {/* Manila Spine Cover */}
             <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-gradient-to-r from-black/15 to-transparent border-r border-stone-800/10"></div>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
             {/* Brass clip overlay */}
             <div className="absolute -top-4 left-1/3 z-20 drop-shadow-[1px_3px_2px_rgba(0,0,0,0.45)] pointer-events-none transform -rotate-[5deg]">
               <svg className="w-6 h-16" viewBox="0 0 24 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2 C17 2 21 6 21 12 L21 60 C21 68 15 74 8 74 C3 74 1 70 1 64 L1 22 C1 18 4 15 8 15 C12 15 14 18 14 22 L14 54" stroke="#8c9099" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 2 C17 2 21 6 21 12 L21 60 C21 68 15 74 8 74 C3 74 1 70 1 64 L1 22 C1 18 4 15 8 15 C12 15 14 18 14 22 L14 54" stroke="#8c9099" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
 
@@ -395,7 +395,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Visual Typewriter Paper visual wrapper */}
-            <div className="flex-1 bg-[#f4ecd8] border border-stone-300 rounded shadow-[inset_0_0_20px_rgba(139,90,43,0.15)] flex flex-col p-4 overflow-hidden relative">
+            <div className="flex-1 bg-[#f4ecd8] border border-stone-300 rounded shadow-[inset_0_0_25px_rgba(139,90,43,0.15)] flex flex-col p-6 sm:p-8 relative">
               
               {/* Typewriter horizontal roller bar */}
               <div className="absolute -top-1.5 left-0 right-0 h-3 bg-gradient-to-b from-stone-900 to-stone-700 border-b border-stone-950 z-20 shadow-md"></div>
@@ -403,10 +403,10 @@ export default function DashboardPage() {
               {/* Paper texturized overlay */}
               <div className="absolute inset-0 opacity-20 mix-blend-multiply pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wIDBoNHYxSDB6bTAgMmg0djFIMHoiIGZpbGw9IiNlNWU1ZTUiIGZpbGwtb3BhY2l0eT0iLjQiLz4KPC9zdmc+')]"></div>
 
-              <form onSubmit={handleInjectPayload} className="flex-1 flex flex-col gap-4 overflow-y-auto pr-1 pt-3 custom-paper-scrollbar relative z-10 text-stone-900 font-serif">
+              <form onSubmit={handleInjectPayload} className="flex flex-col gap-6 pt-3 relative z-10 text-stone-900 font-serif">
                 
                 <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <label className="font-mono text-xs font-bold text-stone-700 uppercase tracking-widest mb-1">
                     TRANSMISSION HEADLINE
                   </label>
                   <input
@@ -415,12 +415,12 @@ export default function DashboardPage() {
                     placeholder="e.g. COMPILER DISRUPTION IN BOMBAY MATRIX..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none font-bold text-sm text-stone-950 placeholder-stone-600/40"
+                    className="w-full bg-transparent border-none outline-none font-bold text-base text-stone-950 placeholder-stone-600/40"
                   />
                 </div>
 
                 <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <label className="font-mono text-xs font-bold text-stone-700 uppercase tracking-widest mb-1">
                     SOURCE LINK
                   </label>
                   <input
@@ -428,12 +428,12 @@ export default function DashboardPage() {
                     placeholder="https://gridleak.secure/..."
                     value={sourceUrl}
                     onChange={(e) => setSourceUrl(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono"
+                    className="w-full bg-transparent border-none outline-none text-sm text-stone-900 placeholder-stone-600/40 font-mono"
                   />
                 </div>
 
                 <div className="flex flex-col flex-1 min-h-[140px] border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <label className="font-mono text-xs font-bold text-stone-700 uppercase tracking-widest mb-1">
                     DRAFT CHRONICLE DETAILS
                   </label>
                   <textarea
@@ -441,16 +441,16 @@ export default function DashboardPage() {
                     placeholder="Inject intelligence dispatch packets or system details here..."
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar"
+                    className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 min-h-[160px] leading-relaxed custom-paper-scrollbar"
                   />
                 </div>
 
                 {/* Priority Selection Bulb Controls */}
                 <div className="flex flex-col gap-1.5">
-                  <span className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest">
+                  <span className="font-mono text-xs font-bold text-stone-700 uppercase tracking-widest">
                     ALERT URGENCY
                   </span>
-                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
+                  <div className="grid grid-cols-4 gap-2 text-center text-xs font-mono">
                     {[
                       { key: "INFO_LEVEL", color: "bg-emerald-500", border: "border-emerald-600", text: "INFO" },
                       { key: "NOTICE_LEVEL", color: "bg-blue-500", border: "border-blue-600", text: "NOTICE" },
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                         className={`py-1.5 rounded-lg border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${priority === pr.key ? "bg-stone-900 text-[#f4ecd8] border-stone-950 font-bold scale-[1.04]" : "bg-stone-300/40 text-stone-700 border-stone-400/50 hover:bg-stone-300"} `}
                       >
                         {/* Bulb Indicator */}
-                        <span className={`w-2 h-2 rounded-full border ${pr.color} ${pr.border} ${priority === pr.key ? "animate-pulse shadow-[0_0_8px_rgba(0,0,0,1)]" : "opacity-60"}`}></span>
+                        <span className={`w-2.5 h-2.5 rounded-full border ${pr.color} ${pr.border} ${priority === pr.key ? "animate-pulse shadow-[0_0_8px_rgba(0,0,0,1)]" : "opacity-60"}`}></span>
                         <span>{pr.text}</span>
                       </button>
                     ))}
@@ -475,7 +475,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <label className="font-mono text-xs font-bold text-stone-700 uppercase tracking-widest mb-1">
                     ROUTING LABELS (COMMA SEPARATED)
                   </label>
                   <input
@@ -483,17 +483,17 @@ export default function DashboardPage() {
                     placeholder="AI, SECURITY, GLITCH..."
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono font-bold"
+                    className="w-full bg-transparent border-none outline-none text-sm text-stone-900 placeholder-stone-600/40 font-mono font-bold"
                   />
                 </div>
 
                 {/* Submit Trigger */}
                 <button
                   type="submit"
-                  className="mt-2 bg-red-800 text-stone-200 hover:bg-red-900 border-2 border-stone-900 font-mono font-bold text-xs py-3 rounded uppercase tracking-wider transition-all shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:shadow-[0_0_0_#000] flex items-center justify-center gap-2 cursor-pointer"
+                  className="mt-2 bg-red-800 text-stone-200 hover:bg-red-900 border-2 border-stone-900 font-mono font-bold text-sm py-3.5 rounded uppercase tracking-wider transition-all shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:shadow-[0_0_0_#000] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                   </svg>
                   Broadcast Draft to Mainframe
                 </button>
@@ -505,18 +505,18 @@ export default function DashboardPage() {
         </div>
 
         {/* RIGHT FOLDER: News Feeds + Simulated Term Log (3 Cols) */}
-        <div className="lg:col-span-3 flex flex-col relative h-full">
+        <div className="lg:col-span-3 flex flex-col relative">
           <div className="absolute inset-0 bg-[#000]/65 rounded-2xl transform translate-x-1.5 translate-y-2 pointer-events-none z-0"></div>
           <div className="absolute inset-0 bg-[#dbcfbc] rounded-2xl transform -rotate-[0.6deg] pointer-events-none border border-stone-800/10"></div>
 
           {/* Top Page Layer */}
-          <div className="bg-[#f2efe6] border-2 border-[#d3c7b3] rounded-2xl p-5 shadow-[0_10px_25px_rgba(0,0,0,0.5)] flex flex-col h-full relative z-10 overflow-hidden">
+          <div className="bg-[#f2efe6] border-2 border-[#d3c7b3] rounded-2xl p-6 md:p-8 shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex flex-col relative z-10">
             
             {/* Spine seam */}
             <div className="absolute top-0 bottom-0 left-0 w-2 bg-gradient-to-r from-black/10 to-transparent border-r border-stone-800/10"></div>
             
             {/* Header meta */}
-            <div className="flex justify-between items-center text-[8px] font-mono text-stone-500 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
+            <div className="flex justify-between items-center text-[10px] sm:text-xs font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
               <span>NEXUS DISPATCH DECK</span>
               <span>GRID MONITOR STATE</span>
               <span>TIME CHECK: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}</span>
@@ -525,12 +525,12 @@ export default function DashboardPage() {
             {/* Headlines Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-stone-800 pb-3 mb-4 pl-2 gap-3">
               <div>
-                <h2 className="font-playfair text-2xl sm:text-3xl font-black text-stone-900 tracking-tighter uppercase leading-none select-none">
+                <h2 className="font-playfair text-3xl sm:text-4xl font-black text-stone-900 tracking-tighter uppercase leading-none select-none">
                   METASPHERE <span className="text-red-800">CHRONICLES</span>
                 </h2>
                 
                 {/* Simulated newspaper tabs */}
-                <div className="flex gap-2.5 text-[8.5px] font-mono font-bold text-red-800 mt-2 uppercase tracking-wide">
+                <div className="flex gap-2.5 text-[10px] sm:text-xs font-mono font-bold text-red-800 mt-2 uppercase tracking-wide">
                   <span>LIVE TRANSMISSIONS</span>
                   <span className="text-stone-400">•</span>
                   <span>MONITORED CHANNELS</span>
@@ -545,26 +545,26 @@ export default function DashboardPage() {
                     placeholder="Search node IDs..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#1c1c1f] text-stone-200 text-[10.5px] pl-3 pr-8 py-1.5 font-mono outline-none border border-stone-900 focus:border-red-700 rounded shadow-[inset_0_1px_4px_rgba(0,0,0,0.8)]"
+                    className="w-full bg-[#1c1c1f] text-stone-200 text-xs sm:text-sm pl-3 pr-8 py-2 font-mono outline-none border border-stone-900 focus:border-red-700 rounded shadow-[inset_0_1px_4px_rgba(0,0,0,0.8)]"
                   />
-                  <svg className="w-3.5 h-3.5 text-zinc-500 absolute right-2.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg className="w-3.5 h-3.5 text-zinc-500 absolute right-2.5 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
               </div>
             </div>
 
             {/* Split Panel: Feed List and Event Terminal logs */}
-            <div className="flex-1 flex flex-col gap-4 overflow-hidden pl-2">
+            <div className="flex flex-col gap-6 pl-2">
               
               {/* Feeds Container */}
-              <div className="flex-1 bg-[#121215] border-2 border-stone-950 rounded-xl p-3 shadow-[inset_0_4px_15px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden relative">
+              <div className="bg-[#121215] border-2 border-stone-950 rounded-xl p-4 sm:p-6 shadow-[inset_0_4px_15px_rgba(0,0,0,0.85)] flex flex-col relative">
                 
                 {/* Grid Scanlines */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none z-0"></div>
 
                 {/* Priority Selector Filter Bar */}
-                <div className="flex flex-wrap gap-2.5 pb-3 border-b border-zinc-900/60 mb-3 relative z-10 font-mono text-[9px] uppercase tracking-wider">
+                <div className="flex flex-wrap gap-2.5 pb-3 border-b border-zinc-900/60 mb-3 relative z-10 font-mono text-[11px] sm:text-xs uppercase tracking-wider">
                   <span className="text-zinc-500 font-bold self-center mr-1">FILTER LEVEL:</span>
                   {["ALL", "CRITICAL", "WARNING", "NOTICE", "INFO"].map((level) => (
                     <button
@@ -580,7 +580,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
 
-                <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar relative z-10">
+                <div className="space-y-4 relative z-10">
                   {newsList.filter(item => {
                     if (selectedPriority === "ALL") return true;
                     const lowerPriority = item.priority.toLowerCase();
@@ -610,34 +610,34 @@ export default function DashboardPage() {
                           setEditTags(item.tags.join(", "));
                           addLog(`INSPECTOR: mounting node record ${item.id.slice(0, 8)}`);
                         }}
-                        className="bg-black/85 border border-zinc-900/60 p-3.5 rounded-lg hover:border-red-800/40 hover:bg-stone-950/90 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer"
+                        className="bg-black/85 border border-zinc-900/60 p-4 rounded-lg hover:border-red-800/40 hover:bg-stone-950/90 transition-all flex flex-col gap-2.5 relative group/item shadow cursor-pointer"
                       >
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <span className={`font-mono text-[8px] border px-2 py-0.5 rounded tracking-wide uppercase font-bold ${getPriorityColors(item.priority)}`}>
+                        <div className="flex flex-wrap gap-2.5 items-center">
+                          <span className={`font-mono text-[10px] border px-2.5 py-0.5 rounded tracking-wide uppercase font-bold ${getPriorityColors(item.priority)}`}>
                             {item.priority}
                           </span>
-                          <span className="font-mono text-[9px] text-zinc-500">
+                          <span className="font-mono text-[11px] text-zinc-400">
                             {new Date(item.createdAt).toLocaleString()}
                           </span>
                         </div>
 
-                        <h4 className="font-serif text-sm font-bold text-zinc-200 tracking-wide uppercase group-hover/item:text-white transition-colors">
+                        <h4 className="font-serif text-base sm:text-lg font-black text-zinc-200 tracking-wide uppercase group-hover/item:text-white transition-colors">
                           {item.title}
                         </h4>
                         
-                        <p className="font-mono text-[11px] text-zinc-400 leading-relaxed truncate max-w-full">
+                        <p className="font-mono text-xs sm:text-sm text-zinc-300 leading-relaxed truncate max-w-full">
                           {item.content}
                         </p>
 
                         <div className="flex flex-wrap justify-between items-center mt-1">
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-2">
                             {item.tags.map((tag) => (
-                              <span key={tag} className="font-mono text-[8px] bg-red-950/20 border border-red-900/30 text-red-400 px-1.5 py-0.2 rounded uppercase">
+                              <span key={tag} className="font-mono text-[10px] bg-red-950/20 border border-red-900/30 text-red-400 px-2 py-0.5 rounded uppercase font-bold">
                                 #{tag}
                               </span>
                             ))}
                           </div>
-                          <span className="font-mono text-[9px] text-zinc-600 group-hover/item:text-cyan-400 transition-colors">
+                          <span className="font-mono text-[11px] text-zinc-500 group-hover/item:text-cyan-400 transition-colors font-bold">
                             [ Inspect Coordinates ]
                           </span>
                         </div>
@@ -649,16 +649,16 @@ export default function DashboardPage() {
                   {newsList.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                       <div className="w-14 h-14 text-zinc-700 mb-4 animate-pulse">
-                        <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <circle cx="50" cy="50" r="12" stroke-dasharray="3 3"/>
+                        <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <circle cx="50" cy="50" r="12" strokeDasharray="3 3"/>
                           <circle cx="50" cy="50" r="30"/>
-                          <path d="M50 20 L50 80 M20 50 L80 50" stroke-width="1"/>
+                          <path d="M50 20 L50 80 M20 50 L80 50" strokeWidth="1"/>
                         </svg>
                       </div>
-                      <h3 className="font-mono text-zinc-400 text-sm font-bold tracking-widest uppercase">
+                      <h3 className="font-mono text-zinc-400 text-base font-bold tracking-widest uppercase">
                         METASPHERE QUIET
                       </h3>
-                      <p className="font-serif text-[10.5px] text-zinc-500 max-w-xs leading-relaxed mt-2 font-bold">
+                      <p className="font-serif text-xs sm:text-sm text-zinc-400 max-w-sm leading-relaxed mt-2 font-bold">
                         Awaiting dispatch signals. Broadcast payloads will populate details in real-time coordinates.
                       </p>
                     </div>
@@ -672,7 +672,7 @@ export default function DashboardPage() {
                           fetchNews(nextCursor, searchQuery, true);
                         }}
                         disabled={fetchLoading}
-                        className="font-mono text-[10px] border border-emerald-500/50 text-emerald-400 px-3 py-1.5 hover:bg-emerald-500 hover:text-black transition-all uppercase tracking-widest disabled:opacity-50 cursor-pointer"
+                        className="font-mono text-xs sm:text-sm border border-emerald-500/50 text-emerald-400 px-4 py-2 hover:bg-emerald-500 hover:text-black transition-all uppercase tracking-widest disabled:opacity-50 cursor-pointer"
                       >
                         {fetchLoading ? "[ ACQUIRING BITS... ]" : "[ LOAD MORE DECK NODES ]"}
                       </button>
@@ -682,11 +682,11 @@ export default function DashboardPage() {
               </div>
 
               {/* Event Logs console drawer */}
-              <div className="h-28 bg-black border border-stone-950 rounded-lg p-3 shadow-inner flex flex-col overflow-hidden relative">
-                <div className="absolute top-0.5 right-3 text-[8px] font-mono text-emerald-600 font-bold uppercase tracking-widest select-none animate-pulse">
+              <div className="h-36 bg-black border border-stone-950 rounded-lg p-4 shadow-inner flex flex-col relative">
+                <div className="absolute top-0.5 right-3 text-[10px] font-mono text-emerald-600 font-bold uppercase tracking-widest select-none animate-pulse">
                   SYSTEM LOGS // MONITORING
                 </div>
-                <div className="flex-1 overflow-y-auto font-mono text-[9px] text-emerald-500/80 space-y-1.5 custom-scrollbar pr-1">
+                <div className="flex-1 overflow-y-auto font-mono text-[11px] text-emerald-500/80 space-y-1.5 custom-scrollbar pr-1">
                   {terminalLogs.map((log, index) => (
                     <div key={index} className="truncate">
                       &gt; {log}
@@ -910,7 +910,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <svg className="w-3.5 h-3.5 text-red-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg className="w-3.5 h-3.5 text-red-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
@@ -919,7 +919,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <svg className="w-3.5 h-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg className="w-3.5 h-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>

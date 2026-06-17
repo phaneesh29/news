@@ -49,7 +49,7 @@ export default function LoginPage() {
         {/* Title bar resembling classic win95 window */}
         <div className="cd-rom-titlebar select-none">
           <span className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
               <line x1="2" y1="10" x2="22" y2="10"/>
               <path d="M6 6h.01M10 6h.01"/>
@@ -106,11 +106,11 @@ export default function LoginPage() {
                   CLASSIFIED
                 </div>
                 <div className="w-12 h-12 mx-auto opacity-75 mix-blend-multiply flex items-center justify-center">
-                  <svg className="w-full h-full text-stone-950" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <svg className="w-full h-full text-stone-950" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <circle cx="50" cy="50" r="40" />
                     <line x1="50" y1="10" x2="50" y2="90" />
                     <line x1="10" y1="50" x2="90" y2="50" />
-                    <circle cx="50" cy="50" r="15" stroke-dasharray="3 3"/>
+                    <circle cx="50" cy="50" r="15" strokeDasharray="3 3"/>
                   </svg>
                 </div>
                 <p className="font-mono text-center text-[9px] mt-2 uppercase font-black tracking-wider text-stone-800">

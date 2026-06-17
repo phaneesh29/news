@@ -43,7 +43,7 @@ newsRoutes.use('*', requireAuth)
 
 newsRoutes.get('/', getAllNews)
 newsRoutes.get('/search', zValidator('query', searchQuerySchema), searchNews)
-newsRoutes.post('/', zValidator('query', createNewsSchema), createNews)
+newsRoutes.post('/', zValidator('json', createNewsSchema), createNews)
 newsRoutes.get('/:id', zValidator('param', paramsSchema), getNewsById)
 newsRoutes.patch('/:id', zValidator('param', paramsSchema), zValidator('json', updateNewsSchema), updateNews)
 newsRoutes.delete('/:id', zValidator('param', paramsSchema), deleteNews)
