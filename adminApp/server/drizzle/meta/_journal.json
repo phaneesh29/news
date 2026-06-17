@@ -15,6 +15,13 @@
       "when": 1781622090099,
       "tag": "0001_long_darwin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781664471125,
+      "tag": "0002_simple_thundra",
+      "breakpoints": true
     }
   ]
 }

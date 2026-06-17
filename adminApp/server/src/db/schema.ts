@@ -51,7 +51,8 @@ export const adminSessions = pgTable('admin_sessions', {
 
 export const adminUsersRelations = relations(adminUsers, ({ many }) => ({
   otps: many(adminOtps),
-  sessions: many(adminSessions)
+  sessions: many(adminSessions),
+  news: many(devNews)
 }))
 
 export const adminOtpsRelations = relations(adminOtps, ({ one }) => ({
@@ -75,3 +76,25 @@ export const adminWhitelist = pgTable('admin_whitelist', {
 }, (table) => [
   index('admin_whitelist_email_idx').on(table.email)
 ])
+
+export const newsPriorityEnum = pgEnum('news_priority', ['low', 'medium', 'high', 'critical'])
+
+export const devNews = pgTable('dev_news', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  content: text('content').notNull(),
+  sourceUrl: varchar('source_url', { length: 512 }),
+  priority: newsPriorityEnum('priority').notNull().default('low'),
+  authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+}, (table) => [
+  index('dev_news_priority_idx').on(table.priority),
+  index('dev_news_created_at_idx').on(table.createdAt)
+])
+
+export const devNewsRelations = relations(devNews, ({ one }) => ({
+  author: one(adminUsers, {
+    fields: [devNews.authorId],
+    references: [adminUsers.id]
+  })
+}))
