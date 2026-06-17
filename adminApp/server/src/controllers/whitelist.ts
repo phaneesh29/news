@@ -7,7 +7,7 @@ import { normalizeEmail } from '../lib/auth.js'
 export const addWhitelistEmail = async (c: Context) => {
   try {
     const user = c.get('user')
-    
+
     if (user.role !== 'admin') {
       return c.json({ error: 'Only admins can whitelist new emails' }, 403)
     }
@@ -22,11 +22,11 @@ export const addWhitelistEmail = async (c: Context) => {
 
     const item = result[0]
 
-    return c.json({ 
-      message: 'Email whitelisted successfully', 
-      email, 
-      id: item?.id, 
-      createdAt: item?.createdAt 
+    return c.json({
+      message: 'Email whitelisted successfully',
+      email,
+      id: item?.id,
+      createdAt: item?.createdAt
     })
   } catch (error: any) {
     console.error('Add Whitelist Error:', error)
@@ -37,7 +37,7 @@ export const addWhitelistEmail = async (c: Context) => {
 export const getWhitelistEmails = async (c: Context) => {
   try {
     const user = c.get('user')
-    
+
     if (user.role !== 'admin') {
       return c.json({ error: 'Only admins can view whitelisted emails' }, 403)
     }
@@ -58,7 +58,7 @@ export const getWhitelistEmails = async (c: Context) => {
 export const deleteWhitelistEmail = async (c: Context) => {
   try {
     const user = c.get('user')
-    
+
     if (user.role !== 'admin') {
       return c.json({ error: 'Only admins can delete whitelisted emails' }, 403)
     }
@@ -82,11 +82,12 @@ export const deleteWhitelistEmail = async (c: Context) => {
       return c.json({ error: 'Action prohibited' }, 403)
     }
 
-    await db.delete(adminWhitelist)
-      .where(eq(adminWhitelist.id, id))
-
-    await db.delete(adminUsers)
-      .where(eq(adminUsers.email, entry.email))
+    await db.transaction(async (tx) => {
+      await tx.delete(adminWhitelist)
+        .where(eq(adminWhitelist.id, id))
+      await tx.delete(adminUsers)
+        .where(eq(adminUsers.email, entry.email))
+    })
 
     return c.json({ message: 'Email removed from whitelist and account deleted successfully', email: entry.email })
   } catch (error: any) {
