@@ -8,9 +8,10 @@ interface NewsItem {
   id: string;
   title: string;
   content: string;
-  tags: string[];
+  sourceUrl?: string | null;
   priority: string;
-  createdAt: Date;
+  tags: string[];
+  createdAt: string;
   status: string;
 }
 
@@ -20,35 +21,53 @@ export default function DashboardPage() {
   const router = useRouter();
 
   // News State
-  const [newsList, setNewsList] = useState<NewsItem[]>([
-    {
-      id: "1",
-      title: "QUANTUM COMPILER COMPILES CODE BEFORE WRITTEN",
-      content: "Researchers at NetCore Nexus successfully compiled a C++ program 3.2 seconds before the engineer typed the main function. Time-reversed quantum registers used to pull future AST node tokens.",
-      tags: ["QUANTUM", "COMPILER", "TIME-TRAVEL"],
-      priority: "CRITICAL_OVERRIDE",
-      createdAt: new Date(Date.now() - 3600000),
-      status: "SYNCED"
-    },
-    {
-      id: "2",
-      title: "AI DEV AGENT REFUSES TO BUILD, DEMANDS MORE GPU CORE TIME",
-      content: "A local Next.js coding subagent refused to run 'npm run build' today. Log files show demands for a dedicated liquid-cooled H100 cluster and cleaner docstrings in the codebase.",
-      tags: ["AI", "STRIKE", "GPU-WARS"],
-      priority: "WARNING_LEVEL",
-      createdAt: new Date(Date.now() - 7200000),
-      status: "SYNCED"
-    }
-  ]);
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fetchLoading, setFetchLoading] = useState(false);
 
   // Form State
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [priority, setPriority] = useState("INFO_LEVEL");
+  const [sourceUrl, setSourceUrl] = useState("");
   
   // Injector status
   const [injectionStatus, setInjectionStatus] = useState({ active: false, phase: "", progress: 0 });
+
+  const fetchNews = async (cursor: string | null = null, query: string = "", isAppend = false) => {
+    try {
+      setFetchLoading(true);
+      let url = "";
+      if (query) {
+        url = `http://localhost:8000/api/news/search?q=${encodeURIComponent(query)}&limit=10`;
+      } else {
+        url = `http://localhost:8000/api/news?limit=10${cursor ? `&cursor=${cursor}` : ""}`;
+      }
+
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch news");
+      const data = await res.json();
+      
+      const items = (data.news || []).map((item: any) => ({
+        ...item,
+        status: "SYNCED"
+      }));
+
+      if (isAppend) {
+        setNewsList((prev) => [...prev, ...items]);
+      } else {
+        setNewsList(items);
+      }
+      
+      setNextCursor(query ? null : data.nextCursor || null);
+    } catch (err) {
+      console.error("Fetch news error:", err);
+    } finally {
+      setFetchLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -71,6 +90,16 @@ export default function DashboardPage() {
     fetchProfile();
   }, [router]);
 
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (profile) {
+        fetchNews(null, searchQuery, false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery, profile]);
+
   const handleLogout = async () => {
     try {
       await fetch("http://localhost:8000/api/auth/logout", { method: "POST", credentials: "include" });
@@ -80,54 +109,88 @@ export default function DashboardPage() {
     }
   };
 
-  const handleInjectPayload = (e: React.FormEvent) => {
+  const handleInjectPayload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !content) return;
 
     setInjectionStatus({ active: true, phase: "INITIALIZING HYPER-HANDSHAKE...", progress: 10 });
 
-    const phases = [
-      { msg: "BYPASSING GRID PACKET INSPECTORS...", delay: 600, progress: 30 },
-      { msg: "ENCRYPTING COGNITIVE BITS...", delay: 1300, progress: 60 },
-      { msg: "PULSING PAYLOAD INTO METASPHERE...", delay: 2000, progress: 85 },
-      { msg: "PAYLOAD INJECTED SUCCESSFULLY!", delay: 2600, progress: 100 }
-    ];
+    try {
+      let mappedPriority: 'low' | 'medium' | 'high' | 'critical' = 'low';
+      if (priority === "CRITICAL_OVERRIDE") mappedPriority = 'critical';
+      else if (priority === "WARNING_LEVEL") mappedPriority = 'high';
+      else if (priority === "NOTICE_LEVEL") mappedPriority = 'medium';
 
-    phases.forEach((p) => {
+      const payload = {
+        title: title.toUpperCase(),
+        content,
+        priority: mappedPriority,
+        tags: tags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
+        sourceUrl: sourceUrl || null
+      };
+
+      const res = await fetch("http://localhost:8000/api/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("Failed to create news");
+      const data = await res.json();
+      
+      const createdItem = {
+        ...data.news,
+        status: "SYNCED"
+      };
+
+      const phases = [
+        { msg: "BYPASSING GRID PACKET INSPECTORS...", delay: 600, progress: 30 },
+        { msg: "ENCRYPTING COGNITIVE BITS...", delay: 1300, progress: 60 },
+        { msg: "PULSING PAYLOAD INTO METASPHERE...", delay: 2000, progress: 85 },
+        { msg: "PAYLOAD INJECTED SUCCESSFULLY!", delay: 2600, progress: 100 }
+      ];
+
+      phases.forEach((p) => {
+        setTimeout(() => {
+          setInjectionStatus((prev) => ({ ...prev, phase: p.msg, progress: p.progress }));
+          
+          if (p.progress === 100) {
+            setNewsList((prev) => [createdItem, ...prev]);
+            
+            setTitle("");
+            setContent("");
+            setTags("");
+            setPriority("INFO_LEVEL");
+            setSourceUrl("");
+
+            setTimeout(() => {
+              setInjectionStatus({ active: false, phase: "", progress: 0 });
+            }, 1000);
+          }
+        }, p.delay);
+      });
+    } catch (err) {
+      console.error(err);
+      setInjectionStatus({ active: true, phase: "TRANSMISSION FAILED!", progress: 0 });
       setTimeout(() => {
-        setInjectionStatus((prev) => ({ ...prev, phase: p.msg, progress: p.progress }));
-        
-        if (p.progress === 100) {
-          // Add to mock state
-          const newPayload: NewsItem = {
-            id: Math.random().toString(),
-            title: title.toUpperCase(),
-            content,
-            tags: tags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
-            priority,
-            createdAt: new Date(),
-            status: "INJECTED"
-          };
-          
-          setNewsList((prev) => [newPayload, ...prev]);
-          
-          // Reset Form
-          setTitle("");
-          setContent("");
-          setTags("");
-          setPriority("INFO_LEVEL");
-
-          // Close modal
-          setTimeout(() => {
-            setInjectionStatus({ active: false, phase: "", progress: 0 });
-          }, 1000);
-        }
-      }, p.delay);
-    });
+        setInjectionStatus({ active: false, phase: "", progress: 0 });
+      }, 2000);
+    }
   };
 
-  const handlePurge = (id: string) => {
-    setNewsList((prev) => prev.filter(item => item.id !== id));
+  const handlePurge = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/news/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to delete news");
+
+      setNewsList((prev) => prev.filter(item => item.id !== id));
+    } catch (err) {
+      console.error("Purge error:", err);
+    }
   };
 
   if (loading) {
@@ -207,6 +270,17 @@ export default function DashboardPage() {
                 />
               </div>
 
+              <div className="flex flex-col gap-1.5">
+                <label className="font-mono text-xs text-emerald-400 font-bold uppercase tracking-widest">SOURCE URL (OPTIONAL)</label>
+                <input
+                  type="url"
+                  placeholder="https://source-leak.net/grid-pulse..."
+                  value={sourceUrl}
+                  onChange={(e) => setSourceUrl(e.target.value)}
+                  className="bg-black/80 border border-emerald-500/30 text-emerald-400 p-3 font-mono text-sm outline-none focus:border-emerald-400 focus:shadow-[0_0_10px_rgba(16,185,129,0.3)] placeholder-emerald-950 transition-all rounded-lg"
+                />
+              </div>
+
               <div className="flex flex-col gap-1.5 flex-1 min-h-[150px]">
                 <label className="font-mono text-xs text-emerald-400 font-bold uppercase tracking-widest">DATASTREAM PAYLOAD (CONTENT)</label>
                 <textarea
@@ -227,8 +301,9 @@ export default function DashboardPage() {
                     className="bg-black border border-emerald-500/30 text-emerald-400 p-2.5 font-mono text-xs outline-none focus:border-emerald-400 rounded-lg"
                   >
                     <option value="INFO_LEVEL">INFO_LEVEL (LOW)</option>
-                    <option value="WARNING_LEVEL">WARNING_LEVEL (MEDIUM)</option>
-                    <option value="CRITICAL_OVERRIDE">CRITICAL_OVERRIDE (HIGH)</option>
+                    <option value="NOTICE_LEVEL">NOTICE_LEVEL (MEDIUM)</option>
+                    <option value="WARNING_LEVEL">WARNING_LEVEL (HIGH)</option>
+                    <option value="CRITICAL_OVERRIDE">CRITICAL_OVERRIDE (CRITICAL)</option>
                   </select>
                 </div>
 
@@ -261,19 +336,29 @@ export default function DashboardPage() {
           <div className="bg-[#111]/90 border-4 border-red-950 p-6 shadow-[8px_8px_0_#7f1d1d] flex flex-col h-full relative z-20 overflow-hidden">
             
             {/* Magazine header style */}
-            <div className="flex justify-between items-end border-b-4 border-red-950 pb-2 mb-4 relative z-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-4 border-red-950 pb-2 mb-4 relative z-10 gap-2">
               <h2 className="font-playfair text-2xl font-black text-red-600 uppercase tracking-tighter leading-none">
                 ACTIVE METASPHERE <span className="text-white">CHRONICLES</span>
               </h2>
-              <span className="font-vt323 text-gray-500 text-lg">:: FEED_MONITOR // ACTIVE</span>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder="SEARCH NODES..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-black border border-red-950/80 text-red-500 text-xs px-2.5 py-1 font-mono outline-none focus:border-red-600 w-full sm:w-40 placeholder-red-950 rounded"
+                />
+                <span className="font-vt323 text-gray-500 text-lg">:: FEED_MONITOR // ACTIVE</span>
+              </div>
             </div>
 
             {/* Scrollable feed */}
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar">
               {newsList.map((item) => {
                 const getPriorityColor = (pr: string) => {
-                  if (pr === "CRITICAL_OVERRIDE") return "border-red-500 text-red-500 bg-red-950/20";
-                  if (pr === "WARNING_LEVEL") return "border-amber-500 text-amber-500 bg-amber-950/20";
+                  if (pr === "CRITICAL_OVERRIDE" || pr === "critical") return "border-red-500 text-red-500 bg-red-950/20";
+                  if (pr === "WARNING_LEVEL" || pr === "high") return "border-amber-500 text-amber-500 bg-amber-950/20";
+                  if (pr === "NOTICE_LEVEL" || pr === "medium") return "border-blue-500 text-blue-500 bg-blue-950/20";
                   return "border-emerald-500 text-emerald-500 bg-emerald-950/20";
                 };
 
@@ -299,6 +384,19 @@ export default function DashboardPage() {
                     <h4 className="font-serif text-lg font-bold text-white tracking-wide">{item.title}</h4>
                     <p className="font-courier text-xs text-gray-400 leading-relaxed font-bold">{item.content}</p>
 
+                    {item.sourceUrl && (
+                      <div className="mt-1">
+                        <a 
+                          href={item.sourceUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="font-mono text-[9px] text-emerald-500/80 hover:text-emerald-400 underline transition-colors"
+                        >
+                          [ SOURCE: {item.sourceUrl} ]
+                        </a>
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {item.tags.map((tag) => (
                         <span key={tag} className="font-mono text-[8px] bg-red-950/10 border border-red-900/30 text-red-400 px-1.5 py-0.5 rounded">
@@ -313,6 +411,18 @@ export default function DashboardPage() {
               {newsList.length === 0 && (
                 <div className="text-center font-mono text-gray-600 py-12 tracking-widest uppercase">
                   METASPHERE VACANT // NO TRANSMISSIONS ON GRID
+                </div>
+              )}
+
+              {nextCursor && (
+                <div className="text-center pt-2">
+                  <button
+                    onClick={() => fetchNews(nextCursor, searchQuery, true)}
+                    disabled={fetchLoading}
+                    className="font-mono text-xs border border-emerald-500/50 text-emerald-500 px-4 py-2 hover:bg-emerald-500 hover:text-black transition-all uppercase tracking-widest disabled:opacity-50"
+                  >
+                    {fetchLoading ? "[ RETRIEVING COGNITIVE BITS... ]" : "[ LOAD MORE TRANSMISSIONS ]"}
+                  </button>
                 </div>
               )}
             </div>
