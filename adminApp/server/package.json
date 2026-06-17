@@ -12,16 +12,17 @@
   "dependencies": {
     "@hono/node-server": "^1.19.14",
     "@hono/zod-validator": "^0.7.6",
-    "@neondatabase/serverless": "^1.1.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.44.7",
     "hono": "^4.12.23",
     "hono-rate-limiter": "^0.5.3",
+    "pg": "^8.21.0",
     "resend": "^6.12.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
+    "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.22.3",
     "typescript": "^5.8.3"
