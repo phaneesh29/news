@@ -9,15 +9,19 @@ export const newsRoutes = new Hono()
 const newsPrioritySchema = z.enum(['low', 'medium', 'high', 'critical'])
 
 const createNewsSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required'),
   content: z.string().trim().min(1, 'Content is required'),
   sourceUrl: z.url('Invalid source URL').max(512).nullable().optional(),
-  priority: newsPrioritySchema.optional()
+  priority: newsPrioritySchema.optional(),
+  tags: z.array(z.string()).optional()
 })
 
 const updateNewsSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required').optional(),
   content: z.string().trim().min(1, 'Content is required').optional(),
   sourceUrl: z.url('Invalid source URL').max(512).nullable().optional(),
-  priority: newsPrioritySchema.optional()
+  priority: newsPrioritySchema.optional(),
+  tags: z.array(z.string()).optional()
 }).refine((body) => Object.keys(body).length > 0, {
   message: 'At least one field is required'
 })

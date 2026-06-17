@@ -7,9 +7,11 @@ const canManageNews = (role: string) => role === 'admin' || role === 'editor'
 
 const newsSelect = {
   id: devNews.id,
+  title: devNews.title,
   content: devNews.content,
   sourceUrl: devNews.sourceUrl,
   priority: devNews.priority,
+  tags: devNews.tags,
   authorId: devNews.authorId,
   createdAt: devNews.createdAt,
   updatedAt: devNews.updatedAt,
@@ -42,16 +44,20 @@ export const createNews = async (c: Context) => {
     }
 
     const body = await c.req.json() as {
+      title: string
       content: string
       sourceUrl?: string | null
       priority?: 'low' | 'medium' | 'high' | 'critical'
+      tags?: string[]
     }
 
     const insertedNews = await db.insert(devNews)
       .values({
+        title: body.title,
         content: body.content,
         sourceUrl: body.sourceUrl ?? null,
         priority: body.priority ?? 'low',
+        tags: body.tags ?? [],
         authorId: user.id
       })
       .returning()
@@ -171,13 +177,19 @@ export const updateNews = async (c: Context) => {
     const id = c.req.param('id')!
 
     const body = await c.req.json() as {
+      title?: string
       content?: string
       sourceUrl?: string | null
       priority?: 'low' | 'medium' | 'high' | 'critical'
+      tags?: string[]
     }
 
     const updates: Partial<typeof devNews.$inferInsert> = {
       updatedAt: new Date()
+    }
+
+    if (body.title !== undefined) {
+      updates.title = body.title
     }
 
     if (body.content !== undefined) {
@@ -190,6 +202,10 @@ export const updateNews = async (c: Context) => {
 
     if (body.priority !== undefined) {
       updates.priority = body.priority
+    }
+
+    if (body.tags !== undefined) {
+      updates.tags = body.tags
     }
 
     const updatedNews = await db.update(devNews)

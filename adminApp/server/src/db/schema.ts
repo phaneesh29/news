@@ -1,5 +1,5 @@
 import { pgTable, timestamp, uuid, varchar, integer, text, boolean, pgEnum, index } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 
 
 export const adminRoleEnum = pgEnum('admin_role', ['admin', 'editor', 'viewer'])
@@ -81,9 +81,11 @@ export const newsPriorityEnum = pgEnum('news_priority', ['low', 'medium', 'high'
 
 export const devNews = pgTable('dev_news', {
   id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
   content: text('content').notNull(),
   sourceUrl: varchar('source_url', { length: 512 }),
   priority: newsPriorityEnum('priority').notNull().default('low'),
+  tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
   authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
