@@ -1,5 +1,5 @@
 import { Context } from 'hono'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, lt, or, and } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { adminUsers, devNews } from '../db/schema.js'
 
@@ -14,6 +14,23 @@ const newsSelect = {
   createdAt: devNews.createdAt,
   updatedAt: devNews.updatedAt,
   authorEmail: adminUsers.email
+}
+
+const encodeCursor = (createdAt: Date, id: string) => {
+  const data = JSON.stringify({ createdAt: createdAt.toISOString(), id })
+  return Buffer.from(data).toString('base64')
+}
+
+const decodeCursor = (cursorStr: string) => {
+  try {
+    const data = JSON.parse(Buffer.from(cursorStr, 'base64').toString('utf-8'))
+    return {
+      createdAt: new Date(data.createdAt),
+      id: data.id as string
+    }
+  } catch {
+    return null
+  }
 }
 
 export const createNews = async (c: Context) => {
@@ -54,12 +71,41 @@ export const createNews = async (c: Context) => {
 
 export const getAllNews = async (c: Context) => {
   try {
-    const news = await db.select(newsSelect)
+    const limit = Math.min(parseInt(c.req.query('limit') || '20', 10), 100)
+    const cursorParam = c.req.query('cursor')
+
+    const decoded = cursorParam ? decodeCursor(cursorParam) : null
+
+    let condition = undefined
+    if (decoded) {
+      condition = or(
+        lt(devNews.createdAt, decoded.createdAt),
+        and(
+          eq(devNews.createdAt, decoded.createdAt),
+          lt(devNews.id, decoded.id)
+        )
+      )
+    }
+
+    const newsItems = await db.select(newsSelect)
       .from(devNews)
       .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
-      .orderBy(desc(devNews.createdAt))
+      .where(condition)
+      .orderBy(desc(devNews.createdAt), desc(devNews.id))
+      .limit(limit + 1)
 
-    return c.json({ news })
+    const hasNextPage = newsItems.length > limit
+    const results = hasNextPage ? newsItems.slice(0, limit) : newsItems
+
+    const lastItem = results[results.length - 1]
+    const nextCursor = hasNextPage && lastItem
+      ? encodeCursor(lastItem.createdAt!, lastItem.id!)
+      : null
+
+    return c.json({
+      news: results,
+      nextCursor
+    })
   } catch (error: any) {
     console.error('Get All News Error:', error)
     return c.json({ error: 'Internal server error' }, 500)
