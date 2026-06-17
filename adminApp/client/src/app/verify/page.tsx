@@ -34,134 +34,176 @@ function VerifyContent() {
       
       if (res.ok) {
         setStatus("success");
-        setMessage("CLEARANCE GRANTED. ARCHIVES MOUNTED.");
+        setMessage("CLEARANCE GRANTED. ACCESS SECURED.");
         setTimeout(() => {
           router.push("/dashboard");
         }, 1500);
       } else {
         setStatus("error");
         const backendError = typeof data.error === "string" ? data.error : data.error?.message;
-        setMessage(backendError || "INVALID KEY.");
+        setMessage(backendError || "DECRYPTION CODE INVALID.");
       }
     } catch (err) {
       setStatus("error");
-      setMessage("FATAL: NEURAL LINK SEVERED");
+      setMessage("FATAL ERROR: NEURAL SYSTEM DOWN");
     }
   };
 
   if (!email) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#b5b5b5] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjYjViNWI1Ij48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDBMOCA4Wk04IDBMMCA4WiIgc3Ryb2tlPSIjYTNhM2EzIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+')] overflow-hidden cursor-crosshair relative">
+    <div className="min-h-screen w-screen bg-[#060608] desk-mat flex items-center justify-center p-4 relative overflow-hidden cursor-crosshair font-mono">
       
-      {/* Background Chaos Elements */}
-      <div className="absolute top-10 left-10 w-64 h-64 bg-black border-4 border-cyber-cyan rotate-[15deg] opacity-60 p-4 shadow-2xl pointer-events-none">
-        <h2 className="text-cyber-cyan font-vt323 text-5xl glitch-text" data-text="INTERCEPTED">INTERCEPTED</h2>
+      {/* Background Decoded Chaos elements */}
+      <div className="absolute top-10 left-10 w-64 h-32 bg-black/60 border border-cyan-500/30 rotate-[8deg] opacity-40 p-4 shadow-2xl pointer-events-none hidden lg:block">
+        <h2 className="text-cyan-400 font-mono text-2xl tracking-widest animate-pulse font-bold">[INTERCEPTING_GRID]</h2>
+        <div className="text-[10px] text-zinc-500 mt-2">
+          PACKETS SNIFFED: 42,940<br/>
+          NODE SECURE LEVEL: 0.12%
+        </div>
       </div>
-      <div className="absolute bottom-10 right-10 md:right-20 w-80 bg-white border-2 border-black -rotate-6 shadow-[10px_10px_0_rgba(0,0,0,0.8)] p-4 z-0 pointer-events-none">
-        <h2 className="font-playfair font-black text-2xl uppercase border-b-4 border-black mb-2">Notice of Decryption</h2>
-        <p className="font-serif text-sm font-bold">Target sector locked. Authorization requires 6-digit cryptographic handshake. Failure to verify will result in immediate localized wipe.</p>
+      
+      <div className="absolute bottom-10 right-10 w-80 bg-[#f4ecd8] border-2 border-stone-800 -rotate-3 shadow-[12px_12px_0_rgba(0,0,0,0.85)] p-5 z-0 pointer-events-none hidden lg:block text-stone-900">
+        <div className="absolute -top-3 right-4 bg-red-800 text-stone-200 font-mono text-[9px] font-bold px-2 py-0.5 transform rotate-6 uppercase">
+          TELEGRAM
+        </div>
+        <h2 className="font-serif font-black text-xl uppercase border-b-2 border-stone-900 mb-2">INTELLIGENCE ALERT</h2>
+        <p className="font-serif text-[11px] font-bold leading-normal">
+          Operatives are advised that 3 failed decryption entries will lock target credentials. Security decks will log IP traces for local enforcement dispatch.
+        </p>
       </div>
 
-      {/* Main Window Shell */}
-      <div className="w-full max-w-4xl z-10 shadow-[15px_15px_0_rgba(0,0,0,0.9)] animate-bounce-slight relative border-2 border-white border-b-black border-r-black bg-[#c0c0c0]">
+      {/* Main CD-ROM Window Shell */}
+      <div className="w-full max-w-4xl z-10 shadow-[15px_15px_0_rgba(0,0,0,0.7)] cd-rom-window animate-bounce-slight relative">
         
         {/* Titlebar */}
-        <div className="bg-[#000080] text-white font-bold p-1 flex justify-between items-center border-b-2 border-black">
-          <span className="font-vt323 text-xl tracking-widest pl-2 flex items-center gap-2">
-             <div className="w-3 h-3 bg-white animate-pulse"></div>
-             A:\CRACKER\BRUTEFORCE_V9.EXE
+        <div className="cd-rom-titlebar select-none">
+          <span className="font-mono text-xs font-bold tracking-widest pl-2 flex items-center gap-2">
+             <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping"></span>
+             A:\DECRYPT\KEY_DECK_V2.EXE
           </span>
           <button 
             onClick={() => router.push('/login')}
-            className="cursor-pointer bg-[#c0c0c0] text-black border-2 border-white border-b-gray-800 border-r-gray-800 px-2 leading-none font-bold hover:bg-gray-300 active:border-b-white active:border-r-white active:border-t-gray-800 active:border-l-gray-800"
+            className="cursor-pointer bg-[#d4d0c8] text-black border border-white border-b-zinc-700 border-r-zinc-700 px-2 py-0.5 leading-none font-bold text-xs hover:bg-zinc-200"
             title="Close"
           >
             X
           </button>
         </div>
         
-        <div className="p-4 md:p-8 flex flex-col md:flex-row gap-8 relative overflow-hidden bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyIiBoZWlnaHQ9IjIiPgo8cmVjdCB3aWR0aD0iMiIgaGVpZ2h0PSIyIiBmaWxsPSIjYzBjMGMwIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNhMGEwYTAiPjwvcmVjdD4KPC9zdmc+')]">
-          
-          {/* Hardware Decryptor Module */}
-          <div className="flex-1 bg-[#111] border-[8px] border-gray-800 border-t-gray-600 border-l-gray-600 shadow-2xl p-4 md:p-6 relative">
-             
-             {/* CRT Screen inside Hardware */}
-             <div className="bg-[#050505] border-4 border-[#000] p-4 h-full relative overflow-hidden shadow-[inset_0_0_30px_rgba(0,240,255,0.2)] crt-flicker">
-                {/* Grid */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.1)_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none"></div>
-                
-                <div className="text-center relative z-10 mb-6">
-                  <h2 className="font-vt323 text-cyber-cyan text-4xl md:text-5xl glitch-text" data-text="ENTER CIPHER">ENTER CIPHER</h2>
-                  <div className="mt-2 font-courier text-white font-bold text-xs md:text-sm bg-cyber-cyan/30 inline-block px-3 py-1 border border-cyber-cyan">
-                    TGT_ID: {email}
-                  </div>
-                </div>
-
-                <form onSubmit={handleVerifyOtp} className="flex flex-col gap-6 relative z-10 w-full max-w-sm mx-auto">
+        {/* Main Panel Content */}
+        <div className="p-4 sm:p-6 bg-[#d4d0c8] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZDRkMGM4Ii8+CjxwYXRoIGQ9Ik0wIDBoMnYySDB6bTIgMmgydjJIMnoiIGZpbGw9IiNhMGExYTMiIGZpbGwtb3BhY2l0eT0iLjE1Ii8+Cjwvc3ZnPg==')]">
+          <div className="flex flex-col md:flex-row gap-6">
+            
+            {/* Left Side: Decrypter Screen (Cyber CRT) */}
+            <div className="flex-1 bg-[#111115] border-[6px] border-zinc-700 border-t-zinc-500 border-l-zinc-500 shadow-2xl p-4 sm:p-6 relative">
+               
+               {/* CRT Screen Panel */}
+               <div className="cyber-console p-4 sm:p-6 h-full relative overflow-hidden rounded-md">
                   
-                  {/* Digital Input */}
-                  <div className="bg-black border-2 border-cyber-cyan p-3 shadow-[0_0_20px_rgba(0,240,255,0.4)] relative">
-                    <input
-                      type="text"
-                      required
-                      pattern="\d{6}"
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      className="w-full bg-transparent border-none outline-none text-cyber-cyan font-vt323 text-5xl md:text-6xl tracking-[0.4em] text-center placeholder-cyber-cyan/30 focus:drop-shadow-[0_0_10px_rgba(0,240,255,0.8)]"
-                      placeholder="------"
-                      autoFocus
-                    />
+                  {/* Sweep scanline */}
+                  <div className="scanline-sweep absolute top-0 left-0 right-0 pointer-events-none z-20"></div>
+                  
+                  <div className="text-center relative z-10 mb-6">
+                    <h2 className="font-mono text-cyan-400 text-2xl sm:text-3xl font-black uppercase tracking-wider glitch-text" data-text="DECRYPT CIPHER">
+                      DECRYPT CIPHER
+                    </h2>
+                    <div className="mt-2 font-mono text-white text-[10px] bg-cyan-950/40 inline-block px-3 py-1 border border-cyan-800/40">
+                      OPERATIVE: {email}
+                    </div>
                   </div>
 
-                  {/* Status */}
-                  <div className="min-h-[60px] flex items-center justify-center">
-                    {status !== "idle" && status !== "loading" && (
-                      <div className={`p-2 text-center border-2 font-vt323 text-xl uppercase w-full ${status === "success" ? "border-cyber-green text-cyber-green bg-black" : "border-red-500 text-red-500 bg-black"}`}>
-                        {message}
-                      </div>
-                    )}
-                    {status === "loading" && (
-                      <div className="p-2 text-center border-2 font-vt323 text-xl uppercase border-cyber-cyan text-black bg-cyber-cyan animate-pulse w-full shadow-[0_0_15px_rgba(0,240,255,0.6)]">
-                        &gt;&gt; CRACKING...
-                      </div>
-                    )}
+                  <form onSubmit={handleVerifyOtp} className="flex flex-col gap-6 relative z-10 w-full max-w-xs mx-auto">
+                    
+                    {/* Digital Code Input */}
+                    <div className="bg-black/90 border-2 border-cyan-500 p-4 shadow-[0_0_20px_rgba(0,240,255,0.25)] relative rounded">
+                      <input
+                        type="text"
+                        required
+                        pattern="\d{6}"
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        className="w-full bg-transparent border-none outline-none text-cyan-400 font-mono text-4xl sm:text-5xl tracking-[0.35em] text-center placeholder-cyan-900 focus:drop-shadow-[0_0_8px_rgba(0,240,255,0.7)] font-black"
+                        placeholder="------"
+                        autoFocus
+                      />
+                    </div>
+
+                    {/* Telemetry Status Message */}
+                    <div className="min-h-[50px] flex items-center justify-center">
+                      {status !== "idle" && status !== "loading" && (
+                        <div className={`p-2 text-center border font-mono text-[10px] uppercase font-bold tracking-wider w-full ${status === "success" ? "border-emerald-500 text-emerald-400 bg-emerald-950/20" : "border-red-600 text-red-400 bg-red-950/20"}`}>
+                          {message}
+                        </div>
+                      )}
+                      {status === "loading" && (
+                        <div className="p-2.5 text-center border font-mono text-[10px] uppercase border-cyan-500 text-black bg-cyan-400 animate-pulse w-full font-bold tracking-widest">
+                          &gt;&gt; BRUTEFORCING MAIN ACCESS DECK...
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Main Overriding Button */}
+                    <button 
+                      type="submit" 
+                      className="w-full font-mono font-black text-sm uppercase text-black bg-cyan-400 border-2 border-cyan-500 py-3.5 rounded hover:bg-white hover:text-black transition-all duration-300 shadow-[0_4px_12px_rgba(0,240,255,0.2)]"
+                      disabled={status === "loading" || otp.length < 6}
+                    >
+                      OVERRIDE MAINFRAME LOCK
+                    </button>
+                  </form>
+               </div>
+            </div>
+
+            {/* Right Side: Stapled Paper memo (Tactile Protocol Document) */}
+            <div className="w-full md:w-[280px] flex flex-col justify-center gap-4 relative">
+               
+               {/* Stapled document page */}
+               <div className="bg-[#f2efe6] text-stone-900 p-5 border border-stone-400/80 shadow-[6px_6px_0px_rgba(26,26,26,0.9)] transform rotate-2 relative z-10 rounded-sm">
+                  
+                  {/* Stains */}
+                  <div className="coffee-stain top-2 right-2 w-16 h-16 opacity-30"></div>
+                  
+                  {/* staple visual */}
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-stone-500/40 border border-stone-600/30 transform rotate-1 rounded-sm z-30"></div>
+
+                  <h3 className="font-serif font-black uppercase text-lg border-b-2 border-stone-900 mb-3 tracking-tight">
+                    DECRYPT PROTOCOL
+                  </h3>
+                  
+                  <ul className="font-mono text-[10px] font-bold space-y-2.5 text-stone-700">
+                    <li className="flex gap-2">
+                      <span className="text-red-800">1.</span>
+                      <span>Retrieve 6-digit key from your registered email account.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-red-800">2.</span>
+                      <span>Insert code exactly. System rejects non-numeric payloads.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-red-800">3.</span>
+                      <span>Handshake will execute automatically upon verification.</span>
+                    </li>
+                  </ul>
+
+                  <div className="mt-5 border-t border-dashed border-stone-400 pt-3">
+                    <span className="font-mono text-xs text-red-800 font-bold uppercase block animate-pulse">
+                      ALERT LEVEL STATUS:
+                    </span>
+                    <p className="font-serif text-[11px] font-bold mt-1 text-stone-600">
+                      Decryption tunnel is monitored under secure protocol. System logs IP coordinates.
+                    </p>
                   </div>
+               </div>
 
-                  {/* Cyber Stamp Button */}
-                  <button 
-                    type="submit" 
-                    className="font-old-standard font-black text-2xl md:text-3xl uppercase text-black bg-cyber-cyan border-[4px] border-black py-4 w-full transform rotate-1 shadow-[5px_5px_0_#000] hover:rotate-0 hover:scale-[1.02] hover:bg-white hover:text-black transition-all mt-2"
-                    disabled={status === "loading" || otp.length < 6}
-                  >
-                    OVERRIDE LOCK
-                  </button>
-                </form>
-             </div>
+               {/* Red Top Secret ink stamp */}
+               <div className="self-end transform -rotate-12 border-4 border-red-700/80 text-red-700/80 font-serif font-black text-2xl px-4 py-1.5 shadow bg-transparent opacity-85 z-20 select-none">
+                 TOP SECRET
+               </div>
+            </div>
+            
           </div>
-
-          {/* Right Side: Dossier / Instructions */}
-          <div className="w-full md:w-1/3 flex flex-col gap-6 justify-center">
-             <div className="bg-[#fff5e6] text-black p-5 border-2 border-black shadow-[6px_6px_0_#000] transform rotate-3 relative z-10">
-                <h3 className="font-playfair font-black uppercase text-2xl border-b-4 border-black mb-4">Protocol</h3>
-                <ul className="font-courier text-base font-bold space-y-3">
-                  <li>1. Check designated dead-drop.</li>
-                  <li>2. Retrieve 6-digit cypher.</li>
-                  <li>3. Input exactly. No mistakes.</li>
-                </ul>
-                <div className="mt-6 border-t-4 border-dashed border-black pt-3">
-                  <span className="font-vt323 text-red-600 text-3xl font-bold animate-pulse">WARNING:</span>
-                  <p className="font-serif text-sm font-bold mt-1">3 failed attempts will trigger IP backtrace.</p>
-                </div>
-             </div>
-
-             {/* Chaotic sticker/stamp */}
-             <div className="self-end transform -rotate-12 border-[6px] border-red-600 text-red-600 font-old-standard font-black text-4xl px-3 py-1 shadow-xl bg-transparent opacity-90 z-20">
-               TOP SECRET
-             </div>
-          </div>
-          
         </div>
       </div>
     </div>
@@ -170,7 +212,7 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-vt323 text-cyber-alert bg-cyber-black text-4xl animate-pulse">BOOTING_DECRYPTER...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-mono text-cyan-400 bg-cyber-black text-xl animate-pulse">&gt; MOUNTING DECRYPTION INTERFACE...</div>}>
       <VerifyContent />
     </Suspense>
   );
