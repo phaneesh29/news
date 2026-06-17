@@ -11,6 +11,7 @@ import { env } from './config/env.js'
 import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
 import { whitelistRoutes } from './routes/whitelist.js'
+import { globalRateLimiter } from './middlewares/rateLimit.js'
 
 type Bindings = {
   Variables: {
@@ -39,6 +40,7 @@ app.use('*', cors({
 })
 )
 app.use('*', logger())
+app.use('/api/*', globalRateLimiter)
 
 
 app.route('/api/health', healthRoutes)
