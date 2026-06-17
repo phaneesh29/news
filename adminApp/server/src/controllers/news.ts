@@ -68,10 +68,7 @@ export const getAllNews = async (c: Context) => {
 
 export const getNewsById = async (c: Context) => {
   try {
-    const id = c.req.param('id')
-    if (!id) {
-      return c.json({ error: 'ID parameter is missing' }, 400)
-    }
+    const id = c.req.param('id')!
 
     const newsItems = await db.select(newsSelect)
       .from(devNews)
@@ -100,10 +97,7 @@ export const updateNews = async (c: Context) => {
       return c.json({ error: 'Only admins and editors can update news' }, 403)
     }
 
-    const id = c.req.param('id')
-    if (!id) {
-      return c.json({ error: 'ID parameter is missing' }, 400)
-    }
+    const id = c.req.param('id')!
 
     const body = await c.req.json() as {
       content?: string
@@ -153,10 +147,7 @@ export const deleteNews = async (c: Context) => {
       return c.json({ error: 'Only admins and editors can delete news' }, 403)
     }
 
-    const id = c.req.param('id')
-    if (!id) {
-      return c.json({ error: 'ID parameter is missing' }, 400)
-    }
+    const id = c.req.param('id')!
 
     const deletedNews = await db.delete(devNews)
       .where(eq(devNews.id, id))
