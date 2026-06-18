@@ -5,19 +5,56 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
 
+interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  sourceUrl?: string | null;
+  priority: string;
+  tags: string[];
+  createdAt: string;
+  status: string;
+}
+
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // News State
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fetchLoading, setFetchLoading] = useState(false);
+
+  // Selected News for Inspector Dossier
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+
   // Clock state
   const [systemTime, setSystemTime] = useState("");
 
-  // Telemetry state
-  const [serverHealth, setServerHealth] = useState<any>(null);
-  const [clientInfo, setClientInfo] = useState<any>(null);
+  // Filter state
+  const [selectedPriority, setSelectedPriority] = useState<string>("ALL");
 
-  // Live Terminal Log System
+  // Editing State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editTags, setEditTags] = useState("");
+  const [editPriority, setEditPriority] = useState("");
+  const [editSourceUrl, setEditSourceUrl] = useState("");
+
+  // Ask Agent Modal State
+  const [isAskAgentOpen, setIsAskAgentOpen] = useState(false);
+  const [agentQuery, setAgentQuery] = useState("");
+  const [agentLoading, setAgentLoading] = useState(false);
+  const [draftedNews, setDraftedNews] = useState<any>(null);
+  const [publishing, setPublishing] = useState(false);
+
+  // Telemetry status
+  const [serverHealth, setServerHealth] = useState<any>(null);
+
+  // Live Terminal Log System (Newspaper Teletype logs)
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     "TELETYPE_INIT: Mounting news wire...",
     "WIRE: Connection to Metasphere active.",
@@ -27,6 +64,43 @@ export default function DashboardPage() {
   const addLog = (msg: string) => {
     const time = new Date().toLocaleTimeString('en-US', { hour12: false });
     setTerminalLogs((prev) => [`[${time}] ${msg}`, ...prev.slice(0, 15)]);
+  };
+
+  const fetchNews = async (cursor: string | null = null, query: string = "", isAppend = false) => {
+    try {
+      setFetchLoading(true);
+      let url = "";
+      if (query) {
+        url = `${API_BASE_URL}/news/search?q=${encodeURIComponent(query)}&limit=10`;
+        addLog(`WIRE_SEARCH: Querying nodes for '${query}'`);
+      } else {
+        url = `${API_BASE_URL}/news?limit=10${cursor ? `&cursor=${cursor}` : ""}`;
+        addLog(cursor ? `WIRE: Loading next block ${cursor.slice(0, 8)}...` : "WIRE: Refreshing printing press feeds...");
+      }
+
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch news");
+      const data = await res.json();
+      
+      const items = (data.news || []).map((item: any) => ({
+        ...item,
+        status: "SYNCED"
+      }));
+
+      if (isAppend) {
+        setNewsList((prev) => [...prev, ...items]);
+      } else {
+        setNewsList(items);
+      }
+      
+      setNextCursor(query ? null : data.nextCursor || null);
+      addLog(`WIRE: Feed updated with ${items.length} print records`);
+    } catch (err) {
+      console.error("Fetch news error:", err);
+      addLog("WARNING: Wire connection timed out or database empty");
+    } finally {
+      setFetchLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -41,35 +115,11 @@ export default function DashboardPage() {
         setProfile(data.user);
         addLog(`AUTH: Operative logged in. Role: '${data.user.role}'`);
 
-        // Fetch health status
+        // Fetch server health status
         fetch(`${API_BASE_URL}/health`)
           .then(res => res.json())
           .then(data => setServerHealth(data))
           .catch(() => setServerHealth({ status: "UNREACHABLE", timestamp: new Date() }));
-
-        const ua = window.navigator.userAgent;
-        const os = ua.indexOf("Win") !== -1 ? "WINDOWS" 
-                 : ua.indexOf("Mac") !== -1 ? "MACOS" 
-                 : ua.indexOf("Linux") !== -1 ? "LINUX" 
-                 : "UNKNOWN_OS";
-        
-        let browser = "UNKNOWN_BROWSER";
-        if (ua.includes("Chrome")) browser = "CHROME";
-        else if (ua.includes("Firefox")) browser = "FIREFOX";
-        else if (ua.includes("Safari")) browser = "SAFARI";
-        else if (ua.includes("Edge")) browser = "EDGE";
-
-        setClientInfo({
-          os,
-          browser,
-          ip: "SCANNING..."
-        });
-
-        fetch("https://api.ipify.org?format=json")
-          .then(res => res.json())
-          .then(data => setClientInfo((prev: any) => ({ ...prev, ip: data.ip })))
-          .catch(() => setClientInfo((prev: any) => ({ ...prev, ip: "SECURE/MASKED" })));
-
       } catch (err) {
         console.error("Dashboard auth check error", err);
         router.push("/login");
@@ -80,6 +130,16 @@ export default function DashboardPage() {
 
     fetchProfileAndTelemetry();
   }, [router]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (profile) {
+        fetchNews(null, searchQuery, false);
+      }
+    }, 450);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery, profile]);
 
   // Clock Update effect
   useEffect(() => {
@@ -105,6 +165,133 @@ export default function DashboardPage() {
     }
   };
 
+  const handleUpdatePayload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTitle || !editContent || !selectedNews) return;
+
+    try {
+      const payload = {
+        title: editTitle.toUpperCase(),
+        content: editContent,
+        priority: editPriority.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
+        tags: editTags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
+        sourceUrl: editSourceUrl || null
+      };
+
+      const res = await fetch(`${API_BASE_URL}/news/${selectedNews.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("Failed to update news");
+      const data = await res.json();
+      
+      const updatedItem = {
+        ...data.news,
+        status: "SYNCED"
+      };
+
+      setNewsList(prev => prev.map(item => item.id === selectedNews.id ? updatedItem : item));
+      setSelectedNews(updatedItem);
+      setIsEditing(false);
+      addLog(`WIRE: Record ${selectedNews.id.slice(0, 8)} updated successfully`);
+    } catch (err) {
+      console.error("Update error:", err);
+      addLog("WARNING: Payload modification failed");
+    }
+  };
+
+  const handlePurge = async (id: string) => {
+    try {
+      addLog(`WIRE: Issuing purge command for record ${id.slice(0, 8)}`);
+      const res = await fetch(`${API_BASE_URL}/news/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to delete news");
+
+      setNewsList((prev) => prev.filter(item => item.id !== id));
+      if (selectedNews?.id === id) {
+        setSelectedNews(null);
+      }
+      addLog(`WIRE: Record ${id.slice(0, 8)} successfully deleted`);
+    } catch (err) {
+      console.error("Purge error:", err);
+      addLog("WARNING: Purge operation denied");
+    }
+  };
+
+  // Ask AI Agent for news draft
+  const handleAskAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agentQuery.trim()) return;
+
+    setAgentLoading(true);
+    setDraftedNews(null);
+    addLog(`AGENT: Querying AI News Drafter for: "${agentQuery}"`);
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: agentQuery }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Agent call failed");
+      const data = await res.json();
+      if (data.success) {
+        setDraftedNews(data.draft);
+        addLog(`AGENT: Draft received: "${data.draft.title.slice(0, 30)}..."`);
+      } else {
+        throw new Error(data.error?.message || "Failed to draft news");
+      }
+    } catch (err: any) {
+      console.error(err);
+      addLog(`WARNING: Agent draft generation failed: ${err.message}`);
+      alert(err.message || "Error generating draft from agent");
+    } finally {
+      setAgentLoading(false);
+    }
+  };
+
+  // Publish agent draft directly
+  const handlePublishDraft = async () => {
+    if (!draftedNews) return;
+    setPublishing(true);
+    addLog("AGENT: Submitting draft directly to print queue...");
+    try {
+      const res = await fetch(`${API_BASE_URL}/news`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draftedNews),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to publish draft");
+      addLog("AGENT: Draft printed and published successfully!");
+      setIsAskAgentOpen(false);
+      setAgentQuery("");
+      setDraftedNews(null);
+      fetchNews(); // Refresh news feed list
+    } catch (err) {
+      console.error(err);
+      addLog("WARNING: Failed to auto-publish agent draft");
+      alert("Error publishing agent draft");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  // Redirect to form editor with draft loaded
+  const handleEditDraftInForm = () => {
+    if (!draftedNews) return;
+    localStorage.setItem("news_agent_draft", JSON.stringify(draftedNews));
+    setIsAskAgentOpen(false);
+    setAgentQuery("");
+    setDraftedNews(null);
+    router.push("/news/add?useDraft=true");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
@@ -119,10 +306,10 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-red-950 text-stone-900 font-serif">
       
-      {/* Newspaper texture noise background */}
+      {/* Newspaper texture noise overlays via css */}
       <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
-
-      {/* Header HUD */}
+      
+      {/* Header HUD - Traditional Newspaper style Banner */}
       <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
         <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
           
@@ -135,11 +322,9 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Navigation Deck Links */}
+          {/* Nav Deck Links */}
           <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Hub</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/news" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+            <Link href="/dashboard" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Wire Feed</Link>
             {canAdd && (
               <>
                 <span className="text-stone-400">|</span>
@@ -174,7 +359,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Main Workspace Layout */}
+      {/* Main Newspaper Layout */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-10 relative z-10 max-w-[1600px] mx-auto w-full pb-8">
         
         {/* LEFT PANEL: Wire Teletype Controls (2 Cols) */}
@@ -186,45 +371,246 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-red-800 rounded-full animate-pulse"></span>
                 <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
-                  SYSTEM OVERVIEW
+                  WIRE DEPATCH
                 </h3>
               </div>
-              <span className="font-mono text-[9px] text-stone-650 font-bold uppercase tracking-widest">
-                SYS.ONLINE
+              <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest">
+                TELETYPE ACTIVE
               </span>
             </div>
 
-            {/* Telemetry rows */}
-            <div className="flex-1 flex flex-col gap-4 text-xs text-stone-850 text-left">
+            {/* Teletype control actions */}
+            <div className="flex-1 flex flex-col gap-4 text-xs text-stone-800">
               
               <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="font-mono uppercase text-stone-500 font-bold">PRESS STATUS</span>
+                <span className="font-mono uppercase text-stone-500 font-bold">Press Health</span>
                 <span className={`font-mono font-bold uppercase tracking-wider text-[10px] ${serverHealth?.status === "ok" ? "text-green-800" : "text-red-700 animate-pulse"}`}>
                   {serverHealth ? `${serverHealth.status.toUpperCase()}` : "SCANNING..."}
                 </span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="font-mono uppercase text-stone-500 font-bold">OPERATIVE OS</span>
-                <span className="font-mono text-stone-900 font-bold">{clientInfo?.os || "DETERMINING..."}</span>
+              {canAdd && (
+                <div className="mt-2 pt-2 border-t border-stone-300 flex flex-col gap-3">
+                  <div className="text-[10px] font-mono text-stone-500 uppercase tracking-widest font-bold">EDITORIAL DESK ACTIONS</div>
+                  
+                  {/* Grid side-by-side action buttons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Link 
+                      href="/news/add"
+                      className="vintage-stamp text-center py-3 text-xs flex items-center justify-center font-bold"
+                    >
+                      WRITE ARTICLE
+                    </Link>
+
+                    <button
+                      onClick={() => setIsAskAgentOpen(true)}
+                      className="vintage-stamp text-center py-3 text-xs bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white flex items-center justify-center gap-1.5 font-bold cursor-pointer"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.904-4.43 1.956-6.195-2.065-2.065-6.195 1.956zm9.813-9.813a2.121 2.121 0 113 3 2.121 2.121 0 01-3-3z" />
+                      </svg>
+                      ASK AGENT
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Wire Teletype log readout */}
+              <div className="flex flex-col gap-1.5 mt-6 bg-[#f5f2e9] border-2 border-stone-950 p-4 rounded shadow-inner">
+                <span className="text-[9px] font-mono text-stone-600 uppercase tracking-widest font-bold">TELETYPE LOG READOUT</span>
+                <div className="font-mono text-[10px] text-stone-800 leading-relaxed space-y-1">
+                  <div>&gt;&gt; MONITORING GLOBAL CHANNELS...</div>
+                  <div>&gt;&gt; AGENT INSTANTIATED VIA GEMINI-3.1-FLASH-LITE</div>
+                  <div>&gt;&gt; TAVILY SEARCH INDEX ONLINE</div>
+                </div>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="font-mono uppercase text-stone-500 font-bold">BROWSER</span>
-                <span className="font-mono text-stone-850 tracking-wider truncate max-w-[150px]">{clientInfo?.browser || "EXTRACTING..."}</span>
+              {/* Newspaper Mini-Editorial snippet */}
+              <div className="mt-6 border-t-4 border-double border-stone-950 pt-4 text-left">
+                <h4 className="font-playfair font-black text-stone-900 uppercase text-xs tracking-tight mb-2">Editorial Note: News Gathering in 2026</h4>
+                <p className="font-serif text-[11px] text-stone-750 leading-relaxed italic">
+                  "Today's dispatches are handled automatically via the Daily Nexus's cognitive news wire. Operatives may utilize the Ask Agent feature to draft detailed accounts of global activities immediately, bypassing traditional printing delays."
+                </p>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="font-mono uppercase text-stone-500 font-bold">OPERATIVE IP</span>
-                <span className="font-mono text-red-900 font-bold tracking-wider">{clientInfo?.ip || "SCANNING..."}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT PANEL: News wire articles list (3 Cols) */}
+        <div className="lg:col-span-3 flex flex-col relative">
+          
+          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
+            
+            {/* Column Header */}
+            <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
+              <span>DAILY WIRE LOGS</span>
+              <span>LATEST BROADCASTS</span>
+            </div>
+
+            {/* Headlines Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-4 border-stone-950 pb-3 mb-4 pl-2 gap-3">
+              <div>
+                <h2 className="font-playfair text-3xl sm:text-4xl font-black text-stone-950 tracking-tighter uppercase leading-none select-none text-left">
+                  WIRE <span className="text-red-800">REPORTS</span>
+                </h2>
+                
+                <div className="flex gap-2.5 text-[10px] font-mono font-bold text-red-800 mt-2 uppercase tracking-wide">
+                  <span>PRINT QUEUE FEED</span>
+                  <span className="text-stone-400">•</span>
+                  <span>SYNCED NODES</span>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 mt-2 bg-[#f5f2e9] border border-stone-400 p-3 rounded">
-                <span className="text-[9px] font-mono text-stone-600 uppercase tracking-widest font-bold">GRID LOGS STREAM</span>
-                <div className="font-mono text-[10px] text-stone-700 leading-relaxed space-y-0.5">
-                  <div>&gt;&gt; TELETYPE DECK ONLINE... OK</div>
-                  <div>&gt;&gt; SYSTEM INTEGRITY CLEARANCE: 100%</div>
-                  <div>&gt;&gt; AUTH DECK CONFIGURED</div>
+              {/* Search Widget */}
+              <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-2 md:mt-0">
+                <div className="relative w-full sm:w-52">
+                  <input
+                    type="text"
+                    placeholder="Search wire reports..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-[#f5f2e9] text-stone-900 text-xs pl-3 pr-8 py-2 font-mono outline-none border-2 border-stone-950 focus:border-red-800 rounded shadow-sm"
+                  />
+                  <svg className="w-3.5 h-3.5 text-stone-700 absolute right-2.5 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Split Panel: Feed List */}
+            <div className="flex flex-col gap-6 pl-2">
+              
+              {/* Feeds Container */}
+              <div className="bg-[#fcfaf2] border-2 border-stone-950 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
+                
+                {/* Priority Selector Filter Bar */}
+                <div className="flex flex-wrap gap-2.5 pb-3 border-b border-stone-300 mb-4 relative z-10 font-mono text-[10px] uppercase tracking-wider">
+                  <span className="text-stone-600 font-bold self-center mr-1">FILTER LEVEL:</span>
+                  {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => {
+                        setSelectedPriority(level);
+                        addLog(`FILTER: Active filter changed to '${level}'`);
+                      }}
+                      className={`px-2 py-0.5 border-2 rounded font-black transition-all cursor-pointer ${selectedPriority === level ? "border-stone-950 text-white bg-stone-950" : "border-stone-400 text-stone-600 hover:border-stone-950 hover:text-stone-950 bg-white"}`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="space-y-6 relative z-10 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
+                  {newsList.filter(item => {
+                    if (selectedPriority === "ALL") return true;
+                    return item.priority.toLowerCase() === selectedPriority.toLowerCase();
+                  }).map((item) => {
+                    const getPriorityColors = (pr: string) => {
+                      const cleanPr = pr.toLowerCase();
+                      if (cleanPr === "critical") return "border-red-950 text-red-900 bg-red-100/60";
+                      if (cleanPr === "high") return "border-amber-950 text-amber-900 bg-amber-100/60";
+                      if (cleanPr === "medium") return "border-blue-950 text-blue-900 bg-blue-100/60";
+                      return "border-stone-950 text-stone-900 bg-stone-100/60";
+                    };
+
+                    return (
+                      <div 
+                        key={item.id} 
+                        onClick={() => {
+                          setSelectedNews(item);
+                          setIsEditing(false);
+                          setEditTitle(item.title);
+                          setEditContent(item.content);
+                          setEditPriority(item.priority);
+                          setEditSourceUrl(item.sourceUrl || "");
+                          setEditTags(item.tags.join(", "));
+                          addLog(`VIEW: Focus shifted to article ${item.id.slice(0, 8)}`);
+                        }}
+                        className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer text-left rounded"
+                      >
+                        <div className="flex flex-wrap gap-2.5 items-center">
+                          <span className={`font-mono text-[9px] border-2 px-2 py-0.5 rounded tracking-wide uppercase font-bold ${getPriorityColors(item.priority)}`}>
+                            {item.priority}
+                          </span>
+                          <span className="font-mono text-[10px] text-stone-600">
+                            {new Date(item.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+
+                        <h4 className="font-playfair text-xl font-black text-stone-950 tracking-tight leading-snug group-hover/item:text-red-950 transition-colors uppercase">
+                          {item.title}
+                        </h4>
+                        
+                        <p className="font-serif text-sm text-stone-850 leading-relaxed truncate max-w-full">
+                          {item.content}
+                        </p>
+
+                        <div className="flex flex-wrap justify-between items-center mt-2 pt-2 border-t border-dashed border-stone-300">
+                          <div className="flex gap-1.5">
+                            {item.tags.map((tag) => (
+                              <span key={tag} className="font-mono text-[9px] bg-stone-200 border border-stone-400 text-stone-800 px-1.5 py-0.5 rounded uppercase font-bold">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                          <span className="font-mono text-[10px] text-stone-600 group-hover/item:text-red-800 transition-colors font-bold">
+                            [ READ REPORT ]
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Empty state visual */}
+                  {newsList.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                      <div className="w-12 h-12 text-stone-400 mb-4">
+                        <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="4" width="18" height="16" rx="2" />
+                          <line x1="7" y1="8" x2="17" y2="8" />
+                          <line x1="7" y1="12" x2="17" y2="12" />
+                          <line x1="7" y1="16" x2="13" y2="16" />
+                        </svg>
+                      </div>
+                      <h3 className="font-playfair text-stone-800 text-lg font-black uppercase">
+                        Wire Archives Empty
+                      </h3>
+                      <p className="font-serif text-sm text-stone-600 max-w-sm leading-relaxed mt-2">
+                        No articles are currently logged on the wire feed. Ask the agent or click write article to log a report.
+                      </p>
+                    </div>
+                  )}
+
+                  {nextCursor && (
+                    <div className="text-center pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fetchNews(nextCursor, searchQuery, true);
+                        }}
+                        disabled={fetchLoading}
+                        className="vintage-stamp text-xs tracking-widest disabled:opacity-50 cursor-pointer bg-white"
+                      >
+                        {fetchLoading ? "[ RE-READING WIRE... ]" : "LOAD NEXT DISPATCHES"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Event Logs teletype window */}
+              <div className="h-32 bg-[#f5f2e9] border-2 border-stone-950 rounded p-4 shadow-inner flex flex-col relative">
+                <div className="absolute top-0.5 right-3 text-[9px] font-mono text-stone-600 font-bold uppercase tracking-widest select-none">
+                  SYSTEM MONITOR FEED
+                </div>
+                <div className="flex-1 overflow-y-auto font-mono text-[10px] text-stone-700 space-y-1.5 custom-scrollbar pr-1">
+                  {terminalLogs.map((log, index) => (
+                    <div key={index} className="truncate text-left">
+                      &gt;&gt; {log}
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -232,66 +618,313 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* RIGHT PANEL: Command Center Deck Navigation (3 Cols) */}
-        <div className="lg:col-span-3 flex flex-col gap-6 relative">
-          
-          {/* Card 1: Chronicles Feed Deck */}
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 sm:p-8 flex flex-col shadow-[4px_4px_0px_#111] relative rounded text-left">
-            
-            <div className="flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-4">
-              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
-                WIRE REPORT ARCHIVES
-              </h3>
-              <span className="text-[10px] font-mono text-stone-700 bg-stone-200 border border-stone-400 px-2.5 py-0.5 tracking-widest font-bold">
-                /news
-              </span>
-            </div>
-
-            <p className="text-stone-800 text-sm leading-relaxed mb-6 font-serif">
-              Access the main intelligence dispatch feeds broadcasting from nodes in real-time. View, inspect, filter, edit, or purge system records.
-            </p>
-
-            <Link 
-              href="/news"
-              className="vintage-stamp text-center py-4 text-sm font-black flex items-center justify-center bg-white"
-            >
-              ACCESS WIRE FEED
-            </Link>
-          </div>
-
-          {/* Card 2: News Payload Injector */}
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 sm:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative rounded text-left">
-            
-            <div className="flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-4 text-stone-900">
-              <h3 className="font-playfair text-lg uppercase tracking-wide font-black">
-                NEWS WIRE INJECTOR
-              </h3>
-              <span className="text-[10px] font-mono text-stone-750 bg-stone-200 border border-stone-400 px-2.5 py-0.5 uppercase tracking-widest font-bold">
-                /news/add
-              </span>
-            </div>
-
-            <p className="text-stone-800 text-sm leading-relaxed mb-6 font-serif">
-              Initialize a teletype broadcast packet to draft and inject news payload dispatches onto the metagrid network. Requires admin or editor credentials.
-            </p>
-
-            {canAdd ? (
-              <Link 
-                href="/news/add"
-                className="vintage-stamp text-center py-4 text-sm font-black flex items-center justify-center bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white"
-              >
-                INITIALIZE PAYLOAD INJECTOR
-              </Link>
-            ) : (
-              <div className="w-full text-center border-2 border-dashed border-stone-400 text-stone-600 font-mono font-bold text-xs py-4 uppercase tracking-wider select-none bg-stone-200/50 rounded">
-                [ SECURITY LOCK: READ-ONLY ACCESS ]
-              </div>
-            )}
-          </div>
-
-        </div>
-
       </div>
+
+      {/* ARTICLE DOSSIER DETAIL OVERLAY */}
+      {selectedNews && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
+            
+            {/* Close */}
+            <button
+              onClick={() => {
+                setSelectedNews(null);
+                addLog("INSPECTOR: Dossier closed");
+              }}
+              className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs"
+            >
+              [ CLOSE ]
+            </button>
+
+            {/* Vintage paper column inside dossier */}
+            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-1 text-stone-900">
+              
+              {isEditing ? (
+                <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      TRANSMISSION HEADLINE
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-950 placeholder-stone-600/40 font-serif"
+                    />
+                  </div>
+
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      SOURCE LINK
+                    </label>
+                    <input
+                      type="url"
+                      value={editSourceUrl}
+                      onChange={(e) => setEditSourceUrl(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono"
+                    />
+                  </div>
+
+                  <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      DRAFT CHRONICLE DETAILS
+                    </label>
+                    <textarea
+                      required
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar"
+                      rows={8}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
+                      ALERT URGENCY
+                    </span>
+                    <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
+                      {[
+                        { key: "low", text: "INFO", color: "bg-stone-500", border: "border-stone-600" },
+                        { key: "medium", text: "NOTICE", color: "bg-blue-500", border: "border-blue-600" },
+                        { key: "high", text: "WARNING", color: "bg-amber-500", border: "border-amber-600" },
+                        { key: "critical", text: "CRITICAL", color: "bg-red-700", border: "border-red-800" },
+                      ].map((pr) => (
+                        <button
+                          key={pr.key}
+                          type="button"
+                          onClick={() => setEditPriority(pr.key)}
+                          className={`py-1.5 rounded border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${editPriority.toLowerCase() === pr.key ? "bg-stone-950 text-white border-stone-950 font-bold scale-[1.04]" : "bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200"}`}
+                        >
+                          <span>{pr.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      ROUTING LABELS (COMMA SEPARATED)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="AI, SECURITY, GLITCH..."
+                      value={editTags}
+                      onChange={(e) => setEditTags(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono font-bold"
+                    />
+                  </div>
+
+                  <div className="mt-4 flex gap-4">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-305 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
+                    <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
+                      WIRE REPORT INDEX ID: {selectedNews.id.slice(0, 8)}
+                    </span>
+                    <h3 className="font-playfair text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-stone-950">
+                      {selectedNews.title}
+                    </h3>
+                  </div>
+
+                  <div className="font-serif text-base leading-relaxed text-justify space-y-4">
+                    <p className="indent-6 text-stone-900">
+                      {selectedNews.content}
+                    </p>
+                  </div>
+
+                  {selectedNews.sourceUrl && (
+                    <div className="mt-6 border-t border-stone-300 pt-3 text-left">
+                      <span className="font-mono text-[9px] text-stone-500 font-bold uppercase block mb-1">DATA VERIFICATION MATRIX (URL)</span>
+                      <a
+                        href={selectedNews.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[10px] text-red-800 hover:underline break-all font-bold"
+                      >
+                        {selectedNews.sourceUrl}
+                      </a>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 mt-6 border-t border-stone-300 pt-4 font-mono text-[10px] text-stone-600 font-bold text-left">
+                    <div>
+                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">WIRE PRIORITY</span>
+                      <span className="text-stone-950 uppercase">{selectedNews.priority}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span>
+                      <span className="text-stone-950">{new Date(selectedNews.createdAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-1.5 border-t border-stone-300 pt-4">
+                    {selectedNews.tags.map((tag) => (
+                      <span key={tag} className="font-mono text-[9px] bg-stone-200 text-stone-850 border border-stone-400 px-2 py-0.5 rounded font-bold uppercase">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Actions inside inspector */}
+                  <div className="mt-8 border-t-4 border-double border-stone-950 pt-4 flex flex-wrap justify-between items-center gap-4">
+                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">WIRE RECORDS SYSTEM CONTROL</span>
+                    <div className="flex gap-3">
+                      {(profile?.role === "admin" || profile?.role === "editor") && (
+                        <button
+                          onClick={() => setIsEditing(true)}
+                          className="vintage-stamp text-xs py-2 bg-transparent text-stone-900 border-stone-950 hover:bg-stone-950 hover:text-white"
+                        >
+                          EDIT REPORT
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handlePurge(selectedNews.id)}
+                        className="vintage-stamp text-xs py-2 bg-transparent text-red-800 border-red-800 hover:bg-red-800 hover:text-white shadow-[2px_2px_0px_#801c1c]"
+                      >
+                        PURGE REPORT
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ASK AGENT WIRE DESK DIALOG MODAL */}
+      {isAskAgentOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
+            
+            {/* Close */}
+            <button
+              onClick={() => {
+                setIsAskAgentOpen(false);
+                setAgentQuery("");
+                setDraftedNews(null);
+                addLog("AGENT: Wire desk session aborted");
+              }}
+              className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs"
+              disabled={agentLoading || publishing}
+            >
+              [ ABORT ]
+            </button>
+
+            <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
+              <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
+                AUTOMATED WIRE DESPATCH
+              </span>
+              <h3 className="font-playfair text-2xl font-black uppercase tracking-tight leading-tight text-stone-950">
+                COGNITIVE NEWS WIRE
+              </h3>
+            </div>
+
+            <div className="flex-1 flex flex-col overflow-y-auto pr-1">
+              {!draftedNews ? (
+                <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
+                  <p className="font-serif text-sm text-stone-700 leading-relaxed">
+                    Provide instructions or a topic. The Nexus Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.
+                  </p>
+
+                  <div className="flex flex-col border-2 border-stone-950 p-3 bg-white rounded">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1.5">
+                      Enter Topic or Wire Request:
+                    </label>
+                    <textarea
+                      required
+                      placeholder="e.g. OpenAI releases a new reasoning model named o3. Include its features and pricing."
+                      value={agentQuery}
+                      onChange={(e) => setAgentQuery(e.target.value)}
+                      className="w-full bg-transparent outline-none text-sm text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-24 resize-none"
+                      disabled={agentLoading}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="vintage-stamp w-full text-center py-3 bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white font-bold cursor-pointer text-xs"
+                    disabled={agentLoading || !agentQuery.trim()}
+                  >
+                    {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH NEWS AGENT"}
+                  </button>
+
+                  {agentLoading && (
+                    <div className="mt-4 p-4 border border-stone-300 bg-stone-100/60 rounded text-center font-mono text-xs text-stone-700 flex flex-col gap-2">
+                      <div className="animate-pulse flex items-center justify-center gap-1.5">
+                        <span className="inline-block w-2.5 h-2.5 bg-red-850 rounded-full animate-ping"></span>
+                        <span>[ NEWS WIRE AGENT AT WORK ]</span>
+                      </div>
+                      <p className="text-[10px] text-stone-505 italic">
+                        Scanning teletypes, mapping wire feeds, and writing copy to print coordinates...
+                      </p>
+                    </div>
+                  )}
+                </form>
+              ) : (
+                <div className="flex flex-col gap-4 text-left">
+                  <div className="p-4 border-2 border-stone-950 bg-white rounded">
+                    <div className="flex justify-between items-center border-b-2 border-stone-950 pb-2 mb-3">
+                      <span className="font-mono text-[9px] bg-red-800 text-white px-2 py-0.5 rounded font-bold uppercase">
+                        AGENT DRAFT
+                      </span>
+                      <span className="font-mono text-[9px] text-stone-600 font-bold uppercase">
+                        PRIORITY: {draftedNews.priority.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <h4 className="font-playfair text-xl font-black text-stone-950 tracking-tight leading-snug uppercase mb-2">
+                      {draftedNews.title}
+                    </h4>
+
+                    <p className="font-serif text-sm text-stone-800 leading-relaxed text-justify mb-4 max-h-[30vh] overflow-y-auto custom-paper-scrollbar pr-1">
+                      {draftedNews.content}
+                    </p>
+
+                    <div className="border-t border-dashed border-stone-300 pt-2 font-mono text-[9px] text-stone-650 flex flex-col gap-1">
+                      <div><strong>SOURCE URL:</strong> {draftedNews.sourceUrl || "N/A"}</div>
+                      <div><strong>TAGS:</strong> {draftedNews.tags.map((t: string) => `#${t}`).join(", ")}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <button
+                      onClick={handlePublishDraft}
+                      disabled={publishing}
+                      className="vintage-stamp py-3 text-xs bg-emerald-800 text-white border-emerald-950 shadow-[3px_3px_0px_#14532d] hover:bg-emerald-900 hover:text-white font-bold cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      {publishing ? "PRINTING..." : "STAMP & PUBLISH"}
+                    </button>
+
+                    <button
+                      onClick={handleEditDraftInForm}
+                      className="vintage-stamp py-3 text-xs font-bold cursor-pointer bg-white text-stone-950"
+                    >
+                      EDIT IN INJECTOR
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer HUD */}
       <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
@@ -316,6 +949,7 @@ export default function DashboardPage() {
           <span className="text-stone-850 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
         </div>
       </footer>
+
     </div>
   );
 }

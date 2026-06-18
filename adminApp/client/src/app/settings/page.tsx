@@ -152,9 +152,7 @@ export default function SettingsPage() {
 
           {/* Navigation Deck Links */}
           <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Hub</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/news" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+            <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/settings" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Security</Link>
           </div>

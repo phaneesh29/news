@@ -41,7 +41,7 @@ export default function AddNewsPage() {
 
         // Check permission - must be admin or editor
         if (data.user.role !== "admin" && data.user.role !== "editor") {
-          router.push("/news");
+          router.push("/dashboard");
           return;
         }
       } catch (err) {
@@ -144,7 +144,7 @@ export default function AddNewsPage() {
           if (p.progress === 100) {
             setTimeout(() => {
               setInjectionStatus({ active: false, phase: "", progress: 0 });
-              router.push("/news");
+              router.push("/dashboard");
             }, 500);
           }
         }, p.delay);
@@ -235,9 +235,7 @@ export default function AddNewsPage() {
 
           {/* Navigation Deck Links */}
           <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Hub</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/news" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+            <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/news/add" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Injector</Link>
           </div>
@@ -384,7 +382,7 @@ export default function AddNewsPage() {
                 {/* Actions */}
                 <div className="flex gap-4 mt-2">
                   <Link
-                    href="/news"
+                    href="/dashboard"
                     className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-300 font-mono font-bold text-xs py-3.5 rounded uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-stone-400"
                   >
                     Cancel
