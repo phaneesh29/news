@@ -360,85 +360,10 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Newspaper Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-10 relative z-10 max-w-[1600px] mx-auto w-full pb-8">
+      <div className="flex-1 flex justify-center relative z-10 max-w-[1100px] mx-auto w-full pb-8">
         
-        {/* LEFT PANEL: Wire Teletype Controls (2 Cols) */}
-        <div className="lg:col-span-2 flex flex-col gap-6 relative">
-          
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 sm:p-8 flex flex-col h-full min-h-[400px] shadow-[4px_4px_0px_#111] rounded">
-            
-            <div className="flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-red-800 rounded-full animate-pulse"></span>
-                <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
-                  WIRE DEPATCH
-                </h3>
-              </div>
-              <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest">
-                TELETYPE ACTIVE
-              </span>
-            </div>
-
-            {/* Teletype control actions */}
-            <div className="flex-1 flex flex-col gap-4 text-xs text-stone-800">
-              
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="font-mono uppercase text-stone-500 font-bold">Press Health</span>
-                <span className={`font-mono font-bold uppercase tracking-wider text-[10px] ${serverHealth?.status === "ok" ? "text-green-800" : "text-red-700 animate-pulse"}`}>
-                  {serverHealth ? `${serverHealth.status.toUpperCase()}` : "SCANNING..."}
-                </span>
-              </div>
-
-              {canAdd && (
-                <div className="mt-2 pt-2 border-t border-stone-300 flex flex-col gap-3">
-                  <div className="text-[10px] font-mono text-stone-500 uppercase tracking-widest font-bold">EDITORIAL DESK ACTIONS</div>
-                  
-                  {/* Grid side-by-side action buttons */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Link 
-                      href="/news/add"
-                      className="vintage-stamp text-center py-3 text-xs flex items-center justify-center font-bold"
-                    >
-                      WRITE ARTICLE
-                    </Link>
-
-                    <button
-                      onClick={() => setIsAskAgentOpen(true)}
-                      className="vintage-stamp text-center py-3 text-xs bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white flex items-center justify-center gap-1.5 font-bold cursor-pointer"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.904-4.43 1.956-6.195-2.065-2.065-6.195 1.956zm9.813-9.813a2.121 2.121 0 113 3 2.121 2.121 0 01-3-3z" />
-                      </svg>
-                      ASK AGENT
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Wire Teletype log readout */}
-              <div className="flex flex-col gap-1.5 mt-6 bg-[#f5f2e9] border-2 border-stone-950 p-4 rounded shadow-inner">
-                <span className="text-[9px] font-mono text-stone-600 uppercase tracking-widest font-bold">TELETYPE LOG READOUT</span>
-                <div className="font-mono text-[10px] text-stone-800 leading-relaxed space-y-1">
-                  <div>&gt;&gt; MONITORING GLOBAL CHANNELS...</div>
-                  <div>&gt;&gt; AGENT INSTANTIATED VIA GEMINI-3.1-FLASH-LITE</div>
-                  <div>&gt;&gt; TAVILY SEARCH INDEX ONLINE</div>
-                </div>
-              </div>
-
-              {/* Newspaper Mini-Editorial snippet */}
-              <div className="mt-6 border-t-4 border-double border-stone-950 pt-4 text-left">
-                <h4 className="font-playfair font-black text-stone-900 uppercase text-xs tracking-tight mb-2">Editorial Note: News Gathering in 2026</h4>
-                <p className="font-serif text-[11px] text-stone-750 leading-relaxed italic">
-                  "Today's dispatches are handled automatically via the Daily Nexus's cognitive news wire. Operatives may utilize the Ask Agent feature to draft detailed accounts of global activities immediately, bypassing traditional printing delays."
-                </p>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT PANEL: News wire articles list (3 Cols) */}
-        <div className="lg:col-span-3 flex flex-col relative">
+        {/* News wire articles list (Full Width) */}
+        <div className="w-full flex flex-col relative">
           
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             
@@ -462,8 +387,29 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Search Widget */}
-              <div className="flex flex-col items-end gap-1 w-full md:w-auto mt-2 md:mt-0">
+              {/* Action Buttons & Search Widget */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                {canAdd && (
+                  <div className="flex gap-2">
+                    <Link 
+                      href="/news/add"
+                      className="vintage-stamp text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider"
+                    >
+                      WRITE ARTICLE
+                    </Link>
+
+                    <button
+                      onClick={() => setIsAskAgentOpen(true)}
+                      className="vintage-stamp text-center py-2 px-3.5 text-[10px] bg-red-800 text-white border-red-950 shadow-[2px_2px_0px_#801c1c] hover:bg-red-950 hover:text-white flex items-center justify-center gap-1.5 font-bold cursor-pointer tracking-wider"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.904-4.43 1.956-6.195-2.065-2.065-6.195 1.956zm9.813-9.813a2.121 2.121 0 113 3 2.121 2.121 0 01-3-3z" />
+                      </svg>
+                      ASK AGENT
+                    </button>
+                  </div>
+                )}
+                
                 <div className="relative w-full sm:w-52">
                   <input
                     type="text"
@@ -502,7 +448,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
 
-                <div className="space-y-6 relative z-10 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
+                <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                   {newsList.filter(item => {
                     if (selectedPriority === "ALL") return true;
                     return item.priority.toLowerCase() === selectedPriority.toLowerCase();
@@ -597,20 +543,6 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   )}
-                </div>
-              </div>
-
-              {/* Event Logs teletype window */}
-              <div className="h-32 bg-[#f5f2e9] border-2 border-stone-950 rounded p-4 shadow-inner flex flex-col relative">
-                <div className="absolute top-0.5 right-3 text-[9px] font-mono text-stone-600 font-bold uppercase tracking-widest select-none">
-                  SYSTEM MONITOR FEED
-                </div>
-                <div className="flex-1 overflow-y-auto font-mono text-[10px] text-stone-700 space-y-1.5 custom-scrollbar pr-1">
-                  {terminalLogs.map((log, index) => (
-                    <div key={index} className="truncate text-left">
-                      &gt;&gt; {log}
-                    </div>
-                  ))}
                 </div>
               </div>
 
