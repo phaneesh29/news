@@ -3,5 +3,6 @@ export const whitelistedEmails = [
   'vivekgowdashivakumar@gmail.com',
   'chandan005ae@gmail.com',
   'ssaisreeharis@gmail.com',
-  'pradumnahj8@gmail.com'
+  'pradumnahj8@gmail.com',
+  'sreepad1975@gmail.com'
 ];
