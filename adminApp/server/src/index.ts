@@ -12,6 +12,7 @@ import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
 import { whitelistRoutes } from './routes/whitelist.js'
 import { newsRoutes } from './routes/news.js'
+import { agentRoutes } from './routes/agent.js'
 import { globalRateLimiter } from './middlewares/rateLimit.js'
 
 type Bindings = {
@@ -48,6 +49,7 @@ app.route('/api/health', healthRoutes)
 app.route('/api/auth', authRoutes)
 app.route('/api/whitelist', whitelistRoutes)
 app.route('/api/news', newsRoutes)
+app.route('/api/agent', agentRoutes)
 
 app.notFound((c) => {
   return c.json(
