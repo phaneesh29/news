@@ -14,7 +14,7 @@ export default function AddNewsPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
-  const [priority, setPriority] = useState("INFO_LEVEL");
+  const [priority, setPriority] = useState("low");
   const [sourceUrl, setSourceUrl] = useState("");
   
   // Injector status
@@ -72,11 +72,7 @@ export default function AddNewsPage() {
             setSourceUrl(draft.sourceUrl);
           }
           if (draft.priority) {
-            const pr = draft.priority.toLowerCase();
-            if (pr === "critical") setPriority("CRITICAL_OVERRIDE");
-            else if (pr === "high") setPriority("WARNING_LEVEL");
-            else if (pr === "medium") setPriority("NOTICE_LEVEL");
-            else setPriority("INFO_LEVEL");
+            setPriority(draft.priority.toLowerCase());
           }
           // Remove draft so it isn't loaded again on refresh
           localStorage.removeItem("news_agent_draft");
@@ -117,15 +113,10 @@ export default function AddNewsPage() {
     setInjectionStatus({ active: true, phase: "PREPARING TELETYPE WIRE...", progress: 10 });
 
     try {
-      let mappedPriority: 'low' | 'medium' | 'high' | 'critical' = 'low';
-      if (priority === "CRITICAL_OVERRIDE") mappedPriority = 'critical';
-      else if (priority === "WARNING_LEVEL") mappedPriority = 'high';
-      else if (priority === "NOTICE_LEVEL") mappedPriority = 'medium';
-
       const payload = {
         title: title.toUpperCase(),
         content,
-        priority: mappedPriority,
+        priority: priority.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
         tags: tags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
         sourceUrl: sourceUrl || null
       };
@@ -194,10 +185,11 @@ export default function AddNewsPage() {
         }
         if (draft.priority) {
           const pr = draft.priority.toLowerCase();
-          if (pr === "critical") setPriority("CRITICAL_OVERRIDE");
-          else if (pr === "high") setPriority("WARNING_LEVEL");
-          else if (pr === "medium") setPriority("NOTICE_LEVEL");
-          else setPriority("INFO_LEVEL");
+          if (["low", "medium", "high", "critical"].includes(pr)) {
+            setPriority(pr);
+          } else {
+            setPriority("low");
+          }
         }
         setIsAskAgentOpen(false);
         setAgentQuery("");
@@ -359,10 +351,10 @@ export default function AddNewsPage() {
                   </span>
                   <div className="grid grid-cols-4 gap-2 text-center text-xs font-mono">
                     {[
-                      { key: "INFO_LEVEL", text: "INFO" },
-                      { key: "NOTICE_LEVEL", text: "NOTICE" },
-                      { key: "WARNING_LEVEL", text: "WARNING" },
-                      { key: "CRITICAL_OVERRIDE", text: "CRITICAL" },
+                      { key: "low", text: "LOW" },
+                      { key: "medium", text: "MEDIUM" },
+                      { key: "high", text: "HIGH" },
+                      { key: "critical", text: "CRITICAL" },
                     ].map((pr) => (
                       <button
                         key={pr.key}

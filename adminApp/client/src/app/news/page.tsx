@@ -170,16 +170,10 @@ export default function NewsPage() {
     if (!editTitle || !editContent || !selectedNews) return;
 
     try {
-      let mappedPriority: 'low' | 'medium' | 'high' | 'critical' = 'low';
-      const cleanPriority = editPriority.toLowerCase();
-      if (cleanPriority === "critical" || cleanPriority === "critical_override") mappedPriority = 'critical';
-      else if (cleanPriority === "high" || cleanPriority === "warning_level") mappedPriority = 'high';
-      else if (cleanPriority === "medium" || cleanPriority === "notice_level") mappedPriority = 'medium';
-
       const payload = {
         title: editTitle.toUpperCase(),
         content: editContent,
-        priority: mappedPriority,
+        priority: editPriority.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
         tags: editTags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
         sourceUrl: editSourceUrl || null
       };
@@ -496,7 +490,7 @@ export default function NewsPage() {
                 {/* Priority Selector Filter Bar */}
                 <div className="flex flex-wrap gap-2.5 pb-3 border-b border-stone-300 mb-4 relative z-10 font-mono text-[10px] uppercase tracking-wider">
                   <span className="text-stone-600 font-bold self-center mr-1">FILTER LEVEL:</span>
-                  {["ALL", "CRITICAL", "WARNING", "NOTICE", "INFO"].map((level) => (
+                  {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((level) => (
                     <button
                       key={level}
                       onClick={() => {
@@ -513,12 +507,7 @@ export default function NewsPage() {
                 <div className="space-y-6 relative z-10 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
                   {newsList.filter(item => {
                     if (selectedPriority === "ALL") return true;
-                    const lowerPriority = item.priority.toLowerCase();
-                    if (selectedPriority === "CRITICAL" && (lowerPriority === "critical" || lowerPriority === "critical_override")) return true;
-                    if (selectedPriority === "WARNING" && (lowerPriority === "high" || lowerPriority === "warning_level")) return true;
-                    if (selectedPriority === "NOTICE" && (lowerPriority === "medium" || lowerPriority === "notice_level")) return true;
-                    if (selectedPriority === "INFO" && (lowerPriority === "low" || lowerPriority === "info_level")) return true;
-                    return false;
+                    return item.priority.toLowerCase() === selectedPriority.toLowerCase();
                   }).map((item) => {
                     const getPriorityColors = (pr: string) => {
                       const cleanPr = pr.toLowerCase();
