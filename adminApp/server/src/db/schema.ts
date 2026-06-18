@@ -87,6 +87,7 @@ export const devNews = pgTable('dev_news', {
   priority: newsPriorityEnum('priority').notNull().default('low'),
   tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
   authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+  isPublished: boolean('is_published').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 }, (table) => [

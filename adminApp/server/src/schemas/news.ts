@@ -15,7 +15,8 @@ export const updateNewsSchema = z.object({
   content: z.string().trim().min(1, 'Content is required').optional(),
   sourceUrl: z.url('Invalid source URL').max(512).nullable().optional(),
   priority: newsPrioritySchema.optional(),
-  tags: z.array(z.string()).optional()
+  tags: z.array(z.string()).optional(),
+  isPublished: z.boolean().optional()
 }).refine((body) => Object.keys(body).length > 0, {
   message: 'At least one field is required'
 })

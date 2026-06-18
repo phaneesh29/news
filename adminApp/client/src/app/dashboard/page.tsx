@@ -14,6 +14,7 @@ interface NewsItem {
   tags: string[];
   createdAt: string;
   status: string;
+  isPublished: boolean;
 }
 
 export default function DashboardPage() {
@@ -43,11 +44,12 @@ export default function DashboardPage() {
   const [editTags, setEditTags] = useState("");
   const [editPriority, setEditPriority] = useState("");
   const [editSourceUrl, setEditSourceUrl] = useState("");
-
+  const [editIsPublished, setEditIsPublished] = useState(false);
 
 
   // Telemetry status
   const [serverHealth, setServerHealth] = useState<any>(null);
+  const [clientInfo, setClientInfo] = useState<any>(null);
 
   // Live Terminal Log System (Newspaper Teletype logs)
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
@@ -115,6 +117,29 @@ export default function DashboardPage() {
           .then(res => res.json())
           .then(data => setServerHealth(data))
           .catch(() => setServerHealth({ status: "UNREACHABLE", timestamp: new Date() }));
+
+        const ua = window.navigator.userAgent;
+        const os = ua.indexOf("Win") !== -1 ? "WINDOWS" 
+        : ua.indexOf("Mac") !== -1 ? "MACOS" 
+        : ua.indexOf("Linux") !== -1 ? "LINUX" 
+        : "UNKNOWN_OS";
+        
+        let browser = "UNKNOWN_BROWSER";
+        if (ua.includes("Chrome")) browser = "CHROME";
+        else if (ua.includes("Firefox")) browser = "FIREFOX";
+        else if (ua.includes("Safari")) browser = "SAFARI";
+        else if (ua.includes("Edge")) browser = "EDGE";
+
+        setClientInfo({
+          os,
+          browser,
+          ip: "SCANNING..."
+        });
+
+        fetch("https://api.ipify.org?format=json")
+          .then(res => res.json())
+          .then(data => setClientInfo((prev: any) => ({ ...prev, ip: data.ip })))
+          .catch(() => setClientInfo((prev: any) => ({ ...prev, ip: "SECURE/MASKED" })));
       } catch (err) {
         console.error("Dashboard auth check error", err);
         router.push("/login");
@@ -170,7 +195,8 @@ export default function DashboardPage() {
         content: editContent,
         priority: editPriority.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
         tags: editTags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
-        sourceUrl: editSourceUrl || null
+        sourceUrl: editSourceUrl || null,
+        isPublished: editIsPublished
       };
 
       const res = await fetch(`${API_BASE_URL}/news/${selectedNews.id}`, {
@@ -195,6 +221,39 @@ export default function DashboardPage() {
     } catch (err) {
       console.error("Update error:", err);
       addLog("WARNING: Payload modification failed");
+    }
+  };
+
+  const handleTogglePublish = async (newsId: string, currentStatus: boolean) => {
+    try {
+      addLog(`WIRE: Toggling publish status for record ${newsId.slice(0, 8)}`);
+      const payload = {
+        isPublished: !currentStatus
+      };
+
+      const res = await fetch(`${API_BASE_URL}/news/${newsId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("Failed to toggle publish status");
+      const data = await res.json();
+      
+      const updatedItem = {
+        ...data.news,
+        status: "SYNCED"
+      };
+
+      setNewsList(prev => prev.map(item => item.id === newsId ? updatedItem : item));
+      if (selectedNews?.id === newsId) {
+        setSelectedNews(updatedItem);
+      }
+      addLog(`WIRE: Record ${newsId.slice(0, 8)} publish status updated`);
+    } catch (err) {
+      console.error("Toggle publish error:", err);
+      addLog("WARNING: Publish toggle operation failed");
     }
   };
 
@@ -288,10 +347,10 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Newspaper Layout */}
-      <div className="flex-1 flex justify-center relative z-10 max-w-[1100px] mx-auto w-full pb-8">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-[1500px] mx-auto w-full pb-8 items-start">
         
-        {/* News wire articles list (Full Width) */}
-        <div className="w-full flex flex-col relative">
+        {/* News wire articles list (Left Columns) */}
+        <div className="lg:col-span-2 w-full flex flex-col relative">
           
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             
@@ -371,10 +430,10 @@ export default function DashboardPage() {
                   }).map((item) => {
                     const getPriorityColors = (pr: string) => {
                       const cleanPr = pr.toLowerCase();
-                      if (cleanPr === "critical") return "border-red-950 text-red-900 bg-red-100/60";
-                      if (cleanPr === "high") return "border-amber-950 text-amber-900 bg-amber-100/60";
-                      if (cleanPr === "medium") return "border-blue-950 text-blue-900 bg-blue-100/60";
-                      return "border-stone-950 text-stone-900 bg-stone-100/60";
+                      if (cleanPr === "critical") return "urgency-badge-critical";
+                      if (cleanPr === "high") return "urgency-badge-high";
+                      if (cleanPr === "medium") return "urgency-badge-medium";
+                      return "urgency-badge-low";
                     };
 
                     return (
@@ -388,6 +447,7 @@ export default function DashboardPage() {
                           setEditPriority(item.priority);
                           setEditSourceUrl(item.sourceUrl || "");
                           setEditTags(item.tags.join(", "));
+                          setEditIsPublished(item.isPublished);
                           addLog(`VIEW: Focus shifted to article ${item.id.slice(0, 8)}`);
                         }}
                         className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer text-left rounded"
@@ -398,6 +458,9 @@ export default function DashboardPage() {
                           </span>
                           <span className="font-mono text-[10px] text-stone-600">
                             {new Date(item.createdAt).toLocaleString()}
+                          </span>
+                          <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
+                            {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
                           </span>
                         </div>
 
@@ -464,7 +527,84 @@ export default function DashboardPage() {
 
             </div>
           </div>
+
+        {/* RIGHT COLUMN: Telemetry and Live Teletype Logs */}
+        <div className="lg:col-span-1 flex flex-col gap-6 relative w-full lg:sticky lg:top-8 text-left z-10">
+          
+          {/* Telemetry Window */}
+          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 scanline overflow-hidden shadow-sm">
+            
+            {/* Decorative coffee stain */}
+            <div className="coffee-stain -top-6 -right-6 opacity-25"></div>
+
+            <div className="border-b-2 border-stone-950 pb-3 mb-5">
+              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span>
+                SYS.TELEMETRY
+              </h3>
+              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+                OPERATIVE DATA SCAN
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3.5 text-xs text-stone-855 font-mono">
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="text-stone-500 font-bold">NODE STATUS</span>
+                <span className={`font-bold uppercase tracking-wider text-[10px] ${serverHealth?.status === "ok" ? "text-green-800" : "text-red-700 animate-pulse"}`}>
+                  {serverHealth ? `${serverHealth.status.toUpperCase()}` : "SCANNING..."}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="text-stone-500 font-bold">OPERATIVE OS</span>
+                <span className="text-stone-900 font-bold">{clientInfo?.os || "DETERMINING..."}</span>
+              </div>
+
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="text-stone-500 font-bold">CLIENT BROWSER</span>
+                <span className="text-stone-800 truncate max-w-[130px] font-bold">{clientInfo?.browser || "EXTRACTING..."}</span>
+              </div>
+
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="text-stone-500 font-bold">IP ADDR COORDINATES</span>
+                <span className="text-red-900 font-bold tracking-wider">{clientInfo?.ip || "SCANNING..."}</span>
+              </div>
+
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="text-stone-500 font-bold">CLEARANCE KEY</span>
+                <span className="text-stone-900 uppercase font-bold">{profile?.role || "OPERATIVE"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Logs Terminal Window */}
+          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 flex-1 min-h-[350px]">
+            
+            <div className="border-b-2 border-stone-950 pb-3 mb-5">
+              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
+                TELETYPE STREAM
+              </h3>
+              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+                LIVE SYSTEM EXECUTIONS
+              </p>
+            </div>
+
+            <div className="flex-1 green-terminal scanline relative overflow-hidden p-4 font-mono text-[11px] leading-relaxed flex flex-col vintage-shadow-sm min-h-[250px] max-h-[350px]">
+              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+                {terminalLogs.map((log, index) => (
+                  <div key={index} className="opacity-90 hover:opacity-100 transition-opacity">
+                    &gt;&gt; {log}
+                  </div>
+                ))}
+                {terminalLogs.length === 0 && (
+                  <div className="text-stone-500 italic">No feed logs recorded.</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
+
+      </div>
 
       </div>
 
@@ -550,6 +690,22 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
+                  <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-2">
+                    <div className="flex flex-col">
+                      <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">PUBLICATION STATUS</span>
+                      <span className="font-serif text-xs text-stone-500">Toggle to publish or unpublish this report.</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditIsPublished(!editIsPublished)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${editIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editIsPublished ? 'translate-x-5' : 'translate-x-1'}`}
+                      />
+                    </button>
+                  </div>
+
                   <div className="flex flex-col border-b border-stone-400 pb-2">
                     <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
                       ROUTING LABELS (COMMA SEPARATED)
@@ -619,6 +775,12 @@ export default function DashboardPage() {
                       <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span>
                       <span className="text-stone-950">{new Date(selectedNews.createdAt).toLocaleString()}</span>
                     </div>
+                    <div>
+                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">STATUS</span>
+                      <span className={`font-bold ${selectedNews.isPublished ? "text-green-700" : "text-stone-500"}`}>
+                        {selectedNews.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-1.5 border-t border-stone-300 pt-4">
@@ -634,12 +796,20 @@ export default function DashboardPage() {
                     <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">WIRE RECORDS SYSTEM CONTROL</span>
                     <div className="flex gap-3">
                       {(profile?.role === "admin" || profile?.role === "editor") && (
-                        <button
-                          onClick={() => setIsEditing(true)}
-                          className="vintage-stamp text-xs py-2 bg-transparent text-stone-900 border-stone-950 hover:bg-stone-950 hover:text-white"
-                        >
-                          EDIT REPORT
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleTogglePublish(selectedNews.id, selectedNews.isPublished)}
+                            className={`vintage-stamp text-xs py-2 bg-transparent hover:text-white cursor-pointer ${selectedNews.isPublished ? 'text-amber-700 border-amber-700 hover:bg-amber-700' : 'text-green-700 border-green-700 hover:bg-green-700'}`}
+                          >
+                            {selectedNews.isPublished ? 'UNPUBLISH' : 'PUBLISH'}
+                          </button>
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="vintage-stamp text-xs py-2 bg-transparent text-stone-900 border-stone-950 hover:bg-stone-950 hover:text-white cursor-pointer"
+                          >
+                            EDIT REPORT
+                          </button>
+                        </>
                       )}
                       <button
                         onClick={() => handlePurge(selectedNews.id)}

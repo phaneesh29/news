@@ -13,6 +13,7 @@ const newsSelect = {
   priority: devNews.priority,
   tags: devNews.tags,
   authorId: devNews.authorId,
+  isPublished: devNews.isPublished,
   createdAt: devNews.createdAt,
   updatedAt: devNews.updatedAt,
   authorEmail: adminUsers.email
@@ -182,6 +183,7 @@ export const updateNews = async (c: Context) => {
       sourceUrl?: string | null
       priority?: 'low' | 'medium' | 'high' | 'critical'
       tags?: string[]
+      isPublished?: boolean
     }
 
     const updates: Partial<typeof devNews.$inferInsert> = {
@@ -206,6 +208,10 @@ export const updateNews = async (c: Context) => {
 
     if (body.tags !== undefined) {
       updates.tags = body.tags
+    }
+
+    if (body.isPublished !== undefined) {
+      updates.isPublished = body.isPublished
     }
 
     const updatedNews = await db.update(devNews)

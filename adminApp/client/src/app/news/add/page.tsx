@@ -6,522 +6,504 @@ import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
 
 export default function AddNewsPage() {
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+ const [profile, setProfile] = useState<any>(null);
+ const [loading, setLoading] = useState(true);
+ const router = useRouter();
 
-  // Form State
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tags, setTags] = useState("");
-  const [priority, setPriority] = useState("low");
-  const [sourceUrl, setSourceUrl] = useState("");
-  
-  // Injector status
-  const [injectionStatus, setInjectionStatus] = useState({ active: false, phase: "", progress: 0 });
+ // Form State
+ const [title, setTitle] = useState("");
+ const [content, setContent] = useState("");
+ const [tags, setTags] = useState("");
+ const [priority, setPriority] = useState("low");
+ const [sourceUrl, setSourceUrl] = useState("");
+ 
+ // Injector status
+ const [injectionStatus, setInjectionStatus] = useState({ active: false, phase: "", progress: 0 });
 
-  // Clock state
-  const [systemTime, setSystemTime] = useState("");
+ // Clock state
+ const [systemTime, setSystemTime] = useState("");
 
-  // Ask Agent Modal State inside form
-  const [isAskAgentOpen, setIsAskAgentOpen] = useState(false);
+  // Ask Agent State inside form
   const [agentQuery, setAgentQuery] = useState("");
   const [agentLoading, setAgentLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/auth/profile`, { credentials: "include" });
-        if (!res.ok) {
-          router.push("/login");
-          return;
-        }
-        const data = await res.json();
-        setProfile(data.user);
+ useEffect(() => {
+ const fetchProfile = async () => {
+ try {
+ const res = await fetch(`${API_BASE_URL}/auth/profile`, { credentials: "include" });
+ if (!res.ok) {
+ router.push("/login");
+ return;
+ }
+ const data = await res.json();
+ setProfile(data.user);
 
-        // Check permission - must be admin or editor
-        if (data.user.role !== "admin" && data.user.role !== "editor") {
-          router.push("/dashboard");
-          return;
-        }
-      } catch (err) {
-        console.error("Auth check error", err);
-        router.push("/login");
-      } finally {
-        setLoading(false);
-      }
-    };
+ // Check permission - must be admin or editor
+ if (data.user.role !== "admin" && data.user.role !== "editor") {
+ router.push("/dashboard");
+ return;
+ }
+ } catch (err) {
+ console.error("Auth check error", err);
+ router.push("/login");
+ } finally {
+ setLoading(false);
+ }
+ };
 
-    fetchProfile();
-  }, [router]);
+ fetchProfile();
+ }, [router]);
 
-  // Load agent draft from URL/localStorage if requested
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("useDraft") === "true") {
-      const savedDraft = localStorage.getItem("news_agent_draft");
-      if (savedDraft) {
-        try {
-          const draft = JSON.parse(savedDraft);
-          setTitle(draft.title || "");
-          setContent(draft.content || "");
-          if (draft.tags) {
-            setTags(draft.tags.join(", "));
-          }
-          if (draft.sourceUrl) {
-            setSourceUrl(draft.sourceUrl);
-          }
-          if (draft.priority) {
-            setPriority(draft.priority.toLowerCase());
-          }
-          // Remove draft so it isn't loaded again on refresh
-          localStorage.removeItem("news_agent_draft");
-        } catch (err) {
-          console.error("Failed to parse agent draft:", err);
-        }
-      }
-    }
-  }, []);
+ // Load agent draft from URL/localStorage if requested
+ useEffect(() => {
+ const params = new URLSearchParams(window.location.search);
+ if (params.get("useDraft") === "true") {
+ const savedDraft = localStorage.getItem("news_agent_draft");
+ if (savedDraft) {
+ try {
+ const draft = JSON.parse(savedDraft);
+ setTitle(draft.title || "");
+ setContent(draft.content || "");
+ if (draft.tags) {
+ setTags(draft.tags.join(", "));
+ }
+ if (draft.sourceUrl) {
+ setSourceUrl(draft.sourceUrl);
+ }
+ if (draft.priority) {
+ setPriority(draft.priority.toLowerCase());
+ }
+ // Remove draft so it isn't loaded again on refresh
+ localStorage.removeItem("news_agent_draft");
+ } catch (err) {
+ console.error("Failed to parse agent draft:", err);
+ }
+ }
+ }
+ }, []);
 
-  // Clock Update effect
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
-      const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-      setSystemTime(`${dateStr}  |  ${timeStr}`);
-    };
-    
-    updateTime();
-    const timer = setInterval(updateTime, 1000);
-    return () => clearInterval(timer);
-  }, []);
+ // Clock Update effect
+ useEffect(() => {
+ const updateTime = () => {
+ const now = new Date();
+ const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
+ const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+ setSystemTime(`${dateStr} | ${timeStr}`);
+ };
+ 
+ updateTime();
+ const timer = setInterval(updateTime, 1000);
+ return () => clearInterval(timer);
+ }, []);
 
-  const handleLogout = async () => {
-    try {
-      await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
-      router.push("/login");
-    } catch (err) {
-      console.error(err);
-    }
-  };
+ const handleLogout = async () => {
+ try {
+ await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
+ router.push("/login");
+ } catch (err) {
+ console.error(err);
+ }
+ };
 
-  const handleInjectPayload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title || !content) return;
+ const handleInjectPayload = async (e: React.FormEvent) => {
+ e.preventDefault();
+ if (!title || !content) return;
 
-    setInjectionStatus({ active: true, phase: "PREPARING TELETYPE WIRE...", progress: 10 });
+ setInjectionStatus({ active: true, phase: "PREPARING TELETYPE WIRE...", progress: 10 });
 
-    try {
-      const payload = {
-        title: title.toUpperCase(),
-        content,
-        priority: priority.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
-        tags: tags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
-        sourceUrl: sourceUrl || null
-      };
+ try {
+ const payload = {
+ title: title.toUpperCase(),
+ content,
+ priority: priority.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
+ tags: tags.split(",").map(t => t.trim().toUpperCase()).filter(Boolean),
+ sourceUrl: sourceUrl || null
+ };
 
-      const res = await fetch(`${API_BASE_URL}/news`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "include"
-      });
+ const res = await fetch(`${API_BASE_URL}/news`, {
+ method: "POST",
+ headers: { "Content-Type": "application/json" },
+ body: JSON.stringify(payload),
+ credentials: "include"
+ });
 
-      if (!res.ok) throw new Error("Failed to create news");
-      
-      const phases = [
-        { msg: "CALIBRATING LETTERPRESS DIES...", delay: 350, progress: 40 },
-        { msg: "STAMPING TYPESET RECORD...", delay: 700, progress: 75 },
-        { msg: "RECORD DEPLOYED TO TELEGRAPH STATION...", delay: 1050, progress: 95 },
-        { msg: "PUBLISHED SUCCESSFULLY! REDIRECTING TO FEED...", delay: 1400, progress: 100 }
-      ];
+ if (!res.ok) throw new Error("Failed to create news");
+ 
+ const phases = [
+ { msg: "CALIBRATING LETTERPRESS DIES...", delay: 350, progress: 40 },
+ { msg: "STAMPING TYPESET RECORD...", delay: 700, progress: 75 },
+ { msg: "RECORD DEPLOYED TO TELEGRAPH STATION...", delay: 1050, progress: 95 },
+ { msg: "PUBLISHED SUCCESSFULLY! REDIRECTING TO FEED...", delay: 1400, progress: 100 }
+ ];
 
-      phases.forEach((p) => {
-        setTimeout(() => {
-          setInjectionStatus((prev) => ({ ...prev, phase: p.msg, progress: p.progress }));
-          
-          if (p.progress === 100) {
-            setTimeout(() => {
-              setInjectionStatus({ active: false, phase: "", progress: 0 });
-              router.push("/dashboard");
-            }, 500);
-          }
-        }, p.delay);
-      });
-    } catch (err) {
-      console.error(err);
-      setInjectionStatus({ active: true, phase: "PUBLISHING INTERRUPTED!", progress: 0 });
-      setTimeout(() => {
-        setInjectionStatus({ active: false, phase: "", progress: 0 });
-      }, 1500);
-    }
-  };
+ phases.forEach((p) => {
+ setTimeout(() => {
+ setInjectionStatus((prev) => ({ ...prev, phase: p.msg, progress: p.progress }));
+ 
+ if (p.progress === 100) {
+ setTimeout(() => {
+ setInjectionStatus({ active: false, phase: "", progress: 0 });
+ router.push("/dashboard");
+ }, 500);
+ }
+ }, p.delay);
+ });
+ } catch (err) {
+ console.error(err);
+ setInjectionStatus({ active: true, phase: "PUBLISHING INTERRUPTED!", progress: 0 });
+ setTimeout(() => {
+ setInjectionStatus({ active: false, phase: "", progress: 0 });
+ }, 1500);
+ }
+ };
 
-  // Ask AI Agent for draft from within form editor
-  const handleAskAgent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!agentQuery.trim()) return;
+ // Ask AI Agent for draft from within form editor
+ const handleAskAgent = async (e: React.FormEvent) => {
+ e.preventDefault();
+ if (!agentQuery.trim()) return;
 
-    setAgentLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/agent/draft`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: agentQuery }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Agent failed to draft");
-      const data = await res.json();
-      if (data.success) {
-        const draft = data.draft;
-        setTitle(draft.title || "");
-        setContent(draft.content || "");
-        if (draft.tags) {
-          setTags(draft.tags.join(", "));
-        }
-        if (draft.sourceUrl) {
-          setSourceUrl(draft.sourceUrl);
-        }
-        if (draft.priority) {
-          const pr = draft.priority.toLowerCase();
-          if (["low", "medium", "high", "critical"].includes(pr)) {
-            setPriority(pr);
-          } else {
-            setPriority("low");
-          }
-        }
-        setIsAskAgentOpen(false);
-        setAgentQuery("");
-      } else {
-        throw new Error(data.error?.message || "Failed to draft news");
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || "Error generating draft from agent");
-    } finally {
-      setAgentLoading(false);
-    }
-  };
+ setAgentLoading(true);
+ try {
+ const res = await fetch(`${API_BASE_URL}/agent/draft`, {
+ method: "POST",
+ headers: { "Content-Type": "application/json" },
+ body: JSON.stringify({ query: agentQuery }),
+ credentials: "include"
+ });
+ if (!res.ok) throw new Error("Agent failed to draft");
+ const data = await res.json();
+ if (data.success) {
+ const draft = data.draft;
+ setTitle(draft.title || "");
+ setContent(draft.content || "");
+ if (draft.tags) {
+ setTags(draft.tags.join(", "));
+ }
+ if (draft.sourceUrl) {
+ setSourceUrl(draft.sourceUrl);
+ }
+ if (draft.priority) {
+ const pr = draft.priority.toLowerCase();
+ if (["low", "medium", "high", "critical"].includes(pr)) {
+ setPriority(pr);
+ } else {
+ setPriority("low");
+ }
+ }
+ setAgentQuery("");
+ } else {
+ throw new Error(data.error?.message || "Failed to draft news");
+ }
+ } catch (err: any) {
+ console.error(err);
+ alert(err.message || "Error generating draft from agent");
+ } finally {
+ setAgentLoading(false);
+ }
+ };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
-        [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
-      </div>
-    );
-  }
+ if (loading) {
+ return (
+ <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
+ [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
+ </div>
+ );
+ }
 
-  const isAdmin = profile?.role === "admin";
+ const isAdmin = profile?.role === "admin";
 
-  return (
-    <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-red-950 text-stone-900 font-serif">
-      
-      {/* Newspaper texture noise background */}
-      <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
-      
-      {/* Header HUD */}
-      <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
-        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
-          
-          <div className="flex flex-col text-center md:text-left">
-            <Link href="/dashboard" className="font-playfair text-3xl sm:text-4xl font-black tracking-tight text-stone-950 uppercase select-none hover:text-red-800 transition-colors">
-              THE DAILY <span className="text-red-800">NEXUS</span>
-            </Link>
-            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
-              WIRE SERVICE  •  OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
-            </span>
-          </div>
+ return (
+ <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-red-950 text-stone-900 font-serif">
+ 
+ {/* Newspaper texture noise background */}
+ 
+ {/* Header HUD */}
+ <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
+ <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
+ 
+ <div className="flex flex-col text-center md:text-left">
+ <Link href="/dashboard" className="font-playfair text-3xl sm:text-4xl font-black tracking-tight text-stone-950 uppercase select-none hover:text-red-800 transition-colors">
+ THE DAILY <span className="text-red-800">NEXUS</span>
+ </Link>
+ <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
+ WIRE SERVICE | OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
+ </span>
+ </div>
 
-          {/* Navigation Deck Links */}
-          <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/news/add" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Injector</Link>
-          </div>
+ {/* Navigation Deck Links */}
+ <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
+ <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+ <span className="text-stone-400">|</span>
+ <Link href="/news/add" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Injector</Link>
+ </div>
 
-          <div className="flex gap-3">
-            {isAdmin && (
-              <Link 
-                href="/settings"
-                className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-white px-3 py-1.5 hover:bg-stone-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5"
-              >
-                Security Deck
-              </Link>
-            )}
-            <button 
-              onClick={handleLogout}
-              className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-white px-3 py-1.5 hover:bg-red-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
-            >
-              Log Out
-            </button>
-          </div>
-        </div>
+ <div className="flex gap-3">
+ {isAdmin && (
+ <Link 
+ href="/settings"
+ className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-[#fcfaf2] px-3 py-1.5 hover:bg-stone-950 hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center gap-1.5"
+ >
+ Security Deck
+ </Link>
+ )}
+ <button 
+ onClick={handleLogout}
+ className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-[#fcfaf2] px-3 py-1.5 hover:bg-red-950 hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
+ >
+ Log Out
+ </button>
+ </div>
+ </div>
 
-        {/* Newspaper Subheader bar */}
-        <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
-          <span>VOL. CXXVI... No. 47190</span>
-          <span className="font-bold text-stone-950">{systemTime || "[ RETRIEVING TIME ]"}</span>
-          <span>PRICE: 10 CENTS</span>
-        </div>
-      </header>
+ {/* Newspaper Subheader bar */}
+ <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
+ <span>VOL. CXXVI... No. 47190</span>
+ <span className="font-bold text-stone-950">{systemTime || "[ RETRIEVING TIME ]"}</span>
+ <span>PRICE: 10 CENTS</span>
+ </div>
+ </header>
 
-      {/* Main Workspace Layout */}
-      <div className="flex-1 flex items-center justify-center relative z-10 max-w-[800px] mx-auto w-full pb-8">
-        
-        {/* CENTER PANEL: Newspaper Article Editor Card */}
-        <div className="flex flex-col relative w-full">
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
-            
-            {/* Header info */}
-            <div className="w-full flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
-              <div>
-                <h3 className="font-playfair text-xl text-stone-950 uppercase tracking-wide font-black">
-                  ARTICLE INJECTOR
-                </h3>
-                <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
-                  Teletype Draft Protocol
-                </p>
-              </div>
+  {/* Main Workspace Layout */}
+  <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-[1500px] mx-auto w-full pb-8 items-start">
+  
+  {/* LEFT PANEL: Newspaper Article Editor Card */}
+  <div className="lg:col-span-2 flex flex-col relative w-full">
+  <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 vintage-shadow-lg rounded">
+  
+  {/* Header info */}
+  <div className="w-full flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
+  <div>
+  <h3 className="font-playfair text-xl text-stone-950 uppercase tracking-wide font-black">
+  ARTICLE INJECTOR
+  </h3>
+  <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+  Teletype Draft Protocol
+  </p>
+  </div>
+  </div>
 
-              {/* Ask Agent button inside form */}
-              <button
-                type="button"
-                onClick={() => setIsAskAgentOpen(true)}
-                className="vintage-stamp text-[10px] py-2 bg-red-800 text-white border-red-950 shadow-[2px_2px_0px_#801c1c] hover:bg-red-950 hover:text-white flex items-center gap-1.5 font-bold cursor-pointer"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.904-4.43 1.956-6.195-2.065-2.065-6.195 1.956zm9.813-9.813a2.121 2.121 0 113 3 2.121 2.121 0 01-3-3z" />
-                </svg>
-                ASK AGENT TO DRAFT
-              </button>
-            </div>
+  {/* Visual Typewriter Paper visual wrapper */}
+  <div className="flex-1 bg-[#fcfaf2] border border-stone-300 flex flex-col p-6 sm:p-8 relative">
+  
+  <form onSubmit={handleInjectPayload} className="flex flex-col gap-6 pt-3 relative z-10 text-stone-900 font-serif text-left">
+  
+  <div className="flex flex-col border-b border-stone-400 pb-2">
+  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+  TRANSMISSION HEADLINE
+  </label>
+  <input
+  type="text"
+  required
+  placeholder="e.g. BREAKING NEWS HEADLINE..."
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+  className="w-full bg-transparent border-none outline-none font-bold text-base text-stone-950 placeholder-stone-600/30 font-serif"
+  />
+  </div>
 
-            {/* Visual Typewriter Paper visual wrapper */}
-            <div className="flex-1 bg-[#fcfaf2] border border-stone-300 rounded flex flex-col p-6 sm:p-8 relative">
-              
-              <form onSubmit={handleInjectPayload} className="flex flex-col gap-6 pt-3 relative z-10 text-stone-900 font-serif text-left">
-                
-                <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    TRANSMISSION HEADLINE
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. BREAKING NEWS HEADLINE..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none font-bold text-base text-stone-950 placeholder-stone-600/30 font-serif"
-                  />
-                </div>
+  <div className="flex flex-col border-b border-stone-400 pb-2">
+  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+  SOURCE LINK
+  </label>
+  <input
+  type="url"
+  placeholder="https://..."
+  value={sourceUrl}
+  onChange={(e) => setSourceUrl(e.target.value)}
+  className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/30 font-mono"
+  />
+  </div>
 
-                <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    SOURCE LINK
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={sourceUrl}
-                    onChange={(e) => setSourceUrl(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/30 font-mono"
-                  />
-                </div>
+  <div className="flex flex-col flex-1 min-h-[140px] border-b border-stone-400 pb-2">
+  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+  ARTICLE CONTENT
+  </label>
+  <textarea
+  required
+  placeholder="Write news content or dispatch records here..."
+  value={content}
+  onChange={(e) => setContent(e.target.value)}
+  className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/30 min-h-[180px] leading-relaxed custom-paper-scrollbar"
+  />
+  </div>
 
-                <div className="flex flex-col flex-1 min-h-[140px] border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    ARTICLE CONTENT
-                  </label>
-                  <textarea
-                    required
-                    placeholder="Write news content or dispatch records here..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/30 min-h-[180px] leading-relaxed custom-paper-scrollbar"
-                  />
-                </div>
+  {/* Priority Selection Bulb Controls */}
+  <div className="flex flex-col gap-1.5">
+  <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
+  ALERT URGENCY
+  </span>
+  <div className="grid grid-cols-4 gap-2 text-center text-xs font-mono">
+  {[
+  { key: "low", text: "LOW" },
+  { key: "medium", text: "MEDIUM" },
+  { key: "high", text: "HIGH" },
+  { key: "critical", text: "CRITICAL" },
+  ].map((pr) => (
+  <button
+  key={pr.key}
+  type="button"
+  onClick={() => setPriority(pr.key)}
+  className={`py-1.5 border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${priority === pr.key ? "bg-stone-950 text-[#fcfaf2] border-stone-950 font-bold scale-[1.04]" : "bg-[#e8e4d9] text-stone-700 border-stone-300 hover:bg-[#dcd7c9]"} `}
+  >
+  <span>{pr.text}</span>
+  </button>
+  ))}
+  </div>
+  </div>
 
-                {/* Priority Selection Bulb Controls */}
-                <div className="flex flex-col gap-1.5">
-                  <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
-                    ALERT URGENCY
-                  </span>
-                  <div className="grid grid-cols-4 gap-2 text-center text-xs font-mono">
-                    {[
-                      { key: "low", text: "LOW" },
-                      { key: "medium", text: "MEDIUM" },
-                      { key: "high", text: "HIGH" },
-                      { key: "critical", text: "CRITICAL" },
-                    ].map((pr) => (
-                      <button
-                        key={pr.key}
-                        type="button"
-                        onClick={() => setPriority(pr.key)}
-                        className={`py-1.5 rounded border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${priority === pr.key ? "bg-stone-950 text-white border-stone-950 font-bold scale-[1.04]" : "bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200"} `}
-                      >
-                        <span>{pr.text}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+  <div className="flex flex-col border-b border-stone-400 pb-2">
+  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+  ROUTING LABELS (COMMA SEPARATED)
+  </label>
+  <input
+  type="text"
+  placeholder="AI, WIRE, BREAKING..."
+  value={tags}
+  onChange={(e) => setTags(e.target.value)}
+  className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/30 font-mono font-bold"
+  />
+  </div>
 
-                <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    ROUTING LABELS (COMMA SEPARATED)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="AI, WIRE, BREAKING..."
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/30 font-mono font-bold"
-                  />
-                </div>
+  {/* Actions */}
+  <div className="flex gap-4 mt-2">
+  <Link
+  href="/dashboard"
+  className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-300 font-mono font-bold text-xs py-3.5 uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-stone-400"
+  >
+  Cancel
+  </Link>
 
-                {/* Actions */}
-                <div className="flex gap-4 mt-2">
-                  <Link
-                    href="/dashboard"
-                    className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-300 font-mono font-bold text-xs py-3.5 rounded uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-stone-400"
-                  >
-                    Cancel
-                  </Link>
+  <button
+  type="submit"
+  className="flex-[2] bg-red-800 text-[#fcfaf2] hover:bg-red-900 border-2 border-red-950 font-mono font-bold text-xs py-3.5 uppercase tracking-wider transition-all active:translate-y-0.5 active: flex items-center justify-center gap-2 cursor-pointer"
+  >
+  Add to Wire (Draft)
+  </button>
+  </div>
 
-                  <button
-                    type="submit"
-                    className="flex-[2] bg-red-800 text-white hover:bg-red-900 border-2 border-red-950 font-mono font-bold text-xs py-3.5 rounded uppercase tracking-wider transition-all shadow-[3px_3px_0px_#801c1c] active:translate-y-0.5 active:shadow-[0_0_0_#000] flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    Print & Publish
-                  </button>
-                </div>
+  </form>
 
-              </form>
+  </div>
+  </div>
+  </div>
 
-            </div>
-          </div>
-        </div>
+  <div className="lg:col-span-1 flex flex-col relative w-full lg:sticky lg:top-8">
+  <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 vintage-shadow-lg rounded">
+  
+  {/* Stamp (visual aesthetic) */}
+  <div className="absolute top-4 right-4 border-2 border-red-800 text-red-800 font-bold text-[9px] px-1.5 -rotate-[10deg] mix-blend-multiply select-none font-playfair uppercase">
+  COGNITIVE DECK
+  </div>
 
-      </div>
+  <div className="border-b-2 border-stone-950 pb-3 mb-5 text-left">
+  <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
+  COGNITIVE NEWS WIRE
+  </h3>
+  <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+  AUTOMATED WIRE DESPATCH
+  </p>
+  </div>
 
-      {/* ASK AGENT WIRE DESK DIALOG MODAL inside Add page */}
-      {isAskAgentOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
-            
-            {/* Close */}
-            <button
-              onClick={() => {
-                setIsAskAgentOpen(false);
-                setAgentQuery("");
-              }}
-              className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs"
-              disabled={agentLoading}
-            >
-              [ CLOSE ]
-            </button>
+  <div className="flex-1 bg-[#fcfaf2] border border-stone-300 flex flex-col p-5 relative">
+  <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
+  <p className="font-serif text-xs text-stone-700 leading-relaxed">
+  Provide instructions or a topic. The Nexus Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.
+  </p>
 
-            <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
-              <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
-                AUTOMATED WIRE DESPATCH
-              </span>
-              <h3 className="font-playfair text-2xl font-black uppercase tracking-tight leading-tight text-stone-950">
-                COGNITIVE NEWS WIRE
-              </h3>
-            </div>
+  <div className="flex flex-col border-2 border-stone-950 p-3 bg-[#fcfaf2]">
+  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1.5">
+  Enter Topic or Wire Request:
+  </label>
+  <textarea
+  required
+  placeholder="e.g. OpenAI releases a new reasoning model named o3. Include its features and pricing."
+  value={agentQuery}
+  onChange={(e) => setAgentQuery(e.target.value)}
+  className="w-full bg-transparent outline-none text-xs text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-24 resize-none typewriter-field"
+  disabled={agentLoading}
+  />
+  </div>
 
-            <div className="flex-1 flex flex-col justify-start">
-              <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
-                <p className="font-serif text-sm text-stone-700 leading-relaxed">
-                  Provide instructions or a topic. The Nexus Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.
-                </p>
+  <button
+  type="submit"
+  className="vintage-stamp w-full text-center py-3 bg-red-800 text-[#fcfaf2] border-red-950 hover:bg-red-950 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs"
+  disabled={agentLoading || !agentQuery.trim()}
+  >
+  {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH NEWS AGENT"}
+  </button>
 
-                <div className="flex flex-col border-2 border-stone-950 p-3 bg-white rounded">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1.5">
-                    Enter Topic or Wire Request:
-                  </label>
-                  <textarea
-                    required
-                    placeholder="e.g. OpenAI releases a new reasoning model named o3. Include its features and pricing."
-                    value={agentQuery}
-                    onChange={(e) => setAgentQuery(e.target.value)}
-                    className="w-full bg-transparent outline-none text-sm text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-24 resize-none"
-                    disabled={agentLoading}
-                  />
-                </div>
+  {agentLoading && (
+  <div className="mt-4 p-4 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-xs text-stone-700 flex flex-col gap-2">
+  <div className="animate-pulse flex items-center justify-center gap-1.5">
+  <span className="inline-block w-2.5 h-2.5 bg-red-800 rounded-full animate-ping"></span>
+  <span>[ NEWS WIRE AGENT AT WORK ]</span>
+  </div>
+  <p className="text-[10px] text-stone-500 italic">
+  Scanning teletypes, mapping wire feeds, and writing copy to print coordinates...
+  </p>
+  </div>
+  )}
+  </form>
+  </div>
+  </div>
+  </div>
+  </div>
 
-                <button
-                  type="submit"
-                  className="vintage-stamp w-full text-center py-3 bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white font-bold cursor-pointer text-xs"
-                  disabled={agentLoading || !agentQuery.trim()}
-                >
-                  {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH NEWS AGENT"}
-                </button>
+ {/* Footer HUD */}
+ <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
+ <div className="flex items-center gap-3">
+ <div className="w-6 h-6 border border-stone-950 flex items-center justify-center text-stone-950 font-bold bg-[#fcfaf2]">
+ N
+ </div>
+ <div>
+ <span className="text-stone-800 font-bold">THE DAILY NEXUS WIRE</span>
+ <span className="mx-2 text-stone-400">|</span>
+ <span>Printing Engine: <span className="text-red-800 font-bold uppercase">STANDBY</span></span>
+ </div>
+ </div>
 
-                {agentLoading && (
-                  <div className="mt-4 p-4 border border-stone-300 bg-stone-100/60 rounded text-center font-mono text-xs text-stone-700 flex flex-col gap-2">
-                    <div className="animate-pulse flex items-center justify-center gap-1.5">
-                      <span className="inline-block w-2.5 h-2.5 bg-red-850 rounded-full animate-ping"></span>
-                      <span>[ NEWS WIRE AGENT AT WORK ]</span>
-                    </div>
-                    <p className="text-[10px] text-stone-500 italic">
-                      Scanning teletypes, mapping wire feeds, and writing copy to print coordinates...
-                    </p>
-                  </div>
-                )}
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+ <div className="flex items-center gap-1.5">
+ <span>DECK ENCRYPTION:</span>
+ <span className="text-stone-800 font-bold">AES-256 / RSA-4096</span>
+ </div>
 
-      {/* Footer HUD */}
-      <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-full border border-stone-950 flex items-center justify-center text-stone-950 font-bold bg-white">
-            N
-          </div>
-          <div>
-            <span className="text-stone-800 font-bold">THE DAILY NEXUS WIRE</span>
-            <span className="mx-2 text-stone-400">|</span>
-            <span>Printing Engine: <span className="text-red-800 font-bold uppercase">STANDBY</span></span>
-          </div>
-        </div>
+ <div className="flex items-center gap-1.5">
+ <span>SYSTEM TIME:</span>
+ <span className="text-stone-850 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
+ </div>
+ </footer>
 
-        <div className="flex items-center gap-1.5">
-          <span>DECK ENCRYPTION:</span>
-          <span className="text-stone-800 font-bold">AES-256 / RSA-4096</span>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <span>SYSTEM TIME:</span>
-          <span className="text-stone-850 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
-        </div>
-      </footer>
-
-      {/* Teletype Progress Overlay */}
-      {injectionStatus.active && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-[#fcfaf2] border-4 border-stone-950 p-8 shadow-[8px_8px_0px_#111] flex flex-col gap-6 rounded relative overflow-hidden">
-            <h3 className="font-playfair text-stone-950 font-black text-xl uppercase tracking-widest text-center animate-pulse">
-              PUBLISHING TO FEED
-            </h3>
-            
-            <div className="flex flex-col gap-2 font-mono text-xs text-stone-800">
-              <div className="flex justify-between">
-                <span>STATUS: {injectionStatus.phase}</span>
-                <span>{injectionStatus.progress}%</span>
-              </div>
-              <div className="w-full h-4 bg-stone-200 border-2 border-stone-950 rounded overflow-hidden p-0.5">
-                <div 
-                  className="h-full bg-stone-950 transition-all duration-300"
-                  style={{ width: `${injectionStatus.progress}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+ {/* Teletype Progress Overlay */}
+ {injectionStatus.active && (
+ <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-6">
+ <div className="max-w-md w-full bg-[#fcfaf2] border-4 border-stone-950 p-8 flex flex-col gap-6 relative overflow-hidden">
+ <h3 className="font-playfair text-stone-950 font-black text-xl uppercase tracking-widest text-center animate-pulse">
+ PUBLISHING TO FEED
+ </h3>
+ 
+ <div className="flex flex-col gap-2 font-mono text-xs text-stone-800">
+ <div className="flex justify-between">
+ <span>STATUS: {injectionStatus.phase}</span>
+ <span>{injectionStatus.progress}%</span>
+ </div>
+ <div className="w-full h-4 bg-[#dcd7c9] border-2 border-stone-950 overflow-hidden p-0.5">
+ <div 
+ className="h-full bg-stone-950 transition-all duration-300"
+ style={{ width: `${injectionStatus.progress}%` }}
+ ></div>
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
+ </div>
+ );
 }
+
+
+
+
+
+
+
+
