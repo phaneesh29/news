@@ -5,6 +5,26 @@
 
 ---
 
+## 📌 Current Project Phase & Refactoring Updates
+
+The project has transitioned from its initial setup to a modular, production-ready stage:
+
+1. **Decoupled Data Validation (Backend Refactor):**
+   - Extracted all Zod validation schemas from inline route files in [server/src/routes](file:///D:/news/adminApp/server/src/routes) into a unified [server/src/schemas](file:///D:/news/adminApp/server/src/schemas) module.
+   - Any backend route can now import validation schemas interchangeably without code duplication.
+
+2. **Dedicated Modular Routing (Frontend Refactor):**
+   - Split the unified dashboard view into distinct Next.js routes to improve layout scalability and maintainability:
+     - [dashboard](file:///D:/news/adminApp/client/src/app/dashboard) serves as the central Command Center and Telemetry launchpad.
+     - [news](file:///D:/news/adminApp/client/src/app/news) houses the Metasphere Chronicles list, filters, search, event logs, and details inspector dossier overlay.
+     - [news/add](file:///D:/news/adminApp/client/src/app/news/add) handles news payload draft composition and teletype dispatch broadcast, redirecting back to `/news` on success.
+
+3. **TypeScript Integrity:**
+   - Standardized imports matching `NodeNext` resolution rules (using strict `.js` extensions for relative TypeScript module imports).
+   - Validated that both client and backend build successfully without any compilation errors.
+
+---
+
 ## 🌟 Key Application Features
 
 ### 🔐 1. Cryptographic Authentication
