@@ -6,7 +6,7 @@ import { newsDraftInstructions } from './instructions.js';
 
 export const newsDraftAgent = new ToolLoopAgent({
   id: 'news-drafter',
-  model: google('gemini-2.5-flash'),
+  model: google('gemini-3.1-flash-lite-preview'),
   instructions: newsDraftInstructions,
   tools: {
     tavilySearch: tavilySearch({

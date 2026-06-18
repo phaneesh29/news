@@ -19,9 +19,9 @@ export default function DashboardPage() {
 
   // Live Terminal Log System
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "SYS_INIT: mounting secure decryption deck...",
-    "TELEMETRY: active connection established.",
-    "DB_DECK: mapping operative indices...",
+    "TELETYPE_INIT: Mounting news wire...",
+    "WIRE: Connection to Metasphere active.",
+    "INK: Press calibration complete.",
   ]);
 
   const addLog = (msg: string) => {
@@ -39,13 +39,13 @@ export default function DashboardPage() {
         }
         const data = await res.json();
         setProfile(data.user);
-        addLog(`SEC_DECK: biometrics verified. user role: '${data.user.role}'`);
+        addLog(`AUTH: Operative logged in. Role: '${data.user.role}'`);
 
         // Fetch health status
         fetch(`${API_BASE_URL}/health`)
           .then(res => res.json())
           .then(data => setServerHealth(data))
-          .catch(() => setServerHealth({ status: "UNREACHABLE", timestamp: new Date(), requestId: "ERR_0x08F" }));
+          .catch(() => setServerHealth({ status: "UNREACHABLE", timestamp: new Date() }));
 
         const ua = window.navigator.userAgent;
         const os = ua.indexOf("Win") !== -1 ? "WINDOWS" 
@@ -87,7 +87,7 @@ export default function DashboardPage() {
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
       const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-      setSystemTime(`${dateStr}  ::  ${timeStr} UTC`);
+      setSystemTime(`${dateStr}  |  ${timeStr}`);
     };
     
     updateTime();
@@ -97,7 +97,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
-      addLog("SEC_DECK: aborting session, purging local cookie keys...");
+      addLog("AUTH: Purging session credentials...");
       await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
       router.push("/login");
     } catch (err) {
@@ -107,8 +107,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-screen bg-[#060608] flex items-center justify-center font-mono text-emerald-400 text-2xl animate-pulse">
-        [ DECRYPTING BIOMETRICS... PENDING ACCESS ]
+      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
+        [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
       </div>
     );
   }
@@ -117,118 +117,114 @@ export default function DashboardPage() {
   const canAdd = profile?.role === "admin" || profile?.role === "editor";
 
   return (
-    <div className="min-h-screen w-screen bg-[#060608] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-emerald-500/30 selection:text-emerald-200 text-white font-mono">
+    <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-red-950 text-stone-900 font-serif">
       
-      {/* Visual Desk Grid Surface */}
+      {/* Newspaper texture noise background */}
       <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
-      
-      {/* Ambient glowing accent bulbs */}
-      <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-emerald-950/15 rounded-full blur-[140px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-[450px] h-[450px] bg-red-950/10 rounded-full blur-[130px] pointer-events-none"></div>
 
       {/* Header HUD */}
-      <header className="w-full flex justify-between items-center border-b border-zinc-800/80 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="font-mono text-2xl sm:text-3xl font-black tracking-widest text-white uppercase select-none hover:text-red-500 transition-colors">
-              NEXUS <span className="text-red-600">CORE</span>
+      <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
+        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
+          
+          <div className="flex flex-col text-center md:text-left">
+            <Link href="/dashboard" className="font-playfair text-3xl sm:text-4xl font-black tracking-tight text-stone-950 uppercase select-none hover:text-red-800 transition-colors">
+              THE DAILY <span className="text-red-800">NEXUS</span>
             </Link>
+            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
+              WIRE SERVICE  •  OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
+            </span>
           </div>
-          <span className="font-mono text-[11px] text-zinc-400 tracking-wider mt-1 uppercase">
-            OPERATIVE: <span className="text-red-500/90 font-bold">{profile?.email}</span> // ROLE: <span className="text-zinc-300 font-bold">{profile?.role?.toUpperCase()}</span>
-          </span>
-        </div>
 
-        {/* Navigation Deck Links */}
-        <div className="hidden md:flex gap-6 text-xs font-bold uppercase self-center tracking-widest">
-          <Link href="/dashboard" className="text-emerald-400 hover:text-emerald-300 transition-colors border-b border-emerald-400 pb-0.5">&gt; Command Hub</Link>
-          <Link href="/news" className="text-zinc-400 hover:text-white transition-colors">&gt; Chronicles Feed</Link>
-          {canAdd && (
-            <Link href="/news/add" className="text-zinc-400 hover:text-white transition-colors">&gt; Payload Injector</Link>
-          )}
-        </div>
+          {/* Navigation Deck Links */}
+          <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
+            <Link href="/dashboard" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Hub</Link>
+            <span className="text-stone-400">|</span>
+            <Link href="/news" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+            {canAdd && (
+              <>
+                <span className="text-stone-400">|</span>
+                <Link href="/news/add" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Injector</Link>
+              </>
+            )}
+          </div>
 
-        <div className="flex gap-4">
-          {isAdmin && (
-            <Link 
-              href="/settings"
-              className="font-mono text-[10px] sm:text-xs border border-emerald-500/50 text-emerald-400 px-4 py-2.5 hover:bg-emerald-500/10 transition-all uppercase tracking-widest shadow-[0_0_12px_rgba(16,185,129,0.15)] flex items-center gap-2"
+          <div className="flex gap-3">
+            {isAdmin && (
+              <Link 
+                href="/settings"
+                className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-white px-3 py-1.5 hover:bg-stone-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5"
+              >
+                Security Deck
+              </Link>
+            )}
+            <button 
+              onClick={handleLogout}
+              className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-white px-3 py-1.5 hover:bg-red-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
             >
-              <span>&gt;</span> Security Deck
-            </Link>
-          )}
-          <button 
-            onClick={handleLogout}
-            className="font-mono text-[10px] sm:text-xs border border-red-500/50 text-red-500 px-4 py-2.5 hover:bg-red-500/10 transition-all uppercase tracking-widest shadow-[0_0_12px_rgba(239,68,68,0.15)] flex items-center gap-2"
-          >
-            <span>X</span> Abort Session
-          </button>
+              Log Out
+            </button>
+          </div>
+        </div>
+
+        {/* Newspaper Subheader bar */}
+        <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
+          <span>VOL. CXXVI... No. 47190</span>
+          <span className="font-bold text-stone-950">{systemTime || "[ RETRIEVING TIME ]"}</span>
+          <span>PRICE: 10 CENTS</span>
         </div>
       </header>
 
       {/* Main Workspace Layout */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-10 relative z-10 max-w-[1600px] mx-auto w-full pb-8">
         
-        {/* LEFT PANEL: Console Telemetry (2 Cols) */}
+        {/* LEFT PANEL: Wire Teletype Controls (2 Cols) */}
         <div className="lg:col-span-2 flex flex-col gap-6 relative">
           
-          {/* CRT Screen Frame */}
-          <div className="cyber-console rounded-2xl p-6 sm:p-8 flex flex-col h-full min-h-[400px] border border-cyan-500/35 shadow-[0_0_35px_rgba(0,240,255,0.06)]">
+          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 sm:p-8 flex flex-col h-full min-h-[400px] shadow-[4px_4px_0px_#111] rounded">
             
-            {/* Dynamic scanline sweep animation */}
-            <div className="scanline-sweep absolute top-0 left-0 right-0 pointer-events-none z-20"></div>
-
-            {/* Glowing bezel title */}
-            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-4 mb-6">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 bg-cyan-400 shadow-[0_0_12px_rgba(0,240,255,1)] animate-pulse rounded-sm"></span>
-                <h3 className="font-mono text-base sm:text-lg text-white uppercase tracking-[0.2em] font-bold">
-                  TELEMETRY DECK
+            <div className="flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-red-800 rounded-full animate-pulse"></span>
+                <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
+                  SYSTEM OVERVIEW
                 </h3>
               </div>
-              <span className="font-mono text-[9px] text-cyan-400 font-bold uppercase tracking-widest animate-pulse">
-                SYS.ONLINE // ACTIVE
+              <span className="font-mono text-[9px] text-stone-650 font-bold uppercase tracking-widest">
+                SYS.ONLINE
               </span>
             </div>
 
-            {/* Telemetry metrics rows */}
-            <div className="flex-1 flex flex-col gap-4 text-xs text-zinc-400 text-left">
+            {/* Telemetry rows */}
+            <div className="flex-1 flex flex-col gap-4 text-xs text-stone-850 text-left">
               
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="uppercase tracking-widest font-semibold text-zinc-500">SERVER STATUS</span>
-                <span className={`font-bold uppercase tracking-wider px-2 py-0.5 rounded text-[10px] ${serverHealth?.status === "ok" ? "text-emerald-400 bg-emerald-950/40 border border-emerald-900/30" : "text-red-500 bg-red-950/40 border border-red-900/30 animate-pulse"}`}>
-                  {serverHealth ? `[${serverHealth.status}]` : "[SCANNING...]"}
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="font-mono uppercase text-stone-500 font-bold">PRESS STATUS</span>
+                <span className={`font-mono font-bold uppercase tracking-wider text-[10px] ${serverHealth?.status === "ok" ? "text-green-800" : "text-red-700 animate-pulse"}`}>
+                  {serverHealth ? `${serverHealth.status.toUpperCase()}` : "SCANNING..."}
                 </span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="uppercase tracking-widest font-semibold text-zinc-500">OPERATIVE OS</span>
-                <span className="text-cyan-400 font-bold tracking-wider">{clientInfo?.os || "DETERMINING..."}</span>
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="font-mono uppercase text-stone-500 font-bold">OPERATIVE OS</span>
+                <span className="font-mono text-stone-900 font-bold">{clientInfo?.os || "DETERMINING..."}</span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="uppercase tracking-widest font-semibold text-zinc-500">BROWSER SIG</span>
-                <span className="text-zinc-300 tracking-wider truncate max-w-[150px]">{clientInfo?.browser || "EXTRACTING..."}</span>
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="font-mono uppercase text-stone-500 font-bold">BROWSER</span>
+                <span className="font-mono text-stone-850 tracking-wider truncate max-w-[150px]">{clientInfo?.browser || "EXTRACTING..."}</span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="uppercase tracking-widest font-semibold text-zinc-500">OPERATIVE IP</span>
-                <span className="text-red-400 font-bold tracking-widest">{clientInfo?.ip || "SCANNING..."}</span>
+              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
+                <span className="font-mono uppercase text-stone-500 font-bold">OPERATIVE IP</span>
+                <span className="font-mono text-red-900 font-bold tracking-wider">{clientInfo?.ip || "SCANNING..."}</span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="uppercase tracking-widest font-semibold text-zinc-500">REQUEST ID</span>
-                <span className="text-zinc-500 text-[10px] font-mono truncate max-w-[140px] tracking-wider">
-                  {serverHealth?.requestId || "GENERATING..."}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1.5 mt-2 bg-black/40 border border-zinc-900 p-3 rounded">
-                <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">GRID LOGS STREAM</span>
-                <div className="text-[10px] font-mono text-cyan-400/75 leading-relaxed space-y-0.5">
-                  <div>&gt; CONNECTING NETWORK NODES... OK</div>
-                  <div>&gt; INTRUSION ATTEMPT FILTERED: ZERO THREAT</div>
-                  <div>&gt; DECRYPTION MODULE LOADED</div>
+              <div className="flex flex-col gap-1.5 mt-2 bg-[#f5f2e9] border border-stone-400 p-3 rounded">
+                <span className="text-[9px] font-mono text-stone-600 uppercase tracking-widest font-bold">GRID LOGS STREAM</span>
+                <div className="font-mono text-[10px] text-stone-700 leading-relaxed space-y-0.5">
+                  <div>&gt;&gt; TELETYPE DECK ONLINE... OK</div>
+                  <div>&gt;&gt; SYSTEM INTEGRITY CLEARANCE: 100%</div>
+                  <div>&gt;&gt; AUTH DECK CONFIGURED</div>
                 </div>
               </div>
 
@@ -240,62 +236,54 @@ export default function DashboardPage() {
         <div className="lg:col-span-3 flex flex-col gap-6 relative">
           
           {/* Card 1: Chronicles Feed Deck */}
-          <div className="cyber-console rounded-2xl p-6 sm:p-8 flex flex-col border border-cyan-500/35 shadow-[0_0_35px_rgba(0,240,255,0.06)] relative group">
-            <div className="scanline-sweep absolute top-0 left-0 right-0 pointer-events-none z-20"></div>
+          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 sm:p-8 flex flex-col shadow-[4px_4px_0px_#111] relative rounded text-left">
             
-            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-4 mb-4">
-              <h3 className="font-mono text-base sm:text-lg text-white uppercase tracking-[0.2em] font-bold">
-                GRID CHRONICLES DECK
+            <div className="flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-4">
+              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
+                WIRE REPORT ARCHIVES
               </h3>
-              <span className="text-[10px] font-mono text-cyan-400 border border-cyan-500/40 px-2.5 py-0.5 tracking-widest">
+              <span className="text-[10px] font-mono text-stone-700 bg-stone-200 border border-stone-400 px-2.5 py-0.5 tracking-widest font-bold">
                 /news
               </span>
             </div>
 
-            <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed mb-6 text-left">
+            <p className="text-stone-800 text-sm leading-relaxed mb-6 font-serif">
               Access the main intelligence dispatch feeds broadcasting from nodes in real-time. View, inspect, filter, edit, or purge system records.
             </p>
 
             <Link 
               href="/news"
-              className="relative w-full flex items-center justify-center p-4 bg-transparent border-2 border-cyan-500/60 hover:border-cyan-400 transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,240,255,0.25)] overflow-hidden group/btn"
+              className="vintage-stamp text-center py-4 text-sm font-black flex items-center justify-center bg-white"
             >
-              <div className="absolute inset-0 bg-cyan-500/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out"></div>
-              <span className="relative z-10 text-cyan-400 group-hover/btn:text-white text-base font-black uppercase tracking-[0.25em] transition-colors duration-300">
-                [ ACCESS BROADCAST FEED ]
-              </span>
+              ACCESS WIRE FEED
             </Link>
           </div>
 
           {/* Card 2: News Payload Injector */}
-          <div className="bg-[#e2c091] border-2 border-[#b89b65] rounded-2xl p-6 sm:p-8 shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex flex-col relative">
-            <div className="absolute top-0 bottom-0 left-0 w-2 bg-gradient-to-r from-black/10 to-transparent border-r border-stone-800/10"></div>
+          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 sm:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative rounded text-left">
             
-            <div className="flex justify-between items-center border-b border-stone-800/40 pb-4 mb-4 text-stone-900 font-serif">
-              <h3 className="font-serif text-base sm:text-lg uppercase tracking-wider font-black">
-                MAINFRAME PAYLOAD INJECTOR
+            <div className="flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-4 text-stone-900">
+              <h3 className="font-playfair text-lg uppercase tracking-wide font-black">
+                NEWS WIRE INJECTOR
               </h3>
-              <span className="text-[9px] font-mono text-[#f4ecd8] bg-[#1a1a1a] px-2.5 py-0.5 uppercase tracking-widest font-bold">
+              <span className="text-[10px] font-mono text-stone-750 bg-stone-200 border border-stone-400 px-2.5 py-0.5 uppercase tracking-widest font-bold">
                 /news/add
               </span>
             </div>
 
-            <p className="text-stone-800 text-xs sm:text-sm leading-relaxed mb-6 font-serif text-left">
+            <p className="text-stone-800 text-sm leading-relaxed mb-6 font-serif">
               Initialize a teletype broadcast packet to draft and inject news payload dispatches onto the metagrid network. Requires admin or editor credentials.
             </p>
 
             {canAdd ? (
               <Link 
                 href="/news/add"
-                className="relative w-full flex items-center justify-center p-4 bg-transparent border-2 border-red-800/60 hover:border-red-700 transition-all duration-300 hover:shadow-[0_0_20px_rgba(139,0,0,0.2)] overflow-hidden group/btn"
+                className="vintage-stamp text-center py-4 text-sm font-black flex items-center justify-center bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white"
               >
-                <div className="absolute inset-0 bg-red-800/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out"></div>
-                <span className="relative z-10 text-red-800 group-hover/btn:text-stone-900 text-base font-black uppercase tracking-[0.25em] transition-colors duration-300 font-mono">
-                  [ INITIALIZE PAYLOAD INJECTOR ]
-                </span>
+                INITIALIZE PAYLOAD INJECTOR
               </Link>
             ) : (
-              <div className="w-full text-center border-2 border-dashed border-stone-500/60 text-stone-600 font-mono font-bold text-xs py-4 uppercase tracking-wider select-none bg-stone-300/40 rounded">
+              <div className="w-full text-center border-2 border-dashed border-stone-400 text-stone-600 font-mono font-bold text-xs py-4 uppercase tracking-wider select-none bg-stone-200/50 rounded">
                 [ SECURITY LOCK: READ-ONLY ACCESS ]
               </div>
             )}
@@ -306,34 +294,26 @@ export default function DashboardPage() {
       </div>
 
       {/* Footer HUD */}
-      <footer className="w-full max-w-[1600px] mx-auto mt-4 pt-3 border-t border-zinc-800/80 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-zinc-500 z-10 px-1">
+      <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
         <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-full border border-red-700/85 flex items-center justify-center text-red-500 font-bold bg-red-950/20">
+          <div className="w-6 h-6 rounded-full border border-stone-950 flex items-center justify-center text-stone-950 font-bold bg-white">
             N
           </div>
           <div>
-            <span className="text-zinc-400 font-bold">NEXUS CORE v2.4.7</span>
-            <span className="mx-2 text-zinc-700">|</span>
-            <span>Grid Link: <span className="text-emerald-500 font-bold animate-pulse">ONLINE ●</span></span>
+            <span className="text-stone-800 font-bold">THE DAILY NEXUS WIRE</span>
+            <span className="mx-2 text-stone-400">|</span>
+            <span>Printing Engine: <span className="text-red-800 font-bold uppercase">STANDBY</span></span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <svg className="w-3.5 h-3.5 text-red-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+        <div className="flex items-center gap-1.5">
           <span>DECK ENCRYPTION:</span>
-          <span className="text-zinc-400 font-bold">AES-256 / RSA-4096</span>
+          <span className="text-stone-800 font-bold">AES-256 / RSA-4096</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <svg className="w-3.5 h-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
+        <div className="flex items-center gap-1.5">
           <span>SYSTEM TIME:</span>
-          <span className="text-zinc-300 font-bold">{systemTime || "[ SYNCHRONIZING TIME ]"}</span>
+          <span className="text-stone-850 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
         </div>
       </footer>
     </div>
