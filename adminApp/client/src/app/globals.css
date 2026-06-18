@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-paper: #f4ecd8;
+  --color-paper: #fcfaf2;
   --color-paper-stain: #e3d3b6;
-  --color-ink: #1a1a1a;
-  --color-ink-faded: #4a4a4a;
-  --color-blood-red: #8b0000;
+  --color-ink: #111111;
+  --color-ink-faded: #4a4947;
+  --color-blood-red: #801c1c;
   
-  --color-manila: #e2c091;
+  --color-manila: #f4edd8;
   --color-manila-dark: #b89b65;
-  --color-aged-paper: #f2efe6;
+  --color-aged-paper: #f5f2e9;
   --color-army-green: #3a3f18;
-  --color-secret-red: #9c1c1c;
+  --color-secret-red: #8b0000;
 
-  --color-cyber-black: #060608;
-  --color-cyber-green: #39ff14;
-  --color-cyber-green-dim: #0f8f0f;
-  --color-cyber-alert: #ff0055;
-  --color-cyber-cyan: #00f0ff;
-  --color-cd-rom: #d4d0c8;
+  --color-cyber-black: #fcfaf2;
+  --color-cyber-green: #111111;
+  --color-cyber-green-dim: #4a4947;
+  --color-cyber-alert: #801c1c;
+  --color-cyber-cyan: #225577;
+  --color-cd-rom: #e8e6df;
   
   --font-playfair: var(--font-playfair);
   --font-old-standard: var(--font-old-standard);
@@ -28,140 +28,113 @@
 }
 
 :root {
-  --background: var(--color-cyber-black);
-  --foreground: var(--color-cyber-green);
+  --background: #f5f2e9;
+  --foreground: #111111;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-vt323), monospace;
+  font-family: var(--font-old-standard), serif;
   background-image: 
-    linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
-  background-size: 30px 30px;
+    linear-gradient(rgba(17, 17, 17, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
   overflow-x: hidden;
   position: relative;
 }
 
-/* Subtle CRT Curve, Glass Reflection, and Flicker Scanline */
+/* Newspaper overlay: Vignette and paper texture noise */
 body::after {
   content: " ";
   display: block;
   position: fixed;
   top: 0; left: 0; bottom: 0; right: 0;
   background: 
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)),
-    radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.2) 100%);
+    radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.05) 100%),
+    url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.045"/></svg>');
   z-index: 9999;
-  background-size: 100% 3px, 6px 100%, 100% 100%;
   pointer-events: none;
-  animation: crtFlicker 0.25s infinite;
 }
 
-@keyframes crtFlicker {
-  0% { opacity: 0.98; }
-  50% { opacity: 0.94; }
-  100% { opacity: 0.98; }
-}
-
-/* Premium CD-ROM Y2K Style Windows */
+/* Vintage Newspaper Window / Column style */
 .cd-rom-window {
-  background: var(--color-cd-rom);
-  border-top: 3px solid #ffffff;
-  border-left: 3px solid #ffffff;
-  border-right: 3px solid #404040;
-  border-bottom: 3px solid #404040;
-  box-shadow: 12px 12px 0px rgba(0,0,0,0.6);
-  color: #000000;
-  font-family: 'Courier New', Courier, monospace;
+  background: #fbfaf5;
+  border: 1px solid #111111;
+  box-shadow: 4px 4px 0px #111111;
+  color: #111111;
+  font-family: var(--font-old-standard), serif;
 }
 
 .cd-rom-titlebar {
-  background: linear-gradient(90deg, #000080, #1084d0);
-  color: #ffffff;
+  background: #111111;
+  color: #fbfaf5;
+  font-family: var(--font-playfair), serif;
   font-weight: bold;
-  padding: 4px 8px;
+  padding: 6px 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 1px;
 }
 
-/* Realistic Dossier Manila Folder */
+/* Newspaper Dossier Folder */
 .dossier-folder {
-  background: var(--color-manila);
-  border: 1px solid var(--color-manila-dark);
-  box-shadow: 
-    0px 5px 15px rgba(0,0,0,0.5), 
-    inset 0 2px 10px rgba(255,255,255,0.2),
-    8px 8px 0px rgba(0, 0, 0, 0.3);
+  background: #fcfaf2;
+  border: 2px solid #111111;
+  box-shadow: 6px 6px 0px #111111;
   position: relative;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dossier-tab {
-  background: var(--color-manila);
-  border: 1px solid var(--color-manila-dark);
+  background: #fcfaf2;
+  border: 2px solid #111111;
   border-bottom: none;
-  border-radius: 8px 8px 0 0;
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);
+  border-radius: 4px 4px 0 0;
 }
 
 /* Aged Parchment / Newspaper Page Styling */
 .parchment-sheet {
-  background-color: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-alegreya), serif;
-  background-image: 
-    url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.12"/></svg>'), 
-    radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, rgba(200,180,140,0.15) 100%);
-  box-shadow: 
-    0px 10px 30px rgba(0,0,0,0.45),
-    inset 0 0 40px rgba(139,90,43,0.1);
-  border: 1px solid var(--color-paper-stain);
-  position: relative;
-  transition: all 0.5s ease;
+  background-color: #fcfaf2;
+  color: #111111;
+  font-family: var(--font-old-standard), serif;
+  border: 1px solid #d3c7b3;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 /* Vintage Newspaper Layout Elements */
 .newspaper-headline {
   font-family: var(--font-playfair), serif;
   font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 0.9;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  border-bottom: 4px double var(--color-ink);
+  border-bottom: 4px double #111111;
   padding-bottom: 8px;
 }
 
 .newspaper-column {
-  font-family: var(--font-alegreya), serif;
-  line-height: 1.35;
+  font-family: var(--font-old-standard), serif;
+  line-height: 1.4;
   text-align: justify;
-  font-size: 14.5px;
 }
 
 .newspaper-column::first-letter {
   font-family: var(--font-playfair), serif;
-  font-size: 4.5rem;
+  font-size: 4rem;
   float: left;
   line-height: 0.8;
   padding-top: 4px;
-  padding-right: 6px;
+  padding-right: 8px;
   font-weight: 900;
   color: var(--color-blood-red);
 }
 
-/* Hacker CRT Console Screens */
+/* CRT Screen Frame adapted to Newspaper Block */
 .cyber-console {
-  background-color: #030305;
-  border: 2px solid var(--color-cyber-green-dim);
-  box-shadow: 
-    0 0 25px rgba(0, 255, 65, 0.05),
-    inset 0 0 20px rgba(0, 255, 65, 0.15);
+  background-color: #fcfaf2;
+  border: 2px solid #111111;
+  box-shadow: 4px 4px 0px #111111;
   position: relative;
   overflow: hidden;
 }
@@ -171,157 +144,96 @@ body::after {
   display: block;
   position: absolute;
   top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background: linear-gradient(rgba(17, 17, 17, 0.015) 50%, transparent 50%);
   background-size: 100% 4px;
   z-index: 10;
   pointer-events: none;
 }
 
-/* Glitch Text Animations */
-.glitch-text {
-  position: relative;
-}
-.glitch-text::before, .glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: transparent;
-}
-.glitch-text::before {
-  left: 2px;
-  text-shadow: -1px 0 var(--color-cyber-alert);
-  clip: rect(24px, 550px, 90px, 0);
-  animation: glitch-anim-2 3s infinite linear alternate-reverse;
-}
-.glitch-text::after {
-  left: -2px;
-  text-shadow: -1px 0 var(--color-cyber-cyan);
-  clip: rect(85px, 550px, 140px, 0);
-  animation: glitch-anim 2.5s infinite linear alternate-reverse;
-}
-
-@keyframes glitch-anim {
-  0% { clip: rect(12px, 9999px, 31px, 0); transform: skew(0.5deg); }
-  20% { clip: rect(45px, 9999px, 16px, 0); transform: skew(0.1deg); }
-  40% { clip: rect(24px, 9999px, 78px, 0); transform: skew(0.3deg); }
-  60% { clip: rect(98px, 9999px, 21px, 0); transform: skew(0.2deg); }
-  80% { clip: rect(15px, 9999px, 56px, 0); transform: skew(0.7deg); }
-  100% { clip: rect(35px, 9999px, 66px, 0); transform: skew(0.4deg); }
-}
-@keyframes glitch-anim-2 {
-  0% { clip: rect(55px, 9999px, 90px, 0); transform: skew(0.3deg); }
-  20% { clip: rect(5px, 9999px, 40px, 0); transform: skew(0.1deg); }
-  40% { clip: rect(79px, 9999px, 22px, 0); transform: skew(0.5deg); }
-  60% { clip: rect(14px, 9999px, 66px, 0); transform: skew(0.2deg); }
-  80% { clip: rect(25px, 9999px, 88px, 0); transform: skew(0.4deg); }
-  100% { clip: rect(68px, 9999px, 44px, 0); transform: skew(0.3deg); }
-}
-
-/* Typing & Stamped Ink Effects */
-.typewriter-field {
-  font-family: var(--font-courier), monospace;
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px dashed rgba(26, 26, 26, 0.4);
-  color: var(--color-ink);
-  outline: none;
-  transition: all 0.3s;
-}
-.typewriter-field:focus {
-  border-bottom: 2px solid var(--color-ink);
-  background-color: rgba(26, 26, 26, 0.03);
-}
-
+/* Vintage Stamped Ink Button */
 .vintage-stamp {
-  font-family: var(--font-old-standard), serif;
+  font-family: var(--font-playfair), serif;
   font-weight: 900;
   text-transform: uppercase;
-  color: var(--color-secret-red);
-  border: 4px solid var(--color-secret-red);
+  color: #111111;
+  border: 2px solid #111111;
   background: transparent;
   padding: 6px 16px;
-  transform: rotate(-4deg);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: rotate(-1deg);
+  transition: all 0.2s ease;
   cursor: pointer;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+  box-shadow: 3px 3px 0px #111111;
 }
 .vintage-stamp:hover {
-  transform: rotate(0deg) scale(1.06);
-  background: var(--color-secret-red);
-  color: var(--color-paper);
+  transform: rotate(0deg) scale(1.03);
+  background: #111111;
+  color: #fcfaf2;
 }
 
-/* Bracket HUD labels */
-.hud-label::before { content: "["; color: var(--color-cyber-green-dim); margin-right: 4px; }
-.hud-label::after { content: "]"; color: var(--color-cyber-green-dim); margin-left: 4px; }
-
-/* Grid desk decoration and notebook dividers */
+/* Desk Surface */
 .desk-mat {
   background: 
-    radial-gradient(circle at center, rgba(16,24,16,0.3) 0%, rgba(5,6,8,0.95) 100%),
-    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+    radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.02) 100%),
+    linear-gradient(rgba(17, 17, 17, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.02) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
 /* Coffee Stain Simulation Overlay */
 .coffee-stain {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
-  border: 4px solid rgba(139, 90, 43, 0.12);
-  filter: blur(1.5px);
+  border: 5px solid rgba(139, 90, 43, 0.06);
+  filter: blur(2px);
   pointer-events: none;
-  transform: rotate(45deg);
+  transform: rotate(35deg);
 }
 .coffee-stain::before {
   content: "";
   position: absolute;
-  top: 5px; left: 5px; right: 5px; bottom: 5px;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
   border-radius: 50%;
-  border: 1.5px solid rgba(139, 90, 43, 0.08);
+  border: 2px solid rgba(139, 90, 43, 0.04);
 }
 
-/* Customized scrollbar design */
+/* Customized scrollbar design for paper */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(17, 17, 17, 0.05);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-cyber-green-dim);
-  border-radius: 4px;
+  background: #4a4947;
+  border-radius: 3px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--color-cyber-green);
+  background: #111111;
 }
 
 .custom-paper-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .custom-paper-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(17, 17, 17, 0.05);
 }
 .custom-paper-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-manila-dark);
-  border-radius: 4px;
+  background: #4a4947;
+  border-radius: 3px;
 }
 .custom-paper-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--color-blood-red);
+  background: #801c1c;
 }
 
-/* Animations and Glitches */
-@keyframes scanline-drift {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+/* Double border separator */
+.newspaper-divider {
+  border-top: 4px double #111111;
+  margin: 1.5rem 0;
 }
 
-.scanline-sweep {
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(180deg, transparent, var(--color-cyber-cyan), transparent);
-  box-shadow: 0 0 10px var(--color-cyber-cyan);
-  animation: scanline-drift 6s linear infinite;
+.newspaper-divider-thin {
+  border-top: 1px solid #111111;
+  margin: 1rem 0;
 }
