@@ -44,12 +44,7 @@ export default function DashboardPage() {
   const [editPriority, setEditPriority] = useState("");
   const [editSourceUrl, setEditSourceUrl] = useState("");
 
-  // Ask Agent Modal State
-  const [isAskAgentOpen, setIsAskAgentOpen] = useState(false);
-  const [agentQuery, setAgentQuery] = useState("");
-  const [agentLoading, setAgentLoading] = useState(false);
-  const [draftedNews, setDraftedNews] = useState<any>(null);
-  const [publishing, setPublishing] = useState(false);
+
 
   // Telemetry status
   const [serverHealth, setServerHealth] = useState<any>(null);
@@ -223,74 +218,7 @@ export default function DashboardPage() {
     }
   };
 
-  // Ask AI Agent for news draft
-  const handleAskAgent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!agentQuery.trim()) return;
 
-    setAgentLoading(true);
-    setDraftedNews(null);
-    addLog(`AGENT: Querying AI News Drafter for: "${agentQuery}"`);
-    try {
-      const res = await fetch(`${API_BASE_URL}/agent/draft`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: agentQuery }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Agent call failed");
-      const data = await res.json();
-      if (data.success) {
-        setDraftedNews(data.draft);
-        addLog(`AGENT: Draft received: "${data.draft.title.slice(0, 30)}..."`);
-      } else {
-        throw new Error(data.error?.message || "Failed to draft news");
-      }
-    } catch (err: any) {
-      console.error(err);
-      addLog(`WARNING: Agent draft generation failed: ${err.message}`);
-      alert(err.message || "Error generating draft from agent");
-    } finally {
-      setAgentLoading(false);
-    }
-  };
-
-  // Publish agent draft directly
-  const handlePublishDraft = async () => {
-    if (!draftedNews) return;
-    setPublishing(true);
-    addLog("AGENT: Submitting draft directly to print queue...");
-    try {
-      const res = await fetch(`${API_BASE_URL}/news`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draftedNews),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Failed to publish draft");
-      addLog("AGENT: Draft printed and published successfully!");
-      setIsAskAgentOpen(false);
-      setAgentQuery("");
-      setDraftedNews(null);
-      fetchNews(); // Refresh news feed list
-    } catch (err) {
-      console.error(err);
-      addLog("WARNING: Failed to auto-publish agent draft");
-      alert("Error publishing agent draft");
-    } finally {
-      setPublishing(false);
-    }
-  };
-
-  // Redirect to form editor with draft loaded
-  const handleEditDraftInForm = () => {
-    if (!draftedNews) return;
-    localStorage.setItem("news_agent_draft", JSON.stringify(draftedNews));
-    setIsAskAgentOpen(false);
-    setAgentQuery("");
-    setDraftedNews(null);
-    router.push("/news/add?useDraft=true");
-  };
 
   if (loading) {
     return (
@@ -390,24 +318,12 @@ export default function DashboardPage() {
               {/* Action Buttons & Search Widget */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
                 {canAdd && (
-                  <div className="flex gap-2">
-                    <Link 
-                      href="/news/add"
-                      className="vintage-stamp text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider"
-                    >
-                      WRITE ARTICLE
-                    </Link>
-
-                    <button
-                      onClick={() => setIsAskAgentOpen(true)}
-                      className="vintage-stamp text-center py-2 px-3.5 text-[10px] bg-red-800 text-white border-red-950 shadow-[2px_2px_0px_#801c1c] hover:bg-red-950 hover:text-white flex items-center justify-center gap-1.5 font-bold cursor-pointer tracking-wider"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.904-4.43 1.956-6.195-2.065-2.065-6.195 1.956zm9.813-9.813a2.121 2.121 0 113 3 2.121 2.121 0 01-3-3z" />
-                      </svg>
-                      ASK AGENT
-                    </button>
-                  </div>
+                  <Link 
+                    href="/news/add"
+                    className="vintage-stamp text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider"
+                  >
+                    WRITE ARTICLE
+                  </Link>
                 )}
                 
                 <div className="relative w-full sm:w-52">
@@ -740,123 +656,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ASK AGENT WIRE DESK DIALOG MODAL */}
-      {isAskAgentOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
-            
-            {/* Close */}
-            <button
-              onClick={() => {
-                setIsAskAgentOpen(false);
-                setAgentQuery("");
-                setDraftedNews(null);
-                addLog("AGENT: Wire desk session aborted");
-              }}
-              className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs"
-              disabled={agentLoading || publishing}
-            >
-              [ ABORT ]
-            </button>
 
-            <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
-              <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
-                AUTOMATED WIRE DESPATCH
-              </span>
-              <h3 className="font-playfair text-2xl font-black uppercase tracking-tight leading-tight text-stone-950">
-                COGNITIVE NEWS WIRE
-              </h3>
-            </div>
-
-            <div className="flex-1 flex flex-col overflow-y-auto pr-1">
-              {!draftedNews ? (
-                <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
-                  <p className="font-serif text-sm text-stone-700 leading-relaxed">
-                    Provide instructions or a topic. The Nexus Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.
-                  </p>
-
-                  <div className="flex flex-col border-2 border-stone-950 p-3 bg-white rounded">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1.5">
-                      Enter Topic or Wire Request:
-                    </label>
-                    <textarea
-                      required
-                      placeholder="e.g. OpenAI releases a new reasoning model named o3. Include its features and pricing."
-                      value={agentQuery}
-                      onChange={(e) => setAgentQuery(e.target.value)}
-                      className="w-full bg-transparent outline-none text-sm text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-24 resize-none"
-                      disabled={agentLoading}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="vintage-stamp w-full text-center py-3 bg-red-800 text-white border-red-950 shadow-[3px_3px_0px_#801c1c] hover:bg-red-950 hover:text-white font-bold cursor-pointer text-xs"
-                    disabled={agentLoading || !agentQuery.trim()}
-                  >
-                    {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH NEWS AGENT"}
-                  </button>
-
-                  {agentLoading && (
-                    <div className="mt-4 p-4 border border-stone-300 bg-stone-100/60 rounded text-center font-mono text-xs text-stone-700 flex flex-col gap-2">
-                      <div className="animate-pulse flex items-center justify-center gap-1.5">
-                        <span className="inline-block w-2.5 h-2.5 bg-red-850 rounded-full animate-ping"></span>
-                        <span>[ NEWS WIRE AGENT AT WORK ]</span>
-                      </div>
-                      <p className="text-[10px] text-stone-505 italic">
-                        Scanning teletypes, mapping wire feeds, and writing copy to print coordinates...
-                      </p>
-                    </div>
-                  )}
-                </form>
-              ) : (
-                <div className="flex flex-col gap-4 text-left">
-                  <div className="p-4 border-2 border-stone-950 bg-white rounded">
-                    <div className="flex justify-between items-center border-b-2 border-stone-950 pb-2 mb-3">
-                      <span className="font-mono text-[9px] bg-red-800 text-white px-2 py-0.5 rounded font-bold uppercase">
-                        AGENT DRAFT
-                      </span>
-                      <span className="font-mono text-[9px] text-stone-600 font-bold uppercase">
-                        PRIORITY: {draftedNews.priority.toUpperCase()}
-                      </span>
-                    </div>
-
-                    <h4 className="font-playfair text-xl font-black text-stone-950 tracking-tight leading-snug uppercase mb-2">
-                      {draftedNews.title}
-                    </h4>
-
-                    <p className="font-serif text-sm text-stone-800 leading-relaxed text-justify mb-4 max-h-[30vh] overflow-y-auto custom-paper-scrollbar pr-1">
-                      {draftedNews.content}
-                    </p>
-
-                    <div className="border-t border-dashed border-stone-300 pt-2 font-mono text-[9px] text-stone-650 flex flex-col gap-1">
-                      <div><strong>SOURCE URL:</strong> {draftedNews.sourceUrl || "N/A"}</div>
-                      <div><strong>TAGS:</strong> {draftedNews.tags.map((t: string) => `#${t}`).join(", ")}</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <button
-                      onClick={handlePublishDraft}
-                      disabled={publishing}
-                      className="vintage-stamp py-3 text-xs bg-emerald-800 text-white border-emerald-950 shadow-[3px_3px_0px_#14532d] hover:bg-emerald-900 hover:text-white font-bold cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      {publishing ? "PRINTING..." : "STAMP & PUBLISH"}
-                    </button>
-
-                    <button
-                      onClick={handleEditDraftInForm}
-                      className="vintage-stamp py-3 text-xs font-bold cursor-pointer bg-white text-stone-950"
-                    >
-                      EDIT IN INJECTOR
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer HUD */}
       <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
