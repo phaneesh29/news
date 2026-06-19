@@ -219,3 +219,27 @@ export async function fetchLikedNewsList(): Promise<ApiResponse<{ news: NewsItem
   }
   return response.json();
 }
+
+export interface FeedbackItem {
+  id: string;
+  userId: string;
+  message: string;
+  createdAt: string;
+}
+
+export async function submitFeedbackApi(message: string): Promise<ApiResponse<{ feedback: FeedbackItem }>> {
+  const response = await fetch(`${API_BASE_URL}/feedbacks`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to submit feedback");
+  }
+  return response.json();
+}
+

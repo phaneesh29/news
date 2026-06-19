@@ -20,6 +20,7 @@ import {
   Laptop,
   Trash2
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 function parseUA(ua: string | null): string {
   if (!ua) return "Unknown Device";
@@ -115,38 +116,7 @@ export default function UserProfilePage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#faf9f5] font-sans text-[#141413] selection:bg-[#cc785c]/20 selection:text-[#141413]">
       
-      {/* Navigation Header */}
-      <header className="border-b border-[#e6dfd8] bg-[#faf9f5]/85 backdrop-blur-md sticky top-0 z-40">
-        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-[#141413] text-[#faf9f5] transition-transform group-hover:rotate-45">
-              <svg viewBox="0 0 24 24" className="h-4.5 w-4.5 fill-current" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className="font-serif text-xl font-medium tracking-tight text-[#141413]">DevBits</span>
-          </Link>
-          
-          <div className="flex items-center gap-3">
-            <Link href="/blogs">
-              <Button variant="ghost" size="sm" className="text-[#6c6a64] hover:text-[#141413] text-xs">
-                Blogs
-              </Button>
-            </Link>
-            <Link href="/liked">
-              <Button variant="ghost" size="sm" className="text-[#6c6a64] hover:text-[#141413] text-xs">
-                Liked News
-              </Button>
-            </Link>
-            <Link href="/">
-              <Button variant="outline" size="sm" className="border-[#e6dfd8] text-xs flex items-center gap-1.5 hover:bg-[#efe9de]">
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Back to Curation
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Container */}
       <main className="flex-1 mx-auto max-w-4xl w-full px-4 py-12 sm:py-16 flex flex-col items-center justify-center">
