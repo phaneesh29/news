@@ -223,3 +223,42 @@ export const unlikeNews = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getMyLikedNews = async (req, res, next) => {
+  try {
+    const userId = req.auth.user.id;
+
+    const likedNewsItems = await db
+      .select({
+        id: devNews.id,
+        title: devNews.title,
+        content: devNews.content,
+        sourceUrl: devNews.sourceUrl,
+        priority: devNews.priority,
+        tags: devNews.tags,
+        isPublished: devNews.isPublished,
+        createdAt: devNews.createdAt,
+        updatedAt: devNews.updatedAt,
+        likesCount: sql`(SELECT count(*) FROM ${newsLikes} WHERE ${newsLikes.newsId} = ${devNews.id})`.mapWith(Number),
+        hasLiked: sql`true`.mapWith(Boolean)
+      })
+      .from(devNews)
+      .innerJoin(newsLikes, eq(newsLikes.newsId, devNews.id))
+      .where(
+        and(
+          eq(newsLikes.userId, userId),
+          eq(devNews.isPublished, true)
+        )
+      )
+      .orderBy(desc(newsLikes.createdAt));
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        news: likedNewsItems,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

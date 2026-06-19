@@ -154,6 +154,10 @@ export default function DevBitsNews() {
               Blogs
             </Link>
 
+            <Link href="/liked" className="hidden sm:inline-block text-xs font-semibold text-[#6c6a64] hover:text-[#141413] transition-colors border-l border-[#e6dfd8] pl-4">
+              Liked News
+            </Link>
+
             {activeUser && (
               <Link href="/profile" className="hidden sm:inline-block text-xs font-semibold text-[#6c6a64] hover:text-[#141413] transition-colors border-l border-[#e6dfd8] pl-4">
                 Profile

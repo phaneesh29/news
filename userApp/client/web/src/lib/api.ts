@@ -208,3 +208,14 @@ export async function unlikeNewsApi(id: string): Promise<ApiResponse<null>> {
   }
   return response.json();
 }
+
+export async function fetchLikedNewsList(): Promise<ApiResponse<{ news: NewsItem[] }>> {
+  const response = await fetch(`${API_BASE_URL}/news/liked`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch liked news list");
+  }
+  return response.json();
+}
