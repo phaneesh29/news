@@ -60,6 +60,7 @@ export const verification = pgTable("verification", {
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  feedbacks: many(feedbacks),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -109,3 +110,17 @@ export const newsLikes = pgTable('news_likes', {
 }, (table) => [
   primaryKey({ columns: [table.userId, table.newsId] })
 ]);
+
+export const feedbacks = pgTable('feedbacks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  message: text('message').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+});
+
+export const feedbackRelations = relations(feedbacks, ({ one }) => ({
+  user: one(user, {
+    fields: [feedbacks.userId],
+    references: [user.id],
+  }),
+}));

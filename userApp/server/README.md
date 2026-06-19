@@ -40,6 +40,11 @@ To prevent Drizzle Kit from generating conflicting migration tables or deleting 
 ### C. Blogs
 * Fetches published blog deep-dives by pagination or details by `:id`. Written in raw Markdown (parsed into rich HTML on the client).
 
+### D. Feedbacks
+* **Feedback Submission**: Authenticated users can submit feedback multiple times. The feedbacks table is owned/migrated entirely by `userApp`.
+* **Feedbacks Endpoints**:
+  * `POST /api/feedbacks` – Submits a feedback message (requires authentication, parses and validates message body using Zod).
+
 ---
 
 ## 3. Middleware Stack
