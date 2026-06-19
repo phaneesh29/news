@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { oneTap } from "better-auth/plugins";
 
 import env from "../config/env.js";
 import { db } from "../db/index.js";
@@ -17,6 +18,9 @@ export const auth = betterAuth({
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     },
   },
+  plugins: [
+    oneTap()
+  ],
   account: {
     accountLinking: {
       enabled: true,

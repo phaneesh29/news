@@ -39,13 +39,13 @@ app.use(pinoHttp({
   customErrorMessage: (req, res, err) => `${req.method} ${req.originalUrl || req.url} - ${res.statusCode} - ${err.message}`
 }));
 
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
 app.use('/api/auth', authRouter);
 app.all('/api/auth/*splat', toNodeHandler(auth));
 
 app.use('/api', rateLimiter);
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
 
 app.use('/api', apiRouter);
 

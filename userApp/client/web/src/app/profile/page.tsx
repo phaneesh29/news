@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
+import { fetchSessionsList, revokeSessionApi, revokeOtherSessionsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,13 +14,87 @@ import {
   Shield, 
   LogOut, 
   Check, 
-  RefreshCw
+  RefreshCw,
+  Monitor,
+  Smartphone,
+  Laptop,
+  Trash2
 } from "lucide-react";
+
+function parseUA(ua: string | null): string {
+  if (!ua) return "Unknown Device";
+  if (ua.includes("Windows")) return "Windows PC";
+  if (ua.includes("Macintosh")) return "MacBook / iMac";
+  if (ua.includes("iPhone")) return "iPhone";
+  if (ua.includes("iPad")) return "iPad";
+  if (ua.includes("Android")) return "Android Phone";
+  if (ua.includes("Linux")) return "Linux PC";
+  return "Mobile/Desktop Device";
+}
+
+function parseBrowser(ua: string | null): string {
+  if (!ua) return "Unknown Browser";
+  if (ua.includes("Edg/")) return "Microsoft Edge";
+  if (ua.includes("Chrome/")) return "Google Chrome";
+  if (ua.includes("Safari/")) return "Safari";
+  if (ua.includes("Firefox/")) return "Mozilla Firefox";
+  return "Web Browser";
+}
 
 export default function UserProfilePage() {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
   const activeSession = sessionData?.session;
+
+  const [sessions, setSessions] = React.useState<any[]>([]);
+  const [loadingSessions, setLoadingSessions] = React.useState(false);
+
+  const fetchSessions = React.useCallback(async () => {
+    if (!activeUser) return;
+    setLoadingSessions(true);
+    try {
+      const res = await fetchSessionsList();
+      if (res.status === "success" && res.data) {
+        setSessions(res.data);
+      } else {
+        console.error("Failed to fetch active sessions:", res.message);
+      }
+    } catch (err) {
+      console.error("Failed to fetch active sessions:", err);
+    } finally {
+      setLoadingSessions(false);
+    }
+  }, [activeUser]);
+
+  React.useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+
+  const handleRevokeSession = async (token: string) => {
+    try {
+      const res = await revokeSessionApi(token);
+      if (res.status === "success") {
+        await fetchSessions();
+      } else {
+        console.error("Failed to revoke session:", res.message);
+      }
+    } catch (err) {
+      console.error("Failed to revoke session:", err);
+    }
+  };
+
+  const handleRevokeOtherSessions = async () => {
+    try {
+      const res = await revokeOtherSessionsApi();
+      if (res.status === "success") {
+        await fetchSessions();
+      } else {
+        console.error("Failed to revoke other sessions:", res.message);
+      }
+    } catch (err) {
+      console.error("Failed to revoke other sessions:", err);
+    }
+  };
 
   const triggerGoogleLogin = async () => {
     try {
@@ -159,40 +234,88 @@ export default function UserProfilePage() {
                   </CardContent>
                 </Card>
 
-                {/* Session Security Details */}
+                {/* Active Sessions & Devices */}
                 {activeSession && (
-                  <Card className="border border-[#e6dfd8] bg-[#faf9f5]">
-                    <CardHeader className="bg-[#f5f0e8]/50 border-b border-[#e6dfd8] p-4.5">
-                      <CardTitle className="font-serif text-lg font-normal text-[#141413] flex items-center gap-2">
-                        <Shield className="h-4.5 w-4.5 text-[#cc785c]" />
-                        Active Security Token
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-5 text-xs text-[#3d3d3a] space-y-4">
-                      <div className="grid grid-cols-3 border-b border-[#e6dfd8]/50 pb-3">
-                        <span className="text-[#6c6a64] font-medium">Session ID:</span>
-                        <span className="col-span-2 font-mono text-[#141413] break-all">{activeSession.id}</span>
+                <Card className="border border-[#e6dfd8] bg-[#faf9f5]">
+                  <CardHeader className="bg-[#f5f0e8]/50 border-b border-[#e6dfd8] p-4.5 flex flex-row items-center justify-between">
+                    <CardTitle className="font-serif text-lg font-normal text-[#141413] flex items-center gap-2">
+                      <Shield className="h-4.5 w-4.5 text-[#cc785c]" />
+                      Active Sessions & Devices
+                    </CardTitle>
+                    {sessions.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRevokeOtherSessions}
+                        className="border-[#c64545]/20 text-[#c64545] hover:bg-[#c64545]/10 text-[10px] h-7 px-2"
+                      >
+                        Revoke Other Sessions
+                      </Button>
+                    )}
+                  </CardHeader>
+                  <CardContent className="p-5 text-xs text-[#3d3d3a] space-y-4">
+                    {loadingSessions ? (
+                      <div className="flex items-center justify-center py-4 gap-2 text-[#6c6a64]">
+                        <RefreshCw className="h-4 w-4 animate-spin text-[#cc785c]" />
+                        <span>Loading active sessions...</span>
                       </div>
-                      {activeSession.ipAddress && (
-                        <div className="grid grid-cols-3 border-b border-[#e6dfd8]/50 pb-3">
-                          <span className="text-[#6c6a64] font-medium">IP Address:</span>
-                          <span className="col-span-2 font-mono text-[#141413]">{activeSession.ipAddress}</span>
-                        </div>
-                      )}
-                      <div className="grid grid-cols-3">
-                        <span className="text-[#6c6a64] font-medium">Token Expires:</span>
-                        <span className="col-span-2 text-[#141413] font-mono">
-                          {new Date(activeSession.expiresAt).toLocaleDateString(undefined, {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                          })}
-                        </span>
+                    ) : sessions.length === 0 ? (
+                      <p className="text-center text-[#6c6a64] py-2">No active sessions found.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {sessions.map((s) => {
+                          const isCurrent = s.id === activeSession?.id;
+                          const deviceType = parseUA(s.userAgent);
+                          const browserName = parseBrowser(s.userAgent);
+
+                          return (
+                            <div key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 border border-[#e6dfd8] rounded-lg bg-[#efe9de]/10 gap-3">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded bg-[#e6dfd8]/50 text-[#cc785c] mt-0.5">
+                                  {deviceType === "iPhone" || deviceType === "Android Phone" ? (
+                                    <Smartphone className="h-4.5 w-4.5" />
+                                  ) : deviceType === "MacBook / iMac" || deviceType === "Laptop" ? (
+                                    <Laptop className="h-4.5 w-4.5" />
+                                  ) : (
+                                    <Monitor className="h-4.5 w-4.5" />
+                                  )}
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-[#141413]">
+                                      {deviceType} • {browserName}
+                                    </span>
+                                    {isCurrent && (
+                                      <Badge className="bg-[#5db872]/10 text-[#5db872] border-0 text-[9px] font-semibold py-0 px-1.5">
+                                        Current Device
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-[#6c6a64] space-y-0.5">
+                                    {s.ipAddress && <p>IP: <span className="font-mono">{s.ipAddress}</span></p>}
+                                    <p>Last active: {new Date(s.updatedAt || s.createdAt).toLocaleString()}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {!isCurrent && s.token && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRevokeSession(s.token)}
+                                  className="border-[#c64545]/20 text-[#c64545] hover:bg-[#c64545]/10 text-[10px] h-7 px-2 shrink-0 self-end sm:self-center"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                  Log Out Device
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    </CardContent>
-                  </Card>
+                    )}
+                  </CardContent>
+                </Card>
                 )}
 
               </div>

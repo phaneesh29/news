@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSession, signIn, signOut } from "@/lib/auth-client";
+import authClient, { useSession, signIn, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +93,15 @@ export default function DevBitsNews() {
   const { data: sessionData, isPending, refetch } = useSession();
   
   const activeUser = sessionData?.user;
+
+  React.useEffect(() => {
+    console.log("Google Client ID configured as:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    if (!activeUser && !isPending) {
+      authClient.oneTap().catch((err) => {
+        console.warn("Google One Tap automatic prompt failed to initialize:", err);
+      });
+    }
+  }, [activeUser, isPending]);
 
   // Bookmarks
   const [bookmarks, setBookmarks] = useState<string[]>([]);

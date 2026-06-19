@@ -53,3 +53,66 @@ export async function fetchProfile(headers?: HeadersInit): Promise<ApiResponse<U
   
   return response.json();
 }
+
+export interface SessionInfo {
+  id: string;
+  userId: string;
+  expiresAt: string;
+  token: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function fetchSessionsList(): Promise<ApiResponse<SessionInfo[]>> {
+  const response = await fetch(`${API_BASE_URL}/auth/sessions`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to fetch sessions");
+  }
+  
+  return response.json();
+}
+
+export async function revokeSessionApi(token: string): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_BASE_URL}/auth/sessions/revoke`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ token }),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to revoke session");
+  }
+  
+  return response.json();
+}
+
+export async function revokeOtherSessionsApi(): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_BASE_URL}/auth/sessions/revoke-others`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to revoke other sessions");
+  }
+  
+  return response.json();
+}
