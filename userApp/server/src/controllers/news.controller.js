@@ -1,6 +1,6 @@
-import { desc, eq, lt, or, and } from "drizzle-orm";
+import { desc, eq, lt, or, and, inArray, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { devNews } from "../db/schema.js";
+import { devNews, newsLikes } from "../db/schema.js";
 
 const newsSelect = {
   id: devNews.id,
@@ -62,6 +62,50 @@ export const getPublishedNews = async (req, res, next) => {
     const hasNextPage = newsItems.length > limit;
     const results = hasNextPage ? newsItems.slice(0, limit) : newsItems;
 
+    let finalResults = results.map(item => ({
+      ...item,
+      likesCount: 0,
+      hasLiked: false
+    }));
+
+    if (results.length > 0) {
+      const newsIds = results.map(item => item.id);
+      
+      const likeCounts = await db
+        .select({
+          newsId: newsLikes.newsId,
+          count: sql`count(*)`.mapWith(Number)
+        })
+        .from(newsLikes)
+        .where(inArray(newsLikes.newsId, newsIds))
+        .groupBy(newsLikes.newsId);
+
+      const countsMap = {};
+      likeCounts.forEach(c => {
+        countsMap[c.newsId] = c.count;
+      });
+
+      let userLikesSet = new Set();
+      if (req.auth?.user?.id) {
+        const userLikes = await db
+          .select({ newsId: newsLikes.newsId })
+          .from(newsLikes)
+          .where(
+            and(
+              inArray(newsLikes.newsId, newsIds),
+              eq(newsLikes.userId, req.auth.user.id)
+            )
+          );
+        userLikesSet = new Set(userLikes.map(l => l.newsId));
+      }
+
+      finalResults = results.map(item => ({
+        ...item,
+        likesCount: countsMap[item.id] || 0,
+        hasLiked: userLikesSet.has(item.id)
+      }));
+    }
+
     const lastItem = results[results.length - 1];
     const nextCursor =
       hasNextPage && lastItem
@@ -71,7 +115,7 @@ export const getPublishedNews = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       data: {
-        news: results,
+        news: finalResults,
         nextCursor,
       },
     });
@@ -99,11 +143,81 @@ export const getPublishedNewsById = async (req, res, next) => {
       });
     }
 
+    const [likeCountResult] = await db
+      .select({ count: sql`count(*)`.mapWith(Number) })
+      .from(newsLikes)
+      .where(eq(newsLikes.newsId, id));
+
+    let hasLiked = false;
+    if (req.auth?.user?.id) {
+      const [userLikeResult] = await db
+        .select({ newsId: newsLikes.newsId })
+        .from(newsLikes)
+        .where(and(eq(newsLikes.newsId, id), eq(newsLikes.userId, req.auth.user.id)));
+      hasLiked = !!userLikeResult;
+    }
+
+    const newsWithLikes = {
+      ...news,
+      likesCount: likeCountResult?.count || 0,
+      hasLiked
+    };
+
     res.status(200).json({
       status: "success",
       data: {
-        news,
+        news: newsWithLikes,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const likeNews = async (req, res, next) => {
+  try {
+    const newsId = req.params.id;
+    const userId = req.auth.user.id;
+
+    const newsItems = await db
+      .select({ id: devNews.id })
+      .from(devNews)
+      .where(and(eq(devNews.id, newsId), eq(devNews.isPublished, true)))
+      .limit(1);
+
+    if (newsItems.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "News article not found.",
+      });
+    }
+
+    await db
+      .insert(newsLikes)
+      .values({ userId, newsId })
+      .onConflictDoNothing();
+
+    res.status(200).json({
+      status: "success",
+      message: "News article liked successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const unlikeNews = async (req, res, next) => {
+  try {
+    const newsId = req.params.id;
+    const userId = req.auth.user.id;
+
+    await db
+      .delete(newsLikes)
+      .where(and(eq(newsLikes.newsId, newsId), eq(newsLikes.userId, userId)));
+
+    res.status(200).json({
+      status: "success",
+      message: "News article unliked successfully.",
     });
   } catch (error) {
     next(error);

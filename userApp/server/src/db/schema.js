@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, pgEnum, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, pgEnum, uuid, varchar, primaryKey } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -101,3 +101,11 @@ export const blogs = pgTable('blogs', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull()
 });
+
+export const newsLikes = pgTable('news_likes', {
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  newsId: uuid('news_id').notNull().references(() => devNews.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+}, (table) => [
+  primaryKey({ columns: [table.userId, table.newsId] })
+]);

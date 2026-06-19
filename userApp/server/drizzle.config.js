@@ -11,5 +11,5 @@ export default defineConfig({
   migrations: {
     table: 'user_drizzle_migrations',
   },
-  tablesFilter: ["user", "session", "account", "verification"],
+  tablesFilter: ["user", "session", "account", "verification", "news_likes"],
 });

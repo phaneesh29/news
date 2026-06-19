@@ -16,9 +16,10 @@ import {
   ArrowRight,
   LogOut,
   ExternalLink,
-  Loader2
+  Loader2,
+  Heart
 } from "lucide-react";
-import { fetchNewsList, type NewsItem } from "@/lib/api";
+import { fetchNewsList, likeNewsApi, unlikeNewsApi, type NewsItem } from "@/lib/api";
 
 export default function DevBitsNews() {
   // Authentic Better Auth States
@@ -65,6 +66,63 @@ export default function DevBitsNews() {
       setBookmarks(bookmarks.filter(b => b !== id));
     } else {
       setBookmarks([...bookmarks, id]);
+    }
+  };
+
+  const handleLikeToggle = async (id: string) => {
+    if (!activeUser) return;
+    
+    const newsItem = news.find(n => n.id === id);
+    if (!newsItem) return;
+
+    const previouslyLiked = newsItem.hasLiked;
+    
+    // Optimistic UI updates
+    setNews(prev => prev.map(n => {
+      if (n.id === id) {
+        return {
+          ...n,
+          hasLiked: !previouslyLiked,
+          likesCount: previouslyLiked ? Math.max(0, n.likesCount - 1) : n.likesCount + 1
+        };
+      }
+      return n;
+    }));
+
+    if (selectedArticle && selectedArticle.id === id) {
+      setSelectedArticle(prev => prev ? {
+        ...prev,
+        hasLiked: !previouslyLiked,
+        likesCount: previouslyLiked ? Math.max(0, prev.likesCount - 1) : prev.likesCount + 1
+      } : null);
+    }
+
+    try {
+      if (previouslyLiked) {
+        await unlikeNewsApi(id);
+      } else {
+        await likeNewsApi(id);
+      }
+    } catch (err) {
+      console.error("Failed to toggle like:", err);
+      // Revert state
+      setNews(prev => prev.map(n => {
+        if (n.id === id) {
+          return {
+            ...n,
+            hasLiked: previouslyLiked,
+            likesCount: previouslyLiked ? n.likesCount + 1 : Math.max(0, n.likesCount - 1)
+          };
+        }
+        return n;
+      }));
+      if (selectedArticle && selectedArticle.id === id) {
+        setSelectedArticle(prev => prev ? {
+          ...prev,
+          hasLiked: previouslyLiked,
+          likesCount: previouslyLiked ? prev.likesCount + 1 : Math.max(0, prev.likesCount - 1)
+        } : null);
+      }
     }
   };
 
@@ -325,7 +383,16 @@ export default function DevBitsNews() {
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => handleLikeToggle(item.id)} 
+                        className="flex items-center gap-1 text-xs text-[#8e8b82] hover:text-[#c64545] transition-colors p-1"
+                        title={item.hasLiked ? "Unlike Article" : "Like Article"}
+                      >
+                        <Heart className={`h-4 w-4 transition-transform active:scale-125 ${item.hasLiked ? "fill-[#c64545] text-[#c64545]" : ""}`} />
+                        <span>{item.likesCount}</span>
+                      </button>
+
                       {item.sourceUrl && (
                         <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" title="View Source Link" className="text-[#8e8b82] hover:text-[#141413] transition-colors p-1">
                           <ExternalLink className="h-4 w-4" />
@@ -407,7 +474,16 @@ export default function DevBitsNews() {
               )}
             </div>
 
-            <DialogFooter className="border-t border-[#e6dfd8] pt-4 gap-2">
+            <DialogFooter className="border-t border-[#e6dfd8] pt-4 flex flex-row items-center justify-between gap-2">
+              <button 
+                onClick={() => handleLikeToggle(selectedArticle.id)}
+                className="flex items-center gap-1.5 text-xs text-[#8e8b82] hover:text-[#c64545] transition-colors p-1"
+                title={selectedArticle.hasLiked ? "Unlike Article" : "Like Article"}
+              >
+                <Heart className={`h-4.5 w-4.5 transition-transform active:scale-125 ${selectedArticle.hasLiked ? "fill-[#c64545] text-[#c64545]" : ""}`} />
+                <span className="font-semibold">{selectedArticle.likesCount} {selectedArticle.likesCount === 1 ? "Like" : "Likes"}</span>
+              </button>
+
               <Button 
                 onClick={() => setSelectedArticle(null)}
                 className="bg-[#141413] hover:bg-[#252523] text-white border-0 text-xs h-9"

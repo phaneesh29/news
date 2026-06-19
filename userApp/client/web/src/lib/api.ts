@@ -127,6 +127,8 @@ export interface NewsItem {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+  likesCount: number;
+  hasLiked: boolean;
 }
 
 export interface BlogItem {
@@ -181,6 +183,28 @@ export async function fetchBlogById(id: string): Promise<ApiResponse<{ blog: Blo
   });
   if (!response.ok) {
     throw new Error("Failed to fetch blog post");
+  }
+  return response.json();
+}
+
+export async function likeNewsApi(id: string): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_BASE_URL}/news/${id}/like`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to like news article");
+  }
+  return response.json();
+}
+
+export async function unlikeNewsApi(id: string): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_BASE_URL}/news/${id}/like`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to unlike news article");
   }
   return response.json();
 }
