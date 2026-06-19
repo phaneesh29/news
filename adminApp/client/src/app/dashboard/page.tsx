@@ -281,7 +281,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
+      <div className="min-h-screen w-screen bg-slate-950 flex items-center justify-center font-sans tracking-tight text-slate-200 text-2xl animate-pulse">
         [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
       </div>
     );
@@ -291,33 +291,32 @@ export default function DashboardPage() {
   const canAdd = profile?.role === "admin" || profile?.role === "editor";
 
   return (
-    <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-red-950 text-stone-900 font-serif">
+    <div className="min-h-screen w-screen bg-slate-950 flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(220,38,38,0.6)]/10 selection:text-red-400 text-slate-200 font-sans">
       
       {/* Newspaper texture noise overlays via css */}
-      <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
+      <div className="absolute inset-0 cyber-grid pointer-events-none z-0"></div>
       
       {/* Header HUD - Traditional Newspaper style Banner */}
-      <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
+      <header className="w-full flex flex-col items-center border-b-4 border-double border-red-900/50 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
         <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
           
           <div className="flex flex-col text-center md:text-left">
-            <Link href="/dashboard" className="font-playfair text-3xl sm:text-4xl font-black tracking-tight text-stone-950 uppercase select-none hover:text-red-800 transition-colors">
-              THE DAILY <span className="text-red-800">NEXUS</span>
+            <Link href="/dashboard" className="font-sans tracking-tight text-3xl sm:text-4xl font-black tracking-tight text-white uppercase select-none hover:text-red-500 text-glow transition-colors">
+              THE DAILY <span className="text-red-500 text-glow">NEXUS</span>
             </Link>
-            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
-              WIRE SERVICE  •  OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
+            <span className="font-mono text-[10px] text-slate-400 tracking-wider mt-1 uppercase">
+              WIRE SERVICE  •  OPERATIVE: <span className="font-bold text-slate-200">{profile?.email}</span> ({profile?.role?.toUpperCase()})
             </span>
           </div>
 
           {/* Nav Deck Links */}
-          <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; News Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
+          <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-white/10/50 px-4 py-2 border border-slate-700/50/50 rounded">
+            <Link href="/dashboard" className="text-red-500 text-glow hover:text-red-900 transition-colors font-black border-b-2 border-red-500 pb-0.5">&gt; News Feed</Link>
+            <span className="text-slate-600">|</span>
+            <Link href="/blogs" className="text-slate-400 hover:text-white transition-colors">&gt; Blogs Feed</Link>
             {canAdd && (
               <>
-                <span className="text-stone-400">|</span>
-                <Link href="/news/add" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; News Injector</Link>
+                
               </>
             )}
           </div>
@@ -326,14 +325,14 @@ export default function DashboardPage() {
             {isAdmin && (
               <Link 
                 href="/settings"
-                className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-white px-3 py-1.5 hover:bg-stone-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5"
+                className="font-mono text-[10px] sm:text-xs border-2 border-red-500/50 text-slate-200 bg-black/50 px-3 py-1.5 hover:bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5"
               >
                 Security Deck
               </Link>
             )}
             <button 
               onClick={handleLogout}
-              className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-white px-3 py-1.5 hover:bg-red-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
+              className="font-mono text-[10px] sm:text-xs border-2 border-red-500 text-red-900 bg-black/50 px-3 py-1.5 hover:bg-red-700 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
             >
               Log Out
             </button>
@@ -341,37 +340,37 @@ export default function DashboardPage() {
         </div>
 
         {/* Newspaper Subheader bar */}
-        <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
+        <div className="w-full flex justify-between items-center border-t border-slate-800 pt-2 text-[10px] font-mono uppercase text-slate-400 tracking-wider">
           <span>VOL. CXXVI... No. 47190</span>
-          <span className="font-bold text-stone-950">{systemTime || "[ RETRIEVING TIME ]"}</span>
+          <span className="font-bold text-white">{systemTime || "[ RETRIEVING TIME ]"}</span>
           <span>PRICE: 10 CENTS</span>
         </div>
       </header>
 
       {/* Main Newspaper Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-[1500px] mx-auto w-full pb-8 items-start">
+      <div className="flex-1 grid grid-cols-1 flex flex-col relative z-10 max-w-5xl mx-auto w-full pb-8 items-start">
         
         {/* News wire articles list (Left Columns) */}
-        <div className="lg:col-span-2 w-full flex flex-col relative">
+        <div className="w-full flex flex-col relative">
           
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 border-red-900/50 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             
             {/* Column Header */}
-            <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-400 uppercase tracking-widest border-b border-white/10 pb-1.5 mb-2 pl-2">
               <span>DAILY WIRE LOGS</span>
               <span>LATEST BROADCASTS</span>
             </div>
 
             {/* Headlines Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-4 border-stone-950 pb-3 mb-4 pl-2 gap-3">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-4 border-red-900/50 pb-3 mb-4 pl-2 gap-3">
               <div>
-                <h2 className="font-playfair text-3xl sm:text-4xl font-black text-stone-950 tracking-tighter uppercase leading-none select-none text-left">
-                  WIRE <span className="text-red-800">REPORTS</span>
+                <h2 className="font-sans tracking-tight text-3xl sm:text-4xl font-black text-white tracking-tighter uppercase leading-none select-none text-left">
+                  WIRE <span className="text-red-500 text-glow">REPORTS</span>
                 </h2>
                 
-                <div className="flex gap-2.5 text-[10px] font-mono font-bold text-red-800 mt-2 uppercase tracking-wide">
+                <div className="flex gap-2.5 text-[10px] font-mono font-bold text-red-500 text-glow mt-2 uppercase tracking-wide">
                   <span>PRINT QUEUE FEED</span>
-                  <span className="text-stone-400">•</span>
+                  <span className="text-slate-600">•</span>
                   <span>SYNCED NODES</span>
                 </div>
               </div>
@@ -381,7 +380,7 @@ export default function DashboardPage() {
                 {canAdd && (
                   <Link 
                     href="/news/add"
-                    className="vintage-stamp text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider"
+                    className="glass-btn relative overflow-hidden text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider"
                   >
                     WRITE ARTICLE
                   </Link>
@@ -393,9 +392,9 @@ export default function DashboardPage() {
                     placeholder="Search wire reports..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#f5f2e9] text-stone-900 text-xs pl-3 pr-8 py-2 font-mono outline-none border-2 border-stone-950 focus:border-red-800 rounded shadow-sm"
+                    className="w-full bg-slate-950 text-slate-200 text-xs pl-3 pr-8 py-2 font-mono outline-none border-2 border-red-900/50 focus:border-red-800 rounded shadow-sm"
                   />
-                  <svg className="w-3.5 h-3.5 text-stone-700 absolute right-2.5 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
@@ -406,11 +405,11 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-6 pl-2">
               
               {/* Feeds Container */}
-              <div className="bg-[#fcfaf2] border-2 border-stone-950 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
+              <div className="bg-black/40 backdrop-blur-xl border-2 border-red-900/50 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
                 
                 {/* Priority Selector Filter Bar */}
-                <div className="flex flex-wrap gap-2.5 pb-3 border-b border-stone-300 mb-4 relative z-10 font-mono text-[10px] uppercase tracking-wider">
-                  <span className="text-stone-600 font-bold self-center mr-1">FILTER LEVEL:</span>
+                <div className="flex flex-wrap gap-2.5 pb-3 border-b border-white/10 mb-4 relative z-10 font-mono text-[10px] uppercase tracking-wider">
+                  <span className="text-slate-400 font-bold self-center mr-1">FILTER LEVEL:</span>
                   {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((level) => (
                     <button
                       key={level}
@@ -418,7 +417,7 @@ export default function DashboardPage() {
                         setSelectedPriority(level);
                         addLog(`FILTER: Active filter changed to '${level}'`);
                       }}
-                      className={`px-2 py-0.5 border-2 rounded font-black transition-all cursor-pointer ${selectedPriority === level ? "border-stone-950 text-white bg-stone-950" : "border-stone-400 text-stone-600 hover:border-stone-950 hover:text-stone-950 bg-white"}`}
+                      className={`px-2 py-0.5 border-2 rounded font-black transition-all cursor-pointer ${selectedPriority === level ? "border-red-900/50 text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)]" : "border-slate-700/50 text-slate-400 hover:border-red-900/50 hover:text-white bg-black/50"}`}
                     >
                       {level}
                     </button>
@@ -452,37 +451,37 @@ export default function DashboardPage() {
                           setEditIsPublished(item.isPublished);
                           addLog(`VIEW: Focus shifted to article ${item.id.slice(0, 8)}`);
                         }}
-                        className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer text-left rounded"
+                        className="bg-black/50 border-2 border-red-900/50 p-5 hover:bg-white/5 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer text-left rounded"
                       >
                         <div className="flex flex-wrap gap-2.5 items-center">
                           <span className={`font-mono text-[9px] border-2 px-2 py-0.5 rounded tracking-wide uppercase font-bold ${getPriorityColors(item.priority)}`}>
                             {item.priority}
                           </span>
-                          <span className="font-mono text-[10px] text-stone-600">
+                          <span className="font-mono text-[10px] text-slate-400">
                             {new Date(item.createdAt).toLocaleString()}
                           </span>
-                          <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
+                          <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-slate-700/50 text-slate-500 bg-white/5"}`}>
                             {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
                           </span>
                         </div>
 
-                        <h4 className="font-playfair text-xl font-black text-stone-950 tracking-tight leading-snug group-hover/item:text-red-950 transition-colors uppercase">
+                        <h4 className="font-sans tracking-tight text-xl font-black text-white tracking-tight leading-snug group-hover/item:text-red-400 transition-colors uppercase">
                           {item.title}
                         </h4>
                         
-                        <p className="font-serif text-sm text-stone-850 leading-relaxed truncate max-w-full">
+                        <p className="font-sans text-sm text-slate-300 leading-relaxed truncate max-w-full">
                           {item.content}
                         </p>
 
-                        <div className="flex flex-wrap justify-between items-center mt-2 pt-2 border-t border-dashed border-stone-300">
+                        <div className="flex flex-wrap justify-between items-center mt-2 pt-2 border-t border-dashed border-white/10">
                           <div className="flex gap-1.5">
                             {item.tags.map((tag) => (
-                              <span key={tag} className="font-mono text-[9px] bg-stone-200 border border-stone-400 text-stone-800 px-1.5 py-0.5 rounded uppercase font-bold">
+                              <span key={tag} className="font-mono text-[9px] bg-white/10 border border-slate-700/50 text-slate-300 px-1.5 py-0.5 rounded uppercase font-bold">
                                 #{tag}
                               </span>
                             ))}
                           </div>
-                          <span className="font-mono text-[10px] text-stone-600 group-hover/item:text-red-800 transition-colors font-bold">
+                          <span className="font-mono text-[10px] text-slate-400 group-hover/item:text-red-500 text-glow transition-colors font-bold">
                             [ READ REPORT ]
                           </span>
                         </div>
@@ -493,7 +492,7 @@ export default function DashboardPage() {
                   {/* Empty state visual */}
                   {newsList.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                      <div className="w-12 h-12 text-stone-400 mb-4">
+                      <div className="w-12 h-12 text-slate-600 mb-4">
                         <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <rect x="3" y="4" width="18" height="16" rx="2" />
                           <line x1="7" y1="8" x2="17" y2="8" />
@@ -501,10 +500,10 @@ export default function DashboardPage() {
                           <line x1="7" y1="16" x2="13" y2="16" />
                         </svg>
                       </div>
-                      <h3 className="font-playfair text-stone-800 text-lg font-black uppercase">
+                      <h3 className="font-sans tracking-tight text-slate-300 text-lg font-black uppercase">
                         Wire Archives Empty
                       </h3>
-                      <p className="font-serif text-sm text-stone-600 max-w-sm leading-relaxed mt-2">
+                      <p className="font-sans text-sm text-slate-400 max-w-sm leading-relaxed mt-2">
                         No articles are currently logged on the wire feed. Ask the agent or click write article to log a report.
                       </p>
                     </div>
@@ -518,7 +517,7 @@ export default function DashboardPage() {
                           fetchNews(nextCursor, searchQuery, true);
                         }}
                         disabled={fetchLoading}
-                        className="vintage-stamp text-xs tracking-widest disabled:opacity-50 cursor-pointer bg-white"
+                        className="glass-btn relative overflow-hidden text-xs tracking-widest disabled:opacity-50 cursor-pointer bg-black/50"
                       >
                         {fetchLoading ? "[ RE-READING WIRE... ]" : "LOAD NEXT DISPATCHES"}
                       </button>
@@ -531,67 +530,67 @@ export default function DashboardPage() {
           </div>
 
         {/* RIGHT COLUMN: Telemetry and Live Teletype Logs */}
-        <div className="lg:col-span-1 flex flex-col gap-6 relative w-full lg:sticky lg:top-8 text-left z-10">
+        <div className="hidden lg:col-span-1 flex-col gap-6 relative w-full lg:sticky lg:top-8 text-left z-10">
           
           {/* Telemetry Window */}
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 scanline overflow-hidden shadow-sm">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 border-red-900/50 p-6 flex flex-col relative z-10 scanline overflow-hidden shadow-sm">
             
             {/* Decorative coffee stain */}
-            <div className="coffee-stain -top-6 -right-6 opacity-25"></div>
+            <div className="hidden"></div>
 
-            <div className="border-b-2 border-stone-950 pb-3 mb-5">
-              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span>
+            <div className="border-b-2 border-red-900/50 pb-3 mb-5">
+              <h3 className="font-sans tracking-tight text-lg text-white uppercase tracking-wide font-black flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse"></span>
                 SYS.TELEMETRY
               </h3>
-              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+              <p className="font-mono text-[9px] text-slate-500 font-bold mt-1 tracking-wider uppercase">
                 OPERATIVE DATA SCAN
               </p>
             </div>
 
             <div className="flex flex-col gap-3.5 text-xs text-stone-855 font-mono">
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="text-stone-500 font-bold">NODE STATUS</span>
+              <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
+                <span className="text-slate-500 font-bold">NODE STATUS</span>
                 <span className={`font-bold uppercase tracking-wider text-[10px] ${serverHealth?.status === "ok" ? "text-green-800" : "text-red-700 animate-pulse"}`}>
                   {serverHealth ? `${serverHealth.status.toUpperCase()}` : "SCANNING..."}
                 </span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="text-stone-500 font-bold">OPERATIVE OS</span>
-                <span className="text-stone-900 font-bold">{clientInfo?.os || "DETERMINING..."}</span>
+              <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
+                <span className="text-slate-500 font-bold">OPERATIVE OS</span>
+                <span className="text-slate-200 font-bold">{clientInfo?.os || "DETERMINING..."}</span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="text-stone-500 font-bold">CLIENT BROWSER</span>
-                <span className="text-stone-800 truncate max-w-[130px] font-bold">{clientInfo?.browser || "EXTRACTING..."}</span>
+              <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
+                <span className="text-slate-500 font-bold">CLIENT BROWSER</span>
+                <span className="text-slate-300 truncate max-w-[130px] font-bold">{clientInfo?.browser || "EXTRACTING..."}</span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="text-stone-500 font-bold">IP ADDR COORDINATES</span>
+              <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
+                <span className="text-slate-500 font-bold">IP ADDR COORDINATES</span>
                 <span className="text-red-900 font-bold tracking-wider">{clientInfo?.ip || "SCANNING..."}</span>
               </div>
 
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5">
-                <span className="text-stone-500 font-bold">CLEARANCE KEY</span>
-                <span className="text-stone-900 uppercase font-bold">{profile?.role || "OPERATIVE"}</span>
+              <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
+                <span className="text-slate-500 font-bold">CLEARANCE KEY</span>
+                <span className="text-slate-200 uppercase font-bold">{profile?.role || "OPERATIVE"}</span>
               </div>
             </div>
           </div>
 
           {/* Live Logs Terminal Window */}
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 flex-1 min-h-[350px]">
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 border-red-900/50 p-6 flex flex-col relative z-10 flex-1 min-h-[350px]">
             
-            <div className="border-b-2 border-stone-950 pb-3 mb-5">
-              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
+            <div className="border-b-2 border-red-900/50 pb-3 mb-5">
+              <h3 className="font-sans tracking-tight text-lg text-white uppercase tracking-wide font-black">
                 TELETYPE STREAM
               </h3>
-              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+              <p className="font-mono text-[9px] text-slate-500 font-bold mt-1 tracking-wider uppercase">
                 LIVE SYSTEM EXECUTIONS
               </p>
             </div>
 
-            <div className="flex-1 green-terminal scanline relative overflow-hidden p-4 font-mono text-[11px] leading-relaxed flex flex-col vintage-shadow-sm min-h-[250px] max-h-[350px]">
+            <div className="flex-1 green-terminal scanline relative overflow-hidden p-4 font-mono text-[11px] leading-relaxed flex flex-col shadow-[0_0_15px_rgba(0,0,0,0.5)] min-h-[250px] max-h-[350px]">
               <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
                 {terminalLogs.map((log, index) => (
                   <div key={index} className="opacity-90 hover:opacity-100 transition-opacity">
@@ -599,7 +598,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
                 {terminalLogs.length === 0 && (
-                  <div className="text-stone-500 italic">No feed logs recorded.</div>
+                  <div className="text-slate-500 italic">No feed logs recorded.</div>
                 )}
               </div>
             </div>
@@ -613,7 +612,7 @@ export default function DashboardPage() {
       {/* ARTICLE DOSSIER DETAIL OVERLAY */}
       {selectedNews && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
+          <div className="w-full max-w-2xl bg-black/40 backdrop-blur-xl border-4 border-red-900/50 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
             
             {/* Close */}
             <button
@@ -621,18 +620,18 @@ export default function DashboardPage() {
                 setSelectedNews(null);
                 addLog("INSPECTOR: Dossier closed");
               }}
-              className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs"
+              className="absolute top-3 right-4 font-mono font-bold text-white border-2 border-red-900/50 px-2 py-0.5 hover:bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:text-white transition-colors cursor-pointer text-xs"
             >
               [ CLOSE ]
             </button>
 
             {/* Vintage paper column inside dossier */}
-            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-1 text-stone-900">
+            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-1 text-slate-200">
               
               {isEditing ? (
-                <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
-                  <div className="flex flex-col border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-sans text-slate-200 text-left">
+                  <div className="flex flex-col border-b border-slate-700/50 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                       TRANSMISSION HEADLINE
                     </label>
                     <input
@@ -640,42 +639,42 @@ export default function DashboardPage() {
                       required
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-950 placeholder-stone-600/40 font-serif"
+                      className="w-full bg-transparent border-none outline-none font-bold text-lg text-white placeholder-stone-600/40 font-sans"
                     />
                   </div>
 
-                  <div className="flex flex-col border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <div className="flex flex-col border-b border-slate-700/50 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                       SOURCE LINK
                     </label>
                     <input
                       type="url"
                       value={editSourceUrl}
                       onChange={(e) => setEditSourceUrl(e.target.value)}
-                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono"
+                      className="w-full bg-transparent border-none outline-none text-xs text-slate-200 placeholder-stone-600/40 font-mono"
                     />
                   </div>
 
-                  <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <div className="flex flex-col min-h-[140px] border-b border-slate-700/50 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                       DRAFT CHRONICLE DETAILS
                     </label>
                     <textarea
                       required
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar"
+                      className="w-full bg-transparent border-none outline-none text-sm text-white placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar"
                       rows={8}
                     />
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
+                    <span className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       ALERT URGENCY
                     </span>
                     <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
                       {[
-                        { key: "low", text: "INFO", color: "bg-stone-500", border: "border-stone-600" },
+                        { key: "low", text: "INFO", color: "bg-white/50", border: "border-stone-600" },
                         { key: "medium", text: "NOTICE", color: "bg-blue-500", border: "border-blue-600" },
                         { key: "high", text: "WARNING", color: "bg-amber-500", border: "border-amber-600" },
                         { key: "critical", text: "CRITICAL", color: "bg-red-700", border: "border-red-800" },
@@ -684,7 +683,7 @@ export default function DashboardPage() {
                           key={pr.key}
                           type="button"
                           onClick={() => setEditPriority(pr.key)}
-                          className={`py-1.5 rounded border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${editPriority.toLowerCase() === pr.key ? "bg-stone-950 text-white border-stone-950 font-bold scale-[1.04]" : "bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200"}`}
+                          className={`py-1.5 rounded border-2 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 ${editPriority.toLowerCase() === pr.key ? "bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] text-white border-red-900/50 font-bold scale-[1.04]" : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10"}`}
                         >
                           <span>{pr.text}</span>
                         </button>
@@ -692,24 +691,24 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-2">
+                  <div className="flex items-center justify-between border-b border-slate-700/50 pb-3 mt-2">
                     <div className="flex flex-col">
-                      <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">PUBLICATION STATUS</span>
-                      <span className="font-serif text-xs text-stone-500">Toggle to publish or unpublish this report.</span>
+                      <span className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest">PUBLICATION STATUS</span>
+                      <span className="font-sans text-xs text-slate-500">Toggle to publish or unpublish this report.</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setEditIsPublished(!editIsPublished)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${editIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${editIsPublished ? 'bg-green-700 border-green-800' : 'bg-white/10 border-slate-700/50'}`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editIsPublished ? 'translate-x-5' : 'translate-x-1'}`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-black/50 transition-transform ${editIsPublished ? 'translate-x-5' : 'translate-x-1'}`}
                       />
                     </button>
                   </div>
 
-                  <div className="flex flex-col border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                  <div className="flex flex-col border-b border-slate-700/50 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                       ROUTING LABELS (COMMA SEPARATED)
                     </label>
                     <input
@@ -717,21 +716,21 @@ export default function DashboardPage() {
                       placeholder="AI, SECURITY, GLITCH..."
                       value={editTags}
                       onChange={(e) => setEditTags(e.target.value)}
-                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono font-bold"
+                      className="w-full bg-transparent border-none outline-none text-xs text-slate-200 placeholder-stone-600/40 font-mono font-bold"
                     />
                   </div>
 
                   <div className="mt-4 flex gap-4">
                     <button
                       type="submit"
-                      className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer"
+                      className="flex-1 bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] text-white border-2 border-red-900/50 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer"
                     >
                       Save Changes
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsEditing(false)}
-                      className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-305 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer"
+                      className="flex-1 bg-white/10 text-slate-200 border-2 border-stone-305 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -739,75 +738,75 @@ export default function DashboardPage() {
                 </form>
               ) : (
                 <>
-                  <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
-                    <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">
+                  <div className="border-b-4 border-double border-red-900/50 pb-3 mb-5 text-center relative">
+                    <span className="font-mono text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">
                       WIRE REPORT INDEX ID: {selectedNews.id.slice(0, 8)}
                     </span>
-                    <h3 className="font-playfair text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-stone-950">
+                    <h3 className="font-sans tracking-tight text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-white">
                       {selectedNews.title}
                     </h3>
                   </div>
 
-                  <div className="font-serif text-base leading-relaxed text-justify space-y-4">
-                    <p className="indent-6 text-stone-900">
+                  <div className="font-sans text-base leading-relaxed text-justify space-y-4">
+                    <p className="indent-6 text-slate-200">
                       {selectedNews.content}
                     </p>
                   </div>
 
                   {selectedNews.sourceUrl && (
-                    <div className="mt-6 border-t border-stone-300 pt-3 text-left">
-                      <span className="font-mono text-[9px] text-stone-500 font-bold uppercase block mb-1">DATA VERIFICATION MATRIX (URL)</span>
+                    <div className="mt-6 border-t border-white/10 pt-3 text-left">
+                      <span className="font-mono text-[9px] text-slate-500 font-bold uppercase block mb-1">DATA VERIFICATION MATRIX (URL)</span>
                       <a
                         href={selectedNews.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-[10px] text-red-800 hover:underline break-all font-bold"
+                        className="font-mono text-[10px] text-red-500 text-glow hover:underline break-all font-bold"
                       >
                         {selectedNews.sourceUrl}
                       </a>
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4 mt-6 border-t border-stone-300 pt-4 font-mono text-[10px] text-stone-600 font-bold text-left">
+                  <div className="grid grid-cols-2 gap-4 mt-6 border-t border-white/10 pt-4 font-mono text-[10px] text-slate-400 font-bold text-left">
                     <div>
-                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">WIRE PRIORITY</span>
-                      <span className="text-stone-950 uppercase">{selectedNews.priority}</span>
+                      <span className="block text-[8px] text-slate-500 uppercase tracking-wide">WIRE PRIORITY</span>
+                      <span className="text-white uppercase">{selectedNews.priority}</span>
                     </div>
                     <div>
-                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span>
-                      <span className="text-stone-950">{new Date(selectedNews.createdAt).toLocaleString()}</span>
+                      <span className="block text-[8px] text-slate-500 uppercase tracking-wide">BROADCAST DATE</span>
+                      <span className="text-white">{new Date(selectedNews.createdAt).toLocaleString()}</span>
                     </div>
                     <div>
-                      <span className="block text-[8px] text-stone-500 uppercase tracking-wide">STATUS</span>
-                      <span className={`font-bold ${selectedNews.isPublished ? "text-green-700" : "text-stone-500"}`}>
+                      <span className="block text-[8px] text-slate-500 uppercase tracking-wide">STATUS</span>
+                      <span className={`font-bold ${selectedNews.isPublished ? "text-green-700" : "text-slate-500"}`}>
                         {selectedNews.isPublished ? 'PUBLISHED' : 'DRAFT'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex flex-wrap gap-1.5 border-t border-stone-300 pt-4">
+                  <div className="mt-5 flex flex-wrap gap-1.5 border-t border-white/10 pt-4">
                     {selectedNews.tags.map((tag) => (
-                      <span key={tag} className="font-mono text-[9px] bg-stone-200 text-stone-850 border border-stone-400 px-2 py-0.5 rounded font-bold uppercase">
+                      <span key={tag} className="font-mono text-[9px] bg-white/10 text-slate-300 border border-slate-700/50 px-2 py-0.5 rounded font-bold uppercase">
                         #{tag}
                       </span>
                     ))}
                   </div>
 
                   {/* Actions inside inspector */}
-                  <div className="mt-8 border-t-4 border-double border-stone-950 pt-4 flex flex-wrap justify-between items-center gap-4">
-                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">WIRE RECORDS SYSTEM CONTROL</span>
+                  <div className="mt-8 border-t-4 border-double border-red-900/50 pt-4 flex flex-wrap justify-between items-center gap-4">
+                    <span className="font-mono text-[9px] text-slate-500 font-bold uppercase">WIRE RECORDS SYSTEM CONTROL</span>
                     <div className="flex gap-3">
                       {(profile?.role === "admin" || profile?.role === "editor") && (
                         <>
                           <button
                             onClick={() => handleTogglePublish(selectedNews.id, selectedNews.isPublished)}
-                            className={`vintage-stamp text-xs py-2 bg-transparent hover:text-white cursor-pointer ${selectedNews.isPublished ? 'text-amber-700 border-amber-700 hover:bg-amber-700' : 'text-green-700 border-green-700 hover:bg-green-700'}`}
+                            className={`glass-btn relative overflow-hidden text-xs py-2 bg-transparent hover:text-white cursor-pointer ${selectedNews.isPublished ? 'text-amber-700 border-amber-700 hover:bg-amber-700' : 'text-green-700 border-green-700 hover:bg-green-700'}`}
                           >
                             {selectedNews.isPublished ? 'UNPUBLISH' : 'PUBLISH'}
                           </button>
                           <button
                             onClick={() => setIsEditing(true)}
-                            className="vintage-stamp text-xs py-2 bg-transparent text-stone-900 border-stone-950 hover:bg-stone-950 hover:text-white cursor-pointer"
+                            className="glass-btn relative overflow-hidden text-xs py-2 bg-transparent text-slate-200 border-red-900/50 hover:bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:text-white cursor-pointer"
                           >
                             EDIT REPORT
                           </button>
@@ -815,7 +814,7 @@ export default function DashboardPage() {
                       )}
                       <button
                         onClick={() => handlePurge(selectedNews.id)}
-                        className="vintage-stamp text-xs py-2 bg-transparent text-red-800 border-red-800 hover:bg-red-800 hover:text-white shadow-[2px_2px_0px_#801c1c]"
+                        className="glass-btn relative overflow-hidden text-xs py-2 bg-transparent text-red-500 text-glow border-red-800 hover:bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(220,38,38,0.6)] hover:text-white shadow-[2px_2px_0px_#801c1c]"
                       >
                         PURGE REPORT
                       </button>
@@ -831,26 +830,26 @@ export default function DashboardPage() {
 
 
       {/* Footer HUD */}
-      <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
+      <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-red-900/50 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-slate-400 z-10 px-1">
         <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-full border border-stone-950 flex items-center justify-center text-stone-950 font-bold bg-white">
+          <div className="w-6 h-6 rounded-full border border-red-900/50 flex items-center justify-center text-white font-bold bg-black/50">
             N
           </div>
           <div>
-            <span className="text-stone-800 font-bold">THE DAILY NEXUS WIRE</span>
-            <span className="mx-2 text-stone-400">|</span>
-            <span>Printing Engine: <span className="text-red-800 font-bold uppercase">STANDBY</span></span>
+            <span className="text-slate-300 font-bold">THE DAILY NEXUS WIRE</span>
+            <span className="mx-2 text-slate-600">|</span>
+            <span>Printing Engine: <span className="text-red-500 text-glow font-bold uppercase">STANDBY</span></span>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5">
           <span>DECK ENCRYPTION:</span>
-          <span className="text-stone-800 font-bold">AES-256 / RSA-4096</span>
+          <span className="text-slate-300 font-bold">AES-256 / RSA-4096</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <span>SYSTEM TIME:</span>
-          <span className="text-stone-850 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
+          <span className="text-slate-300 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
         </div>
       </footer>
 

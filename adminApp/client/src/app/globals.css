@@ -1,24 +1,11 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-paper: #fcfaf2;
-  --color-paper-stain: #e3d3b6;
-  --color-ink: #111111;
-  --color-ink-faded: #4a4947;
-  --color-blood-red: #801c1c;
-  
-  --color-manila: #f4edd8;
-  --color-manila-dark: #b89b65;
-  --color-aged-paper: #f5f2e9;
-  --color-army-green: #3a3f18;
-  --color-secret-red: #8b0000;
-
-  --color-cyber-black: #fcfaf2;
-  --color-cyber-green: #111111;
-  --color-cyber-green-dim: #4a4947;
-  --color-cyber-alert: #801c1c;
-  --color-cyber-cyan: #225577;
-  --color-cd-rom: #e8e6df;
+  --color-cyber-bg: #050505;
+  --color-cyber-panel: rgba(15, 15, 20, 0.7);
+  --color-cyber-border: rgba(255, 255, 255, 0.1);
+  --color-cyber-red: #ff2a2a;
+  --color-cyber-red-glow: rgba(255, 42, 42, 0.5);
   
   --font-playfair: var(--font-playfair);
   --font-old-standard: var(--font-old-standard);
@@ -28,323 +15,149 @@
 }
 
 :root {
-  --background: #f5f2e9;
-  --foreground: #111111;
+  --background: #050505;
+  --foreground: #f0f0f0;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-old-standard), serif;
+  font-family: 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
   position: relative;
+  min-height: 100vh;
 }
 
-/* Paper Grain Texture Overlay */
-body::before {
-  content: " ";
-  display: block;
-  position: fixed;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
-  z-index: 9998;
+/* Dynamic Cyberpunk Grid Background */
+.cyber-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 42, 42, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 42, 42, 0.05) 1px, transparent 1px);
+  z-index: 0;
   pointer-events: none;
+  transform: perspective(500px) rotateX(60deg) scale(2.5) translateY(-10%);
+  transform-origin: top;
+  animation: gridMove 20s linear infinite;
 }
 
-/* Subtle Vignette */
 body::after {
-  content: " ";
-  display: block;
+  content: "";
   position: fixed;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: radial-gradient(circle at center, transparent 40%, rgba(30, 20, 10, 0.06) 100%);
-  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 42, 42, 0.15) 0%, transparent 60%);
   pointer-events: none;
+  z-index: 0;
 }
 
-/* Vintage Newspaper Window / Column style */
-.cd-rom-window {
-  background: #fcfaf2;
-  border: 2px solid #111111;
-  box-shadow: 5px 5px 0px #111111;
-  color: #111111;
-  font-family: var(--font-old-standard), serif;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.cd-rom-window:hover {
-  transform: translateY(-2px);
-  box-shadow: 7px 7px 0px #111111;
+@keyframes gridMove {
+  0% { transform: perspective(500px) rotateX(60deg) scale(2.5) translateY(-10%); }
+  100% { transform: perspective(500px) rotateX(60deg) scale(2.5) translateY(10%); }
 }
 
-.cd-rom-titlebar {
-  background: #111111;
-  color: #fcfaf2;
-  font-family: var(--font-playfair), serif;
-  font-weight: bold;
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  letter-spacing: 1.5px;
-  border-bottom: 2px solid #111111;
-}
-
-/* Newspaper Dossier Folder */
-.dossier-folder {
-  background: #fcfaf2;
-  border: 2px solid #111111;
-  box-shadow: 6px 6px 0px #111111;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.dossier-tab {
-  background: #fcfaf2;
-  border: 2px solid #111111;
-  border-bottom: none;
-  border-radius: 4px 4px 0 0;
-}
-
-/* Aged Parchment / Newspaper Page Styling */
-.parchment-sheet {
-  background-color: #fcfaf2;
-  color: #111111;
-  font-family: var(--font-old-standard), serif;
-  border: 1px solid #d3c7b3;
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.05);
-}
-
-/* Vintage Newspaper Layout Elements */
-.newspaper-headline {
-  font-family: var(--font-playfair), serif;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  border-bottom: 4px double #111111;
-  padding-bottom: 8px;
-}
-
-.newspaper-column {
-  font-family: var(--font-old-standard), serif;
-  line-height: 1.45;
-  text-align: justify;
-}
-
-.newspaper-column::first-letter {
-  font-family: var(--font-playfair), serif;
-  font-size: 4rem;
-  float: left;
-  line-height: 0.8;
-  padding-top: 4px;
-  padding-right: 8px;
-  font-weight: 900;
-  color: var(--color-blood-red);
-}
-
-/* CRT Screen Frame adapted to Newspaper Block */
-.cyber-console {
-  background-color: #fcfaf2;
-  border: 2px solid #111111;
-  box-shadow: 5px 5px 0px #111111;
+/* Glassmorphism Buttons & Panels */
+.glass-btn {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
+  border-radius: 8px;
 }
 
-.cyber-console::before {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(17, 17, 17, 0.02) 50%, transparent 50%);
-  background-size: 100% 4px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-/* CRT glow terminals */
-.amber-terminal {
-  background: linear-gradient(180deg, #1b0e03 0%, #0a0400 100%);
-  border: 2px solid #e07a1b;
-  box-shadow: inset 0 0 15px rgba(224, 122, 27, 0.4), 4px 4px 0px #111111;
-  color: #ff9d3b;
-  text-shadow: 0 0 4px rgba(255, 157, 59, 0.7);
-}
-
-.green-terminal {
-  background: linear-gradient(180deg, #021a08 0%, #000902 100%);
-  border: 2px solid #1c883e;
-  box-shadow: inset 0 0 15px rgba(28, 136, 62, 0.4), 4px 4px 0px #111111;
-  color: #44ee77;
-  text-shadow: 0 0 4px rgba(68, 238, 119, 0.7);
-}
-
-.red-terminal {
-  background: linear-gradient(180deg, #260505 0%, #0e0101 100%);
-  border: 2px solid #991b1b;
-  box-shadow: inset 0 0 15px rgba(153, 27, 27, 0.4), 4px 4px 0px #111111;
-  color: #ef4444;
-  text-shadow: 0 0 4px rgba(239, 68, 68, 0.7);
-}
-
-/* Scanning scanline animations */
-@keyframes scanline-sweep {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
-}
-
-.scanline::after {
+.glass-btn::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 4px;
-  background: rgba(255, 255, 255, 0.07);
-  opacity: 0.8;
-  animation: scanline-sweep 7s linear infinite;
-  pointer-events: none;
-  z-index: 12;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: skewX(-20deg);
+  transition: all 0.5s ease;
 }
 
-/* Vintage Stamped Ink Button */
-.vintage-stamp {
-  font-family: var(--font-playfair), serif;
-  font-weight: 900;
-  text-transform: uppercase;
-  color: #111111;
-  border: 2px solid #111111;
-  background: transparent;
-  padding: 6px 16px;
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  cursor: pointer;
-  box-shadow: 3px 3px 0px #111111;
-}
-.vintage-stamp:hover {
-  background: #111111;
-  color: #fcfaf2;
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #111111;
-}
-.vintage-stamp:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px #111111;
+.glass-btn:hover {
+  background: rgba(255, 42, 42, 0.15);
+  border-color: rgba(255, 42, 42, 0.5);
+  box-shadow: 0 0 15px rgba(255, 42, 42, 0.4);
+  transform: translateY(-2px);
 }
 
-/* Tactile shadow offsets */
-.vintage-shadow-sm { box-shadow: 2px 2px 0px #111111; }
-.vintage-shadow { box-shadow: 4px 4px 0px #111111; }
-.vintage-shadow-lg { box-shadow: 8px 8px 0px #111111; }
-
-.vintage-shadow-red-sm { box-shadow: 2px 2px 0px #801c1c; }
-.vintage-shadow-red { box-shadow: 4px 4px 0px #801c1c; }
-.vintage-shadow-green { box-shadow: 4px 4px 0px #1c6030; }
-.vintage-shadow-amber { box-shadow: 4px 4px 0px #b45309; }
-
-/* Desk Surface */
-.desk-mat {
-  background: 
-    radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.02) 100%),
-    linear-gradient(rgba(17, 17, 17, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 17, 0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 40px 40px, 40px 40px;
+.glass-btn:hover::before {
+  left: 150%;
 }
 
-/* Coffee Stain Simulation Overlay */
-.coffee-stain {
-  position: absolute;
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  border: 5px solid rgba(139, 90, 43, 0.06);
-  filter: blur(2px);
-  pointer-events: none;
-  transform: rotate(35deg);
-  z-index: 1;
-}
-.coffee-stain::before {
-  content: "";
-  position: absolute;
-  top: 6px; left: 6px; right: 6px; bottom: 6px;
-  border-radius: 50%;
-  border: 2px solid rgba(139, 90, 43, 0.04);
+/* Text Glow Utility */
+.text-glow {
+  text-shadow: 0 0 10px rgba(255, 42, 42, 0.7), 0 0 20px rgba(255, 42, 42, 0.5);
 }
 
-/* Customized scrollbar design for paper */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+/* Custom Scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(17, 17, 17, 0.04);
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #6e6d6a;
-  border-radius: 3px;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 42, 42, 0.4);
+  border-radius: 4px;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #111111;
-}
-
-.custom-paper-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-paper-scrollbar::-webkit-scrollbar-track {
-  background: rgba(17, 17, 17, 0.04);
-}
-.custom-paper-scrollbar::-webkit-scrollbar-thumb {
-  background: #85837f;
-  border-radius: 3px;
-}
-.custom-paper-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #801c1c;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 42, 42, 0.8);
 }
 
-/* Double border separator */
-.newspaper-divider {
-  border-top: 4px double #111111;
-  margin: 1.5rem 0;
+/* Form Inputs */
+input, textarea {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.3s ease;
 }
 
-.newspaper-divider-thin {
-  border-top: 1px solid #111111;
-  margin: 1rem 0;
+input:focus, textarea:focus {
+  border-color: rgba(255, 42, 42, 0.8) !important;
+  box-shadow: 0 0 15px rgba(255, 42, 42, 0.3) !important;
+  outline: none;
 }
 
-/* Typewriter static/active inputs */
-.typewriter-field {
-  transition: all 0.25s ease;
-}
-.typewriter-field:focus {
-  background: rgba(184, 155, 101, 0.05);
-  padding-left: 8px;
-}
-
-/* Custom Alert Badge Hues */
+/* Urgency Badges Re-Styled */
 .urgency-badge-critical {
-  background: #991b1b;
-  color: #fef2f2;
-  border: 1px solid #7f1d1d;
-  box-shadow: 2px 2px 0px #7f1d1d;
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
 }
 .urgency-badge-high {
-  background: #d97706;
-  color: #fffbeb;
-  border: 1px solid #b45309;
-  box-shadow: 2px 2px 0px #b45309;
+  background: rgba(217, 119, 6, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(217, 119, 6, 0.5);
+  box-shadow: 0 0 10px rgba(217, 119, 6, 0.3);
 }
 .urgency-badge-medium {
-  background: #047857;
-  color: #ecfdf5;
-  border: 1px solid #065f46;
-  box-shadow: 2px 2px 0px #065f46;
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(5, 150, 105, 0.5);
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.3);
 }
 .urgency-badge-low {
-  background: #4b5563;
-  color: #f9fafb;
-  border: 1px solid #374151;
-  box-shadow: 2px 2px 0px #374151;
+  background: rgba(71, 85, 105, 0.2);
+  color: #cbd5e1;
+  border: 1px solid rgba(71, 85, 105, 0.5);
 }
 
-/* Tactile stamp push effect */
-.stamp-btn-active {
-  transform: scale(0.97) rotate(2deg);
-  opacity: 0.9;
+/* Hover Micro-Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
 }
 
+.hover-float:hover {
+  animation: float 3s ease-in-out infinite;
+}
