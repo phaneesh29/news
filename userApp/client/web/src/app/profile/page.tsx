@@ -127,12 +127,19 @@ export default function UserProfilePage() {
             <span className="font-serif text-xl font-medium tracking-tight text-[#141413]">DevBits</span>
           </Link>
           
-          <Link href="/">
-            <Button variant="outline" size="sm" className="border-[#e6dfd8] text-xs flex items-center gap-1.5 hover:bg-[#efe9de]">
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to Curation
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/blogs">
+              <Button variant="ghost" size="sm" className="text-[#6c6a64] hover:text-[#141413] text-xs">
+                Blogs
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="outline" size="sm" className="border-[#e6dfd8] text-xs flex items-center gap-1.5 hover:bg-[#efe9de]">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to Curation
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

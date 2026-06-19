@@ -116,3 +116,71 @@ export async function revokeOtherSessionsApi(): Promise<ApiResponse<null>> {
   
   return response.json();
 }
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  sourceUrl: string | null;
+  priority: "low" | "medium" | "high" | "critical";
+  tags: string[];
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogItem {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function fetchNewsList(cursor?: string): Promise<ApiResponse<{ news: NewsItem[]; nextCursor: string | null }>> {
+  const url = cursor ? `${API_BASE_URL}/news?cursor=${encodeURIComponent(cursor)}` : `${API_BASE_URL}/news`;
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch news");
+  }
+  return response.json();
+}
+
+export async function fetchNewsById(id: string): Promise<ApiResponse<{ news: NewsItem }>> {
+  const response = await fetch(`${API_BASE_URL}/news/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch news article");
+  }
+  return response.json();
+}
+
+export async function fetchBlogsList(cursor?: string): Promise<ApiResponse<{ blogs: BlogItem[]; nextCursor: string | null }>> {
+  const url = cursor ? `${API_BASE_URL}/blogs?cursor=${encodeURIComponent(cursor)}` : `${API_BASE_URL}/blogs`;
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch blogs");
+  }
+  return response.json();
+}
+
+export async function fetchBlogById(id: string): Promise<ApiResponse<{ blog: BlogItem }>> {
+  const response = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch blog post");
+  }
+  return response.json();
+}
