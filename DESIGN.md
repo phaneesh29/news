@@ -1,110 +1,129 @@
 ---
 version: final
-name: Extreme-Vintage-Indian-Broadsheet
-description: An extreme, highly textured physical newspaper interface inspired by classic Indian broadsheets (e.g., vintage Times of India). The system simulates aged, stained paper using SVG noise filters and radial gradients, heavy ink bleed using text-shadows, and relies entirely on period-accurate typography. The aesthetic is loud, dense, and authentically flawed, rejecting all modern UI conventions in favor of raw newsprint realism.
+name: DEV-NEWS-Nexus-Core-Command-Terminal
+description: A retro-cyber Y2K-themed classified intelligence broadcast interface. It blends Y2K-era tactile windows, CRT scanline aesthetics, amber/green/red terminals, and physical manila-folder dossier layouts over a warm aged paper canvas, rejecting modern flat UI conventions in favor of tactical retro-futurism.
 
 colors:
-  paper: "#e4d8bc"
-  paper-stain: "#cfbe9a"
-  ink: "#181513"
-  ink-faded: "#312a26"
-  blood-red: "#781a1a"
+  paper: "#fcfaf2"
+  paper-stain: "#e3d3b6"
+  ink: "#111111"
+  ink-faded: "#4a4947"
+  blood-red: "#801c1c"
+  manila: "#f4edd8"
+  manila-dark: "#b89b65"
+  aged-paper: "#f5f2e9"
+  cyber-cyan: "#225577"
+  cd-rom: "#e8e6df"
 
 typography:
   masthead:
-    fontFamily: "'Playfair Display', serif"
-    fontSize: 85px
-    fontWeight: 900
-    lineHeight: 1
-    letterSpacing: 2px
-    textShadow: "1px 1px 2px rgba(24, 21, 19, 0.5)"
-    transform: "scaleY(1.1)"
-  headline-main:
-    fontFamily: "'Old Standard TT', serif"
-    fontSize: 52px
-    fontWeight: 700
-    lineHeight: 0.95
-    letterSpacing: -1px
-    textTransform: uppercase
-  headline-sub:
-    fontFamily: "'Old Standard TT', serif"
-    fontSize: 26px
-    fontWeight: 700
-    lineHeight: 1.05
-    textTransform: uppercase
+    fontFamily: "'UnifrakturMaguntia', 'Playfair Display', Georgia, serif"
+    fontSize: "52px"
+    fontWeight: "900"
+    letterSpacing: "-0.02em"
+    textTransform: "uppercase"
+  headline:
+    fontFamily: "'Playfair Display', Georgia, serif"
+    fontSize: "24px"
+    fontWeight: "900"
+    fontStyle: "italic"
+    letterSpacing: "-0.01em"
+    textTransform: "uppercase"
   body:
-    fontFamily: "'Alegreya', serif"
-    fontSize: 14.5px
-    fontWeight: 400
-    lineHeight: 1.35
-    textAlign: justify
-    textIndent: 15px
-  dateline:
-    fontFamily: "'Arial', sans-serif"
-    fontSize: 10px
-    fontWeight: 700
-    textTransform: uppercase
-    letterSpacing: 0.5px
-    color: "{colors.ink-faded}"
+    fontFamily: "'Old Standard TT', system-ui, sans-serif"
+    fontSize: "14px"
+    lineHeight: "1.45"
+  terminal:
+    fontFamily: "'Courier Prime', 'VT323', monospace"
+    fontSize: "11px"
+    lineHeight: "1.6"
 
 effects:
-  ink-bleed: "text-shadow: 0.5px 0.5px 1px rgba(24, 21, 19, 0.4), -0.5px -0.5px 0px rgba(24, 21, 19, 0.1)"
-  paper-texture: "background-image: url('data:image/svg+xml;utf8,<svg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"><filter id=\"noiseFilter\"><feTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"3\" stitchTiles=\"stitch\"/></filter><rect width=\"100%\" height=\"100%\" filter=\"url(%23noiseFilter)\" opacity=\"0.15\"/></svg>'), radial-gradient(circle at 50% 50%, {colors.paper} 0%, {colors.paper-stain} 100%)"
-  engraving-crosshatch: "background: repeating-radial-gradient(circle at 0 0, transparent 0, {colors.paper} 10px), repeating-linear-gradient(#18151355, #18151355)"
+  paper-grain: "SVG noise filter with fractalNoise baseFrequency 0.85 and 0.045 opacity overlaying the document"
+  vignette: "radial-gradient(circle at center, transparent 40%, rgba(30, 20, 10, 0.06) 100%)"
+  scanline: "linear-gradient(rgba(17, 17, 17, 0.02) 50%, transparent 50%) background-size: 100% 4px with scanline-sweep keyframe animation"
 
 components:
-  masthead:
-    borderBottom: "5px solid {colors.ink}"
-    padding: 20px 0 10px 0
-    pseudoAfter: "1px solid {colors.ink} (positioned 8px below main border)"
-  breaking-news:
-    border: "3px double {colors.blood-red}"
-    backgroundColor: "rgba(207, 190, 154, 0.3)"
-    padding: 12px
-  advertisement-box:
-    border: "4px groove rgba(24, 21, 19, 0.4)"
-    background: "repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(24, 21, 19, 0.03) 5px, rgba(24, 21, 19, 0.03) 10px)"
-    padding: 15px
-  drop-cap:
-    fontSize: 64px
-    lineHeight: 48px
-    paddingTop: 8px
-    paddingRight: 6px
-    fontFamily: "'Old Standard TT'"
-    fontWeight: 700
-  button-coupon:
-    border: "1px dashed {colors.ink}"
-    backgroundColor: "transparent"
-    fontFamily: "'Arial', sans-serif"
-    fontSize: 11px
-    fontWeight: 700
-    textTransform: uppercase
+  cd-rom-window:
+    background: "{colors.paper}"
+    border: "2px solid {colors.ink}"
+    boxShadow: "5px 5px 0px {colors.ink}"
+  dossier-folder:
+    background: "{colors.paper}"
+    border: "2px solid {colors.ink}"
+    boxShadow: "6px 6px 0px {colors.ink}"
+  vintage-stamp:
+    background: "transparent"
+    border: "2px solid {colors.ink}"
+    boxShadow: "3px 3px 0px {colors.ink}"
+    textTransform: "uppercase"
+    fontWeight: "900"
+  amber-terminal:
+    background: "linear-gradient(180deg, #1b0e03 0%, #0a0400 100%)"
+    border: "2px solid #e07a1b"
+    boxShadow: "inset 0 0 15px rgba(224, 122, 27, 0.4), 4px 4px 0px {colors.ink}"
+    color: "#ff9d3b"
+  green-terminal:
+    background: "linear-gradient(180deg, #021a08 0%, #000902 100%)"
+    border: "2px solid #1c883e"
+    boxShadow: "inset 0 0 15px rgba(28, 136, 62, 0.4), 4px 4px 0px {colors.ink}"
+    color: "#44ee77"
+  red-terminal:
+    background: "linear-gradient(180deg, #260505 0%, #0e0101 100%)"
+    border: "2px solid #991b1b"
+    boxShadow: "inset 0 0 15px rgba(153, 27, 27, 0.4), 4px 4px 0px {colors.ink}"
+    color: "#ef4444"
 ---
 
-## Overview
+# Design System: DEV.NEWS — NEXUS CORE Command Terminal
 
-The "Extreme Vintage Indian Broadsheet" takes the newspaper aesthetic to its most hyper-realistic limit. It does not just replicate the layout of an old newspaper; it attempts to replicate the physical degradation of the medium itself—stained paper, bleeding ink, imperfect printing presses, and archaic typesetting.
+## 1. Overview & Creative North Star
+**Creative North Star: "Retro-Cyber Classified Terminal"**
 
-## Core Visual Mechanics
+DEV.NEWS merges Y2K tactile desktop interfaces with classical broadsheet typography and CRT terminal glows. The design is deliberately dense, tactile, and structured, mimicking a physical dossier containing classified intelligence wire archives.
 
-1. **The Canvas (Paper Texture)**: We abandon solid hex colors. The background uses a complex CSS composition: an SVG fractal noise filter overlaid on a radial gradient from `#e4d8bc` (paper) to `#cfbe9a` (stain). This creates a fibrous, uneven, and aged look.
-2. **The Ink (Bleed Effect)**: Ink on cheap newsprint spreads. We simulate this by applying a universal `text-shadow` to the entire container: `0.5px 0.5px 1px rgba(24, 21, 19, 0.4), -0.5px -0.5px 0px rgba(24, 21, 19, 0.1)`. This makes the text look slightly fuzzy and heavily stamped.
-3. **The Accents**: Pure black `#000` is banned. We use off-blacks (`#181513`). The only color permitted on the page is a faded blood red (`#781a1a`) used strictly for "Breaking News" banners.
+---
 
-## Typography System
+## 2. Colors & Surface Philosophy
 
-This design relies on loading specific Google Fonts that mimic early 20th-century hot-metal typesetting:
+### The Palette
+- **Canvas Base (`aged-paper` / `paper`):** The default screen container uses `#f5f2e9` (`aged-paper`). Modular elements and parchment sheets float on it with `#fcfaf2` (`paper`).
+- **Tactile Elements (`manila` / `manila-dark` / `cd-rom`):** Manila folder tabs use `#f4edd8` (`manila`) and `#b89b65` (`manila-dark`). CD-ROM panels use `#e8e6df` (`cd-rom`).
+- **Inks & Accents (`ink` / `ink-faded` / `blood-red`):** Pure black is avoided in favor of off-black `#111111` (`ink`). Urgency levels use `#801c1c` (`blood-red`).
 
-- **Masthead**: `Playfair Display`. A bold, elegant Roman serif font that feels authoritative and deeply classical, shifting away from aggressive blackletter to a cleaner, yet heavy vintage presence. It is scaled vertically (`transform: scaleY(1.1)`) and given extra heavy ink-shadows.
-- **Headlines**: `Old Standard TT`. A high-contrast, strict serif font typical of late 19th and early 20th-century newsprint. Must be `text-transform: uppercase` and tightly tracked.
-- **Body**: `Alegreya`. Chosen for its varied, ink-heavy, and slightly irregular humanist serif strokes that look authentic when justified and indented.
-- **Utility / Datelines**: A stark, tiny, bold `Arial` in all-caps, letter-spaced to mimic typewriter inserts or lead-type dates.
+---
 
-## Layout & Components
+## 3. Typography
+The system uses extreme contrast between historical serifs and retro-futuristic monospace:
+- **Masthead:** Large, bold gothic blackletter (`UnifrakturMaguntia` or `Playfair Display`) represents the classical wire service identity.
+- **Headlines:** Medium-sized italic serif titles (`Playfair Display`) command high visual hierarchy.
+- **Body & Dossier Content:** Clean serif typeface (`Old Standard TT` or `Alegreya`) formats news stories.
+- **Console / Terminal Feed:** Clean monospace (`Courier Prime` or `VT323`) displays status feeds and logs.
 
-- **Strict Grids**: Columns must be separated by `1px solid rgba(24, 21, 19, 0.7)` rather than solid borders, simulating fading ink.
-- **Paragraphs**: No spacing between paragraphs. Instead, use a classic `text-indent: 15px` on all `p` tags (except the very first paragraph of a story, which uses a massive 64px Drop Cap).
-- **Asterisms**: Use the `⁂` (U+2042) symbol to divide small sub-sections of articles.
-- **Advertisements**: Ad boxes use a `4px groove` border and a faint, repeating diagonal line background to simulate the halftones or shading of old classifieds.
-- **Buttons**: Rendered to look like "Clip & Mail" coupons using dashed borders (`1px dashed`).
-- **Images**: Real photographs break the illusion unless carefully filtered. We simulate old metal engraving plates using a crosshatch CSS background on image placeholders: `repeating-radial-gradient` layered with `repeating-linear-gradient`.
+---
+
+## 4. Elevation & Depth
+Depth is created physically rather than using modern drop-shadows:
+- **Tactile Shadows:** Hard offset shadows (`3px`, `5px`, `6px`, `8px` solid black) give cards a raised, physical look.
+- **Vignette and Noise:** A fixed SVG noise layer simulates low-grade paper pulp grain, while a radial gradient vignette darkens the corners of the viewport to represent a retro screen tube.
+
+---
+
+## 5. Components
+- **CD-ROM Window / Dossier Folder:** Tactile containers featuring `2px solid #111111` borders, hard solid black shadows, and high contrast.
+- **Vintage Stamp Button:** Stamped buttons with `2px` black borders and `3px` solid shadows.
+- **Teletype Console Terminals:** High-contrast CRT command terminal displays in Amber, Green, or Red with internal glows and sweeping scanline sweeps.
+
+---
+
+## 6. Do’s and Don’ts
+
+### Do:
+- Align content inside defined column layouts separated by thin lines or double dividers.
+- Use solid offset shadows (`vintage-shadow`) for interactive elements.
+- Keep the font sizes distinct and hierarchical (heavy blackletter headers vs. typewriter monospace logs).
+
+### Don’t:
+- Don't use soft, modern CSS shadows or gradient blurs unless they represent terminal tube glows.
+- Don't use pure primary colors or standard Tailwind buttons.
+- Don't use rounded corners greater than `rounded` (4px to 8px) to keep the Y2K industrial look.
