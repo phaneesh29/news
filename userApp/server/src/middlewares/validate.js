@@ -1,8 +1,8 @@
 import AppError from "../utils/appError.js";
 
-const validate = (schema) => (req, res, next) => {
+const validate = (schema, source = "body") => (req, res, next) => {
   try {
-    const parsed = schema.safeParse(req.body);
+    const parsed = schema.safeParse(req[source]);
     if (!parsed.success) {
       const issues = parsed.error.issues || parsed.error.errors || [];
       const messages = issues
@@ -10,7 +10,7 @@ const validate = (schema) => (req, res, next) => {
         .join(", ");
       return next(new AppError(`Validation error: ${messages}`, 400));
     }
-    req.body = parsed.data;
+    req[source] = parsed.data;
     next();
   } catch (error) {
     next(error);
