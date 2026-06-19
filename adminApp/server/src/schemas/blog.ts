@@ -18,3 +18,12 @@ export const updateBlogSchema = z.object({
 export const blogParamsSchema = z.object({
   id: z.uuid('Invalid blog ID')
 })
+
+export const blogSearchQuerySchema = z.object({
+  q: z.string().optional().default(''),
+  limit: z.string()
+    .optional()
+    .default('20')
+    .transform((val) => parseInt(val, 10))
+    .pipe(z.number().int().min(1).max(100))
+})

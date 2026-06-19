@@ -232,9 +232,11 @@ export default function AddNewsPage() {
 
  {/* Navigation Deck Links */}
  <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
- <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+ <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; News Feed</Link>
  <span className="text-stone-400">|</span>
- <Link href="/news/add" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Injector</Link>
+ <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
+ <span className="text-stone-400">|</span>
+ <Link href="/news/add" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; News Injector</Link>
  </div>
 
  <div className="flex gap-3">

@@ -1,5 +1,5 @@
 import { Context } from 'hono'
-import { desc, eq, lt, or, and } from 'drizzle-orm'
+import { desc, eq, lt, or, and, ilike } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { adminUsers, blogs } from '../db/schema.js'
 
@@ -112,6 +112,32 @@ export const getAllBlogs = async (c: Context) => {
     })
   } catch (error: any) {
     console.error('Get All Blogs Error:', error)
+    return c.json({ error: 'Internal server error' }, 500)
+  }
+}
+
+export const searchBlogs = async (c: Context) => {
+  try {
+    const query = (c.req as any).valid('query')
+    const search = query.q || ''
+    const limit = query.limit
+
+    const blogResults = await db.select(blogSelect)
+      .from(blogs)
+      .leftJoin(adminUsers, eq(blogs.authorId, adminUsers.id))
+      .where(
+        or(
+          ilike(blogs.title, `%${search}%`),
+          ilike(blogs.content, `%${search}%`),
+          ilike(blogs.slug, `%${search}%`)
+        )
+      )
+      .orderBy(desc(blogs.createdAt))
+      .limit(limit)
+
+    return c.json({ blogs: blogResults })
+  } catch (error: any) {
+    console.error('Search Blogs Error:', error)
     return c.json({ error: 'Internal server error' }, 500)
   }
 }
