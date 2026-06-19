@@ -52,7 +52,8 @@ export const adminSessions = pgTable('admin_sessions', {
 export const adminUsersRelations = relations(adminUsers, ({ many }) => ({
   otps: many(adminOtps),
   sessions: many(adminSessions),
-  news: many(devNews)
+  news: many(devNews),
+  blogs: many(blogs)
 }))
 
 export const adminOtpsRelations = relations(adminOtps, ({ one }) => ({
@@ -98,6 +99,26 @@ export const devNews = pgTable('dev_news', {
 export const devNewsRelations = relations(devNews, ({ one }) => ({
   author: one(adminUsers, {
     fields: [devNews.authorId],
+    references: [adminUsers.id]
+  })
+}))
+
+export const blogs = pgTable('blogs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  content: text('content').notNull(),
+  authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+  isPublished: boolean('is_published').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+}, (table) => [
+  index('blogs_created_at_idx').on(table.createdAt)
+])
+
+export const blogsRelations = relations(blogs, ({ one }) => ({
+  author: one(adminUsers, {
+    fields: [blogs.authorId],
     references: [adminUsers.id]
   })
 }))
