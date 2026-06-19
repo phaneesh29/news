@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
+import { marked } from "marked";
 
 interface BlogItem {
   id: string;
@@ -249,12 +250,6 @@ export default function BlogsDashboardPage() {
             <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Blogs Feed</Link>
-            {canAdd && (
-              <>
-                <span className="text-stone-400">|</span>
-                <Link href="/blogs/add" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Injector</Link>
-              </>
-            )}
           </div>
 
           <div className="flex gap-3">
@@ -275,8 +270,8 @@ export default function BlogsDashboardPage() {
         </div>
       </header>
 
-      <div className="flex-1 grid grid-cols-1 flex flex-col relative z-10 max-w-5xl mx-auto w-full pb-8 items-start">
-        <div className="w-full flex flex-col relative">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-6xl mx-auto w-full pb-8 items-start">
+        <div className="w-full flex flex-col relative lg:col-span-2">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
               <span>DAILY WIRE LOGS</span>
@@ -309,16 +304,49 @@ export default function BlogsDashboardPage() {
               <div className="bg-[#fcfaf2] border-2 border-stone-950 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
                 <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
                   {blogList.map((item) => (
-                    <div key={item.id} onClick={() => { setSelectedBlog(item); setIsEditing(false); setEditTitle(item.title); setEditContent(item.content); setEditSlug(item.slug); setEditIsPublished(item.isPublished); addLog(`VIEW: Focus shifted to blog ${item.id.slice(0, 8)}`); }} className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer text-left rounded">
-                      <div className="flex flex-wrap gap-2.5 items-center">
-                        <span className="font-mono text-[10px] text-stone-600">{new Date(item.createdAt).toLocaleString()}</span>
-                        <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
-                          {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                    <div 
+                      key={item.id} 
+                      onClick={() => { 
+                        setSelectedBlog(item); 
+                        setIsEditing(false); 
+                        setEditTitle(item.title); 
+                        setEditContent(item.content); 
+                        setEditSlug(item.slug); 
+                        setEditIsPublished(item.isPublished); 
+                        addLog(`VIEW: Focus shifted to blog ${item.id.slice(0, 8)}`); 
+                      }} 
+                      className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50/80 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#111] transition-all flex flex-col gap-2.5 relative group/item shadow cursor-pointer text-left rounded"
+                    >
+                      <div className="flex flex-wrap gap-2.5 items-center justify-between">
+                        <div className="flex gap-2.5 items-center">
+                          <span className="font-mono text-[10px] text-stone-600">
+                            🕒 {new Date(item.createdAt).toLocaleString()}
+                          </span>
+                          <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
+                            {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[9px] text-stone-500 uppercase tracking-widest">
+                          ID: {item.id.slice(0, 8)}
                         </span>
                       </div>
-                      <h4 className="font-playfair text-2xl font-black italic tracking-tight text-stone-950 tracking-tight leading-snug group-hover/item:text-stone-950 transition-colors uppercase">{item.title}</h4>
-                      <p className="font-mono text-xs text-stone-500">/{item.slug}</p>
-                      <p className="font-serif text-sm text-stone-850 leading-relaxed truncate max-w-full">{item.content}</p>
+
+                      <h4 className="font-playfair text-2xl font-black italic tracking-tight text-stone-950 leading-snug group-hover/item:text-red-900 transition-colors uppercase">
+                        {item.title}
+                      </h4>
+                      
+                      <p className="font-serif text-sm text-stone-850 leading-relaxed line-clamp-2 max-w-full">
+                        {item.content}
+                      </p>
+
+                      <div className="flex flex-wrap justify-between items-center mt-2 pt-2.5 border-t border-dashed border-stone-300">
+                        <span className="font-mono text-[11px] text-stone-600 font-bold bg-stone-100 border border-stone-300 px-1.5 py-0.5 rounded">
+                          slug: /{item.slug}
+                        </span>
+                        <span className="font-mono text-[10px] text-stone-600 group-hover/item:text-stone-955 border-b border-stone-900 transition-colors font-bold uppercase tracking-wider">
+                          [ OPEN DISPATCH ]
+                        </span>
+                      </div>
                     </div>
                   ))}
                   {blogList.length === 0 && (
@@ -341,7 +369,7 @@ export default function BlogsDashboardPage() {
           </div>
         </div>
 
-        <div className="hidden lg:col-span-1 flex-col gap-6 relative w-full lg:sticky lg:top-8 text-left z-10">
+        <div className="hidden lg:flex lg:col-span-1 flex-col gap-6 relative w-full lg:sticky lg:top-8 text-left z-10">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 scanline overflow-hidden shadow-sm">
             <div className="coffee-stain -top-6 -right-6 opacity-25"></div>
             <div className="border-b-2 border-stone-950 pb-3 mb-5">
@@ -377,7 +405,7 @@ export default function BlogsDashboardPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-2xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
             <button onClick={() => { setSelectedBlog(null); addLog("INSPECTOR: Dossier closed"); }} className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs">[ CLOSE ]</button>
-            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-1 text-stone-900">
+            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-6 text-stone-900">
               {isEditing ? (
                 <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
                   <div className="flex flex-col border-b border-stone-400 pb-2">
@@ -412,9 +440,10 @@ export default function BlogsDashboardPage() {
                     <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">WIRE REPORT INDEX ID: {selectedBlog.id.slice(0, 8)}</span>
                     <h3 className="font-playfair text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-stone-950">{selectedBlog.title}</h3>
                   </div>
-                  <div className="font-serif text-base leading-relaxed text-justify space-y-4">
-                    <p className="indent-6 text-stone-900 whitespace-pre-wrap">{selectedBlog.content}</p>
-                  </div>
+                  <div 
+                    className="font-serif text-base leading-relaxed text-justify space-y-4 markdown-content text-stone-900"
+                    dangerouslySetInnerHTML={{ __html: marked.parse(selectedBlog.content) as string }}
+                  />
                   <div className="mt-6 border-t border-stone-300 pt-3 text-left">
                     <span className="font-mono text-[9px] text-stone-500 font-bold uppercase block mb-1">BLOG SLUG</span>
                     <span className="font-mono text-[10px] text-stone-900 font-bold">{selectedBlog.slug}</span>

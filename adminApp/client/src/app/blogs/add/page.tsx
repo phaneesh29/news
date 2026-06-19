@@ -170,9 +170,9 @@ export default function AddBlogPage() {
             </span>
           </div>
           <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
-            <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
+            <Link href="/dashboard" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
-            <Link href="/blogs/add" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Injector</Link>
+            <Link href="/blogs" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; Blogs Feed</Link>
           </div>
           <div className="flex gap-3">
             {isAdmin && (
@@ -192,12 +192,12 @@ export default function AddBlogPage() {
         </div>
       </header>
 
-      <div className="flex-1 grid grid-cols-1 flex flex-col relative z-10 max-w-5xl mx-auto w-full pb-8 items-start">
-        <div className="w-full flex flex-col relative">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-6xl mx-auto w-full pb-8 items-start">
+        <div className="w-full flex flex-col relative lg:col-span-2">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 vintage-shadow-lg rounded">
             <div className="w-full flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
               <div>
-                <h3 className="font-playfair text-xl text-stone-950 uppercase tracking-wide font-black">BLOG INJECTOR</h3>
+                <h3 className="font-playfair text-xl text-stone-950 uppercase tracking-wide font-black">WRITE BLOG</h3>
                 <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">Teletype Draft Protocol</p>
               </div>
             </div>
@@ -208,7 +208,24 @@ export default function AddBlogPage() {
                   <input type="text" required placeholder="e.g. BREAKING BLOG HEADLINE..." value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-transparent border-none outline-none font-bold text-base text-stone-950 placeholder-stone-600/30 font-serif" />
                 </div>
                 <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">UNIQUE SLUG</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const generated = title
+                          .trim()
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")
+                          .replace(/[^a-z0-9-]/g, "");
+                        setSlug(generated);
+                      }}
+                      className="font-mono text-[9px] font-bold text-red-800 hover:text-red-955 uppercase border border-red-800/40 hover:border-red-800 px-2 py-0.5 rounded cursor-pointer transition-colors"
+                      disabled={!title.trim()}
+                    >
+                      Generate from Title
+                    </button>
+                  </div>
                   <input type="text" required placeholder="url-friendly-slug-here" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/30 font-mono" />
                 </div>
                 <div className="flex flex-col flex-1 min-h-[140px] border-b border-stone-400 pb-2">
@@ -223,7 +240,7 @@ export default function AddBlogPage() {
             </div>
           </div>
         </div>
-        <div className="hidden lg:col-span-1 flex-col relative w-full lg:sticky lg:top-8">
+        <div className="hidden lg:flex lg:col-span-1 flex-col relative w-full lg:sticky lg:top-8">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 vintage-shadow-lg rounded">
             <div className="border-b-2 border-stone-950 pb-3 mb-5 text-left">
               <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">COGNITIVE BLOG WIRE</h3>

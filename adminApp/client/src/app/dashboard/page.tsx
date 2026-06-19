@@ -622,7 +622,7 @@ export default function DashboardPage() {
             </button>
 
             {/* Vintage paper column inside dossier */}
-            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-1 text-stone-900">
+            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-6 text-stone-900">
               
               {isEditing ? (
                 <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-serif text-stone-900 text-left">

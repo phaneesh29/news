@@ -158,49 +158,49 @@ export default function AddNewsPage() {
  };
 
  // Ask AI Agent for draft from within form editor
- const handleAskAgent = async (e: React.FormEvent) => {
- e.preventDefault();
- if (!agentQuery.trim()) return;
+  const handleAskAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agentQuery.trim()) return;
 
- setAgentLoading(true);
- try {
- const res = await fetch(`${API_BASE_URL}/agent/draft`, {
- method: "POST",
- headers: { "Content-Type": "application/json" },
- body: JSON.stringify({ query: agentQuery }),
- credentials: "include"
- });
- if (!res.ok) throw new Error("Agent failed to draft");
- const data = await res.json();
- if (data.success) {
- const draft = data.draft;
- setTitle(draft.title || "");
- setContent(draft.content || "");
- if (draft.tags) {
- setTags(draft.tags.join(", "));
- }
- if (draft.sourceUrl) {
- setSourceUrl(draft.sourceUrl);
- }
- if (draft.priority) {
- const pr = draft.priority.toLowerCase();
- if (["low", "medium", "high", "critical"].includes(pr)) {
- setPriority(pr);
- } else {
- setPriority("low");
- }
- }
- setAgentQuery("");
- } else {
- throw new Error(data.error?.message || "Failed to draft news");
- }
- } catch (err: any) {
- console.error(err);
- alert(err.message || "Error generating draft from agent");
- } finally {
- setAgentLoading(false);
- }
- };
+    setAgentLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/draft/news`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: agentQuery }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Agent failed to draft");
+      const data = await res.json();
+      if (data.success) {
+        const draft = data.draft;
+        setTitle(draft.title || "");
+        setContent(draft.content || "");
+        if (draft.tags) {
+          setTags(draft.tags.join(", "));
+        }
+        if (draft.sourceUrl) {
+          setSourceUrl(draft.sourceUrl);
+        }
+        if (draft.priority) {
+          const pr = draft.priority.toLowerCase();
+          if (["low", "medium", "high", "critical"].includes(pr)) {
+            setPriority(pr);
+          } else {
+            setPriority("low");
+          }
+        }
+        setAgentQuery("");
+      } else {
+        throw new Error(data.error?.message || "Failed to draft news");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Error generating draft from agent");
+    } finally {
+      setAgentLoading(false);
+    }
+  };
 
  if (loading) {
  return (
@@ -265,17 +265,17 @@ export default function AddNewsPage() {
  </header>
 
   {/* Main Workspace Layout */}
-  <div className="flex-1 grid grid-cols-1 flex flex-col relative z-10 max-w-5xl mx-auto w-full pb-8 items-start">
+  <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-6xl mx-auto w-full pb-8 items-start">
   
   {/* LEFT PANEL: Newspaper Article Editor Card */}
-  <div className="w-full flex flex-col relative">
+  <div className="w-full flex flex-col relative lg:col-span-2">
   <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 vintage-shadow-lg rounded">
   
   {/* Header info */}
   <div className="w-full flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
   <div>
   <h3 className="font-playfair text-xl text-stone-950 uppercase tracking-wide font-black">
-  ARTICLE INJECTOR
+  WRITE ARTICLE
   </h3>
   <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
   Teletype Draft Protocol
@@ -388,7 +388,7 @@ export default function AddNewsPage() {
   </div>
   </div>
 
-  <div className="hidden lg:col-span-1 flex-col relative w-full lg:sticky lg:top-8">
+  <div className="hidden lg:flex lg:col-span-1 flex-col relative w-full lg:sticky lg:top-8">
   <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 vintage-shadow-lg rounded">
   
   {/* Stamp (visual aesthetic) */}
