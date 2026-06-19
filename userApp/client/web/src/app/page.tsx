@@ -260,6 +260,16 @@ export default function DevBitsNews() {
               <Loader2 className="h-8 w-8 text-[#cc785c] animate-spin" />
               <p className="text-xs text-[#6c6a64] font-mono">Fetching curated broadcasts...</p>
             </div>
+          ) : !activeUser ? (
+            <div className="text-center py-20 border border-dashed border-[#e6dfd8] rounded-xl bg-[#efe9de]/10 max-w-2xl mx-auto flex flex-col items-center gap-4">
+              <p className="text-sm text-[#6c6a64]">Please sign in to access DevBits curation analysis and the latest engineering broadcasts.</p>
+              <Button 
+                onClick={triggerGoogleLogin}
+                className="bg-[#cc785c] hover:bg-[#a9583e] text-white border-0 text-xs font-semibold px-6 py-2 h-9 rounded-md transition-colors"
+              >
+                Sign In with Google
+              </Button>
+            </div>
           ) : news.length === 0 ? (
             <div className="text-center py-20 border border-dashed border-[#e6dfd8] rounded-xl bg-[#efe9de]/10">
               <p className="text-sm text-[#6c6a64]">No announcements have been published yet.</p>
