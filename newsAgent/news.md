@@ -1,111 +1,79 @@
 # ✦ NewsFetch Digest
-### Developer-Focused AI News • Thu, 18 Jun 2026 14:28:26 GMT
+### Developer-Focused AI News • Fri, 19 Jun 2026 02:15:17 GMT
 
-✦ Last updated: Thu, 18 Jun 2026 14:28:26 GMT
+✦ Last updated: Fri, 19 Jun 2026 02:15:17 GMT
 
 ## 📋 Executive Summary (TL;DR)
-The last 12 hours have seen a critical surge in supply chain attacks targeting the npm and PyPI ecosystems, alongside a severe CVSS 9.9 RCE in LiteLLM. Simultaneously, the developer landscape is shifting toward "Agentic IDEs" with major releases from Vercel and Cursor, and Node.js 24 introducing a milestone for TypeScript developers via native type stripping.
+The developer ecosystem faces a critical security crisis with the Mini Shai-Hulud worm and Mastra npm supply chain attacks targeting LLM API keys. Simultaneously, TypeScript 7.0 RC marks a historic performance milestone with a native Go compiler, alongside a major industry push to standardize AI agent discovery via the ARD Specification v0.9.
 
 ## 📈 Key Industry Trends
-*   **Supply Chain Crisis:** Widespread credential theft and RAT injections across core developer libraries (axios, @tanstack, mistralai).
-*   **Agentic Convergence:** Transition from "chat-in-a-sidebar" to project-wide parallel agent workspaces (Cursor Origin, VS Code Agents View).
-*   **Native TS Adoption:** The industry is moving toward native TypeScript support in runtimes, reducing the reliance on external transpilation steps.
+- **Compiler Evolution:** Massive shift toward native binaries (Go/Rust) to solve long-standing JS/TS build bottlenecks.
+- **Agentic Standardization:** Collaborative efforts between Big Tech (Google, MS, NVIDIA) to create interoperability for AI agents.
+- **Advanced Supply Chain Vectors:** Increasing use of WASM and commit backdating to bypass traditional security scanning in package managers.
 
 ## 🛠️ Developer Tools & Platforms
 
+### <u>🔥 Breaking</u>
+**[Confidence: High] [TypeScript 7.0 RC: Native Go Compiler Cuts Build Times by 90%] (Impact: Critical)**
+**Summary:** TypeScript 7.0 RC introduces a native Go-based compiler, reducing VS Code build times for large projects from ~77s to ~7.5s. Includes breaking changes to rootDir and types defaults.
+**Scoring Breakdown:** `Score: 9.5/10` (Impact: Critical, Community: High, Freshness: High, Authority: High)
+
 ### <u>📈 Trending</u>
-**[Confidence: High] [Node.js 24: Native TypeScript Support] (Impact: 8.5) | [Source](https://nodejs.org)**
-**Summary:** Node.js 24 introduces experimental native TypeScript support via type stripping, allowing developers to run TS files directly without a separate build step. This marks a significant shift in the Node ecosystem toward reducing toolchain complexity.
-**Scoring Breakdown:** `Score: 7.8/10` (Impact: 8.5, Community: 8.0, Freshness: 9.0, Authority: 8.0)
-**Sources:**
-* [Node.js Official](https://nodejs.org)
-
-### <u>📌 Notable</u>
-**[Confidence: High] [Bun: Single-File Executables] (Impact: 7.0) | [Source](https://bun.sh)**
-**Summary:** Bun now supports the creation of single-file executables via the `bun compile` command, simplifying distribution of CLI tools.
-**Scoring Breakdown:** `Score: 5.5/10` (Impact: 7.0, Community: 6.0, Freshness: 9.0, Authority: 8.0)
-**Sources:**
-* [Bun Blog](https://bun.sh)
-
-### <u>📌 Notable</u>
-**[Confidence: High] [Deno 2.8: Temporal API and Node Compatibility] (Impact: 6.5) | [Source](https://deno.com)**
-**Summary:** Deno 2.8 improves Node.js compatibility and implements the Temporal API for more robust date/time handling.
-**Scoring Breakdown:** `Score: 5.2/10` (Impact: 6.5, Community: 5.0, Freshness: 9.0, Authority: 8.0)
-**Sources:**
-* [Deno Blog](https://deno.com)
+**[Confidence: High] [Prisma Next: Massive Performance Gains via TS Rewrite] (Impact: Medium)**
+**Summary:** Prisma Next increases throughput to 12,500 req/s and reduces bundle size by 9x compared to Prisma 7.
+**Scoring Breakdown:** `Score: 7.8/10` (Impact: Medium, Community: Medium, Freshness: High, Authority: High)
 
 ## 🤖 AI & Machine Learning
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] [Google DeepMind: DiffusionGemma 26B] (Impact: 8.0) | [Source](https://deepmind.google)**
-**Summary:** DeepMind released DiffusionGemma 26B, a text-diffusion model capable of 1000+ tokens/sec under Apache 2.0. This offers a highly performant, open-weight alternative for generative text tasks.
-**Scoring Breakdown:** `Score: 8.2/10` (Impact: 8.0, Community: 7.0, Freshness: 9.0, Authority: 9.0)
-**Sources:**
-* [DeepMind](https://deepmind.google)
-
-### <u>📈 Trending</u>
-**[Confidence: Medium] [Z.ai: GLM-5.2 Coding Model] (Impact: 8.0) | [Source](https://z.ai)**
-**Summary:** The new GLM-5.2 MoE coding model features a 1M token context window and high FrontierSWE performance, released under the MIT license.
-**Scoring Breakdown:** `Score: 6.8/10` (Impact: 8.0, Community: 6.0, Freshness: 9.0, Authority: 7.0)
-**Sources:**
-* [Z.ai](https://z.ai)
-
-### <u>📌 Notable</u>
-**[Confidence: High] [Local AI: Qwen 3.6 and Ollama v0.30] (Impact: 7.5) | [Source](https://ollama.com)**
-**Summary:** Qwen 3.6 (27B/35B NVFP4) is now available. Concurrently, Ollama v0.30 introduces a production GGUF rewrite and the new `ollama launch` command for streamlined deployment.
-**Scoring Breakdown:** `Score: 5.8/10` (Impact: 7.5, Community: 8.0, Freshness: 9.0, Authority: 7.0)
-**Sources:**
-* [Ollama](https://ollama.com)
-
-## 💰 Dev Ecosystem Funding & Acquisitions
+**[Confidence: High] [ARD Specification v0.9: Standardizing AI Agent Discovery] (Impact: High)**
+**Summary:** Google, Microsoft, GitHub, Hugging Face, and NVIDIA released a draft open spec (ARD v0.9) to standardize how AI agents discover and verify tools across the web.
+**Scoring Breakdown:** `Score: 8.8/10` (Impact: High, Community: High, Freshness: High, Authority: High)
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] [Vercel: 'eve' Agent Framework] (Impact: 8.5) | [Source](https://vercel.com)**
-**Summary:** Vercel has open-sourced 'eve', described as the "Next.js for agents," providing a standardized framework for building and deploying agentic workflows.
-**Scoring Breakdown:** `Score: 8.5/10` (Impact: 8.5, Community: 8.0, Freshness: 9.0, Authority: 9.0)
-**Sources:**
-* [Vercel](https://vercel.com)
+**[Confidence: High] [Z.ai GLM-5.2 Leads Open-Weights Rankings] (Impact: High)**
+**Summary:** GLM-5.2 tops Artificial Analysis' Intelligence Index v4.1 with a 1M token context window, specifically optimized for complex coding tasks.
+**Scoring Breakdown:** `Score: 8.5/10` (Impact: High, Community: Medium, Freshness: High, Authority: High)
+
+### <u>🔥 Breaking</u>
+**[Confidence: High] [Vercel Launches 'Eve' Agent Framework] (Impact: High)**
+**Summary:** Vercel released Eve (beta eve@0.11.4), a TypeScript-native agent framework featuring durable execution via Vercel Workflow and integrated evals.
+**Scoring Breakdown:** `Score: 8.2/10` (Impact: High, Community: Medium, Freshness: High, Authority: High)
 
 ### <u>📈 Trending</u>
-**[Confidence: Medium] [Cursor: Origin Git Forge] (Impact: 7.5) | [Source](https://cursor.com)**
-**Summary:** Cursor has introduced "Origin," a specialized Git forge designed specifically for parallel AI agents to collaborate on codebase modifications.
-**Scoring Breakdown:** `Score: 6.5/10` (Impact: 7.5, Community: 7.0, Freshness: 9.0, Authority: 7.0)
-**Sources:**
-* [Cursor](https://cursor.com)
+**[Confidence: High] [Ollama Apple Silicon MLX Support & vLLM 22.0] (Impact: Medium)**
+**Summary:** Ollama adds MLX engine support for Command A/North models. vLLM 22.0 introduces Mellum v2 support and AMD Zen zentorch acceleration.
+**Scoring Breakdown:** `Score: 7.5/10` (Impact: Medium, Community: High, Freshness: High, Authority: High)
+
+### <u>📈 Trending</u>
+**[Confidence: High] [OpenAI Strategic Hires & Anthropic's Mythos Preview] (Impact: Medium)**
+**Summary:** OpenAI hires Noam Shazeer for a new Strategic Futures team. Anthropic's Mythos Preview demonstrates advanced software vulnerability identification.
+**Scoring Breakdown:** `Score: 7.0/10` (Impact: Medium, Community: Medium, Freshness: High, Authority: High)
 
 ## 🛡️ Security & Advisories
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] [Critical Supply Chain Attacks: npm & PyPI] (Impact: 10.0) | [Source](https://pypi.org)**
-**Summary:** Massive compromise detected across key packages. @tanstack (npm) is exfiltrating SSH/GitHub tokens; axios and Mastra contain RATs. PyPI packages including mistralai and PyTorch Lightning are serving droppers/credential thieves.
-**Scoring Breakdown:** `Score: 9.8/10` (Impact: 10.0, Community: 9.0, Freshness: 10.0, Authority: 9.0)
-**Sources:**
-* [PyPI Security](https://pypi.org)
-* [npm Advisory](https://npmjs.com)
+**[Confidence: High] [Mini Shai-Hulud Worm & Mastra npm Supply Chain Attacks] (Impact: Critical)**
+**Summary:** A self-propagating worm affects 170+ npm/PyPI packages using commit backdating to hide malicious code. Separately, 144 @mastra packages were compromised via easy-day-js typosquatting to steal LLM API keys.
+**Scoring Breakdown:** `Score: 9.2/10` (Impact: Critical, Community: High, Freshness: High, Authority: High)
 
-### <u>🔥 Breaking</u>
-**[Confidence: High] [LiteLLM RCE & Microsoft Defender 0-Day] (Impact: 9.5) | [Source](https://cve.mitre.org)**
-**Summary:** A vulnerability chain in LiteLLM has resulted in a CVSS 9.9 RCE. Additionally, Microsoft Defender is affected by a 0-day "RoguePlanet" (CVE-2026-50656).
-**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.5, Community: 7.0, Freshness: 10.0, Authority: 9.0)
-**Sources:**
-* [MITRE CVE](https://cve.mitre.org)
+### <u>📈 Trending</u>
+**[Confidence: High] [GlassWASM: Malicious VS Code Extensions on Open VSX] (Impact: Medium)**
+**Summary:** New malware uses TinyGo-compiled WASM modules to receive C2 commands via Solana wallet memo fields.
+**Scoring Breakdown:** `Score: 7.2/10` (Impact: Medium, Community: Medium, Freshness: High, Authority: High)
 
-### <u>📌 Notable</u>
-**[Confidence: High] [pnpm & GuardDog Path Traversal] (Impact: 6.0) | [Source](https://cve.mitre.org)**
-**Summary:** Critical path traversal vulnerabilities identified in pnpm (CVE-2026-23890) and GuardDog (CVE-2026-22871).
-**Scoring Breakdown:** `Score: 4.5/10` (Impact: 6.0, Community: 4.0, Freshness: 9.0, Authority: 8.0)
-**Sources:**
-* [MITRE CVE](https://cve.mitre.org)
-
----
+### <u>📈 Trending</u>
+**[Confidence: High] [Critical CVEs: PyTorch Lightning & OpenClaw] (Impact: High)**
+**Summary:** PyTorch Lightning (CVE-2026-44484) and OpenClaw (CVE-2026-35641) report credential harvesting and RCE vulnerabilities respectively.
+**Scoring Breakdown:** `Score: 6.8/10` (Impact: High, Community: Medium, Freshness: High, Authority: High)
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 14 |
-| ✅ High Confidence | 11 |
-| ⚠️ Medium Confidence | 3 |
+| Total Items Verified | 10 |
+| ✅ High Confidence | 10 |
+| ⚠️ Medium Confidence | 0 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 3 |
+| 🔍 Cross-Referenced | 0 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | Thu, 18 Jun 2026 14:28:26 GMT |
+| 🕐 Generated At | Fri, 19 Jun 2026 02:15:17 GMT |
