@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import Link from "next/link";
 import { 
   Clock, 
-  Bookmark, 
   ChevronRight, 
   Check, 
   ArrowRight,
@@ -31,7 +30,6 @@ export default function DevBitsNews() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
-  const [bookmarks, setBookmarks] = useState<string[]>([]);
 
   // Fetch news on mount
   React.useEffect(() => {
@@ -60,14 +58,7 @@ export default function DevBitsNews() {
     }
   }, [activeUser, isPending]);
 
-  const toggleBookmark = (id: string) => {
-    if (!activeUser) return;
-    if (bookmarks.includes(id)) {
-      setBookmarks(bookmarks.filter(b => b !== id));
-    } else {
-      setBookmarks([...bookmarks, id]);
-    }
-  };
+
 
   const handleLikeToggle = async (id: string) => {
     if (!activeUser) return;
@@ -140,7 +131,6 @@ export default function DevBitsNews() {
   const handleLogout = async () => {
     await signOut();
     refetch();
-    setBookmarks([]);
   };
 
   return (
@@ -245,61 +235,7 @@ export default function DevBitsNews() {
         </div>
       </section>
 
-      {/* Authenticated Bookmarks Container */}
-      {activeUser && bookmarks.length > 0 && (
-        <section className="py-12 bg-[#efe9de] border-t border-[#e6dfd8]">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6">
-            <Card className="border border-[#e6dfd8] bg-[#faf9f5]">
-              <CardHeader className="bg-[#f5f0e8]/50 border-b border-[#e6dfd8] p-6">
-                <CardTitle className="font-serif text-xl font-normal text-[#141413] flex items-center gap-2">
-                  <Bookmark className="h-5 w-5 text-[#cc785c] fill-current" />
-                  Your Bookmarked Announcements
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  {bookmarks.map(id => {
-                    const article = news.find(n => n.id === id);
-                    if (!article) return null;
-                    
-                    return (
-                      <div key={id} className="flex items-center justify-between p-3.5 border border-[#e6dfd8] rounded-lg bg-[#efe9de]/30">
-                        <div className="flex items-center gap-3">
-                          <Badge className={`border-0 text-[10px] font-mono shrink-0 uppercase tracking-wide ${
-                            article.priority === "critical"
-                              ? "bg-[#c64545]/10 text-[#c64545]"
-                              : article.priority === "high"
-                              ? "bg-[#cc785c]/10 text-[#cc785c]"
-                              : article.priority === "medium"
-                              ? "bg-[#d4a017]/10 text-[#d4a017]"
-                              : "bg-[#5db872]/10 text-[#5db872]"
-                          }`}>
-                            {article.priority}
-                          </Badge>
-                          <span 
-                            className="text-xs font-semibold text-[#141413] hover:text-[#cc785c] cursor-pointer truncate max-w-[200px] sm:max-w-md"
-                            onClick={() => setSelectedArticle(article)}
-                          >
-                            {article.title}
-                          </span>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => toggleBookmark(id)}
-                          className="border-[#c64545]/20 text-[#c64545] hover:bg-[#c64545]/10 text-[10px] h-6 px-2"
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
+
 
       {/* Latest News Grid */}
       <section className="py-16 bg-[#faf9f5] border-t border-[#e6dfd8]">
@@ -398,11 +334,7 @@ export default function DevBitsNews() {
                           <ExternalLink className="h-4 w-4" />
                         </a>
                       )}
-                      {activeUser && (
-                        <button onClick={() => toggleBookmark(item.id)} className="text-[#8e8b82] hover:text-[#cc785c] transition-colors p-1" title={bookmarks.includes(item.id) ? "Remove Bookmark" : "Bookmark Article"}>
-                          <Bookmark className={`h-4 w-4 ${bookmarks.includes(item.id) ? "fill-[#cc785c] text-[#cc785c]" : ""}`} />
-                        </button>
-                      )}
+
                     </div>
                   </CardFooter>
                 </Card>
