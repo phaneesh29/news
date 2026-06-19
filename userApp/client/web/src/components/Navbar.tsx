@@ -178,7 +178,7 @@ export default function Navbar() {
                 Submit Feedback
               </DialogTitle>
               <DialogDescription className="text-xs text-[#6c6a64]">
-                We'd love to hear your thoughts, suggestions, or bug reports! You can submit feedback multiple times.
+                We'd love to hear your thoughts, suggestions, or bug reports! Your feedback is submitted anonymously. You can submit feedback multiple times.
               </DialogDescription>
             </DialogHeader>
 
