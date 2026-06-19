@@ -13,6 +13,7 @@ import {
   Loader2,
   BookOpen
 } from "lucide-react";
+import { marked } from "marked";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,9 +26,21 @@ export default function BlogDetailPage({ params }: PageProps) {
   const [blog, setBlog] = useState<BlogItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [htmlContent, setHtmlContent] = useState<string>("");
 
   // Unwrap params using React.use() or a simple local state
   const [blogId, setBlogId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (blog?.content) {
+      const parsed = marked.parse(blog.content);
+      if (parsed instanceof Promise) {
+        parsed.then((res) => setHtmlContent(res)).catch(console.error);
+      } else {
+        setHtmlContent(parsed);
+      }
+    }
+  }, [blog]);
 
   useEffect(() => {
     params.then((p) => setBlogId(p.id)).catch(() => setError("Invalid parameters"));
@@ -190,9 +203,10 @@ export default function BlogDetailPage({ params }: PageProps) {
             <div className="h-px bg-[#e6dfd8]" />
 
             {/* Post Content */}
-            <div className="text-[#3d3d3a] text-sm sm:text-base leading-relaxed whitespace-pre-wrap font-sans space-y-6">
-              {blog.content}
-            </div>
+            <div 
+              className="markdown-content text-[#3d3d3a] text-sm sm:text-base leading-relaxed font-sans"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
           </article>
         )}
       </main>
