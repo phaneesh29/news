@@ -70,7 +70,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-[10000] border-b-2 border-double border-current bg-[#faf9f5]/75 dark:bg-[#181715]/75 backdrop-blur-xl backdrop-saturate-150 text-[#141413] dark:text-[#faf9f5] newspaper-theme-nav shadow-sm">
+      <header className="sticky top-0 z-[10000] border-b-2 border-double border-current bg-background/90 backdrop-blur-xl backdrop-saturate-150 text-foreground newspaper-theme-nav shadow-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <Link href="/news" className="flex items-center gap-2.5 group select-none">

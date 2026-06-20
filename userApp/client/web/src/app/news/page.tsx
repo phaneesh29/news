@@ -245,7 +245,7 @@ export default function NewsBroadcastsPage() {
 
              {/* Gothic Masthead Title */}
              <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-inherit select-none uppercase font-blackletter border-b border-current pb-4 w-full max-w-6xl whitespace-nowrap">
-               DevBits Newsroom
+               Newsroom
              </h1>
              
              <div className="text-center font-serif italic text-sm md:text-base border-t border-b border-current py-1 max-w-2xl px-6 font-newspaper">

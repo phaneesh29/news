@@ -179,7 +179,7 @@ export default function LikedNewsPage() {
 
              {/* Gothic Masthead Title */}
              <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-inherit uppercase font-blackletter border-b border-current pb-4 w-full max-w-5xl whitespace-nowrap">
-               Saved Bulletins
+               Bulletins
              </h1>
  
              <div className="text-center font-serif italic text-sm border-t border-b border-current py-1 max-w-xl px-6 font-newspaper">
