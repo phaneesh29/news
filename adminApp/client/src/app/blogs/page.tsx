@@ -250,6 +250,12 @@ export default function BlogsDashboardPage() {
             <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Blogs Feed</Link>
+            {isAdmin && (
+              <>
+                <span className="text-stone-400">|</span>
+                <Link href="/feedback" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; User Feedback</Link>
+              </>
+            )}
           </div>
 
           <div className="flex gap-3">

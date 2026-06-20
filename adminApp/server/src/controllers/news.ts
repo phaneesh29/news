@@ -1,7 +1,8 @@
 import { Context } from 'hono'
-import { desc, eq, lt, or, and, ilike } from 'drizzle-orm'
+import { desc, eq, lt, or, and, ilike, sql } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { adminUsers, devNews } from '../db/schema.js'
+import { newsLikes } from '../db/userSchema.js'
 
 const canManageNews = (role: string) => role === 'admin' || role === 'editor'
 
@@ -94,12 +95,30 @@ export const getAllNews = async (c: Context) => {
       )
     }
 
-    const newsItems = await db.select(newsSelect)
+    const user = c.get('user')
+    const isAdmin = user?.role === 'admin'
+
+    let newsItems
+    if (isAdmin) {
+      newsItems = await db.select({
+        ...newsSelect,
+        likesCount: sql<number>`cast(count(${newsLikes.userId}) as integer)`.as('likes_count')
+      })
       .from(devNews)
       .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
+      .leftJoin(newsLikes, eq(devNews.id, newsLikes.newsId))
       .where(condition)
+      .groupBy(devNews.id, adminUsers.email)
       .orderBy(desc(devNews.createdAt), desc(devNews.id))
       .limit(limit + 1)
+    } else {
+      newsItems = await db.select(newsSelect)
+        .from(devNews)
+        .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
+        .where(condition)
+        .orderBy(desc(devNews.createdAt), desc(devNews.id))
+        .limit(limit + 1)
+    }
 
     const hasNextPage = newsItems.length > limit
     const results = hasNextPage ? newsItems.slice(0, limit) : newsItems
@@ -125,17 +144,40 @@ export const searchNews = async (c: Context) => {
     const search = query.q || ''
     const limit = query.limit
 
-    const news = await db.select(newsSelect)
+    const user = c.get('user')
+    const isAdmin = user?.role === 'admin'
+
+    let news
+    if (isAdmin) {
+      news = await db.select({
+        ...newsSelect,
+        likesCount: sql<number>`cast(count(${newsLikes.userId}) as integer)`.as('likes_count')
+      })
       .from(devNews)
       .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
+      .leftJoin(newsLikes, eq(devNews.id, newsLikes.newsId))
       .where(
         or(
           ilike(devNews.content, `%${search}%`),
           ilike(devNews.sourceUrl, `%${search}%`)
         )
       )
+      .groupBy(devNews.id, adminUsers.email)
       .orderBy(desc(devNews.createdAt))
       .limit(limit)
+    } else {
+      news = await db.select(newsSelect)
+        .from(devNews)
+        .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
+        .where(
+          or(
+            ilike(devNews.content, `%${search}%`),
+            ilike(devNews.sourceUrl, `%${search}%`)
+          )
+        )
+        .orderBy(desc(devNews.createdAt))
+        .limit(limit)
+    }
 
     return c.json({ news })
   } catch (error: any) {
@@ -148,11 +190,28 @@ export const getNewsById = async (c: Context) => {
   try {
     const id = c.req.param('id')!
 
-    const newsItems = await db.select(newsSelect)
+    const user = c.get('user')
+    const isAdmin = user?.role === 'admin'
+
+    let newsItems
+    if (isAdmin) {
+      newsItems = await db.select({
+        ...newsSelect,
+        likesCount: sql<number>`cast(count(${newsLikes.userId}) as integer)`.as('likes_count')
+      })
       .from(devNews)
       .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
+      .leftJoin(newsLikes, eq(devNews.id, newsLikes.newsId))
       .where(eq(devNews.id, id))
+      .groupBy(devNews.id, adminUsers.email)
       .limit(1)
+    } else {
+      newsItems = await db.select(newsSelect)
+        .from(devNews)
+        .leftJoin(adminUsers, eq(devNews.authorId, adminUsers.id))
+        .where(eq(devNews.id, id))
+        .limit(1)
+    }
 
     const news = newsItems[0]
 

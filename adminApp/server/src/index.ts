@@ -14,6 +14,7 @@ import { whitelistRoutes } from './routes/whitelist.js'
 import { newsRoutes } from './routes/news.js'
 import { agentRoutes } from './routes/agent.js'
 import { blogRoutes } from './routes/blog.js'
+import { feedbackRoutes } from './routes/feedback.js'
 import { globalRateLimiter } from './middlewares/rateLimit.js'
 
 type Bindings = {
@@ -52,6 +53,7 @@ app.route('/api/whitelist', whitelistRoutes)
 app.route('/api/news', newsRoutes)
 app.route('/api/agent', agentRoutes)
 app.route('/api/blogs', blogRoutes)
+app.route('/api/feedback', feedbackRoutes)
 
 app.notFound((c) => {
   return c.json(

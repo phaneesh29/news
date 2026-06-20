@@ -15,6 +15,7 @@ interface NewsItem {
   createdAt: string;
   status: string;
   isPublished: boolean;
+  likesCount?: number;
 }
 
 export default function DashboardPage() {
@@ -210,6 +211,7 @@ export default function DashboardPage() {
       const data = await res.json();
       
       const updatedItem = {
+        ...selectedNews,
         ...data.news,
         status: "SYNCED"
       };
@@ -241,7 +243,9 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error("Failed to toggle publish status");
       const data = await res.json();
       
+      const oldItem = newsList.find(item => item.id === newsId);
       const updatedItem = {
+        ...oldItem,
         ...data.news,
         status: "SYNCED"
       };
@@ -314,7 +318,12 @@ export default function DashboardPage() {
             <Link href="/dashboard" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
-            
+            {isAdmin && (
+              <>
+                <span className="text-stone-400">|</span>
+                <Link href="/feedback" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; User Feedback</Link>
+              </>
+            )}
           </div>
 
           <div className="flex gap-3">
@@ -459,6 +468,11 @@ export default function DashboardPage() {
                           <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
                             {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
                           </span>
+                          {isAdmin && item.likesCount !== undefined && (
+                            <span className="font-mono text-[9px] border border-red-800 text-red-800 bg-red-50/50 px-1.5 py-0.5 rounded tracking-wide uppercase font-bold">
+                              ❤️ {item.likesCount} {item.likesCount === 1 ? 'LIKE' : 'LIKES'}
+                            </span>
+                          )}
                         </div>
 
                         <h4 className="font-playfair text-2xl font-black italic tracking-tight text-stone-950 tracking-tight leading-snug group-hover/item:text-stone-950 transition-colors uppercase">
@@ -778,6 +792,14 @@ export default function DashboardPage() {
                         {selectedNews.isPublished ? 'PUBLISHED' : 'DRAFT'}
                       </span>
                     </div>
+                    {isAdmin && selectedNews.likesCount !== undefined && (
+                      <div>
+                        <span className="block text-[8px] text-stone-500 uppercase tracking-wide">NUMBER OF LIKES</span>
+                        <span className="text-red-800 font-bold">
+                          ❤️ {selectedNews.likesCount} {selectedNews.likesCount === 1 ? 'LIKE' : 'LIKES'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-1.5 border-t border-stone-300 pt-4">
