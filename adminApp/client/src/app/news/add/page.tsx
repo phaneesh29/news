@@ -335,9 +335,9 @@ export default function AddNewsPage() {
   </span>
   <div className="grid grid-cols-4 gap-2 text-center text-xs font-mono">
   {[
-  { key: "low", text: "LOW" },
-  { key: "medium", text: "MEDIUM" },
-  { key: "high", text: "HIGH" },
+  { key: "low", text: "INFO" },
+  { key: "medium", text: "NOTICE" },
+  { key: "high", text: "WARNING" },
   { key: "critical", text: "CRITICAL" },
   ].map((pr) => (
   <button

@@ -411,8 +411,7 @@ export default function DashboardPage() {
               
               {/* Feeds Container */}
               <div className="bg-[#fcfaf2] border-2 border-stone-950 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
-                
-                {/* Priority Selector Filter Bar */}
+                              {/* Priority Selector Filter Bar */}
                 <div className="flex flex-wrap gap-2.5 pb-3 border-b border-stone-300 mb-4 relative z-10 font-mono text-[10px] uppercase tracking-wider">
                   <span className="text-stone-600 font-bold self-center mr-1">FILTER LEVEL:</span>
                   {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((level) => (
@@ -460,7 +459,7 @@ export default function DashboardPage() {
                       >
                         <div className="flex flex-wrap gap-2.5 items-center">
                           <span className={`font-mono text-[9px] border-2 px-2 py-0.5 rounded tracking-wide uppercase font-bold ${getPriorityColors(item.priority)}`}>
-                            {item.priority}
+                             {item.priority}
                           </span>
                           <span className="font-mono text-[10px] text-stone-600">
                             {new Date(item.createdAt).toLocaleString()}
@@ -684,9 +683,9 @@ export default function DashboardPage() {
                     </span>
                     <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
                       {[
-                        { key: "low", text: "INFO", color: "bg-stone-500", border: "border-stone-600" },
-                        { key: "medium", text: "NOTICE", color: "bg-blue-500", border: "border-blue-600" },
-                        { key: "high", text: "WARNING", color: "bg-amber-500", border: "border-amber-600" },
+                        { key: "low", text: "LOW", color: "bg-stone-500", border: "border-stone-600" },
+                        { key: "medium", text: "MEDIUM", color: "bg-blue-500", border: "border-blue-600" },
+                        { key: "high", text: "HIGH", color: "bg-amber-500", border: "border-amber-600" },
                         { key: "critical", text: "CRITICAL", color: "bg-red-700", border: "border-red-800" },
                       ].map((pr) => (
                         <button
