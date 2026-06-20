@@ -70,41 +70,61 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-[#e6dfd8] bg-[#faf9f5]/85 backdrop-blur-md">
+      <header className="sticky top-0 z-[10000] border-b-2 border-double border-current bg-[#faf9f5]/75 dark:bg-[#181715]/75 backdrop-blur-xl backdrop-saturate-150 text-[#141413] dark:text-[#faf9f5] newspaper-theme-nav shadow-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
-            <Link href="/news" className="flex items-center gap-2 group">
-              <div className="flex h-6 w-6 items-center justify-center rounded bg-[#141413] text-[#faf9f5] transition-transform group-hover:rotate-45">
-                <svg viewBox="0 0 24 24" className="h-4.5 w-4.5 fill-current" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-                </svg>
+            <Link href="/news" className="flex items-center gap-2.5 group select-none">
+              {/* Newspaper Metal Press Block Icon */}
+              <div className="flex h-8 w-8 items-center justify-center border-2 border-current bg-current/5 text-current transition-transform group-hover:scale-105 duration-200">
+                <span className="font-serif text-base font-black tracking-tighter uppercase font-blackletter">
+                  DB
+                </span>
               </div>
-              <span className="font-serif text-xl font-medium tracking-tight text-[#141413]">DevBits</span>
-              <span className="rounded bg-[#cc785c]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#cc785c]">AI Curation</span>
+              <div className="flex flex-col items-start leading-none">
+                <span className="font-serif text-lg font-black tracking-tight text-current uppercase font-newspaper">
+                  DevBits
+                </span>
+                <span className="text-[7.5px] font-mono tracking-widest uppercase opacity-60">
+                  Daily Dispatch
+                </span>
+              </div>
             </Link>
 
+            {/* News Tab */}
+            <Link 
+              href="/news" 
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname === "/news" ? "text-current" : "text-current/60 hover:text-current"
+              }`}
+            >
+              News
+            </Link>
+
+            {/* Blog Tab */}
             <Link 
               href="/blog" 
-              className={`hidden sm:inline-block text-xs font-semibold transition-colors border-l border-[#e6dfd8] pl-4 ${
-                pathname.startsWith("/blog") && !pathname.startsWith("/blogs") ? "text-[#141413]" : "text-[#6c6a64] hover:text-[#141413]"
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname.startsWith("/blog") && !pathname.startsWith("/blogs") ? "text-current" : "text-current/60 hover:text-current"
               }`}
             >
               Blog
             </Link>
 
+            {/* Liked News Tab */}
             <Link 
               href="/liked" 
-              className={`hidden sm:inline-block text-xs font-semibold transition-colors border-l border-[#e6dfd8] pl-4 ${
-                pathname === "/liked" ? "text-[#141413]" : "text-[#6c6a64] hover:text-[#141413]"
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname === "/liked" ? "text-current" : "text-current/60 hover:text-current"
               }`}
             >
               Liked News
             </Link>
 
+            {/* Settings Tab */}
             <Link 
               href="/settings" 
-              className={`hidden sm:inline-block text-xs font-semibold transition-colors border-l border-[#e6dfd8] pl-4 ${
-                pathname === "/settings" ? "text-[#141413]" : "text-[#6c6a64] hover:text-[#141413]"
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname === "/settings" ? "text-current" : "text-current/60 hover:text-current"
               }`}
             >
               Settings
@@ -114,8 +134,8 @@ export default function Navbar() {
               <>
                 <Link 
                   href="/profile" 
-                  className={`hidden sm:inline-block text-xs font-semibold transition-colors border-l border-[#e6dfd8] pl-4 ${
-                    pathname === "/profile" ? "text-[#141413]" : "text-[#6c6a64] hover:text-[#141413]"
+                  className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                    pathname === "/profile" ? "text-current" : "text-current/60 hover:text-current"
                   }`}
                 >
                   Profile
@@ -123,7 +143,7 @@ export default function Navbar() {
 
                 <button
                   onClick={() => setIsFeedbackOpen(true)}
-                  className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-[#6c6a64] hover:text-[#141413] transition-colors border-l border-[#e6dfd8] pl-4"
+                  className="hidden sm:inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-current/60 hover:text-current transition-colors border-l border-current/15 pl-4 cursor-pointer"
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   Feedback
@@ -134,17 +154,17 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3">
             {isPending ? (
-              <div className="h-8 w-24 bg-[#efe9de] animate-pulse rounded-md" />
+              <div className="h-8 w-24 bg-current/10 animate-pulse rounded-none" />
             ) : activeUser ? (
               <div className="flex items-center gap-3">
                 <Link href="/profile" className="flex items-center gap-3 group/avatar">
                   <div className="hidden sm:block text-right">
-                    <p className="text-xs font-semibold text-[#141413] max-w-[120px] truncate group-hover/avatar:text-[#cc785c] transition-colors">{activeUser.name}</p>
-                    <p className="text-[9px] text-[#cc785c]/80 group-hover/avatar:text-[#cc785c] transition-colors font-medium">View Profile</p>
+                    <p className="text-xs font-bold text-current max-w-[120px] truncate group-hover/avatar:text-[#cc785c] transition-colors">{activeUser.name}</p>
+                    <p className="text-[9px] text-[#cc785c] group-hover/avatar:text-[#cc785c] transition-colors font-bold uppercase tracking-wider">View Profile</p>
                   </div>
-                  <Avatar className="h-8 w-8 border border-[#e6dfd8] group-hover/avatar:border-[#cc785c] transition-colors">
-                    <AvatarImage src={activeUser.image || undefined} />
-                    <AvatarFallback className="bg-[#cc785c] text-white font-medium text-xs">
+                  <Avatar className="h-8 w-8 border border-current/20 group-hover/avatar:border-[#cc785c] transition-colors rounded-full">
+                    <AvatarImage src={activeUser.image || undefined} className="rounded-full" />
+                    <AvatarFallback className="bg-[#cc785c] text-white font-bold text-xs rounded-full">
                       {activeUser.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -153,7 +173,7 @@ export default function Navbar() {
                   variant="outline" 
                   size="sm" 
                   onClick={handleLogout}
-                  className="border-[#e6dfd8] text-[#6c6a64] hover:text-[#141413] hover:bg-[#efe9de] text-xs h-8 px-3"
+                  className="border-current/25 text-current hover:bg-current/10 text-xs h-8 px-3 rounded-none transition-colors cursor-pointer"
                 >
                   <LogOut className="h-3.5 w-3.5 mr-1" />
                   Sign Out
@@ -162,9 +182,9 @@ export default function Navbar() {
             ) : (
               <Button 
                 onClick={triggerGoogleLogin}
-                className="bg-[#cc785c] hover:bg-[#a9583e] text-white border-0 font-medium px-4 text-xs h-9 rounded-md transition-colors shadow-sm"
+                className="bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] font-bold uppercase tracking-wider px-4 text-xs h-9 rounded-none transition-colors shadow-sm cursor-pointer"
               >
-                Sign In with Google
+                Sign In
               </Button>
             )}
           </div>
