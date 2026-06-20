@@ -1,27 +1,33 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { fetchLikedNewsList, likeNewsApi, unlikeNewsApi, type NewsItem } from "@/lib/api";
+import authClient, { useSession, signIn, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import Link from "next/link";
 import { 
   Clock, 
   ChevronRight, 
+  Check, 
   ArrowRight,
+  LogOut,
   ExternalLink,
   Loader2,
   Heart,
+  Sliders,
+  Settings as SettingsIcon,
+  BookOpen,
   Calendar,
   AlertCircle
 } from "lucide-react";
+import { fetchNewsList, likeNewsApi, unlikeNewsApi, type NewsItem } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
 
-export default function LikedNewsPage() {
+export default function NewsBroadcastsPage() {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
   const { settings } = useSettings();
@@ -86,65 +92,92 @@ export default function LikedNewsPage() {
     return `${baseTheme} ${fontClass} ${sizeClass}`;
   };
 
+  // News States
   const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingNews, setLoadingNews] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
+  // Fetch news when user is authenticated
   useEffect(() => {
-    if (!activeUser) return;
+    if (!activeUser) {
+      setNews([]);
+      setNextCursor(null);
+      if (!isPending) {
+        setLoadingNews(false);
+      }
+      return;
+    }
 
-    async function loadLikedNews() {
+    async function loadNews() {
       try {
-        setLoading(true);
-        const res = await fetchLikedNewsList();
+        setLoadingNews(true);
+        const res = await fetchNewsList();
         if (res.status === "success" && res.data) {
           setNews(res.data.news);
+          setNextCursor(res.data.nextCursor);
         }
       } catch (err) {
-        console.error("Failed to load liked news:", err);
+        console.error("Failed to load news articles:", err);
       } finally {
-        setLoading(false);
+        setLoadingNews(false);
       }
     }
-    loadLikedNews();
-  }, [activeUser]);
+    loadNews();
+  }, [activeUser, isPending]);
 
-  const triggerGoogleLogin = async () => {
+  const handleLoadMore = async () => {
+    if (!nextCursor || loadingMore || !activeUser) return;
     try {
-      await signIn.social({
-        provider: "google",
-        callbackURL: window.location.origin + "/liked"
-      });
+      setLoadingMore(true);
+      const res = await fetchNewsList(nextCursor);
+      if (res.status === "success" && res.data) {
+        const data = res.data;
+        setNews(prev => [...prev, ...data.news]);
+        setNextCursor(data.nextCursor);
+      }
     } catch (err) {
-      console.error("Authentication redirect error:", err);
+      console.error("Failed to load more dispatches:", err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
+  useEffect(() => {
+    if (!activeUser && !isPending) {
+      authClient.oneTap().catch((err) => {
+        console.warn("Google One Tap automatic prompt failed to initialize:", err);
+      });
+    }
+  }, [activeUser, isPending]);
+
   const handleLikeToggle = async (id: string) => {
     if (!activeUser) return;
-
+    
     const newsItem = news.find(n => n.id === id);
     if (!newsItem) return;
 
     const previouslyLiked = newsItem.hasLiked;
-
-    // Optimistic UI updates - since it's the liked page, we filter it out if unliked
-    if (previouslyLiked) {
-      setNews(prev => prev.filter(n => n.id !== id));
-      if (selectedArticle && selectedArticle.id === id) {
-        setSelectedArticle(null);
+    
+    // Optimistic UI updates
+    setNews(prev => prev.map(n => {
+      if (n.id === id) {
+        return {
+          ...n,
+          hasLiked: !previouslyLiked,
+          likesCount: previouslyLiked ? Math.max(0, n.likesCount - 1) : n.likesCount + 1
+        };
       }
-    } else {
-      setNews(prev => prev.map(n => {
-        if (n.id === id) {
-          return {
-            ...n,
-            hasLiked: true,
-            likesCount: n.likesCount + 1
-          };
-        }
-        return n;
-      }));
+      return n;
+    }));
+
+    if (selectedArticle && selectedArticle.id === id) {
+      setSelectedArticle(prev => prev ? {
+        ...prev,
+        hasLiked: !previouslyLiked,
+        likesCount: previouslyLiked ? Math.max(0, prev.likesCount - 1) : prev.likesCount + 1
+      } : null);
     }
 
     try {
@@ -155,11 +188,35 @@ export default function LikedNewsPage() {
       }
     } catch (err) {
       console.error("Failed to toggle like:", err);
-      // Re-fetch standard liked news list on error to be safe
-      const res = await fetchLikedNewsList().catch(() => null);
-      if (res && res.status === "success" && res.data) {
-        setNews(res.data.news);
+      // Revert state
+      setNews(prev => prev.map(n => {
+        if (n.id === id) {
+          return {
+            ...n,
+            hasLiked: previouslyLiked,
+            likesCount: previouslyLiked ? n.likesCount + 1 : Math.max(0, n.likesCount - 1)
+          };
+        }
+        return n;
+      }));
+      if (selectedArticle && selectedArticle.id === id) {
+        setSelectedArticle(prev => prev ? {
+          ...prev,
+          hasLiked: previouslyLiked,
+          likesCount: previouslyLiked ? prev.likesCount + 1 : Math.max(0, prev.likesCount - 1)
+        } : null);
       }
+    }
+  };
+
+  const triggerGoogleLogin = async () => {
+    try {
+      await signIn.social({
+        provider: "google",
+        callbackURL: window.location.origin + "/news"
+      });
+    } catch (err) {
+      console.error("Authentication redirect error:", err);
     }
   };
 
@@ -168,39 +225,62 @@ export default function LikedNewsPage() {
       <Navbar />
 
       {/* Retro Newspaper Masthead */}
-      <header className="py-8 md:py-12 border-b-4 border-double border-current px-4 bg-transparent text-inherit text-center">
-        <div className="mx-auto max-w-7xl flex flex-col items-center space-y-4">
+      <header className="py-8 md:py-12 border-b-4 border-double border-current px-4 bg-transparent text-inherit">
+        <div className="mx-auto max-w-7xl flex flex-col items-center text-center space-y-4">
           
-          <div className="w-full flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest border-b border-current pb-2 max-w-5xl">
-            <span>SAVED REPOSITORY</span>
-            <span>RECOMMENDED DOSSIERS</span>
-            <span>SECTION D // SAVED WIRE</span>
+          {/* Header metadata row */}
+          <div className="w-full flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest border-b border-current pb-2 max-w-6xl">
+            <span>Vol. XCVII // No. 3409</span>
+            <span className="hidden sm:inline-block">Global Intelligence Wire</span>
+            <span className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              {new Date().toLocaleDateString(undefined, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+              })}
+            </span>
           </div>
 
              {/* Gothic Masthead Title */}
-             <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-inherit uppercase font-blackletter border-b border-current pb-4 w-full max-w-5xl whitespace-nowrap">
-               Saved Bulletins
+             <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-inherit select-none uppercase font-blackletter border-b border-current pb-4 w-full max-w-6xl whitespace-nowrap">
+               DevBits Newsroom
              </h1>
- 
-             <div className="text-center font-serif italic text-sm border-t border-b border-current py-1 max-w-xl px-6 font-newspaper">
-               "Your Personal Selection of Engineering Announcements & Intelligence Dispatches"
-             </div></div>
+             
+             <div className="text-center font-serif italic text-sm md:text-base border-t border-b border-current py-1 max-w-2xl px-6 font-newspaper">
+               "AI-Enriched Engineering Dispatches & Acquisitions Every 60 Minutes"
+             </div>
+
+          {!activeUser && !loadingNews && (
+            <div className="pt-4 animate-bounce">
+              <Button 
+                onClick={triggerGoogleLogin}
+                className="bg-[#cc785c] hover:bg-[#a9583e] text-white px-6 py-5.5 text-xs font-bold rounded-none vintage-shadow flex items-center gap-2 border-2 border-[#111111]"
+              >
+                Sign In with Google Identity
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </header>
 
-      {/* Main List */}
+      {/* Main Content Area */}
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-10">
-        {isPending || (activeUser && loading) ? (
+        
+        {loadingNews ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 text-[#cc785c] animate-spin" />
-            <p className="text-xs font-mono">Scanning saved catalog database...</p>
+            <p className="text-xs font-mono">Fetching latest broadsheet broadcasts...</p>
           </div>
         ) : !activeUser ? (
-          <div className="border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-2xl mx-auto flex flex-col items-center gap-4 p-8 vintage-shadow text-center">
+          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-2xl mx-auto flex flex-col items-center gap-5 p-8 vintage-shadow">
             <AlertCircle className="h-10 w-10 text-[#cc785c]" />
             <div>
-              <h3 className="font-serif text-xl font-bold uppercase font-newspaper">Identity Verification Required</h3>
+              <h3 className="font-serif text-xl font-bold uppercase font-newspaper">Identity Authentication Required</h3>
               <p className="text-xs opacity-75 mt-1.5 leading-relaxed max-w-md">
-                Please log in to retrieve your personal dispatches storage record index.
+                This broadcast archive stores classified developer analytics. Secure Google sign-in is required to sync intelligence indexes.
               </p>
             </div>
             <Button 
@@ -211,15 +291,11 @@ export default function LikedNewsPage() {
             </Button>
           </div>
         ) : news.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-xl mx-auto p-8 vintage-shadow">
-            <p className="text-sm font-serif italic mb-4">No dispatches have been saved to your records list.</p>
-            <Link href="/news">
-              <Button className="bg-[#111111] hover:bg-[#222222] text-white border-2 border-[#111111] text-xs font-bold rounded-none px-6 vintage-shadow-sm">
-                Explore Broadcasts
-              </Button>
-            </Link>
+          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-xl mx-auto p-8">
+            <p className="text-sm font-serif italic">No announcements have been compiled for this wire cycle yet.</p>
           </div>
         ) : (
+          <>
           <div className={
             settings.doubleColumn 
               ? "columns-1 md:columns-2 gap-8 space-y-8" 
@@ -228,11 +304,12 @@ export default function LikedNewsPage() {
             {news.map((item) => (
               <article 
                 key={item.id} 
-                className={`bg-[#fcfaf2] dark:bg-[#252320] border-2 border-[#111111] dark:border-[#e6dfd8] p-6 flex flex-col justify-between hover:-translate-y-0.5 transition-all vintage-shadow ${
+                className={`bg-[#fcfaf2] dark:bg-[#252320] border-2 border-[#111111] dark:border-[#e6dfd8] p-6 flex flex-col justify-between transition-all hover:bg-[#fcfaf2]/60 dark:hover:bg-[#252320]/60 hover:-translate-y-0.5 vintage-shadow ${
                   settings.doubleColumn ? "inline-block w-full mb-8" : ""
                 }`}
               >
                 <div>
+                  {/* Category & Date */}
                   <div className="flex items-center justify-between border-b border-[#e6dfd8] pb-3 mb-4 text-[10px] font-mono uppercase tracking-wider">
                     <Badge className={`border-2 border-current text-[10px] font-bold py-0.5 px-2 bg-transparent rounded-none ${
                       item.priority === "critical"
@@ -245,7 +322,7 @@ export default function LikedNewsPage() {
                     }`}>
                       {item.priority}
                     </Badge>
-                    <span className="opacity-75 font-mono">
+                    <span className="opacity-75">
                       {new Date(item.createdAt).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -253,7 +330,8 @@ export default function LikedNewsPage() {
                       })}
                     </span>
                   </div>
-                  
+
+                  {/* Headline */}
                   <h3 
                     onClick={() => setSelectedArticle(item)}
                     className="font-serif text-xl sm:text-2xl font-black tracking-tight hover:text-[#cc785c] cursor-pointer transition-colors leading-tight font-newspaper"
@@ -261,12 +339,14 @@ export default function LikedNewsPage() {
                     {item.title}
                   </h3>
 
-                  <p className="mt-4 text-xs md:text-sm leading-relaxed opacity-85 line-clamp-3">
+                  {/* Snippet */}
+                  <p className="mt-4 text-xs md:text-sm leading-relaxed opacity-85 line-clamp-4">
                     {item.content}
                   </p>
 
+                  {/* Tags */}
                   {item.tags && item.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-dashed border-[#e6dfd8]">
+                    <div className="flex flex-wrap gap-1.5 mt-5 pt-3 border-t border-dashed border-[#e6dfd8]">
                       {item.tags.map((tag) => (
                         <span key={tag} className="text-[10px] font-mono opacity-65">
                           #{tag}
@@ -276,6 +356,7 @@ export default function LikedNewsPage() {
                   )}
                 </div>
 
+                {/* Footer Controls */}
                 <div className="mt-6 pt-4 border-t border-[#111111]/15 dark:border-[#e6dfd8]/15 flex items-center justify-between">
                   <button 
                     onClick={() => setSelectedArticle(item)}
@@ -284,14 +365,14 @@ export default function LikedNewsPage() {
                     Read dispatch
                     <ChevronRight className="h-4 w-4" />
                   </button>
-                  
+
                   <div className="flex items-center gap-3">
                     <button 
                       onClick={() => handleLikeToggle(item.id)} 
                       className="flex items-center gap-1 text-xs hover:text-[#c64545] transition-colors p-1"
-                      title="Unlike Dispatch"
+                      title={item.hasLiked ? "Unlike Dispatch" : "Like Dispatch"}
                     >
-                      <Heart className="h-4.5 w-4.5 fill-[#c64545] text-[#c64545] transition-transform active:scale-125" />
+                      <Heart className={`h-4.5 w-4.5 transition-transform active:scale-125 ${item.hasLiked ? "fill-[#c64545] text-[#c64545]" : ""}`} />
                       <span className="font-mono text-xs font-bold">{item.likesCount}</span>
                     </button>
 
@@ -305,10 +386,30 @@ export default function LikedNewsPage() {
               </article>
             ))}
           </div>
+          
+          {nextCursor && (
+            <div className="flex justify-center mt-12 pb-4">
+              <Button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="bg-[#fcfaf2] dark:bg-[#252320] text-inherit border-2 border-[#111111] dark:border-[#e6dfd8] font-mono text-xs font-bold px-8 py-5 rounded-none vintage-shadow-sm hover:bg-[#efe9de] dark:hover:bg-[#181715] hover:scale-[0.98] transition-all cursor-pointer"
+              >
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    DECODING WIRE DISPATCHES...
+                  </>
+                ) : (
+                  "FETCH MORE DISPATCHES"
+                )}
+              </Button>
+            </div>
+          )}
+          </>
         )}
       </main>
 
-      {/* Article Detail Dialog Overlay - Made BIGGER & CLEANER */}
+      {/* Article Detail Dialog Overlay - Blog-Inspired Redesign */}
       {selectedArticle && (
         <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && setSelectedArticle(null)}>
           <DialogContent className={`max-w-4xl w-[95vw] md:w-[85vw] lg:max-w-5xl border-4 rounded-none vintage-shadow-lg p-0 overflow-y-auto max-h-[90vh] ${getModalThemeClasses()}`}>
@@ -323,7 +424,7 @@ export default function LikedNewsPage() {
                 <div className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-[#cc785c] flex flex-wrap items-center gap-4">
                   <span className="flex items-center gap-1.5">
                     <Clock className="h-4 w-4" />
-                    SAVED RECORD: {new Date(selectedArticle.createdAt).toLocaleString(undefined, {
+                    DISPATCH CYCLE: {new Date(selectedArticle.createdAt).toLocaleString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -384,9 +485,9 @@ export default function LikedNewsPage() {
                 <button 
                   onClick={() => handleLikeToggle(selectedArticle.id)}
                   className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider hover:text-[#c64545] p-1 transition-colors"
-                  title="Unlike Dispatch"
+                  title={selectedArticle.hasLiked ? "Unlike Dispatch" : "Like Dispatch"}
                 >
-                  <Heart className="h-5 w-5 fill-[#c64545] text-[#c64545] transition-transform active:scale-125" />
+                  <Heart className={`h-5 w-5 transition-transform active:scale-125 ${selectedArticle.hasLiked ? "fill-[#c64545] text-[#c64545]" : ""}`} />
                   <span>{selectedArticle.likesCount} Recommendations</span>
                 </button>
 
@@ -407,13 +508,19 @@ export default function LikedNewsPage() {
       {/* Footer */}
       <footer className="bg-[#181715] text-[#a09d96] py-12 border-t-4 border-[#111111]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-mono">
-          <span className="font-serif text-lg font-bold text-[#faf9f5]">DEVBITS</span>
+          <div className="flex items-center gap-2">
+            <span className="font-serif text-lg font-bold text-[#faf9f5]">DEVBITS</span>
+          </div>
+
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
             <Link href="/terms" className="hover:underline">Terms of Service</Link>
             <Link href="/settings" className="hover:underline">Settings</Link>
           </div>
-          <p className="opacity-50">© {new Date().getFullYear()} Curation Newsroom. Saved dispatches.</p>
+
+          <p className="opacity-50">
+            © {new Date().getFullYear()} Curation Newsroom. Classified dispatches.
+          </p>
         </div>
       </footer>
     </div>

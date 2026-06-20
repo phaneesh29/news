@@ -164,14 +164,11 @@
   h1, h2, h3, h4 {
     font-family: var(--font-serif);
     font-weight: 500;
-    color: #141413;
+    color: inherit;
     margin-top: 2rem;
     margin-bottom: 1rem;
     line-height: 1.3;
   }
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.4rem; }
-  h3 { font-size: 1.2rem; }
   
   ul, ol {
     margin-left: 1.5rem;
@@ -225,3 +222,292 @@
     margin-bottom: 1.25rem;
   }
 }
+
+/* Custom Newspaper & Retro Terminal Core Styles */
+@layer utilities {
+  .font-newspaper {
+    font-family: var(--font-playfair), var(--font-serif), Georgia, serif;
+  }
+}
+
+/* CRT Scanlines Sweep Effect */
+.scanline-sweeper {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.15) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanline-sweep 16s linear infinite;
+}
+
+@keyframes scanline-sweep {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+/* Paper Grain Overlay using an inline SVG noise filter (monochrome grayscale) */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Aged newspaper double-border borders and stamps */
+.newspaper-border-double {
+  border-bottom: 4px double var(--color-border, #e6dfd8);
+}
+
+.newspaper-border-heavy {
+  border-bottom: 4px solid #111111;
+}
+
+.vintage-shadow {
+  box-shadow: 4px 4px 0px #111111;
+}
+
+.vintage-shadow-lg {
+  box-shadow: 6px 6px 0px #111111;
+}
+
+.vintage-shadow-sm {
+  box-shadow: 2px 2px 0px #111111;
+}
+
+/* Terminal themes overrides */
+.--theme-amber-terminal {
+  --background: #0a0400;
+  --foreground: #ff9d3b;
+  --card: #150900;
+  --card-foreground: #ff9d3b;
+  --border: #bf5b00;
+  --primary: #ff9d3b;
+  --muted: #1c0d00;
+  --muted-foreground: #d2771b;
+  --accent: #ff9d3b;
+  --accent-foreground: #0a0400;
+}
+
+.--theme-amber-terminal * {
+  border-color: rgba(255, 157, 59, 0.4) !important;
+  color: #ff9d3b !important;
+}
+
+/* Allow critical status badges, alerts, active buttons, and logs to stand out in Amber CRT */
+.--theme-amber-terminal .text-white { color: #ffffff !important; }
+.--theme-amber-terminal .text-emerald-400 { color: #34d399 !important; }
+.--theme-amber-terminal .text-red-400 { color: #f87171 !important; }
+.--theme-amber-terminal .text-\[\#c64545\] { color: #c64545 !important; }
+.--theme-amber-terminal .text-\[\#cc785c\] { color: #cc785c !important; }
+.--theme-amber-terminal .bg-\[\#cc785c\] { background-color: #cc785c !important; color: #ffffff !important; }
+.--theme-amber-terminal .bg-\[\#cc785c\]\/15 { background-color: rgba(204, 120, 92, 0.15) !important; }
+.--theme-amber-terminal .border-\[\#cc785c\] { border-color: #cc785c !important; }
+
+.--theme-green-terminal {
+  --background: #000902;
+  --foreground: #44ee77;
+  --card: #001805;
+  --card-foreground: #44ee77;
+  --border: #136029;
+  --primary: #44ee77;
+  --muted: #001304;
+  --muted-foreground: #34bc5d;
+  --accent: #44ee77;
+  --accent-foreground: #000902;
+}
+
+.--theme-green-terminal * {
+  border-color: rgba(68, 238, 119, 0.4) !important;
+  color: #44ee77 !important;
+}
+
+/* Allow critical status badges, alerts, active buttons, and logs to stand out in Green CRT */
+.--theme-green-terminal .text-white { color: #ffffff !important; }
+.--theme-green-terminal .text-emerald-400 { color: #34d399 !important; }
+.--theme-green-terminal .text-red-400 { color: #f87171 !important; }
+.--theme-green-terminal .text-\[\#c64545\] { color: #c64545 !important; }
+.--theme-green-terminal .text-\[\#cc785c\] { color: #cc785c !important; }
+.--theme-green-terminal .bg-\[\#cc785c\] { background-color: #cc785c !important; color: #ffffff !important; }
+.--theme-green-terminal .bg-\[\#cc785c\]\/15 { background-color: rgba(204, 120, 92, 0.15) !important; }
+.--theme-green-terminal .border-\[\#cc785c\] { border-color: #cc785c !important; }
+
+.--theme-aged-paper {
+  --background: #f3ecd8;
+  --foreground: #2d251e;
+  --card: #eadebe;
+  --card-foreground: #2d251e;
+  --border: #d8cfa8;
+  --primary: #cc785c;
+  --muted: #ebdca7;
+  --muted-foreground: #6e644a;
+  --accent: #e5dcbf;
+  --accent-foreground: #cc785c;
+  --popover: #eadebe;
+  --popover-foreground: #2d251e;
+  --secondary: #e5dcbf;
+  --secondary-foreground: #2d251e;
+}
+
+.--theme-aged-paper * {
+  border-color: #d8cfa8;
+}
+
+.--theme-aged-paper .border-\[\#111111\] {
+  border-color: #2d251e !important;
+}
+
+.--theme-ink-dark {
+  --background: #181715;
+  --foreground: #efe9de;
+  --card: #252320;
+  --card-foreground: #efe9de;
+  --border: #3d3b37;
+  --primary: #cc785c;
+  --muted: #1f1e1b;
+  --muted-foreground: #a09d96;
+}
+
+.--theme-ink-dark * {
+  border-color: #3d3b37;
+}
+
+.dark * {
+  border-color: #3d3b37;
+}
+
+/* Vignette radial shadow overlay */
+.vignette-effect {
+  background: radial-gradient(circle at center, transparent 40%, rgba(30, 20, 10, 0.08) 100%);
+}
+
+/* Font context settings override to enable dynamic settings reflecting on all content (including portalled modals) */
+#devbits-settings-root,
+[data-radix-portal] {
+  --active-serif-font: Georgia, Cambria, "Times New Roman", Times, serif;
+  --active-newspaper-font: var(--font-playfair), var(--font-serif), Georgia, serif;
+}
+
+#devbits-settings-root.font-newspaper,
+[data-radix-portal] .font-newspaper {
+  --active-serif-font: Georgia, Cambria, "Times New Roman", Times, serif;
+  --active-newspaper-font: var(--font-playfair), var(--font-serif), Georgia, serif;
+}
+
+#devbits-settings-root.font-serif,
+[data-radix-portal] .font-serif {
+  --active-serif-font: Georgia, Cambria, "Times New Roman", Times, serif;
+  --active-newspaper-font: var(--font-serif);
+}
+
+#devbits-settings-root.font-sans,
+[data-radix-portal] .font-sans {
+  --active-serif-font: var(--font-sans);
+  --active-newspaper-font: var(--font-sans);
+}
+
+#devbits-settings-root.font-mono,
+[data-radix-portal] .font-mono {
+  --active-serif-font: var(--font-mono);
+  --active-newspaper-font: var(--font-mono);
+}
+
+#devbits-settings-root .font-serif,
+[data-radix-portal] .font-serif {
+  font-family: var(--active-serif-font) !important;
+}
+
+#devbits-settings-root .font-newspaper,
+[data-radix-portal] .font-newspaper {
+  font-family: var(--active-newspaper-font) !important;
+}
+
+/* Text scale settings override to dynamically scale all layout font sizes */
+#devbits-settings-root,
+[data-radix-portal] {
+  --text-scale: 1;
+}
+
+#devbits-settings-root.text-scale-sm,
+[data-radix-portal] .text-scale-sm {
+  --text-scale: 0.85;
+}
+
+#devbits-settings-root.text-scale-md,
+[data-radix-portal] .text-scale-md {
+  --text-scale: 1;
+}
+
+#devbits-settings-root.text-scale-lg,
+[data-radix-portal] .text-scale-lg {
+  --text-scale: 1.15;
+}
+
+#devbits-settings-root.text-scale-xl,
+[data-radix-portal] .text-scale-xl {
+  --text-scale: 1.3;
+}
+
+#devbits-settings-root,
+[data-radix-portal] [data-slot="dialog-content"] {
+  /* Redefine Tailwind v4 theme font-size custom properties */
+  --text-xs: calc(0.75rem * var(--text-scale));
+  --text-sm: calc(0.875rem * var(--text-scale));
+  --text-base: calc(1rem * var(--text-scale));
+  --text-lg: calc(1.125rem * var(--text-scale));
+  --text-xl: calc(1.25rem * var(--text-scale));
+  --text-2xl: calc(1.5rem * var(--text-scale));
+  --text-3xl: calc(1.875rem * var(--text-scale));
+  --text-4xl: calc(2.25rem * var(--text-scale));
+  --text-5xl: calc(3rem * var(--text-scale));
+  --text-6xl: calc(3.75rem * var(--text-scale));
+  --text-7xl: calc(4.5rem * var(--text-scale));
+  --text-8xl: calc(6rem * var(--text-scale));
+  --text-9xl: calc(8rem * var(--text-scale));
+
+  /* Also redefine standard font size properties just in case */
+  --font-size-xs: calc(0.75rem * var(--text-scale));
+  --font-size-sm: calc(0.875rem * var(--text-scale));
+  --font-size-base: calc(1rem * var(--text-scale));
+  --font-size-lg: calc(1.125rem * var(--text-scale));
+  --font-size-xl: calc(1.25rem * var(--text-scale));
+  --font-size-2xl: calc(1.5rem * var(--text-scale));
+  --font-size-3xl: calc(1.875rem * var(--text-scale));
+  --font-size-4xl: calc(2.25rem * var(--text-scale));
+  --font-size-5xl: calc(3rem * var(--text-scale));
+}
+
+/* Real Printed Newspaper Styling Enhancements */
+.newspaper-body {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.newspaper-body::first-letter,
+.newspaper-body p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.5rem;
+  line-height: 0.85;
+  font-weight: 900;
+  padding-right: 10px;
+  padding-top: 4px;
+  color: #cc785c;
+  font-family: var(--font-playfair), var(--font-serif), Georgia, serif;
+}
+
+/* Elegant, subtle paper grain overlay for realistic newsprint texture */
+.paper-grain {
+  position: relative;
+}
+
+.paper-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.045;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
