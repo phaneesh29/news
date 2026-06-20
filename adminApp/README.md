@@ -1,47 +1,48 @@
 # DEV.NEWS — NEXUS CORE Command Terminal
 
 > [!NOTE]
-> DEV.NEWS is a retro-cyber themed classified intelligence broadcast platform designed for drafting, broadcasting, and managing secure news dispatches. The client application features Y2K-era tactile interfaces, CRT scanline aesthetics, and manila-folder dossier designs.
+> DEV.NEWS is a retro-cyber themed classified intelligence broadcast platform designed for drafting, broadcasting, and managing secure news dispatches and long-form manifestos. The client application features Y2K-era tactile interfaces, CRT scanline aesthetics, and manila-folder dossier designs.
 
 ---
 
-## 📌 Current Project Phase & Refactoring Updates
+## 📌 Current Project Phase & Feature Integrations
 
-The project has transitioned from its initial setup to a modular, production-ready stage:
+The project has transitioned into a highly modular, AI-powered production stage:
 
-1. **Decoupled Data Validation (Backend Refactor):**
-   - Extracted all Zod validation schemas from inline route files in [server/src/routes](file:///D:/news/adminApp/server/src/routes) into a unified [server/src/schemas](file:///D:/news/adminApp/server/src/schemas) module.
-   - Any backend route can now import validation schemas interchangeably without code duplication.
+1. **AI Agent Operatives (Vercel AI SDK):**
+   - Integrated intelligent agent systems (`@ai-sdk/google`, `@tavily/ai-sdk`) to autonomously research, draft, and refine both News dispatches and Blog publications.
+   - Dedicated `blog-agent.ts` and `news-agent.ts` modules process raw intel into formatted, production-ready payloads.
 
-2. **Dedicated Modular Routing (Frontend Refactor):**
-   - Split the unified dashboard view into distinct Next.js routes to improve layout scalability and maintainability:
-     - [dashboard](file:///D:/news/adminApp/client/src/app/dashboard) serves as the central Command Center and Telemetry launchpad.
-     - [news](file:///D:/news/adminApp/client/src/app/news) houses the Metasphere Chronicles list, filters, search, event logs, and details inspector dossier overlay.
-     - [news/add](file:///D:/news/adminApp/client/src/app/news/add) handles news payload draft composition and teletype dispatch broadcast, redirecting back to `/news` on success.
+2. **Expanded Content Horizons (Blogs & Feedback):**
+   - Added a full **Blogs** administration interface alongside the News feed for long-form content generation.
+   - Introduced a **Feedback** terminal for telemetry and operative insights.
 
-3. **TypeScript Integrity:**
-   - Standardized imports matching `NodeNext` resolution rules (using strict `.js` extensions for relative TypeScript module imports).
-   - Validated that both client and backend build successfully without any compilation errors.
+3. **Fortified Security & Transport Layer:**
+   - Implemented strict rate-limiting (`hono-rate-limiter`) across vital API endpoints.
+   - OTP transmission is now securely handled via the **Resend** email service API.
+   - Refined client-side authentication routing (`/login`, `/verify`) separate from the main dashboard.
 
 ---
 
 ## 🌟 Key Application Features
 
 ### 🔐 1. Cryptographic Authentication
-- Operative authentication utilizing a one-time passcode (OTP) verification system sent to registered emails.
+- Operative authentication utilizing a one-time passcode (OTP) verification system sent to registered emails via **Resend**.
 - Biometric verification state checks on the server to enforce operative clearance levels.
+- Strict rate-limiting defending against brute-force intrusion attempts.
 
 ### 🎛️ 2. Command Hub Dashboard
 - Telemetry logging deck rendering active system specs: Server status, Operative OS signature, Browser identifier, Operative IP address, and dynamic logs stream.
-- Central deck interface routing operatives directly to the Broadcast Feed or the Payload Injector.
+- Central deck interface routing operatives directly to the Broadcast Feed, Blogs Hub, or the Payload Injector.
 
 ### 📰 3. Metasphere Chronicles Feed
 - Real-time intelligence dispatch logs filtered dynamically by **Urgency level** (`INFO`, `NOTICE`, `WARNING`, `CRITICAL`).
 - Search functionality querying the database news indices in real-time.
 - Interactive detailed inspection dossier overlay. Operatives with clearance can modify details (`Edit Payload`) or purge transmission files completely (`Purge Transmission`).
 
-### 🚀 4. Mainframe Payload Injector
-- Teletype manual drafting screen structured around Manila folder aesthetics.
+### 🧠 4. AI-Assisted Payload Injectors (News & Blogs)
+- Teletype manual drafting screens structured around Manila folder aesthetics.
+- **AI Co-Pilot:** Operatives can invoke integrated AI agents to research topics (via Tavily) and draft robust content automatically.
 - Interactive payload injection loader showing packet compilation progress, encryption phases, and final grid broadcast sync.
 
 ### ⚙️ 5. Whitelist Email Administration
@@ -52,30 +53,31 @@ The project has transitioned from its initial setup to a modular, production-rea
 
 ## 🏗️ System Architecture
 
-The DEV.NEWS system utilizes a modern, split-layer client-server architecture built for fast runtime performance and strict schema validations.
+The DEV.NEWS system utilizes a modern, split-layer client-server architecture built for fast runtime performance, strict schema validations, and AI flexibility.
 
 ### Architecture Topology Diagram
 ```mermaid
 graph TD
     subgraph Client [Next.js Client]
         A["Dashboard Hub (/dashboard)"] --> B["Chronicles Feed (/news)"]
-        A --> C["Payload Injector (/news/add)"]
-        B --> D["Dossier Overlay (Inspector)"]
+        A --> C["Blogs Hub (/blogs)"]
+        A --> D["Feedback (/feedback)"]
+        B & C --> E["AI Payload Injectors"]
     end
 
     subgraph Server [Hono Node Backend]
-        E["Hono Router"] --> F["requireAuth Middleware"]
-        F --> G["zValidator Middleware"]
-        G --> H["Zod Schema Validation"]
+        F["Hono Router"] --> G["requireAuth & Rate Limiting"]
+        G --> H["zValidator Middleware"]
         H --> I["Controllers (Business Logic)"]
+        I --> J["AI Agents (Vercel AI SDK)"]
     end
 
     subgraph Data [Database Layer]
-        I --> J["Drizzle ORM Querying"]
-        J --> K["PostgreSQL Database"]
+        I --> K["Drizzle ORM Querying"]
+        K --> L["PostgreSQL Database"]
     end
 
-    B & C --> E
+    E & D --> F
 ```
 
 ### Technical Stack Details
@@ -87,9 +89,11 @@ graph TD
 
 #### Backend Server
 - **Framework:** Hono (Node Server adaptor)
+- **AI Intelligence:** Vercel AI SDK (`@ai-sdk/google`, `ai`, `@tavily/ai-sdk`)
+- **Email Service:** Resend API
 - **ORM:** Drizzle ORM
 - **Database:** PostgreSQL
-- **Security:** Session-based validation, cookie handlers, custom token validation middlewares, and request limiters
+- **Security:** Session-based validation, cookie handlers, custom token validation middlewares, and `hono-rate-limiter`
 - **Data Validation:** Zod validator schemas decoupled from routes for high readability and interchangeability
 
 ---
@@ -99,13 +103,16 @@ graph TD
 - [client](file:///D:/news/adminApp/client) — Next.js Y2K Command Interface
   - [src/app](file:///D:/news/adminApp/client/src/app) — Main Next.js route folders
     - [dashboard](file:///D:/news/adminApp/client/src/app/dashboard) — Central telemetry and navigation launchpad
+    - [login](file:///D:/news/adminApp/client/src/app/login) & [verify](file:///D:/news/adminApp/client/src/app/verify) — Secure OTP entry protocols
     - [news](file:///D:/news/adminApp/client/src/app/news) — Live feed monitoring Chronicles deck
-    - [news/add](file:///D:/news/adminApp/client/src/app/news/add) — Classified dispatch draft and broadcast console
+    - [blogs](file:///D:/news/adminApp/client/src/app/blogs) — Long-form manifesto drafting and publishing deck
+    - [feedback](file:///D:/news/adminApp/client/src/app/feedback) — User feedback analysis and telemetry
     - [settings](file:///D:/news/adminApp/client/src/app/settings) — Security whitelist deck for grid access
 - [server](file:///D:/news/adminApp/server) — Hono Backend & Database Engine
-  - [src/schemas](file:///D:/news/adminApp/server/src/schemas) — Centrally exported Zod schemas (Auth, News, Whitelist)
+  - [src/schemas](file:///D:/news/adminApp/server/src/schemas) — Centrally exported Zod schemas (Auth, News, Blogs, Whitelist, Agent)
   - [src/routes](file:///D:/news/adminApp/server/src/routes) — API route definitions leveraging zValidator validation middleware
   - [src/controllers](file:///D:/news/adminApp/server/src/controllers) — Server-side operations and database querying logic
+  - [src/lib/agents](file:///D:/news/adminApp/server/src/lib/agents) — AI logic defining generation tasks for news and blogs
   - [src/db](file:///D:/news/adminApp/server/src/db) — PostgreSQL schema mapping declarations and Drizzle ORM configs
 
 ---
@@ -118,20 +125,27 @@ graph TD
 
 ### 2. Setting up the Backend
 1. Go to the [server](file:///D:/news/adminApp/server) directory.
-2. Initialize environment parameters inside `.env` (using `.env.example` as a template).
-3. Run the migrations to initialize database tables:
+2. Initialize environment parameters inside `.env` (using `.env.example` as a template). Ensure to add keys for Resend and AI services if utilizing agent operatives.
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Run the migrations to initialize database tables:
    ```bash
    npm run db:generate
    npm run db:migrate
    ```
-4. Start the watch dev server:
+5. Start the watch dev server:
    ```bash
    npm run dev
    ```
 
 ### 3. Setting up the Frontend
 1. Go to the [client](file:///D:/news/adminApp/client) directory.
-2. Ensure [client/src/config.ts](file:///D:/news/adminApp/client/src/config.ts) is configured to point to your backend API URL.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 3. Start the Next.js development server:
    ```bash
    npm run dev

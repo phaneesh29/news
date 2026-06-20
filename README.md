@@ -21,7 +21,7 @@
 | :--- | :--- | :--- |
 | **Clearance Level** | `LEVEL 4 (CLASSIFIED)` | `0xEF99A2` |
 | **Grid Status** | `ONLINE / SYNCED` | `🟢 ACTIVE` |
-| **Core Processor** | `@openai/agents SDK` | `Ollama Cloud (nemotron-3-ultra)` |
+| **Core Processor** | `@openai/agents SDK`, `Vercel AI SDK` | `Ollama Cloud (nemotron-3-ultra)` |
 | **Visual Framework** | `CRT / Scanline / Manila Dossier` | See [DESIGN.md](file:///D:/news/DESIGN.md) |
 
 ---
@@ -41,24 +41,24 @@ graph TD
 
     %% Database
     subgraph DB [Grid Mainframe Storage]
-        PG[("PostgreSQL DB")]
+        PG[("Neon Serverless PostgreSQL")]
     end
 
     %% Admin Layer
     subgraph Admin [Classified Command Console: adminApp]
-        H["Hono Backend Server"]
-        C["Next.js Admin Client"]
-        C -->|Secure Session / OTP| H
+        H["Hono Backend Server (Agentic Payload Injectors)"]
+        C["Next.js Admin Client (Dash, Blogs, Feedback)"]
+        C -->|Secure Session / OTP via Resend| H
         H -->|Drizzle ORM| PG
         N -.->|Manual Ingest| C
     end
 
     %% User Portal
-    subgraph Portal [Editorial Curation Portal: userApp]
-        U["Next.js client Portal"]
-        US["Express Server / Better Auth"]
+    subgraph Portal [Public Editorial Curation Portal: userApp]
+        U["Next.js Client (News, Blogs, Profile, Liked)"]
+        US["Express Server / better-auth"]
         U --> US
-        US --> PG
+        US -->|Drizzle ORM| PG
     end
 
     classDef terminal fill:#1b0e03,stroke:#e07a1b,color:#ff9d3b,stroke-width:2px;
@@ -76,27 +76,27 @@ graph TD
 
 ### 🛰️ [newsAgent](file:///D:/news/newsAgent) — Autonomous Curation Swarm
 Operates a sequential parent-child LLM agent workflow configured to scrape hacker updates, trending releases, exploits, and academic briefs, compiling them into ranked dispatch feeds.
-- **Coordination Hub:** [newsAgent/index.js](file:///D:/news/newsAgent/index.js) runs the core orchestration logic.
-- **Architectural Specs:** Read [newsAgent/system_architecture.md](file:///D:/news/newsAgent/system_architecture.md) for data flow specifications.
-- **Output Vault:** [news.md](file:///D:/news/newsAgent/news.md) holds the raw telemetry outputs compiled by the editor agent.
+- **Coordination Hub:** [newsAgent/index.js](file:///D:/news/newsAgent/index.js) orchestrates the agentic workflow via `@openai/agents`.
+- **Architectural Specs:** Read [newsAgent/README.md](file:///D:/news/newsAgent/README.md) for data flow specifications.
+- **Output Vault:** [newsAgent/news.md](file:///D:/news/newsAgent/news.md) holds the raw telemetry outputs compiled by the editor agent.
 
 ### 🎛️ [adminApp](file:///D:/news/adminApp) — Classified Command Terminal
-The Win95/Y2K-themed operational environment allowing grid operators to audit, write, and purge Chronicles dispatches.
-- **Hono Backend Node Engine:** [adminApp/server](file:///D:/news/adminApp/server) coordinates session access, PostgreSQL schemas, and route validators.
-- **Next.js Web Command Client:** [adminApp/client](file:///D:/news/adminApp/client) displays CRT sweeps, interactive folders, and telemetry metrics.
+The Win95/Y2K-themed operational environment allowing grid operators to audit, write, and purge Chronicles dispatches, alongside managing long-form Manifests (Blogs) and addressing User Feedback.
+- **Hono Backend Node Engine:** [adminApp/server](file:///D:/news/adminApp/server) coordinates session access, OTP verification via **Resend**, PostgreSQL schemas via Drizzle ORM, and integrated **Vercel AI SDK** drafting agents.
+- **Next.js Web Command Client:** [adminApp/client](file:///D:/news/adminApp/client) displays CRT sweeps, interactive folders, telemetry metrics, and AI Co-Pilot integrations.
 - **Sub-System Readme:** Read [adminApp/README.md](file:///D:/news/adminApp/README.md) for environment presets.
 
-### 📖 [userApp](file:///D:/news/userApp) — DevBits Editorial Portal
-A sleek, cormorant garamond serif-based user interface following warm-editorial design systems, allowing authorized operatives to review active broadcasts.
-- **User Portal Client:** [userApp/client/web](file:///D:/news/userApp/client/web) handles bookmarks, profiles, and feeds.
-- **Express Backend Adapter:** [userApp/server](file:///D:/news/userApp/server) manages Better Auth tokens and secure PostgreSQL transactions.
-- **Sub-System Readme:** Read [userApp/client/web/README.md](file:///D:/news/userApp/client/web/README.md) for auth configurations.
+### 📖 [userApp](file:///D:/news/userApp) — Public Grid Terminal
+A sleek, cormorant garamond serif-based user interface following warm-editorial design systems, allowing authorized operatives to review active broadcasts, blogs, like posts, and submit feedback.
+- **Next.js Interface:** [userApp/client/web](file:///D:/news/userApp/client/web) handles bookmarks, profile settings, and dispatch reading.
+- **Express Backend Adapter:** [userApp/server](file:///D:/news/userApp/server) manages robust user authentication logic using `better-auth` and secure Neon PostgreSQL transactions via Drizzle ORM.
+- **Sub-System Readme:** Read [userApp/README.md](file:///D:/news/userApp/README.md) for architectural and setup instructions.
 
 ---
 
 ## 🧮 CURATION SWARM MATHEMATICS
 
-To maintain signal integrity and strip out low-value alerts, the [SynthesisAgent](file:///D:/news/newsAgent/agents/synthesisAgent.js) grades gathered reports using the following scoring framework:
+To maintain signal integrity and strip out low-value alerts, the synthesis agent grades gathered reports using the following scoring framework:
 
 $$\text{Final Score} = 0.40 \times \text{Impact} + 0.25 \times \text{Community} + 0.20 \times \text{Freshness} + 0.15 \times \text{Source Authority}$$
 
@@ -156,13 +156,15 @@ npm start
    *Terminal active on `http://localhost:3000`.*
 
 ### Phase 3: Spin Up Reader Portal (userApp)
-1. Initialize backend database connectors and OAuth verification:
+1. Initialize backend database connectors and authentication endpoints:
    ```bash
    cd D:/news/userApp/server
    npm install
+   npm run db:generate
+   npm run db:migrate
    npm run dev
    ```
-2. Launch user interface:
+2. Launch public user interface:
    ```bash
    cd D:/news/userApp/client/web
    npm install
