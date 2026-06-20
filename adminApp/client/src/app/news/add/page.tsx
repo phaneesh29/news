@@ -202,13 +202,13 @@ export default function AddNewsPage() {
     }
   };
 
- if (loading) {
- return (
- <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
- [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
- </div>
- );
- }
+  if (loading) {
+  return (
+  <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-['Playfair_Display',_Georgia,_serif] text-stone-900 text-2xl animate-pulse font-bold">
+  [ RETRIEVING ARCHIVES & EDITORIAL FEED... ]
+  </div>
+  );
+  }
 
  const isAdmin = profile?.role === "admin";
 
@@ -221,14 +221,14 @@ export default function AddNewsPage() {
  <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
  <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
  
- <div className="flex flex-col text-center md:text-left">
- <Link href="/dashboard" className="font-blackletter text-4xl sm:text-5xl font-normal drop-shadow-sm tracking-tight text-stone-950 uppercase select-none hover:text-stone-900 border-b border-stone-900 transition-colors">
- THE DAILY <span className="text-stone-900 border-b border-stone-900">NEXUS</span>
- </Link>
- <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
- WIRE SERVICE | OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
- </span>
- </div>
+  <div className="flex flex-col text-center md:text-left">
+  <Link href="/dashboard" className="font-['UnifrakturMaguntia',_Georgia,_serif] text-6xl sm:text-7xl drop-shadow-sm tracking-tight text-black select-none hover:opacity-80 border-b-4 border-double border-black transition-opacity pb-1 leading-none">
+  Dev Bits
+  </Link>
+  <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase font-bold">
+  EDITORIAL DESK • STAFF ID: <span className="text-black">{profile?.email}</span> ({profile?.role?.toUpperCase()})
+  </span>
+  </div>
 
  {/* Navigation Deck Links */}
  <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
@@ -238,23 +238,23 @@ export default function AddNewsPage() {
  
  </div>
 
- <div className="flex gap-3">
- {isAdmin && (
- <Link 
- href="/settings"
- className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-[#fcfaf2] px-3 py-1.5 hover:bg-stone-950 hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center gap-1.5"
- >
- Security Deck
- </Link>
- )}
- <button 
- onClick={handleLogout}
- className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-[#fcfaf2] px-3 py-1.5 hover:bg-red-950 hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
- >
- Log Out
- </button>
- </div>
- </div>
+  <div className="flex gap-3">
+  {isAdmin && (
+  <Link 
+  href="/settings"
+  className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-[#fcfaf2] px-3 py-1.5 hover:bg-black hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center font-bold"
+  >
+  Oversight Board
+  </Link>
+  )}
+  <button 
+  onClick={handleLogout}
+  className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-[#fcfaf2] px-3 py-1.5 hover:bg-black hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center font-bold cursor-pointer"
+  >
+  Log Out
+  </button>
+  </div>
+  </div>
 
  {/* Newspaper Subheader bar */}
  <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
@@ -272,12 +272,12 @@ export default function AddNewsPage() {
   <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 vintage-shadow-lg rounded">
   
   {/* Header info */}
-  <div className="w-full flex justify-between items-center border-b-2 border-stone-950 pb-3 mb-5">
+  <div className="w-full flex justify-between items-center border-b-[4px] border-double border-black pb-4 mb-6">
   <div>
-  <h3 className="font-playfair text-xl text-stone-950 uppercase tracking-wide font-black">
+  <h3 className="font-['Playfair_Display',_Georgia,_serif] text-4xl sm:text-5xl font-black drop-shadow-sm text-black tracking-tighter uppercase leading-none select-none text-left">
   WRITE ARTICLE
   </h3>
-  <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+  <p className="font-mono text-[10px] text-black font-bold mt-2 tracking-wider uppercase border-b border-black w-max pb-0.5">
   Teletype Draft Protocol
   </p>
   </div>
@@ -389,30 +389,30 @@ export default function AddNewsPage() {
   </div>
 
   <div className="hidden lg:flex lg:col-span-1 flex-col relative w-full lg:sticky lg:top-8">
-  <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 vintage-shadow-lg rounded">
+  <div className="bg-[#fcfaf2] border-[3px] border-black p-6 flex flex-col relative z-10 shadow-[4px_4px_0px_#111111] rounded">
   
   {/* Stamp (visual aesthetic) */}
-  <div className="absolute top-4 right-4 border-2 border-red-800 text-stone-900 border-b border-stone-900 font-bold text-[9px] px-1.5 -rotate-[10deg] mix-blend-multiply select-none font-playfair uppercase">
-  COGNITIVE DECK
+  <div className="absolute top-4 right-4 border-2 border-black text-black border-b border-black font-black text-[9px] px-1.5 -rotate-[10deg] mix-blend-multiply select-none font-['Playfair_Display',_Georgia,_serif] uppercase">
+  STAFF AI
   </div>
 
-  <div className="border-b-2 border-stone-950 pb-3 mb-5 text-left">
-  <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
-  COGNITIVE NEWS WIRE
+  <div className="border-b-2 border-black pb-3 mb-5 text-left">
+  <h3 className="font-['Playfair_Display',_Georgia,_serif] text-lg text-black uppercase tracking-wide font-black">
+  EDITORIAL ASSISTANT
   </h3>
-  <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
+  <p className="font-mono text-[10px] text-stone-600 font-bold mt-1 tracking-wider uppercase">
   AUTOMATED WIRE DESPATCH
   </p>
   </div>
 
-  <div className="flex-1 bg-[#fcfaf2] border border-stone-300 flex flex-col p-5 relative">
+  <div className="flex-1 bg-[#fcfaf2] flex flex-col relative">
   <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
   <p className="font-serif text-xs text-stone-700 leading-relaxed">
-  Provide instructions or a topic. The Nexus Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.
+  Provide instructions or a topic. The Staff Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.
   </p>
 
-  <div className="flex flex-col border-2 border-stone-950 p-3 bg-[#fcfaf2]">
-  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1.5">
+  <div className="flex flex-col border-[2px] border-black p-3 bg-[#fcfaf2]">
+  <label className="font-mono text-[10px] font-bold text-black uppercase tracking-widest mb-1.5">
   Enter Topic or Wire Request:
   </label>
   <textarea
@@ -427,7 +427,7 @@ export default function AddNewsPage() {
 
   <button
   type="submit"
-  className="vintage-stamp w-full text-center py-3 bg-red-800 text-[#fcfaf2] border-red-950 hover:bg-red-950 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs"
+  className="vintage-stamp w-full text-center py-3 bg-black text-[#fcfaf2] border-black hover:bg-stone-800 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs"
   disabled={agentLoading || !agentQuery.trim()}
   >
   {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH NEWS AGENT"}
@@ -436,8 +436,8 @@ export default function AddNewsPage() {
   {agentLoading && (
   <div className="mt-4 p-4 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-xs text-stone-700 flex flex-col gap-2">
   <div className="animate-pulse flex items-center justify-center gap-1.5">
-  <span className="inline-block w-2.5 h-2.5 bg-red-800 rounded-full animate-ping"></span>
-  <span>[ NEWS WIRE AGENT AT WORK ]</span>
+  <span className="inline-block w-2.5 h-2.5 bg-black rounded-full animate-ping"></span>
+  <span className="text-black font-bold">[ NEWS WIRE AGENT AT WORK ]</span>
   </div>
   <p className="text-[10px] text-stone-500 italic">
   Scanning teletypes, mapping wire feeds, and writing copy to print coordinates...
@@ -451,26 +451,26 @@ export default function AddNewsPage() {
   </div>
 
  {/* Footer HUD */}
- <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-stone-950 flex flex-wrap justify-between items-center gap-4 text-[9px] font-mono text-stone-600 z-10 px-1">
+ <footer className="w-full max-w-[1600px] mx-auto mt-6 pt-3 border-t-2 border-black flex flex-wrap justify-between items-center gap-4 text-[10px] font-mono text-stone-800 z-10 px-1 font-bold">
  <div className="flex items-center gap-3">
- <div className="w-6 h-6 border border-stone-950 flex items-center justify-center text-stone-950 font-bold bg-[#fcfaf2]">
- N
+ <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center text-black font-black bg-[#fcfaf2]">
+ D
  </div>
  <div>
- <span className="text-stone-800 font-bold">THE DAILY NEXUS WIRE</span>
+ <span className="text-black font-black tracking-widest">DEV BITS PUBLISHING</span>
  <span className="mx-2 text-stone-400">|</span>
- <span>Printing Engine: <span className="text-stone-900 border-b border-stone-900 font-bold uppercase">STANDBY</span></span>
+ <span>Printing Engine: <span className="text-black border-b border-black font-black uppercase">STANDBY</span></span>
  </div>
  </div>
 
  <div className="flex items-center gap-1.5">
- <span>DECK ENCRYPTION:</span>
- <span className="text-stone-800 font-bold">AES-256 / RSA-4096</span>
+ <span>STAFF CLEARANCE:</span>
+ <span className="text-black font-black uppercase">VERIFIED ACTIVE</span>
  </div>
 
  <div className="flex items-center gap-1.5">
  <span>SYSTEM TIME:</span>
- <span className="text-stone-850 font-bold">{systemTime || "[ SYSTEM STANDBY ]"}</span>
+ <span className="text-black font-black">{systemTime || "[ SYSTEM STANDBY ]"}</span>
  </div>
  </footer>
 

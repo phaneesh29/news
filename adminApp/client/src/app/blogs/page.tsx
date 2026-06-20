@@ -38,8 +38,8 @@ export default function BlogsDashboardPage() {
   const [serverHealth, setServerHealth] = useState<any>(null);
   const [clientInfo, setClientInfo] = useState<any>(null);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "TELETYPE_INIT: Mounting blog wire...",
-    "WIRE: Connection to Metasphere active.",
+    "DESK_INIT: Preparing editorial log...",
+    "WIRE: Connection to central press active.",
   ]);
 
   const addLog = (msg: string) => {
@@ -222,8 +222,8 @@ export default function BlogsDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
-        [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
+      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-['Playfair_Display',_Georgia,_serif] text-stone-900 text-2xl animate-pulse font-bold">
+        [ RETRIEVING ARCHIVES & EDITORIAL FEED... ]
       </div>
     );
   }
@@ -238,11 +238,11 @@ export default function BlogsDashboardPage() {
       <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
         <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
           <div className="flex flex-col text-center md:text-left">
-            <Link href="/dashboard" className="font-blackletter text-4xl sm:text-5xl font-normal drop-shadow-sm tracking-tight text-stone-950 uppercase select-none hover:text-stone-900 border-b border-stone-900 transition-colors">
-              THE DAILY <span className="text-stone-900 border-b border-stone-900">NEXUS</span>
+            <Link href="/dashboard" className="font-['UnifrakturMaguntia',_Georgia,_serif] text-6xl sm:text-7xl drop-shadow-sm tracking-tight text-black select-none hover:opacity-80 border-b-4 border-double border-black transition-opacity pb-1 leading-none">
+              Dev Bits
             </Link>
-            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
-              WIRE SERVICE • OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
+            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase font-bold">
+              EDITORIAL DESK • STAFF ID: <span className="text-black">{profile?.email}</span> ({profile?.role?.toUpperCase()})
             </span>
           </div>
 
@@ -260,11 +260,11 @@ export default function BlogsDashboardPage() {
 
           <div className="flex gap-3">
             {isAdmin && (
-              <Link href="/settings" className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-white px-3 py-1.5 hover:bg-stone-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5">
-                Security Deck
+              <Link href="/settings" className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold">
+                Oversight Board
               </Link>
             )}
-            <button onClick={handleLogout} className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-white px-3 py-1.5 hover:bg-red-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer">
+            <button onClick={handleLogout} className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold cursor-pointer">
               Log Out
             </button>
           </div>
@@ -276,22 +276,20 @@ export default function BlogsDashboardPage() {
         </div>
       </header>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-6xl mx-auto w-full pb-8 items-start">
-        <div className="w-full flex flex-col relative lg:col-span-2">
+      <div className="flex-1 grid grid-cols-1 relative z-10 max-w-5xl mx-auto w-full pb-8 items-start">
+        <div className="w-full flex flex-col relative">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
               <span>DAILY WIRE LOGS</span>
               <span>LATEST BLOGS</span>
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-4 border-stone-950 pb-3 mb-4 pl-2 gap-3">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-[4px] border-double border-black pb-4 mb-6 pl-2 gap-3">
               <div>
-                <h2 className="font-blackletter text-4xl sm:text-5xl font-normal drop-shadow-sm text-stone-950 tracking-tighter uppercase leading-none select-none text-left">
-                  BLOG <span className="text-stone-900 border-b border-stone-900">POSTS</span>
+                <h2 className="font-['Playfair_Display',_Georgia,_serif] text-4xl sm:text-5xl font-black drop-shadow-sm text-black tracking-tighter uppercase leading-none select-none text-left">
+                  LATEST BLOGS
                 </h2>
-                <div className="flex gap-2.5 text-[10px] font-mono font-bold text-stone-900 border-b border-stone-900 mt-2 uppercase tracking-wide">
+                <div className="flex gap-2.5 text-[10px] font-bold text-black border-b border-black mt-2 uppercase tracking-wide">
                   <span>PRINT QUEUE FEED</span>
-                  <span className="text-stone-400">•</span>
-                  <span>SYNCED NODES</span>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
@@ -337,7 +335,7 @@ export default function BlogsDashboardPage() {
                         </span>
                       </div>
 
-                      <h4 className="font-playfair text-2xl font-black italic tracking-tight text-stone-950 leading-snug group-hover/item:text-red-900 transition-colors uppercase">
+                      <h4 className="font-['Playfair_Display',_Georgia,_serif] text-2xl font-black tracking-tight text-black leading-snug group-hover/item:text-gray-800 transition-colors uppercase">
                         {item.title}
                       </h4>
                       
@@ -375,36 +373,7 @@ export default function BlogsDashboardPage() {
           </div>
         </div>
 
-        <div className="hidden lg:flex lg:col-span-1 flex-col gap-6 relative w-full lg:sticky lg:top-8 text-left z-10">
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 scanline overflow-hidden shadow-sm">
-            <div className="coffee-stain -top-6 -right-6 opacity-25"></div>
-            <div className="border-b-2 border-stone-950 pb-3 mb-5">
-              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span>
-                SYS.TELEMETRY
-              </h3>
-              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">OPERATIVE DATA SCAN</p>
-            </div>
-            <div className="flex flex-col gap-3.5 text-xs text-stone-855 font-mono">
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5"><span className="text-stone-500 font-bold">NODE STATUS</span><span className={`font-bold uppercase tracking-wider text-[10px] ${serverHealth?.status === "ok" ? "text-green-800" : "text-red-700 animate-pulse"}`}>{serverHealth ? serverHealth.status.toUpperCase() : "SCANNING..."}</span></div>
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5"><span className="text-stone-500 font-bold">OPERATIVE OS</span><span className="text-stone-900 font-bold">{clientInfo?.os || "DETERMINING..."}</span></div>
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5"><span className="text-stone-500 font-bold">CLIENT BROWSER</span><span className="text-stone-800 truncate max-w-[130px] font-bold">{clientInfo?.browser || "EXTRACTING..."}</span></div>
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5"><span className="text-stone-500 font-bold">IP ADDR COORDINATES</span><span className="text-red-900 font-bold tracking-wider">{clientInfo?.ip || "SCANNING..."}</span></div>
-              <div className="flex justify-between items-center border-b border-stone-300 pb-1.5"><span className="text-stone-500 font-bold">CLEARANCE KEY</span><span className="text-stone-900 uppercase font-bold">{profile?.role || "OPERATIVE"}</span></div>
-            </div>
-          </div>
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 flex-1 min-h-[350px]">
-            <div className="border-b-2 border-stone-950 pb-3 mb-5">
-              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">TELETYPE STREAM</h3>
-              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">LIVE SYSTEM EXECUTIONS</p>
-            </div>
-            <div className="flex-1 green-terminal scanline relative overflow-hidden p-4 font-mono text-[11px] leading-relaxed flex flex-col vintage-shadow-sm min-h-[250px] max-h-[350px]">
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
-                {terminalLogs.map((log, index) => <div key={index} className="opacity-90 hover:opacity-100 transition-opacity">&gt;&gt; {log}</div>)}
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
 
       {selectedBlog && (

@@ -123,13 +123,13 @@ export default function SettingsPage() {
  }
  };
 
- if (loading) {
- return (
- <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
- [ CALIBRATING TELETYPES & FEEDING WIRE PRINT... ]
- </div>
- );
- }
+  if (loading) {
+    return (
+      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-['Playfair_Display',_Georgia,_serif] text-stone-900 text-2xl animate-pulse font-bold">
+        [ RETRIEVING ARCHIVES & EDITORIAL FEED... ]
+      </div>
+    );
+  }
 
  return (
  <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-red-950 text-stone-900 font-serif">
@@ -140,21 +140,21 @@ export default function SettingsPage() {
  <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
  <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
  
- <div className="flex flex-col text-center md:text-left">
- <Link href="/dashboard" className="font-playfair text-3xl sm:text-4xl font-black tracking-tight text-stone-950 uppercase select-none hover:text-red-800 transition-colors">
- THE DAILY <span className="text-red-800">NEXUS</span>
- </Link>
- <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
- WIRE SERVICE | OPERATIVE: <span className="font-bold text-stone-900">{profile?.email}</span> ({profile?.role?.toUpperCase()})
- </span>
- </div>
+  <div className="flex flex-col text-center md:text-left">
+  <Link href="/dashboard" className="font-['UnifrakturMaguntia',_Georgia,_serif] text-6xl sm:text-7xl drop-shadow-sm tracking-tight text-black select-none hover:opacity-80 border-b-4 border-double border-black transition-opacity pb-1 leading-none">
+  Dev Bits
+  </Link>
+  <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase font-bold">
+  EDITORIAL DESK • STAFF ID: <span className="text-black">{profile?.email}</span> ({profile?.role?.toUpperCase()})
+  </span>
+  </div>
 
- {/* Navigation Deck Links */}
- <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
- <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
- <span className="text-stone-400">|</span>
- <Link href="/settings" className="text-red-800 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Security</Link>
- </div>
+  {/* Navigation Deck Links */}
+  <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
+  <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
+  <span className="text-stone-400">|</span>
+  <Link href="/settings" className="text-black hover:text-stone-800 transition-colors font-black border-b-2 border-black pb-0.5">&gt; Oversight Board</Link>
+  </div>
 
  <div className="flex gap-3">
  <Link 
@@ -163,20 +163,20 @@ export default function SettingsPage() {
  >
  Back to Core
  </Link>
- <button 
- onClick={handleLogout}
- className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-[#fcfaf2] px-3 py-1.5 hover:bg-red-950 hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
- >
- Log Out
- </button>
- </div>
- </div>
+  <button 
+  onClick={handleLogout}
+  className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-[#fcfaf2] px-3 py-1.5 hover:bg-black hover:text-[#fcfaf2] transition-all uppercase tracking-widest flex items-center font-bold cursor-pointer"
+  >
+  Log Out
+  </button>
+  </div>
+  </div>
 
- {/* Newspaper Subheader bar */}
- <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
- <span>VOL. CXXVI... No. 47190</span>
- <span>SECURITY DESK SYSTEM</span>
- <span>PRICE: 10 CENTS</span>
+  {/* Newspaper Subheader bar */}
+  <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
+  <span>VOL. CXXVI... No. 47190</span>
+  <span>OVERSIGHT BOARD SYSTEM</span>
+  <span>PRICE: 10 CENTS</span>
  </div>
  </header>
 
@@ -188,20 +188,20 @@ export default function SettingsPage() {
  
  <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 text-stone-900 text-left vintage-shadow-lg rounded">
  
- {/* Stamp */}
- <div className="absolute top-4 right-4 border-2 border-red-800 text-red-800 font-bold text-xs px-2 -rotate-[10deg] mix-blend-multiply select-none font-playfair uppercase">
- VERIFIED
- </div>
+  {/* Stamp */}
+  <div className="absolute top-4 right-4 border-2 border-black text-black font-black text-xs px-2 -rotate-[10deg] mix-blend-multiply select-none font-['Playfair_Display',_Georgia,_serif] uppercase">
+  VERIFIED
+  </div>
 
- {/* Inner Parchment Sheet */}
- <div className="flex-1 bg-[#fcfaf2] border border-stone-300 flex flex-col p-6 sm:p-8 font-serif">
- 
- {/* Coffee Stain */}
- <div className="coffee-stain top-2 left-2 w-20 h-20 opacity-30"></div>
+  {/* Inner Parchment Sheet */}
+  <div className="flex-1 bg-[#fcfaf2] border border-stone-300 flex flex-col p-6 sm:p-8 font-serif">
+  
+  {/* Coffee Stain */}
+  <div className="coffee-stain top-2 left-2 w-20 h-20 opacity-30"></div>
 
- <div className="border-b-2 border-stone-950 pb-3 mb-6">
- <h2 className="font-playfair text-xl sm:text-2xl font-black leading-tight uppercase">OPERATIVE DOSSIER</h2>
- <p className="font-mono text-[9px] font-bold text-stone-500 mt-2 truncate">DATABASE ID: {profile?.id || "UNKNOWN"}</p>
+  <div className="border-b-2 border-stone-950 pb-3 mb-6">
+  <h2 className="font-['Playfair_Display',_Georgia,_serif] text-xl sm:text-2xl font-black leading-tight uppercase">STAFF DOSSIER</h2>
+  <p className="font-mono text-[9px] font-bold text-stone-500 mt-2 truncate">DATABASE ID: {profile?.id || "UNKNOWN"}</p>
  </div>
 
  {/* Bio Grid */}
@@ -243,17 +243,17 @@ export default function SettingsPage() {
  <div className="lg:col-span-2 flex flex-col relative">
  <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 text-left vintage-shadow-lg rounded">
  
- <div className="flex justify-between items-center mb-4 border-b-2 border-stone-950 pb-3">
- <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black flex items-center gap-2">
- ACTIVE DECK TETHERS
- </h3>
- <button 
- onClick={handleRevokeAll}
- className="vintage-stamp text-[9px] py-1 border-red-750 text-red-800 font-mono font-bold"
- >
- REVOKE LINKS
- </button>
- </div>
+  <div className="flex justify-between items-center mb-4 border-b-2 border-stone-950 pb-3">
+  <h3 className="font-['Playfair_Display',_Georgia,_serif] text-lg text-stone-950 uppercase tracking-wide font-black flex items-center gap-2">
+  ACTIVE WORK DESKS
+  </h3>
+  <button 
+  onClick={handleRevokeAll}
+  className="vintage-stamp text-[9px] py-1 border-black text-black font-mono font-bold hover:bg-black hover:text-[#fcfaf2] transition-colors"
+  >
+  REVOKE LINKS
+  </button>
+  </div>
 
  {/* Sessions Tethers list */}
  <div className="space-y-3 pr-2">
@@ -285,12 +285,12 @@ export default function SettingsPage() {
  <div className="lg:col-span-2 flex flex-col relative">
  <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 flex flex-col relative z-10 text-left vintage-shadow-lg rounded">
  
- <div className="flex justify-between items-end border-b-2 border-stone-950 pb-2.5 mb-4 relative z-10">
- <h2 className="font-playfair text-lg font-black text-stone-950 uppercase tracking-wide">
- OPERATIVE OVERRIDE REGISTRY
- </h2>
- <span className="font-mono text-stone-600 text-[10px]">&gt;&gt; AUTH_PROTOCOL</span>
- </div>
+  <div className="flex justify-between items-end border-b-2 border-stone-950 pb-2.5 mb-4 relative z-10">
+  <h2 className="font-['Playfair_Display',_Georgia,_serif] text-lg font-black text-stone-950 uppercase tracking-wide">
+  STAFF AUTHORIZATION REGISTRY
+  </h2>
+  <span className="font-mono text-stone-600 text-[10px]">&gt;&gt; AUTH_PROTOCOL</span>
+  </div>
 
  <div className="flex flex-col gap-5 relative z-10">
  
@@ -305,15 +305,15 @@ export default function SettingsPage() {
  required
  value={newEmail}
  onChange={(e) => setNewEmail(e.target.value)}
- placeholder="OPERATIVE@DEV.NEWS..."
- className="flex-1 bg-transparent border-2 border-stone-950 px-3 py-2 text-xs outline-none focus:border-red-800 placeholder-stone-400 font-mono"
- />
- <button 
- type="submit"
- disabled={whitelistStatus.type === "loading"}
- className="vintage-stamp text-xs font-bold py-2 px-4 disabled:opacity-50"
- >
- AUTHORIZE ID
+  placeholder="OPERATIVE@DEV.NEWS..."
+  className="flex-1 bg-transparent border-2 border-stone-950 px-3 py-2 text-xs outline-none focus:border-black placeholder-stone-400 font-mono"
+  />
+  <button 
+  type="submit"
+  disabled={whitelistStatus.type === "loading"}
+  className="vintage-stamp text-[#fcfaf2] bg-black text-xs font-bold py-2 px-4 disabled:opacity-50 hover:bg-stone-800"
+  >
+  AUTHORIZE ID
  </button>
  </form>
  {whitelistStatus.msg && (

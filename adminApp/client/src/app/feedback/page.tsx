@@ -106,8 +106,8 @@ export default function FeedbackPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-playfair text-stone-900 text-2xl animate-pulse">
-        [ CALIBRATING TELETYPES & SHIELDING CORRIDORS... ]
+      <div className="min-h-screen w-screen bg-[#f5f2e9] flex items-center justify-center font-['Playfair_Display',_Georgia,_serif] text-stone-900 text-2xl animate-pulse font-bold">
+        [ RETRIEVING ARCHIVES & EDITORIAL FEED... ]
       </div>
     );
   }
@@ -121,11 +121,11 @@ export default function FeedbackPage() {
         <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
           
           <div className="flex flex-col text-center md:text-left">
-            <Link href="/dashboard" className="font-blackletter text-4xl sm:text-5xl font-normal drop-shadow-sm tracking-tight text-stone-950 uppercase select-none hover:text-stone-900 border-b border-stone-900 transition-colors">
-              THE DAILY <span className="text-stone-900 border-b border-stone-900">NEXUS</span>
+            <Link href="/dashboard" className="font-['UnifrakturMaguntia',_Georgia,_serif] text-6xl sm:text-7xl drop-shadow-sm tracking-tight text-black select-none hover:opacity-80 border-b-4 border-double border-black transition-opacity pb-1 leading-none">
+              Dev Bits
             </Link>
-            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-1 uppercase">
-              WIRE SERVICE  •  ADMINISTRATOR DECK: <span className="font-bold text-stone-900">{profile?.email}</span>
+            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase font-bold">
+              EDITORIAL DESK  •  STAFF ID: <span className="text-black">{profile?.email}</span>
             </span>
           </div>
 
@@ -141,13 +141,13 @@ export default function FeedbackPage() {
           <div className="flex gap-3">
             <Link 
               href="/settings"
-              className="font-mono text-[10px] sm:text-xs border-2 border-stone-900 text-stone-900 bg-white px-3 py-1.5 hover:bg-stone-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5"
+              className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold"
             >
-              Security Deck
+              Oversight Board
             </Link>
             <button 
               onClick={handleLogout}
-              className="font-mono text-[10px] sm:text-xs border-2 border-red-950 text-red-900 bg-white px-3 py-1.5 hover:bg-red-950 hover:text-white transition-all uppercase tracking-widest flex items-center gap-1.5 cursor-pointer"
+              className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold cursor-pointer"
             >
               Log Out
             </button>
@@ -163,20 +163,20 @@ export default function FeedbackPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 max-w-[1600px] mx-auto w-full pb-8">
+      <main className="flex-1 grid grid-cols-1 relative z-10 max-w-5xl mx-auto w-full pb-8">
         
-        {/* Feedback List (Left 2 Columns) */}
-        <div className="lg:col-span-2 flex flex-col relative w-full">
+        {/* Feedback List */}
+        <div className="flex flex-col relative w-full">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             
             {/* Header */}
-            <div className="flex justify-between items-center border-b-4 border-stone-950 pb-3 mb-6">
+            <div className="flex justify-between items-center border-b-[4px] border-double border-black pb-4 mb-6">
               <div>
-                <h2 className="font-blackletter text-4xl sm:text-5xl font-normal text-stone-950 uppercase tracking-tighter leading-none select-none text-left">
-                  USER <span className="text-stone-900 border-b border-stone-900">FEEDBACK</span>
+                <h2 className="font-['Playfair_Display',_Georgia,_serif] text-4xl sm:text-5xl font-black drop-shadow-sm text-black tracking-tighter uppercase leading-none select-none text-left">
+                  LETTERS TO THE EDITOR
                 </h2>
-                <div className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase">
-                  incoming dispatches & communications
+                <div className="font-mono text-[10px] font-bold text-black tracking-wider mt-2 uppercase border-b border-black w-max pb-0.5">
+                  PRINT QUEUE FEED
                 </div>
               </div>
               <button 
@@ -242,30 +242,7 @@ export default function FeedbackPage() {
           </div>
         </div>
 
-        {/* Live Logs & Telemetry panel (Right 1 Column) */}
-        <div className="flex flex-col gap-6 relative w-full">
-          {/* Telemetry log system */}
-          <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 flex flex-col relative z-10 scanline overflow-hidden shadow-sm rounded">
-            <div className="border-b-2 border-stone-950 pb-3 mb-5">
-              <h3 className="font-playfair text-lg text-stone-950 uppercase tracking-wide font-black">
-                FEEDBACK LOG STREAM
-              </h3>
-              <p className="font-mono text-[9px] text-stone-500 font-bold mt-1 tracking-wider uppercase">
-                Teletype print activity
-              </p>
-            </div>
 
-            <div className="green-terminal scanline relative overflow-hidden p-4 font-mono text-[11px] leading-relaxed flex flex-col vintage-shadow-sm min-h-[300px]">
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1 max-h-[350px]">
-                {terminalLogs.map((log, index) => (
-                  <div key={index} className="opacity-90 hover:opacity-100 transition-opacity">
-                    &gt;&gt; {log}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
 
       </main>
     </div>
