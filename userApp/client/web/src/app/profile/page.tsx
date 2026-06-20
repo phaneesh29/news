@@ -136,20 +136,21 @@ export default function UserProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col selection:bg-[#cc785c]/20 selection:text-[#141413]">
+    <div className="min-h-screen flex flex-col paper-grain selection:bg-[#cc785c]/20 selection:text-[#141413]">
       <Navbar />
 
       {/* Broadsheet Profile Header */}
       <header className="py-8 md:py-12 border-b-4 border-double border-current px-4 bg-transparent text-inherit text-center">
         <div className="mx-auto max-w-7xl flex flex-col items-center space-y-4">
           
-          <div className="w-full flex justify-between items-center text-[10px] font-mono uppercase tracking-widest border-b border-current pb-2 max-w-5xl">
+          <div className="w-full flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest border-b border-current pb-2 max-w-5xl">
             <span>DOSSIER CATALOG</span>
             <span>IDENTITY VERIFICATION RECORDS</span>
             <span>SECTION C // PROFILE</span>
           </div>
 
-          <h1 className="font-serif text-5xl sm:text-7xl font-black tracking-tight text-inherit uppercase font-blackletter">
+          {/* Gothic Masthead Title */}
+          <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-inherit uppercase font-blackletter border-b border-current pb-4 w-full max-w-5xl whitespace-nowrap">
             Archival Identity
           </h1>
 
