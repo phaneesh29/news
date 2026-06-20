@@ -32,8 +32,16 @@ export default function DevBitsNews() {
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
 
-  // Fetch news on mount
+  // Fetch news when user is authenticated
   React.useEffect(() => {
+    if (!activeUser) {
+      setNews([]);
+      if (!isPending) {
+        setLoadingNews(false);
+      }
+      return;
+    }
+
     async function loadNews() {
       try {
         setLoadingNews(true);
@@ -48,7 +56,7 @@ export default function DevBitsNews() {
       }
     }
     loadNews();
-  }, []);
+  }, [activeUser, isPending]);
 
   React.useEffect(() => {
     console.log("Google Client ID configured as:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
