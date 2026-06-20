@@ -223,6 +223,7 @@ export async function fetchLikedNewsList(): Promise<ApiResponse<{ news: NewsItem
 export interface FeedbackItem {
   id: string;
   userId: string;
+  email: string;
   message: string;
   createdAt: string;
 }

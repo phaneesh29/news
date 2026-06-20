@@ -4,12 +4,14 @@ import { feedbacks } from "../db/schema.js";
 export const submitFeedback = async (req, res, next) => {
   try {
     const userId = req.auth.user.id;
+    const email = req.auth.user.email;
     const { message } = req.body;
 
     const [newFeedback] = await db
       .insert(feedbacks)
       .values({
         userId,
+        email,
         message,
       })
       .returning();

@@ -114,6 +114,7 @@ export const newsLikes = pgTable('news_likes', {
 export const feedbacks = pgTable('feedbacks', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  email: text('email').notNull(),
   message: text('message').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 });
