@@ -1,5 +1,8 @@
 import "dotenv/config";
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const config = {
   tavilyApiKey: process.env.TAVILY_API_KEY || '',
@@ -11,5 +14,5 @@ export const config = {
   llmModel: 'gemma4:31b',
   llmModelSettings: {},
 
-  outputFile: path.resolve('news.md'),
+  outputFile: path.resolve(__dirname, '..', '..', 'content', 'news.md'),
 };

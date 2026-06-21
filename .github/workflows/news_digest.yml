@@ -43,6 +43,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add newsAgent/news.md
+          git add content/news.md
           # Only commit if changes exist
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update news digest [skip ci]" && git push)

@@ -78,7 +78,7 @@ graph TD
 Operates a sequential parent-child LLM agent workflow configured to scrape hacker updates, trending releases, exploits, and academic briefs, compiling them into ranked dispatch feeds.
 - **Coordination Hub:** [newsAgent/index.js](file:///D:/news/newsAgent/index.js) orchestrates the agentic workflow via `@openai/agents`.
 - **Architectural Specs:** Read [newsAgent/README.md](file:///D:/news/newsAgent/README.md) for data flow specifications.
-- **Output Vault:** [newsAgent/news.md](file:///D:/news/newsAgent/news.md) holds the raw telemetry outputs compiled by the editor agent.
+- **Output Vault:** [content/news.md](file:///D:/news/content/news.md) holds the raw telemetry outputs compiled by the editor agent.
 
 ### 🎛️ [adminApp](file:///D:/news/adminApp) — Classified Command Terminal
 The Win95/Y2K-themed operational environment allowing grid operators to audit, write, and purge Chronicles dispatches, alongside managing long-form Manifests (Blogs) and addressing User Feedback.
@@ -136,7 +136,7 @@ cd D:/news/newsAgent
 npm install
 npm start
 ```
-*Creates the [news.md](file:///D:/news/newsAgent/news.md) dispatch archive.*
+*Creates the [news.md](file:///D:/news/content/news.md) dispatch archive.*
 
 ### Phase 2: Launch Command Mainframe (adminApp)
 1. Initialize the PostgreSQL schema via Drizzle ORM:
