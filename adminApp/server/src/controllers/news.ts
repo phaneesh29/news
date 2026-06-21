@@ -51,6 +51,7 @@ export const createNews = async (c: Context) => {
       sourceUrl?: string | null
       priority?: 'low' | 'medium' | 'high' | 'critical'
       tags?: string[]
+      isPublished?: boolean
     }
 
     const insertedNews = await db.insert(devNews)
@@ -60,6 +61,7 @@ export const createNews = async (c: Context) => {
         sourceUrl: body.sourceUrl ?? null,
         priority: body.priority ?? 'low',
         tags: body.tags ?? [],
+        isPublished: body.isPublished ?? false,
         authorId: user.id
       })
       .returning()

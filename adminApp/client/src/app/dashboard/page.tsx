@@ -318,6 +318,8 @@ export default function DashboardPage() {
             <Link href="/dashboard" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
+            <span className="text-stone-400">|</span>
+            <Link href="/digest" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Digest Wire</Link>
             {isAdmin && (
               <>
                 <span className="text-stone-400">|</span>

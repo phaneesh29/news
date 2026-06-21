@@ -153,6 +153,8 @@ export default function SettingsPage() {
   <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-[#dcd7c9]/50 px-4 py-2 border border-stone-400/50">
   <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Wire Feed</Link>
   <span className="text-stone-400">|</span>
+  <Link href="/digest" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Digest Wire</Link>
+  <span className="text-stone-400">|</span>
   <Link href="/settings" className="text-black hover:text-stone-800 transition-colors font-black border-b-2 border-black pb-0.5">&gt; Oversight Board</Link>
   </div>
 

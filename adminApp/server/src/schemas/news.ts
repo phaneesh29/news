@@ -7,7 +7,8 @@ export const createNewsSchema = z.object({
   content: z.string().trim().min(1, 'Content is required'),
   sourceUrl: z.url('Invalid source URL').max(512).nullable().optional(),
   priority: newsPrioritySchema.optional(),
-  tags: z.array(z.string()).optional()
+  tags: z.array(z.string()).optional(),
+  isPublished: z.boolean().optional()
 })
 
 export const updateNewsSchema = z.object({

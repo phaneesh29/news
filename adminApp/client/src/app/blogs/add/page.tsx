@@ -173,6 +173,8 @@ export default function AddBlogPage() {
             <Link href="/dashboard" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; Blogs Feed</Link>
+            <span className="text-stone-400">|</span>
+            <Link href="/digest" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; Digest Wire</Link>
           </div>
           <div className="flex gap-3">
             {isAdmin && (
