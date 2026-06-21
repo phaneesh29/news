@@ -244,3 +244,65 @@ export async function submitFeedbackApi(message: string): Promise<ApiResponse<{ 
   return response.json();
 }
 
+export interface DigestTrend {
+  trend: string;
+  description: string;
+}
+
+export interface DigestSource {
+  name: string;
+  url: string;
+}
+
+export interface DigestArticle {
+  type: string;
+  emoji: string;
+  confidence: string;
+  title: string;
+  impact: number;
+  sourceName: string;
+  sourceUrl: string;
+  summary: string;
+  score: number;
+  scoringBreakdown: Record<string, number>;
+  sources: DigestSource[];
+}
+
+export interface DigestCategory {
+  name: string;
+  emoji: string;
+  articles: DigestArticle[];
+}
+
+export interface DigestStats {
+  totalItemsVerified?: string;
+  highConfidence?: string;
+  mediumConfidence?: string;
+  lowConfidence?: string;
+  crossReferenced?: string;
+  freshnessWindow?: string;
+  generatedAt?: string;
+  [key: string]: string | undefined;
+}
+
+export interface DigestData {
+  title: string;
+  subtitle: string;
+  lastUpdated: string;
+  executiveSummary: string;
+  trends: DigestTrend[];
+  categories: DigestCategory[];
+  stats: DigestStats;
+}
+
+export async function fetchDigest(): Promise<ApiResponse<DigestData>> {
+  const response = await fetch(`${API_BASE_URL}/digest`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch digest");
+  }
+  return response.json();
+}
+

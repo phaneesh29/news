@@ -100,6 +100,16 @@ export default function Navbar() {
               News
             </Link>
 
+            {/* Digest Tab */}
+            <Link 
+              href="/digest" 
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname === "/digest" ? "text-current" : "text-current/60 hover:text-current"
+              }`}
+            >
+              Briefs
+            </Link>
+
             {/* Blog Tab */}
             <Link 
               href="/blog" 
