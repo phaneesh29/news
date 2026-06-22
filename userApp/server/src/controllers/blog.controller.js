@@ -1,4 +1,4 @@
-import { desc, eq, lt, or, and } from "drizzle-orm";
+import { desc, eq, lt, or, and, ilike } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { blogs } from "../db/schema.js";
 
@@ -101,6 +101,37 @@ export const getPublishedBlogById = async (req, res, next) => {
       status: "success",
       data: {
         blog,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchPublishedBlogs = async (req, res, next) => {
+  try {
+    const { q: search, limit } = req.query;
+
+    const blogResults = await db
+      .select(blogSelect)
+      .from(blogs)
+      .where(
+        and(
+          eq(blogs.isPublished, true),
+          or(
+            ilike(blogs.title, `%${search}%`),
+            ilike(blogs.content, `%${search}%`),
+            ilike(blogs.slug, `%${search}%`)
+          )
+        )
+      )
+      .orderBy(desc(blogs.createdAt), desc(blogs.id))
+      .limit(Math.min(limit, 100));
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        blogs: blogResults,
       },
     });
   } catch (error) {

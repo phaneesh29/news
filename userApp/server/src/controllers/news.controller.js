@@ -1,4 +1,4 @@
-import { desc, eq, lt, or, and, inArray, sql } from "drizzle-orm";
+import { desc, eq, lt, or, and, inArray, sql, ilike } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { devNews, newsLikes } from "../db/schema.js";
 
@@ -256,6 +256,85 @@ export const getMyLikedNews = async (req, res, next) => {
       status: "success",
       data: {
         news: likedNewsItems,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchPublishedNews = async (req, res, next) => {
+  try {
+    const { q: search, priority, limit } = req.query;
+
+    let conditions = [
+      eq(devNews.isPublished, true),
+      or(
+        ilike(devNews.title, `%${search}%`),
+        ilike(devNews.content, `%${search}%`),
+        ilike(devNews.sourceUrl, `%${search}%`)
+      )
+    ];
+
+    if (priority) {
+      conditions.push(eq(devNews.priority, priority));
+    }
+
+    const newsItems = await db
+      .select(newsSelect)
+      .from(devNews)
+      .where(and(...conditions))
+      .orderBy(desc(devNews.createdAt), desc(devNews.id))
+      .limit(Math.min(limit, 100));
+
+    let finalResults = newsItems.map(item => ({
+      ...item,
+      likesCount: 0,
+      hasLiked: false
+    }));
+
+    if (newsItems.length > 0) {
+      const newsIds = newsItems.map(item => item.id);
+      
+      const likeCounts = await db
+        .select({
+          newsId: newsLikes.newsId,
+          count: sql`count(*)`.mapWith(Number)
+        })
+        .from(newsLikes)
+        .where(inArray(newsLikes.newsId, newsIds))
+        .groupBy(newsLikes.newsId);
+
+      const countsMap = {};
+      likeCounts.forEach(c => {
+        countsMap[c.newsId] = c.count;
+      });
+
+      let userLikesSet = new Set();
+      if (req.auth?.user?.id) {
+        const userLikes = await db
+          .select({ newsId: newsLikes.newsId })
+          .from(newsLikes)
+          .where(
+            and(
+              inArray(newsLikes.newsId, newsIds),
+              eq(newsLikes.userId, req.auth.user.id)
+            )
+          );
+        userLikesSet = new Set(userLikes.map(l => l.newsId));
+      }
+
+      finalResults = newsItems.map(item => ({
+        ...item,
+        likesCount: countsMap[item.id] || 0,
+        hasLiked: userLikesSet.has(item.id)
+      }));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        news: finalResults,
       },
     });
   } catch (error) {
