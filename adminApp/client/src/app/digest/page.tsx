@@ -79,6 +79,9 @@ export default function DigestPage() {
   const [formSourceUrl, setFormSourceUrl] = useState("");
   const [formIsPublished, setFormIsPublished] = useState(true);
 
+  const [agentQuery, setAgentQuery] = useState("");
+  const [agentLoading, setAgentLoading] = useState(false);
+
   // Successfully verified articles titles tracker
   const [verifiedTitles, setVerifiedTitles] = useState<string[]>([]);
 
@@ -138,6 +141,17 @@ export default function DigestPage() {
 
     initPage();
   }, [router]);
+
+  useEffect(() => {
+    if (showVerifyModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showVerifyModal]);
 
   const handleLogout = async () => {
     try {
@@ -221,6 +235,67 @@ export default function DigestPage() {
       setTimeout(() => {
         setInjectionStatus({ active: false, phase: "", progress: 0 });
       }, 1500);
+    }
+  };
+
+  const handleAskAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agentQuery.trim()) return;
+
+    setAgentLoading(true);
+    try {
+      const promptWithContext = `You are refining or drafting a news article based on a neural wire digest dispatch suggestion.
+
+Here is the current draft state:
+---
+TITLE: ${formTitle || "(empty)"}
+CONTENT/SUMMARY:
+${formContent || "(empty)"}
+TAGS: ${formTags || "(empty)"}
+PRIORITY/ALERT LEVEL: ${formPriority || "(empty)"}
+SOURCE LINK: ${formSourceUrl || "(empty)"}
+---
+
+User Instructions / Topic:
+"${agentQuery}"
+
+Please modify or rewrite the news draft according to the user instructions. Make sure to respond with the complete updated schema (title, content, tags, priority, and sourceUrl).`;
+
+      const res = await fetch(`${API_BASE_URL}/agent/draft/news`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: promptWithContext }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Agent failed to draft news");
+      const data = await res.json();
+      if (data.success) {
+        const draft = data.draft;
+        setFormTitle(draft.title || "");
+        setFormContent(draft.content || "");
+        if (draft.tags) {
+          setFormTags(draft.tags.join(", "));
+        }
+        if (draft.sourceUrl) {
+          setFormSourceUrl(draft.sourceUrl);
+        }
+        if (draft.priority) {
+          const pr = draft.priority.toLowerCase();
+          if (["low", "medium", "high", "critical"].includes(pr)) {
+            setFormPriority(pr);
+          } else {
+            setFormPriority("low");
+          }
+        }
+        setAgentQuery("");
+      } else {
+        throw new Error(data.error?.message || "Failed to draft news");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Error generating draft from agent");
+    } finally {
+      setAgentLoading(false);
     }
   };
 
@@ -477,7 +552,7 @@ export default function DigestPage() {
       {/* Verification Overlay Modal */}
       {showVerifyModal && selectedArticle && (
         <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-[#fcfaf2] border-4 border-stone-950 p-6 md:p-8 max-w-2xl w-full rounded shadow-[6px_6px_0px_#111] relative text-left">
+          <div className="bg-[#fcfaf2] border-4 border-stone-950 p-6 md:p-8 max-w-5xl w-full rounded shadow-[6px_6px_0px_#111] relative text-left transition-all duration-300">
             
             {/* Modal close */}
             <button 
@@ -497,144 +572,176 @@ export default function DigestPage() {
               </h3>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleVerifyPublishSubmit} className="space-y-4">
-              <div className="flex flex-col border-b border-stone-400 pb-2">
-                <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                  ARTICLE TITLE
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-base text-stone-900 font-bold font-serif uppercase tracking-tight"
-                />
-              </div>
-
-              <div className="flex flex-col border-b border-stone-400 pb-2">
-                <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                  CONTENT SUMMARY
-                </label>
-                <textarea
-                  required
-                  value={formContent}
-                  onChange={(e) => setFormContent(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-sm text-stone-900 font-serif leading-relaxed"
-                  rows={5}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Split layout: Form & Agent Pane */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mt-4">
+              <form onSubmit={handleVerifyPublishSubmit} className="lg:col-span-2 space-y-4">
                 <div className="flex flex-col border-b border-stone-400 pb-2">
                   <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    SOURCE URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formSourceUrl}
-                    onChange={(e) => setFormSourceUrl(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-900 font-mono"
-                  />
-                </div>
-
-                <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    ROUTING LABELS (COMMA SEPARATED)
+                    ARTICLE TITLE
                   </label>
                   <input
                     type="text"
-                    value={formTags}
-                    onChange={(e) => setFormTags(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-xs text-stone-900 font-mono uppercase"
+                    required
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    className="w-full bg-transparent border-none outline-none text-base text-stone-900 font-bold font-serif uppercase tracking-tight"
                   />
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-1.5 pt-2">
-                <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
-                  ALERT LEVEL
-                </span>
-                <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
-                  {[
-                    { key: "low", text: "LOW" },
-                    { key: "medium", text: "MEDIUM" },
-                    { key: "high", text: "HIGH" },
-                    { key: "critical", text: "CRITICAL" }
-                  ].map((level) => (
-                    <button
-                      key={level.key}
-                      type="button"
-                      onClick={() => setFormPriority(level.key)}
-                      className={`py-2 rounded border-2 cursor-pointer transition-all duration-200 ${
-                        formPriority === level.key 
-                          ? "bg-stone-950 text-white border-stone-950 font-bold scale-[1.03]" 
-                          : "bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200"
-                      }`}
-                    >
-                      {level.text}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-4">
-                <div className="flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">DIRECT PUBLICATION</span>
-                  <span className="font-serif text-xs text-stone-500">Toggle on to immediately list on the public feed.</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormIsPublished(!formIsPublished)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${formIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formIsPublished ? 'translate-x-5' : 'translate-x-1'}`}
+                <div className="flex flex-col border-b border-stone-400 pb-2">
+                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                    CONTENT SUMMARY
+                  </label>
+                  <textarea
+                    required
+                    value={formContent}
+                    onChange={(e) => setFormContent(e.target.value)}
+                    className="w-full bg-transparent border-none outline-none text-sm text-stone-900 font-serif leading-relaxed"
+                    rows={5}
                   />
-                </button>
-              </div>
+                </div>
 
-              <div className="pt-4 flex gap-4">
-                <button
-                  type="submit"
-                  disabled={injectionStatus.active}
-                  className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-3 rounded uppercase tracking-wider hover:bg-transparent hover:text-black transition-all cursor-pointer"
-                >
-                  Confirm & Verify Dispatch
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowVerifyModal(false)}
-                  className="flex-1 bg-stone-200 text-stone-900 border-2 border-stone-300 font-mono font-bold text-xs py-3 rounded uppercase tracking-wider hover:bg-stone-300 transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      SOURCE URL
+                    </label>
+                    <input
+                      type="url"
+                      value={formSourceUrl}
+                      onChange={(e) => setFormSourceUrl(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 font-mono"
+                    />
+                  </div>
+
+                  <div className="flex flex-col border-b border-stone-400 pb-2">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                      ROUTING LABELS (COMMA SEPARATED)
+                    </label>
+                    <input
+                      type="text"
+                      value={formTags}
+                      onChange={(e) => setFormTags(e.target.value)}
+                      className="w-full bg-transparent border-none outline-none text-xs text-stone-900 font-mono uppercase"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5 pt-2">
+                  <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
+                    ALERT LEVEL
+                  </span>
+                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono">
+                    {[
+                      { key: "low", text: "LOW" },
+                      { key: "medium", text: "MEDIUM" },
+                      { key: "high", text: "HIGH" },
+                      { key: "critical", text: "CRITICAL" }
+                    ].map((level) => (
+                      <button
+                        key={level.key}
+                        type="button"
+                        onClick={() => setFormPriority(level.key)}
+                        className={`py-2 rounded border-2 cursor-pointer transition-all duration-200 ${
+                          formPriority === level.key 
+                            ? "bg-stone-950 text-white border-stone-950 font-bold scale-[1.03]" 
+                            : "bg-stone-100 text-stone-700 border-stone-300 hover:bg-stone-200"
+                        }`}
+                      >
+                        {level.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-4">
+                  <div className="flex flex-col">
+                    <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">DIRECT PUBLICATION</span>
+                    <span className="font-serif text-xs text-stone-500">Toggle on to immediately list on the public feed.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormIsPublished(!formIsPublished)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${formIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formIsPublished ? 'translate-x-5' : 'translate-x-1'}`}
+                    />
+                  </button>
+                </div>
+
+                <div className="pt-4 flex gap-4">
+                  <button
+                    type="submit"
+                    disabled={injectionStatus.active}
+                    className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-3 rounded uppercase tracking-wider hover:bg-transparent hover:text-black transition-all cursor-pointer"
+                  >
+                    Confirm & Verify Dispatch
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowVerifyModal(false)}
+                    className="flex-1 bg-stone-200 text-stone-900 border-2 border-stone-300 font-mono font-bold text-xs py-3 rounded uppercase tracking-wider hover:bg-stone-300 transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+
+              <div className="lg:col-span-1 flex flex-col relative w-full lg:sticky lg:top-0">
+                <div className="bg-[#fcfaf2] border-[3px] border-black p-4 flex flex-col relative z-10 shadow-[4px_4px_0px_#111111] rounded">
+                  <div className="absolute top-4 right-4 border-2 border-black text-black border-b border-black font-black text-[9px] px-1.5 -rotate-[10deg] mix-blend-multiply select-none font-['Playfair_Display',_Georgia,_serif] uppercase">
+                    STAFF AI
+                  </div>
+                  <div className="border-b-2 border-black pb-3 mb-4 text-left">
+                    <h3 className="font-['Playfair_Display',_Georgia,_serif] text-base text-black uppercase tracking-wide font-black">EDITORIAL ASSISTANT</h3>
+                    <p className="font-mono text-[9px] text-stone-600 font-bold mt-1 tracking-wider uppercase">AUTOMATED WIRE DESPATCH</p>
+                  </div>
+                  <div className="flex-1 bg-[#fcfaf2] flex flex-col relative">
+                    <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
+                      <p className="font-serif text-xs text-stone-700 leading-relaxed">Provide instructions or a topic. The Staff Agent will search the web using <strong>Tavily Search & Extraction</strong>, synthesize the details, and return a print-ready news report draft matching the database schema.</p>
+                      <div className="flex flex-col border-[2px] border-black p-2 bg-[#fcfaf2]">
+                        <label className="font-mono text-[9px] font-bold text-black uppercase tracking-widest mb-1.5">Enter Topic or Wire Request:</label>
+                        <textarea required placeholder="e.g. OpenAI releases a new reasoning model named o3. Include its features and pricing." value={agentQuery} onChange={(e) => setAgentQuery(e.target.value)} className="w-full bg-transparent outline-none text-xs text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-20 resize-none typewriter-field" disabled={agentLoading} />
+                      </div>
+                      <button type="submit" className="vintage-stamp w-full text-center py-2 bg-black text-[#fcfaf2] border-black hover:bg-stone-800 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs" disabled={agentLoading || !agentQuery.trim()}>
+                        {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH NEWS AGENT"}
+                      </button>
+                      {agentLoading && (
+                        <div className="mt-2 p-2 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-[10px] text-stone-700 flex flex-col gap-1">
+                          <div className="animate-pulse flex items-center justify-center gap-1">
+                            <span className="inline-block w-2 h-2 bg-black rounded-full animate-ping"></span>
+                            <span className="text-black font-bold">[ WIRE AGENT AT WORK ]</span>
+                          </div>
+                        </div>
+                      )}
+                    </form>
+                  </div>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Dispatching Teleprinter sweep animation popup */}
       {injectionStatus.active && (
-        <div className="fixed inset-0 bg-stone-950/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center p-6 text-[#44ee77] font-mono">
-          <div className="max-w-md w-full border-2 border-[#1c883e] bg-black p-6 rounded shadow-[0_0_20px_rgba(28,136,62,0.4)] text-center relative scanline">
-            <h3 className="text-sm font-bold uppercase tracking-widest mb-4">
-              [ DIRECT TELEGRAPH WIRE COMMUNICATOR ]
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-[#fcfaf2] border-4 border-double border-black p-8 flex flex-col gap-6 relative overflow-hidden text-stone-900">
+            <h3 className="font-['Playfair_Display',_Georgia,_serif] text-black font-black text-xl uppercase tracking-widest text-center animate-pulse">
+              PUBLISHING TO FEED
             </h3>
             
-            <div className="space-y-4">
-              <div className="text-xs uppercase animate-pulse">{injectionStatus.phase}</div>
-              
-              <div className="w-full bg-stone-900 border border-[#1c883e]/50 h-3 rounded overflow-hidden">
+            <div className="flex flex-col gap-2 font-mono text-xs text-stone-800">
+              <div className="flex justify-between">
+                <span>STATUS: {injectionStatus.phase}</span>
+                <span>{injectionStatus.progress}%</span>
+              </div>
+              <div className="w-full h-4 bg-[#dcd7c9] border-2 border-stone-950 overflow-hidden p-0.5">
                 <div 
-                  className="bg-[#44ee77] h-full transition-all duration-300"
+                  className="h-full bg-stone-950 transition-all duration-300"
                   style={{ width: `${injectionStatus.progress}%` }}
                 ></div>
-              </div>
-
-              <div className="text-[10px] text-stone-400">
-                TRANS-CHANNEL BROADCAST INTENSITY: {injectionStatus.progress}%
               </div>
             </div>
           </div>

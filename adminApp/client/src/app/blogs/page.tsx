@@ -34,6 +34,9 @@ export default function BlogsDashboardPage() {
   const [editContent, setEditContent] = useState("");
   const [editSlug, setEditSlug] = useState("");
   const [editIsPublished, setEditIsPublished] = useState(false);
+  
+  const [agentQuery, setAgentQuery] = useState("");
+  const [agentLoading, setAgentLoading] = useState(false);
 
   const [serverHealth, setServerHealth] = useState<any>(null);
   const [clientInfo, setClientInfo] = useState<any>(null);
@@ -148,6 +151,17 @@ export default function BlogsDashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (selectedBlog) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedBlog]);
+
   const handleLogout = async () => {
     try {
       addLog("AUTH: Purging session credentials...");
@@ -182,6 +196,55 @@ export default function BlogsDashboardPage() {
     } catch (err) {
       console.error("Update error:", err);
       addLog("WARNING: Payload modification failed (Slug might not be unique)");
+    }
+  };
+
+  const handleAskAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agentQuery.trim()) return;
+
+    setAgentLoading(true);
+    try {
+      const promptWithContext = `You are updating/revising an existing blog post. 
+
+Here is the current edit draft:
+---
+TITLE: ${editTitle || "(empty)"}
+SLUG: ${editSlug || "(empty)"}
+CONTENT:
+${editContent || "(empty)"}
+---
+
+User Update Instructions:
+"${agentQuery}"
+
+Please modify or rewrite the blog post according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
+
+      const res = await fetch(`${API_BASE_URL}/agent/draft/blog`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: promptWithContext }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Agent failed to draft blog");
+      const data = await res.json();
+      if (data.success) {
+        const draft = data.draft;
+        setEditTitle(draft.title || "");
+        setEditContent(draft.content || "");
+        if (draft.slug) {
+          setEditSlug(draft.slug);
+        }
+        setAgentQuery("");
+        addLog("WIRE: AI agent successfully updated edit draft fields");
+      } else {
+        throw new Error(data.error?.message || "Failed to draft blog");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Error generating draft from agent");
+    } finally {
+      setAgentLoading(false);
     }
   };
 
@@ -380,37 +443,70 @@ export default function BlogsDashboardPage() {
 
       {selectedBlog && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded">
+          <div className={`w-full ${isEditing ? 'max-w-5xl' : 'max-w-2xl'} bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded transition-all duration-300`}>
             <button onClick={() => { setSelectedBlog(null); addLog("INSPECTOR: Dossier closed"); }} className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs">[ CLOSE ]</button>
             <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-6 text-stone-900">
               {isEditing ? (
-                <form onSubmit={handleUpdatePayload} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
-                  <div className="flex flex-col border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">TRANSMISSION HEADLINE</label>
-                    <input type="text" required value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-950 placeholder-stone-600/40 font-serif" />
-                  </div>
-                  <div className="flex flex-col border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
-                    <input type="text" required value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono" />
-                  </div>
-                  <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
-                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">DRAFT CHRONICLE DETAILS</label>
-                    <textarea required value={editContent} onChange={(e) => setEditContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar" rows={8} />
-                  </div>
-                  <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-2">
-                    <div className="flex flex-col">
-                      <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">PUBLICATION STATUS</span>
-                      <span className="font-serif text-xs text-stone-500">Toggle to publish or unpublish this report.</span>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                  <form onSubmit={handleUpdatePayload} className="lg:col-span-2 flex flex-col gap-4 font-serif text-stone-900 text-left">
+                    <div className="flex flex-col border-b border-stone-400 pb-2">
+                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">TRANSMISSION HEADLINE</label>
+                      <input type="text" required value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-950 placeholder-stone-600/40 font-serif" />
                     </div>
-                    <button type="button" onClick={() => setEditIsPublished(!editIsPublished)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${editIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}>
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editIsPublished ? 'translate-x-5' : 'translate-x-1'}`} />
-                    </button>
+                    <div className="flex flex-col border-b border-stone-400 pb-2">
+                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
+                      <input type="text" required value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono" />
+                    </div>
+                    <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
+                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">DRAFT CHRONICLE DETAILS</label>
+                      <textarea required value={editContent} onChange={(e) => setEditContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar" rows={8} />
+                    </div>
+                    <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-2">
+                      <div className="flex flex-col">
+                        <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">PUBLICATION STATUS</span>
+                        <span className="font-serif text-xs text-stone-500">Toggle to publish or unpublish this report.</span>
+                      </div>
+                      <button type="button" onClick={() => setEditIsPublished(!editIsPublished)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${editIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editIsPublished ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                    <div className="mt-4 flex gap-4">
+                      <button type="submit" className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer">Save Changes</button>
+                      <button type="button" onClick={() => setIsEditing(false)} className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-305 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer">Cancel</button>
+                    </div>
+                  </form>
+                  <div className="lg:col-span-1 flex flex-col relative w-full lg:sticky lg:top-0">
+                    <div className="bg-[#fcfaf2] border-[3px] border-black p-4 flex flex-col relative z-10 shadow-[4px_4px_0px_#111111] rounded">
+                      <div className="absolute top-4 right-4 border-2 border-black text-black border-b border-black font-black text-[9px] px-1.5 -rotate-[10deg] mix-blend-multiply select-none font-['Playfair_Display',_Georgia,_serif] uppercase">
+                        STAFF AI
+                      </div>
+                      <div className="border-b-2 border-black pb-3 mb-4 text-left">
+                        <h3 className="font-['Playfair_Display',_Georgia,_serif] text-base text-black uppercase tracking-wide font-black">EDITORIAL ASSISTANT</h3>
+                        <p className="font-mono text-[9px] text-stone-600 font-bold mt-1 tracking-wider uppercase">AUTOMATED WIRE DESPATCH</p>
+                      </div>
+                      <div className="flex-1 bg-[#fcfaf2] flex flex-col relative">
+                        <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
+                          <p className="font-serif text-xs text-stone-700 leading-relaxed">Provide instructions or a topic. The Staff Agent will search the web using <strong>Tavily Search</strong>, synthesize details, and return a print-ready blog draft.</p>
+                          <div className="flex flex-col border-[2px] border-black p-2 bg-[#fcfaf2]">
+                            <label className="font-mono text-[9px] font-bold text-black uppercase tracking-widest mb-1.5">Enter Topic or Wire Request:</label>
+                            <textarea required placeholder="e.g. Write a blog about the evolution of JavaScript." value={agentQuery} onChange={(e) => setAgentQuery(e.target.value)} className="w-full bg-transparent outline-none text-xs text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-20 resize-none typewriter-field" disabled={agentLoading} />
+                          </div>
+                          <button type="submit" className="vintage-stamp w-full text-center py-2 bg-black text-[#fcfaf2] border-black hover:bg-stone-800 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs" disabled={agentLoading || !agentQuery.trim()}>
+                            {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH BLOG AGENT"}
+                          </button>
+                          {agentLoading && (
+                            <div className="mt-2 p-2 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-[10px] text-stone-700 flex flex-col gap-1">
+                              <div className="animate-pulse flex items-center justify-center gap-1">
+                                <span className="inline-block w-2 h-2 bg-black rounded-full animate-ping"></span>
+                                <span className="text-black font-bold">[ WIRE AGENT AT WORK ]</span>
+                              </div>
+                            </div>
+                          )}
+                        </form>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-4 flex gap-4">
-                    <button type="submit" className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer">Save Changes</button>
-                    <button type="button" onClick={() => setIsEditing(false)} className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-305 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer">Cancel</button>
-                  </div>
-                </form>
+                </div>
               ) : (
                 <>
                   <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
