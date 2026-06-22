@@ -41,13 +41,8 @@ export default function Home() {
     setClientInfo({
       os,
       browser,
-      ip: "Determining..."
+      ip: "Undisclosed"
     });
-
-    fetch("https://api.ipify.org?format=json")
-      .then((res) => res.json())
-      .then((data) => setClientInfo((prev: any) => ({ ...prev, ip: data.ip })))
-      .catch(() => setClientInfo((prev: any) => ({ ...prev, ip: "Undisclosed" })));
   }, []);
 
   // Today's Date formatted nicely

@@ -116,12 +116,7 @@ export default function BlogsDashboardPage() {
         else if (ua.includes("Safari")) browser = "SAFARI";
         else if (ua.includes("Edge")) browser = "EDGE";
 
-        setClientInfo({ os, browser, ip: "SCANNING..." });
-
-        fetch("https://api.ipify.org?format=json")
-          .then(res => res.json())
-          .then(data => setClientInfo((prev: any) => ({ ...prev, ip: data.ip })))
-          .catch(() => setClientInfo((prev: any) => ({ ...prev, ip: "SECURE/MASKED" })));
+        setClientInfo({ os, browser, ip: "SECURE/MASKED" });
       } catch (err) {
         console.error("Dashboard auth check error", err);
         router.push("/login");

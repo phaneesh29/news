@@ -137,13 +137,8 @@ export default function DashboardPage() {
         setClientInfo({
           os,
           browser,
-          ip: "SCANNING..."
+          ip: "SECURE/MASKED"
         });
-
-        fetch("https://api.ipify.org?format=json")
-          .then(res => res.json())
-          .then(data => setClientInfo((prev: any) => ({ ...prev, ip: data.ip })))
-          .catch(() => setClientInfo((prev: any) => ({ ...prev, ip: "SECURE/MASKED" })));
       } catch (err) {
         console.error("Dashboard auth check error", err);
         router.push("/login");
