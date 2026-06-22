@@ -174,7 +174,7 @@ export default function UserProfilePage() {
                     <div className="flex gap-6 items-start">
                       {/* Photo Area */}
                       <div className="shrink-0 relative">
-                        <Avatar className="h-28 w-28 border-[3px] border-[#111111] dark:border-[#e6dfd8] rounded-full shadow-inner grayscale contrast-125 sepia-[0.3]">
+                        <Avatar className="!h-28 !w-28 border-[3px] border-[#111111] dark:border-[#e6dfd8] rounded-full shadow-inner grayscale contrast-125 sepia-[0.3]">
                           <AvatarImage src={activeUser.image || undefined} className="object-cover" />
                           <AvatarFallback className="bg-[#e6dfd8] dark:bg-[#252320] text-[#111111] dark:text-[#e6dfd8] text-5xl font-serif font-black rounded-full">
                             {activeUser.name.charAt(0)}
