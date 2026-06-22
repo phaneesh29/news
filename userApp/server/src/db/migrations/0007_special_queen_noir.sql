@@ -1,0 +1,1 @@
+DROP TABLE "api_rate_limits" CASCADE;

@@ -1,4 +1,5 @@
 import logger from '../utils/logger.js';
+import env from '../config/env.js';
 
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
@@ -28,7 +29,7 @@ const errorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  if (process.env.NODE_ENV === 'development') {
+  if (env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else {
     sendErrorProd(err, res);

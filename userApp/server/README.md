@@ -4,6 +4,52 @@ An Express.js REST API backend supporting the DevBits AI-Enriched news curation 
 
 ---
 
+## Deploying to Vercel
+
+The server exposes the Express app through `api/index.js` as a Vercel Function. Local development uses the globally installed Vercel CLI:
+
+```bash
+npm run dev    # vc dev
+vercel dev     # equivalent global CLI command
+```
+
+1. Import the repository into Vercel and set the project **Root Directory** to `server`.
+2. Keep the framework preset as **Other** and leave the build/output commands empty.
+3. Add these environment variables for Production and Preview:
+
+```env
+NODE_ENV=production
+DATABASE_URL=postgresql://...
+BETTER_AUTH_SECRET=...
+BETTER_AUTH_URL=https://your-api-project.vercel.app
+CORS_ORIGIN=https://your-frontend-project.vercel.app
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
+
+4. In Google OAuth, add this authorized redirect URI:
+
+```text
+https://your-api-project.vercel.app/api/auth/callback/google
+```
+
+5. Deploy and verify:
+
+```text
+https://your-api-project.vercel.app/api/health
+```
+
+The frontend deployment should use:
+
+```env
+NEXT_PUBLIC_API_URL=https://your-api-project.vercel.app/api
+NEXT_PUBLIC_BETTER_AUTH_URL=https://your-api-project.vercel.app
+```
+
+Do not run database migrations as a Vercel build command. Apply migrations separately before deploying schema-dependent changes.
+
+---
+
 ## 1. System Architecture & Shared DB Strategy
 
 The `userApp` backend shares a single cloud database instance (hosted on Neon PostgreSQL) with the `adminApp`. To prevent database lockups, data pollution, or migration collisions, we implement the following separation of concerns:
@@ -18,7 +64,7 @@ To prevent Drizzle Kit from generating conflicting migration tables or deleting 
 1. **Custom Migration Log Table**: We set `migrations: { table: 'user_drizzle_migrations' }` in `drizzle.config.js` to avoid sharing the same migration tracking logs.
 2. **Tables Whitelist Filter**: We set `tablesFilter` in `drizzle.config.js` to only manage tables owned by `userApp`:
    ```javascript
-   tablesFilter: ["user", "session", "account", "verification", "news_likes"]
+   tablesFilter: ["user", "session", "account", "verification", "news_likes", "feedbacks"]
    ```
 
 ---
@@ -50,9 +96,8 @@ To prevent Drizzle Kit from generating conflicting migration tables or deleting 
 ## 3. Middleware Stack
 
 ### Global & Route-level Rate Limiting
-* **Global API Limiter**: A `rateLimiter` (100 requests per 15 minutes) is mounted globally in `app.js` on `/api` to prevent API endpoint spam.
-* **Custom Auth Limiter**: Because custom auth handlers (`/profile`, `/sessions`, `/revoke`) are mounted at `/api/auth` *before* the global `/api` rate limiter in `app.js`, they bypassed global limiting. We explicitly mounted `router.use(rateLimiter)` inside `auth.route.js` to protect these session-related endpoints.
-* **Better Auth Rate Limiter**: Better Auth's native rate limit plugin is enabled (100 requests per 60 seconds) to guard OAuth callbacks and session checking.
+* **Distributed API Limiter**: The global `rateLimiter` allows 100 requests per 15 minutes and stores counters in Neon so limits are shared across Vercel Function instances.
+* **Complete API Coverage**: The limiter is mounted before custom auth routes, Better Auth, and all other `/api` routes. Better Auth's process-local limiter is disabled to avoid serverless instances maintaining separate counters.
 
 ### Zod Parameter Validation
 The validation middleware in `src/middlewares/validate.js` was enhanced to support dynamic request segments:

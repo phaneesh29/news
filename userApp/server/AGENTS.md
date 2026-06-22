@@ -4,7 +4,7 @@
 
 This is an Express API server using ESM modules. Application code lives in `src/`:
 
-- `src/index.js` starts the HTTP server and handles process shutdown.
+- `api/index.js` exports the Express app as the Vercel Function entrypoint.
 - `src/app.js` registers middleware and top-level routes.
 - `src/config/` contains environment validation.
 - `src/controllers/`, `src/routes/`, and `src/middlewares/` hold request handlers, route maps, and Express middleware.
@@ -17,8 +17,7 @@ There is no `tests/` directory yet. Add tests under `tests/` or colocated `*.tes
 ## Build, Test, and Development Commands
 
 - `npm install`: install dependencies from `package-lock.json`.
-- `npm run dev`: run the server with `nodemon` for local development.
-- `npm start`: run the production entrypoint with Node.
+- `npm run dev`: run the server locally through the globally installed Vercel CLI.
 - `npm run db:generate`: generate Drizzle migrations from schema changes.
 - `npm run db:migrate`: apply pending Drizzle migrations.
 - `npm run db:studio`: open Drizzle Studio for database inspection.

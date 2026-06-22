@@ -3,7 +3,6 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  PORT: z.string().transform((val) => parseInt(val, 10)).default("5000"),
   CORS_ORIGIN: z.string().default("*"),
   DATABASE_URL: z.string().url("DATABASE_URL must be a valid URL"),
   BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET is required"),

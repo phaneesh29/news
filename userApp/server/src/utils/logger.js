@@ -5,7 +5,7 @@ const isProduction = env.NODE_ENV === 'production';
 
 const logger = pino({
   level: isProduction ? 'info' : 'debug',
-  base: isProduction ? { pid: process.pid } : undefined,
+  base: isProduction ? { service: 'devbits-api' } : undefined,
   timestamp: pino.stdTimeFunctions.isoTime,
   ...(isProduction ? {} : {
     transport: {
