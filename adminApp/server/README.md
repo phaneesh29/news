@@ -1,7 +1,7 @@
 ```
 npm install
 cp .env.example .env
-vercel dev
+vc dev
 ```
 
 ```
@@ -26,7 +26,7 @@ npm run db:migrate
 The server exports the Hono app from `src/index.ts`, which is the serverless entrypoint Vercel expects for Hono. Use Vercel CLI locally:
 
 ```
-npm run dev
+vc dev
 ```
 
 Deploy the `server` directory as the Vercel project root, then set these environment variables in Vercel:
