@@ -62,7 +62,7 @@ export const setSessionCookie = (c: Context, token: string) => {
   setCookie(c, SESSION_COOKIE, token, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: SESSION_TTL_SECONDS,
     path: '/'
   })
@@ -70,6 +70,8 @@ export const setSessionCookie = (c: Context, token: string) => {
 
 export const clearSessionCookie = (c: Context) => {
   deleteCookie(c, SESSION_COOKIE, {
-    path: '/'
+    path: '/',
+    secure: env.NODE_ENV === 'production',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax'
   })
 }

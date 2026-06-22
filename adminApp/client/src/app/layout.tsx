@@ -1,7 +1,7 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Playfair_Display, Old_Standard_TT, Alegreya, Courier_Prime, VT323 } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
-
 const playfair = Playfair_Display({
  subsets: ["latin"],
  variable: "--font-playfair",
@@ -45,7 +45,10 @@ export default function RootLayout({
  lang="en"
  className={`${playfair.variable} ${oldStandard.variable} ${alegreya.variable} ${courier.variable} ${vt323.variable} h-full antialiased`}
  >
- <body className="min-h-full flex flex-col">{children}</body>
+ <body className="min-h-full flex flex-col">
+  {children}
+  <Analytics />
+ </body>
  </html>
  );
 }
