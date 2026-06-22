@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   Clock, 
   ChevronRight, 
@@ -25,6 +26,14 @@ export default function LikedNewsPage() {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
   const { settings } = useSettings();
+  const router = useRouter();
+
+  // Redirect to login if user is logged out
+  useEffect(() => {
+    if (!isPending && !activeUser) {
+      router.push("/login");
+    }
+  }, [activeUser, isPending, router]);
 
   const getModalThemeClasses = () => {
     let baseTheme = "";

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
+import { useRouter } from "next/navigation";
 
 function parseUA(ua: string | null): string {
   if (!ua) return "Unknown Device";
@@ -41,6 +42,14 @@ export default function UserProfilePage() {
   const activeUser = sessionData?.user;
   const activeSession = sessionData?.session;
   const { settings } = useSettings();
+  const router = useRouter();
+
+  // Redirect to login if user is logged out
+  useEffect(() => {
+    if (!isPending && !activeUser) {
+      router.push("/login");
+    }
+  }, [activeUser, isPending, router]);
 
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);

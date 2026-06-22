@@ -19,6 +19,7 @@ import {
 import { marked } from "marked";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
+import { useRouter } from "next/navigation";
 
 interface TocItem {
   id: string;
@@ -71,6 +72,14 @@ export default function BlogDetailPage({ params }: PageProps) {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
   const { settings } = useSettings();
+  const router = useRouter();
+
+  // Redirect to login if user is logged out
+  useEffect(() => {
+    if (!isPending && !activeUser) {
+      router.push("/login");
+    }
+  }, [activeUser, isPending, router]);
 
   const [blog, setBlog] = useState<BlogItem | null>(null);
   const [loading, setLoading] = useState(true);

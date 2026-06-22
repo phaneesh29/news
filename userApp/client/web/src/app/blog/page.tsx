@@ -14,10 +14,19 @@ import {
   Calendar
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useRouter } from "next/navigation";
 
 export default function BlogListPage() {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
+  const router = useRouter();
+
+  // Redirect to login if user is logged out
+  useEffect(() => {
+    if (!isPending && !activeUser) {
+      router.push("/login");
+    }
+  }, [activeUser, isPending, router]);
 
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState(true);

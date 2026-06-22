@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   Clock, 
   ChevronRight, 
@@ -24,6 +25,14 @@ export default function DigestPage() {
   const { data: sessionData, isPending } = useSession();
   const activeUser = sessionData?.user;
   const { settings } = useSettings();
+  const router = useRouter();
+
+  // Redirect to login if user is logged out
+  useEffect(() => {
+    if (!isPending && !activeUser) {
+      router.push("/login");
+    }
+  }, [activeUser, isPending, router]);
 
   const [digest, setDigest] = useState<DigestData | null>(null);
   const [loading, setLoading] = useState(true);
