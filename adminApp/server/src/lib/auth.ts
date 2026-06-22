@@ -1,5 +1,4 @@
 import { Context } from 'hono'
-import { getConnInfo } from '@hono/node-server/conninfo'
 import { deleteCookie, setCookie } from 'hono/cookie'
 import crypto from 'crypto'
 import { env } from '../config/env.js'
@@ -30,14 +29,6 @@ export const getClientIp = (c: Context) => {
 
   const realIp = c.req.header('x-real-ip')
   if (realIp) return realIp
-
-  try {
-    const info = getConnInfo(c)
-    if (info.remote.address) {
-      return info.remote.address === '::1' ? '127.0.0.1' : info.remote.address.replace(/^.*:/, '')
-    }
-  } catch (e) {
-  }
 
   return null
 }

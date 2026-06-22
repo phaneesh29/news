@@ -11,7 +11,7 @@ const envSchema = z.object({
       .filter(Boolean)
   ),
   DATABASE_URL: z.url(),
-  DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+  DB_POOL_MAX: z.coerce.number().int().positive().default(1),
   RESEND_API_KEY: z.string().min(1, 'Resend API Key is required'),
   AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters')
 })

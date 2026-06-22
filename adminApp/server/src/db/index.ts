@@ -9,6 +9,10 @@ if (!env.DATABASE_URL) {
 
 export const pool = new pg.Pool({
   connectionString: env.DATABASE_URL,
+  max: env.DB_POOL_MAX,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 10_000,
+  allowExitOnIdle: true
 })
 
 export const db = drizzle(pool, { schema })

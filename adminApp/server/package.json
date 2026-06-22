@@ -2,16 +2,14 @@
   "name": "server",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "vercel dev",
     "build": "tsc",
-    "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.83",
-    "@hono/node-server": "^1.19.14",
     "@hono/zod-validator": "^0.7.6",
     "@tavily/ai-sdk": "^0.5.0",
     "ai": "^6.0.208",
