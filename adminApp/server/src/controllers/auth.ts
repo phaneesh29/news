@@ -25,7 +25,7 @@ export const requestOtp = async (c: Context) => {
     const ipAddress = getClientIp(c)
 
     const requestKey = `${email}:${ipAddress ?? 'unknown'}`
-    if (!await consumeRateLimit(requestKey, 5, OTP_TTL_MS, 'rl:otp-request')) {
+    if (!await consumeRateLimit(requestKey, 5, OTP_TTL_MS, 'rl:admin:otp-request')) {
       return c.json({ error: 'Too many OTP requests. Please try again later.' }, 429)
     }
 
@@ -100,7 +100,7 @@ export const verifyOtp = async (c: Context) => {
     const ipAddress = getClientIp(c)
 
     const verifyKey = `${email}:${ipAddress ?? 'unknown'}`
-    if (!await consumeRateLimit(verifyKey, 10, OTP_TTL_MS, 'rl:otp-verify')) {
+    if (!await consumeRateLimit(verifyKey, 10, OTP_TTL_MS, 'rl:admin:otp-verify')) {
       return c.json({ error: 'Too many verification attempts. Please try again later.' }, 429)
     }
 

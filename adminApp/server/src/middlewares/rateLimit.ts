@@ -10,7 +10,7 @@ export const globalRateLimiter = rateLimiter({
   skip: (c: Context) => c.req.method === 'OPTIONS',
   store: new RedisStore({
     client: redis,
-    prefix: 'rl:global:'
+    prefix: 'rl:admin:global:'
   }),
   keyGenerator: (c: Context) => getClientIp(c) ?? 'anonymous',
   handler: (c: Context) => {
