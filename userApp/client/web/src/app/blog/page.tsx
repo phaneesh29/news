@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { fetchBlogsList, type BlogItem } from "@/lib/api";
+import { fetchBlogsList, searchBlogsList, type BlogItem } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -23,24 +23,39 @@ export default function BlogListPage() {
   const [loading, setLoading] = useState(true);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    async function loadBlogs() {
+    if (!activeUser) {
+      setLoading(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
       try {
         setLoading(true);
-        const res = await fetchBlogsList();
-        if (res.status === "success" && res.data) {
-          setBlogs(res.data.blogs);
-          setNextCursor(res.data.nextCursor);
+        if (searchQuery.trim() === "") {
+          const res = await fetchBlogsList();
+          if (res.status === "success" && res.data) {
+            setBlogs(res.data.blogs);
+            setNextCursor(res.data.nextCursor);
+          }
+        } else {
+          const res = await searchBlogsList(searchQuery);
+          if (res.status === "success" && res.data) {
+            setBlogs(res.data.blogs);
+            setNextCursor(null);
+          }
         }
       } catch (err) {
-        console.error("Failed to load blog posts:", err);
+        console.error("Failed to load or search blog posts:", err);
       } finally {
         setLoading(false);
       }
-    }
-    loadBlogs();
-  }, []);
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, activeUser]);
 
   const handleLoadMore = async () => {
     if (!nextCursor || loadingMore || !activeUser) return;
@@ -97,6 +112,22 @@ export default function BlogListPage() {
 
       {/* Blogs Grid */}
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-10">
+        
+        {activeUser && (
+          <div className="mb-8 max-w-md mx-auto sm:mx-0">
+            <div className="flex items-center gap-2 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-[#111111] dark:border-[#e6dfd8] px-3 py-3 font-mono text-xs shadow-[2px_2px_0px_#111111] dark:shadow-[2px_2px_0px_#e6dfd8] focus-within:shadow-none transition-all">
+              <span className="text-[#cc785c] font-bold uppercase shrink-0">// SEARCH:</span>
+              <input 
+                type="text" 
+                placeholder="Search chronicles (title, content, slug)..." 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="w-full bg-transparent outline-none border-none p-0 text-inherit text-xs font-mono"
+              />
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 text-[#cc785c] animate-spin" />
@@ -113,13 +144,24 @@ export default function BlogListPage() {
             </Button>
           </div>
         ) : blogs.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-2xl mx-auto p-8">
-            <p className="text-sm font-serif italic">No chronicles have been published for this print cycle.</p>
-            <Link href="/news">
-              <Button className="mt-4 bg-[#111111] hover:bg-[#222222] text-white border-2 border-[#111111] text-xs font-bold rounded-none px-6 vintage-shadow-sm">
-                Back to News Wire
+          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-2xl mx-auto p-8 vintage-shadow">
+            <p className="text-sm font-serif italic">
+              {searchQuery ? `No chronicles discovered matching "${searchQuery}".` : "No chronicles have been published for this print cycle."}
+            </p>
+            {searchQuery ? (
+              <Button 
+                onClick={() => setSearchQuery("")}
+                className="mt-4 bg-[#111111] hover:bg-[#222222] text-white border-2 border-[#111111] text-xs font-bold rounded-none px-6 vintage-shadow-sm cursor-pointer"
+              >
+                Clear Search Query
               </Button>
-            </Link>
+            ) : (
+              <Link href="/news">
+                <Button className="mt-4 bg-[#111111] hover:bg-[#222222] text-white border-2 border-[#111111] text-xs font-bold rounded-none px-6 vintage-shadow-sm">
+                  Back to News Wire
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <>

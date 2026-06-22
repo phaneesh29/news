@@ -23,7 +23,7 @@ import {
   Calendar,
   AlertCircle
 } from "lucide-react";
-import { fetchNewsList, likeNewsApi, unlikeNewsApi, type NewsItem } from "@/lib/api";
+import { fetchNewsList, searchNewsList, likeNewsApi, unlikeNewsApi, type NewsItem } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
 import ShareBriefing from "@/components/ShareBriefing";
@@ -99,6 +99,9 @@ export default function NewsBroadcastsPage() {
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("");
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
 
   const handleSelectArticle = (item: NewsItem) => {
     setSelectedArticle(item);
@@ -143,7 +146,7 @@ export default function NewsBroadcastsPage() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [news]);
 
-  // Fetch news when user is authenticated
+  // Fetch & search news effect
   useEffect(() => {
     if (!activeUser) {
       setNews([]);
@@ -154,22 +157,31 @@ export default function NewsBroadcastsPage() {
       return;
     }
 
-    async function loadNews() {
+    const delayDebounceFn = setTimeout(async () => {
       try {
         setLoadingNews(true);
-        const res = await fetchNewsList();
-        if (res.status === "success" && res.data) {
-          setNews(res.data.news);
-          setNextCursor(res.data.nextCursor);
+        if (searchQuery.trim() === "" && priorityFilter === "") {
+          const res = await fetchNewsList();
+          if (res.status === "success" && res.data) {
+            setNews(res.data.news);
+            setNextCursor(res.data.nextCursor);
+          }
+        } else {
+          const res = await searchNewsList(searchQuery, priorityFilter || undefined);
+          if (res.status === "success" && res.data) {
+            setNews(res.data.news);
+            setNextCursor(null);
+          }
         }
       } catch (err) {
-        console.error("Failed to load news articles:", err);
+        console.error("Failed to load or search news articles:", err);
       } finally {
         setLoadingNews(false);
       }
-    }
-    loadNews();
-  }, [activeUser, isPending]);
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, priorityFilter, activeUser, isPending]);
 
   const handleLoadMore = async () => {
     if (!nextCursor || loadingMore || !activeUser) return;
@@ -313,6 +325,71 @@ export default function NewsBroadcastsPage() {
       {/* Main Content Area */}
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-10">
         
+        {activeUser && (
+          <div className="mb-8 flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto sm:mx-0">
+            {/* Search Input */}
+            <div className="flex-1 flex items-center gap-2 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-[#111111] dark:border-[#e6dfd8] px-3 py-3 font-mono text-xs shadow-[2px_2px_0px_#111111] dark:shadow-[2px_2px_0px_#e6dfd8] focus-within:shadow-none transition-all">
+              <span className="text-[#cc785c] font-bold uppercase shrink-0">// SEARCH:</span>
+              <input 
+                type="text" 
+                placeholder="Search dispatches (title, content, sourceUrl)..." 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="w-full bg-transparent outline-none border-none p-0 text-inherit text-xs font-mono"
+              />
+            </div>
+            {/* Custom Priority Dropdown Selector */}
+            <div className="relative shrink-0 font-mono text-xs z-20">
+              <button 
+                type="button"
+                onClick={() => setIsPriorityOpen(!isPriorityOpen)}
+                className="w-full sm:w-auto flex items-center justify-between gap-3 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-[#111111] dark:border-[#e6dfd8] px-3 py-3 shadow-[2px_2px_0px_#111111] dark:shadow-[2px_2px_0px_#e6dfd8] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none hover:bg-current/5 transition-all cursor-pointer select-none font-bold"
+              >
+                <span className="text-[#cc785c] font-black uppercase tracking-wider">// PRIORITY:</span>
+                <span className="opacity-90">{priorityFilter ? priorityFilter.toUpperCase() : "ALL DISPATCHES"}</span>
+                <svg className={`h-3 w-3 fill-none stroke-current transition-transform duration-200 ${isPriorityOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isPriorityOpen && (
+                <>
+                  {/* Click outside overlay backdrop */}
+                  <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setIsPriorityOpen(false)} />
+                  
+                  {/* Custom List dropdown */}
+                  <ul className="absolute top-[calc(100%+6px)] right-0 left-0 sm:left-auto sm:w-48 bg-[#fcfaf2] dark:bg-[#181715] border-2 border-[#111111] dark:border-[#e6dfd8] shadow-[4px_4px_0px_#111111] dark:shadow-[4px_4px_0px_#e6dfd8] z-50 rounded-none overflow-hidden select-none animate-in fade-in slide-in-from-top-1 duration-150">
+                    {[
+                      { value: "", label: "ALL DISPATCHES" },
+                      { value: "low", label: "LOW" },
+                      { value: "medium", label: "MEDIUM" },
+                      { value: "high", label: "HIGH" },
+                      { value: "critical", label: "CRITICAL" }
+                    ].map((opt) => (
+                      <li key={opt.value}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPriorityFilter(opt.value);
+                            setIsPriorityOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 hover:bg-[#cc785c]/10 dark:hover:bg-[#cc785c]/20 hover:text-[#cc785c] transition-colors cursor-pointer font-bold ${
+                            priorityFilter === opt.value 
+                              ? "bg-[#cc785c]/15 text-[#cc785c] border-l-4 border-[#cc785c]" 
+                              : "border-l-4 border-transparent text-inherit"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {loadingNews ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 text-[#cc785c] animate-spin" />
@@ -335,8 +412,23 @@ export default function NewsBroadcastsPage() {
             </Button>
           </div>
         ) : news.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-xl mx-auto p-8">
-            <p className="text-sm font-serif italic">No announcements have been compiled for this wire cycle yet.</p>
+          <div className="text-center py-20 border-2 border-dashed border-[#e6dfd8] rounded-none bg-[#efe9de]/10 max-w-xl mx-auto p-8 vintage-shadow">
+            <p className="text-sm font-serif italic">
+              {searchQuery || priorityFilter
+                ? "No wire dispatches match your search query or priority filters."
+                : "No announcements have been compiled for this wire cycle yet."}
+            </p>
+            {(searchQuery || priorityFilter) && (
+              <Button 
+                onClick={() => {
+                  setSearchQuery("");
+                  setPriorityFilter("");
+                }}
+                className="mt-4 bg-[#111111] hover:bg-[#222222] text-white border-2 border-[#111111] text-xs font-bold rounded-none px-6 vintage-shadow-sm cursor-pointer"
+              >
+                Clear Search Filters
+              </Button>
+            )}
           </div>
         ) : (
           <>

@@ -10,7 +10,8 @@ const validate = (schema, source = "body") => (req, res, next) => {
         .join(", ");
       return next(new AppError(`Validation error: ${messages}`, 400));
     }
-    req[source] = parsed.data;
+    
+    Object.assign(req[source], parsed.data);
     next();
   } catch (error) {
     next(error);

@@ -187,6 +187,33 @@ export async function fetchBlogById(id: string): Promise<ApiResponse<{ blog: Blo
   return response.json();
 }
 
+export async function searchNewsList(query: string, priority?: string): Promise<ApiResponse<{ news: NewsItem[] }>> {
+  let url = `${API_BASE_URL}/news/search?q=${encodeURIComponent(query)}`;
+  if (priority) {
+    url += `&priority=${encodeURIComponent(priority)}`;
+  }
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to search news");
+  }
+  return response.json();
+}
+
+export async function searchBlogsList(query: string): Promise<ApiResponse<{ blogs: BlogItem[] }>> {
+  const url = `${API_BASE_URL}/blogs/search?q=${encodeURIComponent(query)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to search blogs");
+  }
+  return response.json();
+}
+
 export async function likeNewsApi(id: string): Promise<ApiResponse<null>> {
   const response = await fetch(`${API_BASE_URL}/news/${id}/like`, {
     method: "POST",
