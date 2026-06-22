@@ -14,10 +14,8 @@ import {
   hashOtp,
   hashToken,
   normalizeEmail,
-  requestOtpLimits,
   secureCompare,
   setSessionCookie,
-  verifyOtpLimits
 } from '../lib/auth.js'
 
 export const requestOtp = async (c: Context) => {
@@ -27,7 +25,7 @@ export const requestOtp = async (c: Context) => {
     const ipAddress = getClientIp(c)
 
     const requestKey = `${email}:${ipAddress ?? 'unknown'}`
-    if (!consumeRateLimit(requestOtpLimits, requestKey, 5, OTP_TTL_MS)) {
+    if (!await consumeRateLimit(requestKey, 5, OTP_TTL_MS, 'rl:otp-request')) {
       return c.json({ error: 'Too many OTP requests. Please try again later.' }, 429)
     }
 
@@ -102,7 +100,7 @@ export const verifyOtp = async (c: Context) => {
     const ipAddress = getClientIp(c)
 
     const verifyKey = `${email}:${ipAddress ?? 'unknown'}`
-    if (!consumeRateLimit(verifyOtpLimits, verifyKey, 10, OTP_TTL_MS)) {
+    if (!await consumeRateLimit(verifyKey, 10, OTP_TTL_MS, 'rl:otp-verify')) {
       return c.json({ error: 'Too many verification attempts. Please try again later.' }, 429)
     }
 

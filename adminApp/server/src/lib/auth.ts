@@ -2,6 +2,7 @@ import { Context } from 'hono'
 import { deleteCookie, setCookie } from 'hono/cookie'
 import crypto from 'crypto'
 import { env } from '../config/env.js'
+import { redis } from './redis.js'
 
 export const SESSION_COOKIE = 'admin_session'
 export const OTP_TTL_MS = 15 * 60 * 1000
@@ -9,14 +10,6 @@ export const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60
 export const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000
 
 const AUTH_SECRET = env.AUTH_SECRET
-
-type RateLimitBucket = {
-  count: number
-  resetAt: number
-}
-
-export const requestOtpLimits = new Map<string, RateLimitBucket>()
-export const verifyOtpLimits = new Map<string, RateLimitBucket>()
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
@@ -33,26 +26,20 @@ export const getClientIp = (c: Context) => {
   return null
 }
 
-export const consumeRateLimit = (
-  store: Map<string, RateLimitBucket>,
+export const consumeRateLimit = async (
   key: string,
   limit: number,
-  windowMs: number
+  windowMs: number,
+  redisPrefix: string
 ) => {
-  const now = Date.now()
-  const bucket = store.get(key)
+  const redisKey = `${redisPrefix}:${key}`
+  const count = await redis.incr(redisKey)
 
-  if (!bucket || bucket.resetAt <= now) {
-    store.set(key, { count: 1, resetAt: now + windowMs })
-    return true
+  if (count === 1) {
+    await redis.pexpire(redisKey, windowMs)
   }
 
-  if (bucket.count >= limit) {
-    return false
-  }
-
-  bucket.count += 1
-  return true
+  return count <= limit
 }
 
 export const hashOtp = (email: string, otp: string) =>

@@ -13,7 +13,9 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   DB_POOL_MAX: z.coerce.number().int().positive().default(1),
   RESEND_API_KEY: z.string().min(1, 'Resend API Key is required'),
-  AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters')
+  AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
+  UPSTASH_REDIS_REST_URL: z.url('UPSTASH_REDIS_REST_URL must be a valid URL'),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1, 'UPSTASH_REDIS_REST_TOKEN is required'),
 })
 
 const result = envSchema.safeParse(process.env)
