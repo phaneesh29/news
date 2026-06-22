@@ -5,6 +5,7 @@ import { useSession, signIn, signOut } from "@/lib/auth-client";
 import { fetchBlogById, type BlogItem } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import ShareBriefing from "@/components/ShareBriefing";
 import { 
   Clock, 
   ArrowLeft,
@@ -78,6 +79,7 @@ export default function BlogDetailPage({ params }: PageProps) {
   const [toc, setToc] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>("");
   const [readProgress, setReadProgress] = useState(0);
+  const [shareUrl, setShareUrl] = useState("");
 
   const resolvedParams = use(params);
   const blogId = resolvedParams?.id;
@@ -94,6 +96,10 @@ export default function BlogDetailPage({ params }: PageProps) {
         parsed.then((res) => setHtmlContent(injectHeaderIds(res))).catch(console.error);
       } else {
         setHtmlContent(injectHeaderIds(parsed));
+      }
+
+      if (typeof window !== "undefined") {
+        setShareUrl(window.location.origin + `/blog/${blog.id}`);
       }
     }
   }, [blog]);
@@ -393,6 +399,11 @@ export default function BlogDetailPage({ params }: PageProps) {
                   <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-inherit uppercase font-newspaper">
                     {blog.title}
                   </h1>
+
+                  {/* Share buttons */}
+                  {shareUrl && (
+                    <ShareBriefing url={shareUrl} title={blog.title} className="pt-2 border-t border-[#e6dfd8]/30 dark:border-current/10" />
+                  )}
                 </div>
 
                 {/* Mobile Table of Contents Dropdown (visible only on mobile) */}
@@ -472,8 +483,13 @@ export default function BlogDetailPage({ params }: PageProps) {
                 />
 
                 {/* Bottom Actions */}
-                <div className="border-t border-[#e6dfd8] pt-6 flex justify-between items-center text-xs font-mono">
-                  <span className="opacity-60">// END BULLET DISPATCH</span>
+                <div className="border-t border-[#e6dfd8] pt-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-xs font-mono">
+                  <div className="flex flex-col gap-2">
+                    <span className="opacity-60">// END BULLET DISPATCH</span>
+                    {shareUrl && (
+                      <ShareBriefing url={shareUrl} title={blog.title} />
+                    )}
+                  </div>
                   <Link href="/blog" className="text-[#cc785c] font-bold hover:underline flex items-center gap-1">
                     Return to all dispatches
                     <ArrowRight className="h-3.5 w-3.5" />

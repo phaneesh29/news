@@ -26,6 +26,7 @@ import {
 import { fetchNewsList, likeNewsApi, unlikeNewsApi, type NewsItem } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
+import ShareBriefing from "@/components/ShareBriefing";
 
 export default function NewsBroadcastsPage() {
   const { data: sessionData, isPending, refetch } = useSession();
@@ -98,6 +99,49 @@ export default function NewsBroadcastsPage() {
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  const handleSelectArticle = (item: NewsItem) => {
+    setSelectedArticle(item);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("article", item.id);
+      window.history.pushState({}, "", url.pathname + url.search);
+    }
+  };
+
+  const handleCloseArticle = () => {
+    setSelectedArticle(null);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("article");
+      window.history.pushState({}, "", url.pathname + url.search);
+    }
+  };
+
+  // Sync state with URL search params (handling page load & browser back/forward buttons)
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const articleId = params.get("article");
+        if (articleId) {
+          const found = news.find(n => n.id === articleId);
+          if (found) {
+            setSelectedArticle(found);
+            return;
+          }
+        }
+        setSelectedArticle(null);
+      }
+    };
+
+    if (news.length > 0) {
+      handlePopState(); // run once when news loads
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [news]);
 
   // Fetch news when user is authenticated
   useEffect(() => {
@@ -333,7 +377,7 @@ export default function NewsBroadcastsPage() {
 
                   {/* Headline */}
                   <h3 
-                    onClick={() => setSelectedArticle(item)}
+                    onClick={() => handleSelectArticle(item)}
                     className="font-serif text-xl sm:text-2xl font-black tracking-tight hover:text-[#cc785c] cursor-pointer transition-colors leading-tight font-newspaper"
                   >
                     {item.title}
@@ -359,7 +403,7 @@ export default function NewsBroadcastsPage() {
                 {/* Footer Controls */}
                 <div className="mt-6 pt-4 border-t border-[#111111]/15 dark:border-[#e6dfd8]/15 flex items-center justify-between">
                   <button 
-                    onClick={() => setSelectedArticle(item)}
+                    onClick={() => handleSelectArticle(item)}
                     className="text-xs font-bold uppercase tracking-wider flex items-center gap-1 hover:text-[#cc785c]"
                   >
                     Read dispatch
@@ -411,7 +455,7 @@ export default function NewsBroadcastsPage() {
 
       {/* Article Detail Dialog Overlay - Blog-Inspired Redesign */}
       {selectedArticle && (
-        <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && setSelectedArticle(null)}>
+        <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && handleCloseArticle()}>
           <DialogContent className={`max-w-4xl w-[95vw] md:w-[85vw] lg:max-w-5xl border-4 rounded-none vintage-shadow-lg p-0 overflow-y-auto max-h-[90vh] ${getModalThemeClasses()}`}>
             
             {/* Unified sheet container */}
@@ -463,6 +507,14 @@ export default function NewsBroadcastsPage() {
                 </div>
               )}
 
+              {/* Share Briefing component */}
+              <div className="border-b border-[#e6dfd8] pb-4">
+                <ShareBriefing
+                  url={typeof window !== "undefined" ? `${window.location.origin}/news?article=${selectedArticle.id}` : ""}
+                  title={selectedArticle.title}
+                />
+              </div>
+
               {/* Full Article Content */}
               <div className="text-base md:text-[18px] lg:text-[20px] leading-relaxed md:leading-[1.75] font-serif font-medium opacity-100 space-y-6 whitespace-pre-wrap py-4 selection:bg-[#cc785c]/35 newspaper-body">
                 {selectedArticle.content}
@@ -492,7 +544,7 @@ export default function NewsBroadcastsPage() {
                 </button>
 
                 <Button 
-                  onClick={() => setSelectedArticle(null)}
+                  onClick={handleCloseArticle}
                   className="bg-transparent hover:bg-current/15 text-current border-2 border-current text-xs font-bold h-9 px-6 rounded-none vintage-shadow-sm transition-colors cursor-pointer"
                 >
                   Close Dispatch

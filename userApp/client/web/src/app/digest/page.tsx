@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
+import ShareBriefing from "@/components/ShareBriefing";
 
 export default function DigestPage() {
   const { data: sessionData, isPending } = useSession();
@@ -28,6 +29,51 @@ export default function DigestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<DigestArticle | null>(null);
+
+  const handleSelectArticle = (item: DigestArticle) => {
+    setSelectedArticle(item);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("article", item.title);
+      window.history.pushState({}, "", url.pathname + url.search);
+    }
+  };
+
+  const handleCloseArticle = () => {
+    setSelectedArticle(null);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("article");
+      window.history.pushState({}, "", url.pathname + url.search);
+    }
+  };
+
+  // Sync state with URL search params (handling page load & browser back/forward buttons)
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window !== "undefined" && digest) {
+        const params = new URLSearchParams(window.location.search);
+        const articleTitle = params.get("article");
+        if (articleTitle) {
+          for (const category of digest.categories) {
+            const found = category.articles.find(a => a.title === articleTitle);
+            if (found) {
+              setSelectedArticle(found);
+              return;
+            }
+          }
+        }
+        setSelectedArticle(null);
+      }
+    };
+
+    if (digest) {
+      handlePopState(); // run once when digest loads
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [digest]);
 
   useEffect(() => {
     if (!activeUser) return;
@@ -291,7 +337,7 @@ export default function DigestPage() {
                           </div>
 
                           <h3 
-                            onClick={() => setSelectedArticle(item)}
+                            onClick={() => handleSelectArticle(item)}
                             className="font-serif text-lg md:text-xl font-bold tracking-tight hover:text-[#cc785c] dark:hover:text-[#ff9d3b] cursor-pointer transition-colors leading-tight font-newspaper group-hover:underline decoration-1"
                           >
                             {item.title}
@@ -309,7 +355,7 @@ export default function DigestPage() {
 
                         <div className="mt-5 pt-3 border-t border-current/10 flex items-center justify-between">
                           <button 
-                            onClick={() => setSelectedArticle(item)}
+                            onClick={() => handleSelectArticle(item)}
                             className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:text-[#cc785c] dark:group-hover:text-[#ff9d3b] transition-colors font-mono"
                           >
                             Read dossier
@@ -340,7 +386,7 @@ export default function DigestPage() {
 
       {/* Article Detail Dialog Overlay */}
       {selectedArticle && (
-        <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && setSelectedArticle(null)}>
+        <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && handleCloseArticle()}>
           <DialogContent className={`max-w-4xl w-[95vw] md:w-[85vw] lg:max-w-5xl border-4 rounded-none vintage-shadow-lg p-0 overflow-y-auto max-h-[90vh] ${getModalThemeClasses()}`}>
             <div className="p-6 md:p-10 space-y-8 max-w-3xl mx-auto">
               
@@ -376,6 +422,14 @@ export default function DigestPage() {
                   </a>
                 </div>
               )}
+
+              {/* Share Briefing component */}
+              <div className="border-b border-[#e6dfd8] pb-4">
+                <ShareBriefing
+                  url={typeof window !== "undefined" ? `${window.location.origin}/digest?article=${encodeURIComponent(selectedArticle.title)}` : ""}
+                  title={selectedArticle.title}
+                />
+              </div>
 
               {/* Article Content / Summary */}
               <div className="space-y-6 py-2">
@@ -422,7 +476,7 @@ export default function DigestPage() {
               {/* Bottom Actions */}
               <div className="border-t border-[#e6dfd8] pt-6 flex flex-row items-center justify-end font-mono">
                 <Button 
-                  onClick={() => setSelectedArticle(null)}
+                  onClick={handleCloseArticle}
                   className="bg-transparent hover:bg-current/15 text-current border-2 border-current text-xs font-bold h-9 px-6 rounded-none vintage-shadow-sm transition-colors cursor-pointer"
                 >
                   Dismiss Dossier
