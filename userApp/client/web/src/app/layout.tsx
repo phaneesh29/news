@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, JetBrains_Mono, Playfair_Display, UnifrakturMaguntia } from "next/font/google";
 import { SettingsProvider } from "@/components/SettingsProvider";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const inter = Inter({
@@ -52,6 +53,7 @@ export default function RootLayout({
         <SettingsProvider>
           {children}
         </SettingsProvider>
+        <Analytics />
       </body>
     </html>
   );
