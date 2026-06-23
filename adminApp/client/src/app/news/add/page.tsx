@@ -157,17 +157,36 @@ export default function AddNewsPage() {
  }
  };
 
- // Ask AI Agent for draft from within form editor
   const handleAskAgent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agentQuery.trim()) return;
 
     setAgentLoading(true);
     try {
+      let finalQuery = agentQuery;
+      if (title || content) {
+        finalQuery = `You are updating/revising an existing news article draft. 
+
+Here is the current draft:
+---
+TITLE: ${title || "(empty)"}
+CONTENT:
+${content || "(empty)"}
+TAGS: ${tags || "(empty)"}
+PRIORITY: ${priority || "(empty)"}
+SOURCE LINK: ${sourceUrl || "(empty)"}
+---
+
+User Update Instructions:
+"${agentQuery}"
+
+Please modify or rewrite the news article according to the user instructions. Make sure to respond with the complete updated schema (title, content, tags, priority, and sourceUrl).`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/agent/draft/news`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: agentQuery }),
+        body: JSON.stringify({ query: finalQuery }),
         credentials: "include"
       });
       if (!res.ok) throw new Error("Agent failed to draft");

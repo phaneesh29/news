@@ -120,10 +120,28 @@ export default function AddBlogPage() {
 
     setAgentLoading(true);
     try {
+      let finalQuery = agentQuery;
+      if (title || content) {
+        finalQuery = `You are updating/revising an existing blog post draft. 
+
+Here is the current draft:
+---
+TITLE: ${title || "(empty)"}
+SLUG: ${slug || "(empty)"}
+CONTENT:
+${content || "(empty)"}
+---
+
+User Update Instructions:
+"${agentQuery}"
+
+Please modify or rewrite the blog post according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/agent/draft/blog`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: agentQuery }),
+        body: JSON.stringify({ query: finalQuery }),
         credentials: "include"
       });
       if (!res.ok) throw new Error("Agent failed to draft blog");
