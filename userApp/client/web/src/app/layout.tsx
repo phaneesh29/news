@@ -33,8 +33,36 @@ const blackletter = UnifrakturMaguntia({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://devbits.com"),
   title: "DevBits | Retro-Cyber Editorial News Curation",
   description: "AI-enriched engineering news briefs, acquisitions, and strategic deep dives.",
+  openGraph: {
+    title: "DevBits | Retro-Cyber Editorial News Curation",
+    description: "AI-enriched engineering news briefs, acquisitions, and strategic deep dives.",
+    url: "https://devbits.com",
+    siteName: "DevBits",
+    images: [
+      {
+        url: "/devbits-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "DevBits Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DevBits | Retro-Cyber Editorial News Curation",
+    description: "AI-enriched engineering news briefs, acquisitions, and strategic deep dives.",
+    images: ["/devbits-logo.png"],
+  },
+  icons: {
+    icon: "/devbits-logo.png",
+    shortcut: "/devbits-logo.png",
+    apple: "/devbits-logo.png",
+  },
 };
 
 export default function RootLayout({
