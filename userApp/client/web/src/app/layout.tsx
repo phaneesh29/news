@@ -34,7 +34,10 @@ const blackletter = UnifrakturMaguntia({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://devbits.com"),
-  title: "DevBits | Retro-Cyber Editorial News Curation",
+  title: {
+    template: "%s | DevBits",
+    default: "DevBits | Retro-Cyber Editorial News Curation",
+  },
   description: "AI-enriched engineering news briefs, acquisitions, and strategic deep dives.",
   openGraph: {
     title: "DevBits | Retro-Cyber Editorial News Curation",

@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, BrainCircuit, Gamepad2, ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Playables Hub",
+};
 
 export default function PlayablesHub() {
   return (

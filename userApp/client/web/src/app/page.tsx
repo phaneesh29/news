@@ -9,7 +9,8 @@ import {
   Terminal, 
   Settings as SettingsIcon, 
   BookOpen, 
-  FileText, 
+  Newspaper,
+  Gamepad2,
   Tv, 
   Clock, 
   Sparkles, 
@@ -86,18 +87,26 @@ export default function LandingPage() {
             DevBits continuously indexes framework releases, compiler bulletins, and strategic announcements to deliver structured dispatches. No fluff, just core indicators.
           </p>
 
-          {/* Enter Newsroom buttons */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-md pt-4">
+          {/* Call to Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 w-full max-w-3xl pt-6">
             <Link href="/news" className="flex-1">
-              <Button className="w-full bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] text-xs font-bold py-6 rounded-none vintage-shadow flex items-center justify-center gap-1.5 transition-transform hover:-translate-y-0.5">
+              <Button className="w-full bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] text-xs font-bold py-7 rounded-none vintage-shadow flex items-center justify-center gap-2 transition-transform hover:-translate-y-1">
                 Access Newsroom
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
 
             <Link href="/blog" className="flex-1">
-              <Button variant="outline" className="w-full bg-transparent hover:bg-[#efe9de] dark:hover:bg-[#252320] border-2 border-[#111111] dark:border-[#e6dfd8] text-xs font-bold py-6 rounded-none vintage-shadow-sm">
-                Read bulletins
+              <Button variant="outline" className="w-full bg-[#fcfaf2] text-[#111111] hover:bg-[#efe9de] dark:bg-[#1f1e1b] dark:text-[#e6dfd8] dark:hover:bg-[#252320] border-2 border-[#111111] dark:border-[#e6dfd8] text-xs font-bold py-7 rounded-none vintage-shadow-sm flex items-center justify-center gap-2 transition-transform hover:-translate-y-1">
+                Read Bulletins
+                <BookOpen className="h-4 w-4" />
+              </Button>
+            </Link>
+
+            <Link href="/playables" className="flex-1">
+              <Button className="w-full bg-[#111111] hover:bg-[#333333] text-white dark:bg-[#e6dfd8] dark:hover:bg-[#ffffff] dark:text-[#111111] border-2 border-[#111111] dark:border-[#e6dfd8] text-xs font-bold py-7 rounded-none vintage-shadow flex items-center justify-center gap-2 transition-transform hover:-translate-y-1">
+                Playables Hub
+                <Gamepad2 className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -119,59 +128,62 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             
-            {/* Display config */}
-            <div className="border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 space-y-4 vintage-shadow relative flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="h-10 w-10 border border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm">
-                  <Tv className="h-5 w-5" />
+            {/* Short Bits */}
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1">
+              <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current opacity-30 group-hover:border-[#cc785c] group-hover:opacity-100 transition-colors"></div>
+              <div className="space-y-4">
+                <div className="h-12 w-12 border-2 border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
+                  <Newspaper className="h-6 w-6" />
                 </div>
-                <h3 className="font-serif text-xl font-bold uppercase font-newspaper">Cathode Display Tones</h3>
-                <p className="text-xs leading-relaxed opacity-85">
-                  Toggle between aged pulp paper, dark ink, amber console terminals, or green cathode rays. Full simulation of vintage scanlines and CRT vignettes.
+                <h3 className="font-serif text-2xl font-bold uppercase font-newspaper">Tactical Short Bits</h3>
+                <p className="text-sm leading-relaxed opacity-85">
+                  A continuous wire of concise, high-signal engineering updates, framework releases, and migration alerts. No fluff, just the critical bits.
                 </p>
               </div>
-              <Link href="/settings" className="pt-4 block">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-1 hover:underline">
-                  Configure display
-                  <ChevronRight className="h-4 w-4" />
+              <Link href="/news" className="pt-6 block">
+                <span className="text-sm font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-2 group-hover:underline">
+                  Enter Newsroom
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </Link>
             </div>
 
-            {/* Readability & columns */}
-            <div className="border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 space-y-4 vintage-shadow relative flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="h-10 w-10 border border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm">
-                  <FileText className="h-5 w-5" />
+            {/* Blog & Docs */}
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1">
+              <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current opacity-30 group-hover:border-[#cc785c] group-hover:opacity-100 transition-colors"></div>
+              <div className="space-y-4">
+                <div className="h-12 w-12 border-2 border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
+                  <BookOpen className="h-6 w-6" />
                 </div>
-                <h3 className="font-serif text-xl font-bold uppercase font-newspaper">Broadsheet Columns</h3>
-                <p className="text-xs leading-relaxed opacity-85">
-                  Split your news wire stream into classic newspaper double columns. Built-in warmth sliders filter orange hues directly in your viewport to prevent eye strain.
+                <h3 className="font-serif text-2xl font-bold uppercase font-newspaper">In-Depth Dispatches</h3>
+                <p className="text-sm leading-relaxed opacity-85">
+                  Comprehensive architectural deep dives, post-mortems, and technical documentation formatted for maximum retention and late-night hacking.
                 </p>
               </div>
-              <Link href="/settings" className="pt-4 block">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-1 hover:underline">
-                  Configure typography
-                  <ChevronRight className="h-4 w-4" />
+              <Link href="/blog" className="pt-6 block">
+                <span className="text-sm font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-2 group-hover:underline">
+                  Read Dispatches
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </Link>
             </div>
 
-            {/* Strategic dispatches outline */}
-            <div className="border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 space-y-4 vintage-shadow relative flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="h-10 w-10 border border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm">
-                  <BookOpen className="h-5 w-5" />
+            {/* Playables */}
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1">
+              <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current opacity-30 group-hover:border-[#cc785c] group-hover:opacity-100 transition-colors"></div>
+              <div className="space-y-4">
+                <div className="h-12 w-12 border-2 border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
+                  <Gamepad2 className="h-6 w-6" />
                 </div>
-                <h3 className="font-serif text-xl font-bold uppercase font-newspaper">Scroll-Spy Chronicle Outline</h3>
-                <p className="text-xs leading-relaxed opacity-85">
-                  Read strategic technical blogs equipped with dynamic table of contents. Highlights headings automatically on scroll for quick layout scanning.
+                <h3 className="font-serif text-2xl font-bold uppercase font-newspaper">Full Play Time</h3>
+                <p className="text-sm leading-relaxed opacity-85">
+                  Interactive technical assessments and developer amusements. Challenge your backend, infrastructure, and DevOps knowledge with our endless quiz engine.
                 </p>
               </div>
-              <Link href="/blog" className="pt-4 block">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-1 hover:underline">
-                  Read dispatches
-                  <ChevronRight className="h-4 w-4" />
+              <Link href="/playables" className="pt-6 block">
+                <span className="text-sm font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-2 group-hover:underline">
+                  Explore Playables
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </Link>
             </div>
