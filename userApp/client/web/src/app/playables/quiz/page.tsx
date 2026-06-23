@@ -299,9 +299,39 @@ export default function QuizPage() {
                <div className="border-2 border-current p-6">
                  <div className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c] mb-2">MAX STREAK</div>
                  <div className="text-4xl font-bold font-mono flex items-center justify-center gap-2">
-                   {maxStreak} <Flame className="h-6 w-6 text-[#cc785c]" />
-                 </div>
+                    {maxStreak} <Flame className="h-6 w-6 text-[#cc785c]" />
+                  </div>
+                </div>
+             </div>
+
+             <div className="flex flex-wrap justify-center gap-4 text-sm font-mono mt-6">
+               <div className="border-2 border-current px-4 py-2 bg-[#cc785c]/10">
+                 <span className="opacity-60 text-xs uppercase tracking-wider block mb-1">Topic</span>
+                 <span className="font-bold">{topicFilter || "All Topics"}</span>
                </div>
+               <div className="border-2 border-current px-4 py-2 bg-[#cc785c]/10 capitalize">
+                 <span className="opacity-60 text-xs uppercase tracking-wider block mb-1">Difficulty</span>
+                 <span className="font-bold">{difficultyFilter || "Mixed"}</span>
+               </div>
+             </div>
+
+             <div className="flex flex-wrap justify-center gap-4 mt-8">
+                <a 
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I just scored ${score} on the ${topicFilter || 'General'} (${difficultyFilter || 'Mixed'}) Developer Trivia! Can you beat my score?`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 border-2 border-current px-4 py-3 hover:bg-[#cc785c] hover:text-white hover:border-[#cc785c] transition-colors font-bold uppercase text-xs tracking-widest"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg> Share to X
+                </a>
+                <a 
+                  href={`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(`I just scored ${score} on the ${topicFilter || 'General'} (${difficultyFilter || 'Mixed'}) Developer Trivia! Can you beat my score?`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 border-2 border-current px-4 py-3 hover:bg-[#cc785c] hover:text-white hover:border-[#cc785c] transition-colors font-bold uppercase text-xs tracking-widest"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg> Share to LinkedIn
+                </a>
              </div>
 
              <div className="pt-8">
