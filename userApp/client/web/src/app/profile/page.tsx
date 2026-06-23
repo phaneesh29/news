@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { fetchSessionsList, revokeSessionApi, revokeOtherSessionsApi, fetchLikedNewsList, deleteAccountApi } from "@/lib/api";
+import { fetchSessionsList, revokeSessionApi, revokeOtherSessionsApi, fetchLikedNewsList, deleteAccountApi, submitFeedbackApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Link from "next/link";
 import { 
-  ArrowLeft, LogOut, Check, RefreshCw,
+  ArrowLeft, LogOut, Check, RefreshCw, MessageSquare, Loader2,
   Monitor, Smartphone, Laptop, Trash2, Lock, History,
   Terminal, Fingerprint, QrCode, AlertTriangle, Shield,
   KeyRound, Cpu, Activity, UserMinus
@@ -54,6 +55,15 @@ export default function UserProfilePage() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [savedCount, setSavedCount] = useState<number | null>(null);
+
+  // Feedback states
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [category, setCategory] = useState("other");
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     if (!activeUser) return;
@@ -149,6 +159,27 @@ export default function UserProfilePage() {
       alert((err instanceof Error ? err.message : null) || "Failed to delete account. Please try again or contact support.");
     } finally {
       setLoadingSessions(false);
+    }
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (!message.trim()) return;
+    try {
+      setSubmitting(true);
+      setError(null);
+      const res = await submitFeedbackApi(category, message);
+      if (res.status === "success") {
+        setSuccess(true);
+        setMessage("");
+        setCategory("other");
+      } else {
+        setError(res.message || "Failed to submit feedback.");
+      }
+    } catch (err) {
+      console.error("Feedback submission failed:", err);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -248,6 +279,28 @@ export default function UserProfilePage() {
                         SURRENDER ID
                       </Button>
                     </div>
+                  </div>
+                </div>
+
+                {/* FEEDBACK & TELEMETRY */}
+                <div className="border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#f5f2e9] dark:bg-[#252320] p-6 vintage-shadow">
+                  <div className="flex items-center justify-between border-b-2 border-[#111111] dark:border-[#e6dfd8] pb-3 mb-4">
+                    <h3 className="font-serif text-xl font-bold uppercase font-newspaper flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-[#cc785c]" />
+                      Letters to Editor
+                    </h3>
+                  </div>
+
+                  <div className="font-mono text-[11px] space-y-4">
+                    <p className="opacity-70 leading-relaxed text-xs">
+                      Submit dispatches, feature requests, or telemetry bug reports directly to the editorial board.
+                    </p>
+                    <Button 
+                      onClick={() => setIsFeedbackOpen(true)}
+                      className="w-full bg-transparent hover:bg-[#cc785c] text-[#cc785c] hover:text-white border-2 border-[#cc785c] rounded-none font-mono text-[10px] font-bold h-10 vintage-shadow-sm transition-colors"
+                    >
+                      DRAFT DISPATCH
+                    </Button>
                   </div>
                 </div>
 
@@ -428,6 +481,137 @@ export default function UserProfilePage() {
           </div>
         )}
 
+        {/* Feedback Modal Dialog */}
+        {isFeedbackOpen && (
+          <Dialog open={isFeedbackOpen} onOpenChange={(open) => {
+            setIsFeedbackOpen(open);
+            if (!open) {
+              setMessage("");
+              setCategory("other");
+              setIsCategoryDropdownOpen(false);
+              setError(null);
+              setSuccess(false);
+            }
+          }}>
+            <DialogContent className="max-w-md border-4 rounded-none border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-6 vintage-shadow-lg text-inherit font-newspaper">
+              <DialogHeader className="border-b border-[#e6dfd8] pb-4 space-y-2">
+                <DialogTitle className="text-3xl font-normal tracking-wide text-inherit font-blackletter border-b-2 border-[#111111] dark:border-[#e6dfd8] inline-block pb-1">
+                  Letters to the Editor
+                </DialogTitle>
+                <DialogDescription className="text-xs font-sans font-medium opacity-70 italic pt-1">
+                  Submit dispatches, commentaries, or telemetry bug reports.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="py-4 space-y-4">
+                {error && (
+                  <div className="text-xs text-[#c64545] bg-[#c64545]/10 border border-[#c64545] p-3 rounded-none font-mono">
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div className="text-xs text-emerald-600 bg-emerald-600/10 border border-emerald-600 p-3 rounded-none font-mono">
+                    DISPATCH SUBMITTED. Thank you for your correspondence.
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
+                    CATEGORY:
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                      disabled={submitting || success}
+                      className="w-full flex items-center justify-between rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] hover:border-[#cc785c]/70 disabled:opacity-50 font-mono cursor-pointer"
+                    >
+                      <span>
+                        {category === "feature" && "Feature Request"}
+                        {category === "improvement" && "Improvement"}
+                        {category === "bug" && "Bug Fix"}
+                        {category === "other" && "Other"}
+                      </span>
+                      <svg className={`w-4 h-4 transition-transform duration-200 ${isCategoryDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    
+                    {isCategoryDropdownOpen && !submitting && !success && (
+                      <div className="absolute z-10 w-full mt-1 border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] shadow-md animate-in fade-in zoom-in-95 duration-100">
+                        {[
+                          { value: "feature", label: "Feature Request" },
+                          { value: "improvement", label: "Improvement" },
+                          { value: "bug", label: "Bug Fix" },
+                          { value: "other", label: "Other" }
+                        ].map((c) => (
+                          <button
+                            key={c.value}
+                            type="button"
+                            onClick={() => {
+                              setCategory(c.value);
+                              setIsCategoryDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-sm font-mono hover:bg-[#111111]/5 dark:hover:bg-[#e6dfd8]/5 transition-colors cursor-pointer border-b last:border-0 border-[#111111]/10 dark:border-[#e6dfd8]/10 ${category === c.value ? "bg-[#cc785c]/10 dark:bg-[#cc785c]/20 font-bold text-[#cc785c]" : ""}`}
+                          >
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="feedback-message" className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
+                    CORRESPONDENCE TEXT:
+                  </label>
+                  <textarea
+                    id="feedback-message"
+                    rows={5}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Draft your message to the editorial board..."
+                    disabled={submitting || success}
+                    className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] disabled:opacity-50 resize-none font-mono placeholder:text-[#8e8b82] placeholder:font-sans placeholder:italic"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="flex flex-row justify-end items-center gap-3 border-t border-[#e6dfd8] pt-4 font-mono">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setIsFeedbackOpen(false);
+                    setMessage("");
+                    setCategory("other");
+                    setIsCategoryDropdownOpen(false);
+                    setError(null);
+                    setSuccess(false);
+                  }}
+                  disabled={submitting}
+                  className="text-xs font-bold uppercase tracking-wider text-current hover:bg-current/10 rounded-none h-9 px-4 transition-colors cursor-pointer"
+                >
+                  {success ? "Dismiss" : "Cancel"}
+                </Button>
+                {!success && (
+                  <Button
+                    onClick={handleSubmitFeedback}
+                    disabled={submitting || !message.trim()}
+                    className="bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] text-xs font-bold uppercase tracking-wider h-9 px-4 rounded-none vintage-shadow-sm transition-all cursor-pointer"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                        TRANSMITTING...
+                      </>
+                    ) : (
+                      "Send Dispatch"
+                    )}
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
 
       {/* Footer */}

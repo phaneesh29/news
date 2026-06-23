@@ -6,23 +6,19 @@ import { usePathname } from "next/navigation";
 import authClient, { useSession, signIn, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { LogOut, Loader2, MessageSquare } from "lucide-react";
-import { submitFeedbackApi } from "@/lib/api";
+
+import { LogOut, Loader2, MessageSquare, Menu, X } from "lucide-react";
+
 
 export default function Navbar() {
   const { data: sessionData, isPending, refetch } = useSession();
   const activeUser = sessionData?.user;
   const pathname = usePathname();
 
-  // Feedback states
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [category, setCategory] = useState("other");
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  // Mobile Menu state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+
 
   // Google social login
   const triggerGoogleLogin = async () => {
@@ -41,26 +37,7 @@ export default function Navbar() {
     refetch();
   };
 
-  const handleSubmitFeedback = async () => {
-    if (!message.trim()) return;
-    try {
-      setSubmitting(true);
-      setError(null);
-      const res = await submitFeedbackApi(category, message);
-      if (res.status === "success") {
-        setSuccess(true);
-        setMessage("");
-        setCategory("other");
-      } else {
-        setError(res.message || "Failed to submit feedback.");
-      }
-    } catch (err) {
-      console.error("Feedback submission failed:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+
 
   // Google One Tap init
   useEffect(() => {
@@ -133,6 +110,16 @@ export default function Navbar() {
               Liked News
             </Link>
 
+            {/* Playables Tab */}
+            <Link 
+              href="/playables" 
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname.startsWith("/playables") ? "text-current" : "text-current/60 hover:text-current"
+              }`}
+            >
+              Playables
+            </Link>
+
             {/* Settings Tab */}
             <Link 
               href="/settings" 
@@ -143,26 +130,7 @@ export default function Navbar() {
               Settings
             </Link>
 
-            {activeUser && (
-              <>
-                <Link 
-                  href="/profile" 
-                  className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
-                    pathname === "/profile" ? "text-current" : "text-current/60 hover:text-current"
-                  }`}
-                >
-                  Profile
-                </Link>
 
-                <button
-                  onClick={() => setIsFeedbackOpen(true)}
-                  className="hidden sm:inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-current/60 hover:text-current transition-colors border-l border-current/15 pl-4 cursor-pointer"
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  Feedback
-                </button>
-              </>
-            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -200,141 +168,71 @@ export default function Navbar() {
                 Sign In
               </Button>
             )}
+            
+            {/* Mobile Menu Toggle */}
+            <button 
+              className="sm:hidden p-2 text-current cursor-pointer hover:bg-current/10 transition-colors rounded-md" 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="sm:hidden border-t-2 border-double border-current bg-background/95 backdrop-blur-xl px-4 py-4 space-y-4 shadow-md animate-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col space-y-4">
+              <Link 
+                href="/news" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname === "/news" ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                News
+              </Link>
+              <Link 
+                href="/digest" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname === "/digest" ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Briefs
+              </Link>
+              <Link 
+                href="/blog" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname.startsWith("/blog") && !pathname.startsWith("/blogs") ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Blog
+              </Link>
+              <Link 
+                href="/liked" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname === "/liked" ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Liked News
+              </Link>
+              <Link 
+                href="/playables" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname.startsWith("/playables") ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Playables
+              </Link>
+              <Link 
+                href="/settings" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname === "/settings" ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Settings
+              </Link>
+
+            </nav>
+          </div>
+        )}
       </header>
 
-      {/* Feedback Modal Dialog */}
-      {isFeedbackOpen && (
-        <Dialog open={isFeedbackOpen} onOpenChange={(open) => {
-          setIsFeedbackOpen(open);
-          if (!open) {
-            setMessage("");
-            setCategory("other");
-            setIsCategoryDropdownOpen(false);
-            setError(null);
-            setSuccess(false);
-          }
-        }}>
-          <DialogContent className="max-w-md border-4 rounded-none border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-6 vintage-shadow-lg text-inherit font-newspaper">
-            <DialogHeader className="border-b border-[#e6dfd8] pb-4 space-y-2">
-              <DialogTitle className="text-3xl font-normal tracking-wide text-inherit font-blackletter border-b-2 border-[#111111] dark:border-[#e6dfd8] inline-block pb-1">
-                Letters to the Editor
-              </DialogTitle>
-              <DialogDescription className="text-xs font-sans font-medium opacity-70 italic pt-1">
-                Submit dispatches, commentaries, or telemetry bug reports.
-              </DialogDescription>
-            </DialogHeader>
 
-            <div className="py-4 space-y-4">
-              {error && (
-                <div className="text-xs text-[#c64545] bg-[#c64545]/10 border border-[#c64545] p-3 rounded-none font-mono">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="text-xs text-emerald-600 bg-emerald-600/10 border border-emerald-600 p-3 rounded-none font-mono">
-                  DISPATCH SUBMITTED. Thank you for your correspondence.
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
-                  CATEGORY:
-                </label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                    disabled={submitting || success}
-                    className="w-full flex items-center justify-between rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] hover:border-[#cc785c]/70 disabled:opacity-50 font-mono cursor-pointer"
-                  >
-                    <span>
-                      {category === "feature" && "Feature Request"}
-                      {category === "improvement" && "Improvement"}
-                      {category === "bug" && "Bug Fix"}
-                      {category === "other" && "Other"}
-                    </span>
-                    <svg className={`w-4 h-4 transition-transform duration-200 ${isCategoryDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                  </button>
-                  
-                  {isCategoryDropdownOpen && !submitting && !success && (
-                    <div className="absolute z-10 w-full mt-1 border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] shadow-md animate-in fade-in zoom-in-95 duration-100">
-                      {[
-                        { value: "feature", label: "Feature Request" },
-                        { value: "improvement", label: "Improvement" },
-                        { value: "bug", label: "Bug Fix" },
-                        { value: "other", label: "Other" }
-                      ].map((c) => (
-                        <button
-                          key={c.value}
-                          type="button"
-                          onClick={() => {
-                            setCategory(c.value);
-                            setIsCategoryDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-2.5 text-sm font-mono hover:bg-[#111111]/5 dark:hover:bg-[#e6dfd8]/5 transition-colors cursor-pointer border-b last:border-0 border-[#111111]/10 dark:border-[#e6dfd8]/10 ${category === c.value ? "bg-[#cc785c]/10 dark:bg-[#cc785c]/20 font-bold text-[#cc785c]" : ""}`}
-                        >
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="feedback-message" className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
-                  CORRESPONDENCE TEXT:
-                </label>
-                <textarea
-                  id="feedback-message"
-                  rows={5}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Draft your message to the editorial board..."
-                  disabled={submitting || success}
-                  className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] disabled:opacity-50 resize-none font-mono placeholder:text-[#8e8b82] placeholder:font-sans placeholder:italic"
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="flex flex-row justify-end items-center gap-3 border-t border-[#e6dfd8] pt-4 font-mono">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setIsFeedbackOpen(false);
-                  setMessage("");
-                  setCategory("other");
-                  setIsCategoryDropdownOpen(false);
-                  setError(null);
-                  setSuccess(false);
-                }}
-                disabled={submitting}
-                className="text-xs font-bold uppercase tracking-wider text-current hover:bg-current/10 rounded-none h-9 px-4 transition-colors cursor-pointer"
-              >
-                {success ? "Dismiss" : "Cancel"}
-              </Button>
-              {!success && (
-                <Button
-                  onClick={handleSubmitFeedback}
-                  disabled={submitting || !message.trim()}
-                  className="bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] text-xs font-bold uppercase tracking-wider h-9 px-4 rounded-none vintage-shadow-sm transition-all cursor-pointer"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-                      TRANSMITTING...
-                    </>
-                  ) : (
-                    "Send Dispatch"
-                  )}
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </>
   );
 }
