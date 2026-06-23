@@ -191,13 +191,24 @@ export default function IncidentSimulator() {
                 </button>
               ))
             ) : (
-              <button
-                onClick={resetGame}
-                disabled={isTyping}
-                className="w-full text-center p-4 border-4 border-current hover:bg-[#cc785c] hover:border-[#cc785c] hover:text-white transition-all font-bold tracking-widest uppercase disabled:opacity-50 text-xl font-blackletter"
-              >
-                Draft New Simulation
-              </button>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="https://devbits-app.vercel.app/blog/d6209bda-fe6e-417f-b240-a247896dd8c2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-center p-3 border-2 border-current hover:bg-current/10 transition-all font-bold tracking-widest uppercase text-sm sm:text-base block flex items-center justify-center gap-2"
+                >
+                  <Terminal className="h-4 w-4" />
+                  Read Real-World Case Study
+                </Link>
+                <button
+                  onClick={resetGame}
+                  disabled={isTyping}
+                  className="w-full text-center p-4 border-4 border-current hover:bg-[#cc785c] hover:border-[#cc785c] hover:text-white transition-all font-bold tracking-widest uppercase disabled:opacity-50 text-xl font-blackletter"
+                >
+                  Draft New Simulation
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -163,7 +163,7 @@ export default function QuizPage() {
                 <span>DISPATCH {currentIndex + 1} <span className="opacity-50 mx-1">/</span> {questions.length}</span>
                 <button 
                   onClick={() => setGameState("results")}
-                  className="text-[10px] font-bold uppercase tracking-wider text-[#c64545] hover:bg-[#c64545]/10 border border-[#c64545] px-2 py-0.5 transition-colors cursor-pointer"
+                  className="text-xs font-bold uppercase tracking-wider text-[#c64545] hover:bg-[#c64545]/10 border-2 border-[#c64545] px-3 py-1 transition-colors cursor-pointer rounded-none"
                 >
                   Stop Assessment
                 </button>
