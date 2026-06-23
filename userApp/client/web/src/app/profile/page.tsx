@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { fetchSessionsList, revokeSessionApi, revokeOtherSessionsApi, fetchLikedNewsList } from "@/lib/api";
+import { fetchSessionsList, revokeSessionApi, revokeOtherSessionsApi, fetchLikedNewsList, deleteAccountApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import {
   ArrowLeft, LogOut, Check, RefreshCw,
   Monitor, Smartphone, Laptop, Trash2, Lock, History,
   Terminal, Fingerprint, QrCode, AlertTriangle, Shield,
-  KeyRound, Cpu, Activity
+  KeyRound, Cpu, Activity, UserMinus
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
@@ -131,6 +131,25 @@ export default function UserProfilePage() {
   const handleLogout = async () => {
     await signOut();
     refetch();
+  };
+
+  const handleDeleteAccount = async () => {
+    const isConfirmed = window.confirm("WARNING: Are you sure you want to permanently delete your account and all associated data? This action cannot be undone.");
+    if (!isConfirmed) return;
+
+    try {
+      setLoadingSessions(true); // Re-use loading state to show progress
+      await deleteAccountApi();
+      
+      // Assuming successful deletion, force logout and redirect
+      await signOut();
+      router.push("/");
+    } catch (err) {
+      console.error("Failed to delete account:", err);
+      alert((err instanceof Error ? err.message : null) || "Failed to delete account. Please try again or contact support.");
+    } finally {
+      setLoadingSessions(false);
+    }
   };
 
   return (
@@ -356,6 +375,29 @@ export default function UserProfilePage() {
                         })}
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* DANGER ZONE: ACCOUNT TERMINATION */}
+                <div className="border-2 border-[#c64545] bg-[#fcfaf2] dark:bg-[#1f1e1b] vintage-shadow-sm">
+                  <div className="bg-[#c64545]/10 border-b-2 border-[#c64545] p-4 flex flex-row items-center gap-2 text-[#c64545]">
+                    <AlertTriangle className="h-5 w-5" />
+                    <h3 className="font-serif font-bold text-lg font-newspaper">Danger Zone</h3>
+                  </div>
+                  
+                  <div className="p-6 space-y-4">
+                    <p className="text-xs font-mono opacity-80 leading-relaxed">
+                      Permanently erase your identity, profile, and all saved curation data from the central servers. This action is instantaneous and <strong className="text-[#c64545]">cannot be undone</strong>.
+                    </p>
+                    <div className="pt-2">
+                      <Button 
+                        onClick={handleDeleteAccount}
+                        className="bg-transparent hover:bg-[#c64545] text-[#c64545] hover:text-white border-2 border-[#c64545] text-[10px] font-bold h-10 px-6 rounded-none transition-colors vintage-shadow-sm w-full sm:w-auto"
+                      >
+                        <UserMinus className="h-4 w-4 mr-2" />
+                        TERMINATE DOSSIER (DELETE ACCOUNT)
+                      </Button>
+                    </div>
                   </div>
                 </div>
 

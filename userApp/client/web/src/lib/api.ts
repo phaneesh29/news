@@ -117,6 +117,23 @@ export async function revokeOtherSessionsApi(): Promise<ApiResponse<null>> {
   return response.json();
 }
 
+export async function deleteAccountApi(): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_BASE_URL}/auth/account`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete account");
+  }
+  
+  return response.json();
+}
+
 export interface NewsItem {
   id: string;
   title: string;
