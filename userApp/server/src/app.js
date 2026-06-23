@@ -44,6 +44,10 @@ app.use('/api', rateLimiter);
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+app.get('/google6611f56d5341a892.html', (req, res) => {
+  res.send('google-site-verification: google6611f56d5341a892.html');
+});
+
 app.use('/api/auth', authRouter);
 app.all('/api/auth/*splat', toNodeHandler(auth));
 
