@@ -17,6 +17,8 @@ export default function Navbar() {
 
   // Feedback states
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [category, setCategory] = useState("other");
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,16 +46,17 @@ export default function Navbar() {
     try {
       setSubmitting(true);
       setError(null);
-      const res = await submitFeedbackApi(message);
+      const res = await submitFeedbackApi(category, message);
       if (res.status === "success") {
         setSuccess(true);
         setMessage("");
+        setCategory("other");
       } else {
         setError(res.message || "Failed to submit feedback.");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Feedback submission failed:", err);
-      setError(err.message || "An unexpected error occurred.");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setSubmitting(false);
     }
@@ -207,16 +210,18 @@ export default function Navbar() {
           setIsFeedbackOpen(open);
           if (!open) {
             setMessage("");
+            setCategory("other");
+            setIsCategoryDropdownOpen(false);
             setError(null);
             setSuccess(false);
           }
         }}>
           <DialogContent className="max-w-md border-4 rounded-none border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-6 vintage-shadow-lg text-inherit font-newspaper">
             <DialogHeader className="border-b border-[#e6dfd8] pb-4 space-y-2">
-              <DialogTitle className="font-serif text-2xl font-black italic uppercase tracking-tight text-inherit font-newspaper">
+              <DialogTitle className="text-3xl font-normal tracking-wide text-inherit font-blackletter border-b-2 border-[#111111] dark:border-[#e6dfd8] inline-block pb-1">
                 Letters to the Editor
               </DialogTitle>
-              <DialogDescription className="text-xs font-mono tracking-wider opacity-60 uppercase">
+              <DialogDescription className="text-xs font-sans font-medium opacity-70 italic pt-1">
                 Submit dispatches, commentaries, or telemetry bug reports.
               </DialogDescription>
             </DialogHeader>
@@ -234,7 +239,52 @@ export default function Navbar() {
               )}
               
               <div className="space-y-2">
-                <label htmlFor="feedback-message" className="text-xs font-bold uppercase font-mono tracking-wider opacity-70 block">
+                <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
+                  CATEGORY:
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                    disabled={submitting || success}
+                    className="w-full flex items-center justify-between rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] hover:border-[#cc785c]/70 disabled:opacity-50 font-mono cursor-pointer"
+                  >
+                    <span>
+                      {category === "feature" && "Feature Request"}
+                      {category === "improvement" && "Improvement"}
+                      {category === "bug" && "Bug Fix"}
+                      {category === "other" && "Other"}
+                    </span>
+                    <svg className={`w-4 h-4 transition-transform duration-200 ${isCategoryDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+                  
+                  {isCategoryDropdownOpen && !submitting && !success && (
+                    <div className="absolute z-10 w-full mt-1 border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] shadow-md animate-in fade-in zoom-in-95 duration-100">
+                      {[
+                        { value: "feature", label: "Feature Request" },
+                        { value: "improvement", label: "Improvement" },
+                        { value: "bug", label: "Bug Fix" },
+                        { value: "other", label: "Other" }
+                      ].map((c) => (
+                        <button
+                          key={c.value}
+                          type="button"
+                          onClick={() => {
+                            setCategory(c.value);
+                            setIsCategoryDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-mono hover:bg-[#111111]/5 dark:hover:bg-[#e6dfd8]/5 transition-colors cursor-pointer border-b last:border-0 border-[#111111]/10 dark:border-[#e6dfd8]/10 ${category === c.value ? "bg-[#cc785c]/10 dark:bg-[#cc785c]/20 font-bold text-[#cc785c]" : ""}`}
+                        >
+                          {c.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="feedback-message" className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
                   CORRESPONDENCE TEXT:
                 </label>
                 <textarea
@@ -244,7 +294,7 @@ export default function Navbar() {
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Draft your message to the editorial board..."
                   disabled={submitting || success}
-                  className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] disabled:opacity-50 resize-none font-serif placeholder:text-[#8e8b82] placeholder:italic"
+                  className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-transparent p-3 text-sm transition-colors outline-none focus:border-[#cc785c] disabled:opacity-50 resize-none font-mono placeholder:text-[#8e8b82] placeholder:font-sans placeholder:italic"
                 />
               </div>
             </div>
@@ -255,6 +305,8 @@ export default function Navbar() {
                 onClick={() => {
                   setIsFeedbackOpen(false);
                   setMessage("");
+                  setCategory("other");
+                  setIsCategoryDropdownOpen(false);
                   setError(null);
                   setSuccess(false);
                 }}

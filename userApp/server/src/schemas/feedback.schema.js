@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const createFeedbackSchema = z.object({
+  category: z.enum(["feature", "improvement", "bug", "other"]).optional().default("other"),
   message: z
     .string({
       required_error: "Feedback message is required.",

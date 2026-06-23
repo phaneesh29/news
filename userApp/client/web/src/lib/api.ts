@@ -251,18 +251,19 @@ export interface FeedbackItem {
   id: string;
   userId: string;
   email: string;
+  category: string;
   message: string;
   createdAt: string;
 }
 
-export async function submitFeedbackApi(message: string): Promise<ApiResponse<{ feedback: FeedbackItem }>> {
+export async function submitFeedbackApi(category: string, message: string): Promise<ApiResponse<{ feedback: FeedbackItem }>> {
   const response = await fetch(`${API_BASE_URL}/feedbacks`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ category, message }),
   });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
