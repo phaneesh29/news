@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BrainCircuit, Gamepad2, ArrowLeft } from "lucide-react";
+import { ArrowRight, BrainCircuit, Gamepad2, ArrowLeft, Terminal } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -58,13 +58,33 @@ export default function PlayablesHub() {
             </div>
           </Link>
 
-          {/* Coming Soon Card */}
-          <div className="border-2 border-dashed border-current/50 bg-[#111111]/5 dark:bg-[#e6dfd8]/5 p-8 flex flex-col items-center justify-center text-center opacity-70">
-            <h2 className="font-blackletter text-2xl mb-2 opacity-50">More Coming Soon</h2>
-            <p className="font-mono text-xs opacity-60">
-              The editorial board is currently developing new amusements. Check back in future editions.
+          {/* Incident Simulator Card */}
+          <Link 
+            href="/playables/incident" 
+            className="group block border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-8 vintage-shadow-lg transition-all hover:-translate-y-1 hover:border-[#cc785c] duration-300 relative overflow-hidden"
+          >
+            {/* Decorative corners */}
+            <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+
+            <div className="flex items-start justify-between mb-6">
+              <Terminal className="h-10 w-10 text-current group-hover:text-[#cc785c] transition-colors" />
+              <div className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 font-mono">
+                New Alert
+              </div>
+            </div>
+
+            <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Incident Simulator</h2>
+            <p className="font-mono text-sm opacity-80 leading-relaxed mb-8">
+              A text-based crisis management game. Experience a simulated cache stampede, make critical architectural decisions under pressure, and try to keep your company afloat.
             </p>
-          </div>
+
+            <div className="flex items-center text-[#cc785c] font-bold uppercase tracking-wider text-sm">
+              Enter Command Center <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
+            </div>
+          </Link>
 
         </div>
       </div>
