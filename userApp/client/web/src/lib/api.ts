@@ -351,3 +351,57 @@ export async function fetchDigest(): Promise<ApiResponse<DigestData>> {
   return response.json();
 }
 
+export interface DocItem {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  parentId: string | null;
+  orderIndex: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function fetchDocsList(cursor?: string, parentId?: string): Promise<ApiResponse<{ docs: DocItem[]; nextCursor: string | null }>> {
+  let url = `${API_BASE_URL}/docs`;
+  const params = new URLSearchParams();
+  if (cursor) params.append("cursor", cursor);
+  if (parentId) params.append("parentId", parentId);
+  const queryString = params.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch documents");
+  }
+  return response.json();
+}
+
+export async function fetchDocBySlug(slug: string): Promise<ApiResponse<{ doc: DocItem }>> {
+  const response = await fetch(`${API_BASE_URL}/docs/${encodeURIComponent(slug)}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch document");
+  }
+  return response.json();
+}
+
+export async function searchDocsList(query: string): Promise<ApiResponse<{ docs: DocItem[] }>> {
+  const url = `${API_BASE_URL}/docs/search?q=${encodeURIComponent(query)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to search documents");
+  }
+  return response.json();
+}
+

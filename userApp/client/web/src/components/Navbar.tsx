@@ -119,6 +119,16 @@ export default function Navbar() {
               Playables
             </Link>
 
+            {/* Docs Tab */}
+            <Link 
+              href="/docs" 
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname.startsWith("/docs") ? "text-current" : "text-current/60 hover:text-current"
+              }`}
+            >
+              Docs
+            </Link>
+
             {/* Settings Tab */}
             <Link 
               href="/settings" 
@@ -217,6 +227,13 @@ export default function Navbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Playables
+              </Link>
+              <Link 
+                href="/docs" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname.startsWith("/docs") ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Docs
               </Link>
               <Link 
                 href="/settings" 

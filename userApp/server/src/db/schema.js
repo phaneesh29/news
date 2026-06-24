@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, pgEnum, uuid, varchar, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, pgEnum, uuid, varchar, primaryKey, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -126,3 +126,19 @@ export const feedbackRelations = relations(feedbacks, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const docs = pgTable('docs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  content: text('content').notNull(),
+  parentId: uuid('parent_id'),
+  orderIndex: integer('order_index').notNull().default(0),
+  authorId: uuid('author_id'),
+  isPublished: boolean('is_published').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+}, (table) => [
+  index('docs_created_at_idx').on(table.createdAt),
+  index('docs_parent_id_idx').on(table.parentId)
+]);
