@@ -16,7 +16,8 @@ import {
   Sparkles, 
   ShieldCheck,
   ChevronRight,
-  Heart
+  Heart,
+  Code2
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -69,7 +70,7 @@ export default function LandingPage() {
               DevBits
             </h1>
             <div className="text-center font-serif italic text-sm md:text-xl opacity-90 max-w-2xl mx-auto font-newspaper pt-3 text-[#cc785c] dark:text-[#e89b82] font-semibold">
-              "Stop switching tabs. News, Official Docs, Engineering Blogs, and Playables—all in one unified command center."
+              "Stop switching tabs. News, Official Docs, Engineering Blogs, Playables, and a full In-Browser IDE—all in one unified command center."
             </div>
           </div>
 
@@ -89,7 +90,14 @@ export default function LandingPage() {
           </p>
 
           {/* Call to Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-4xl pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 w-full max-w-5xl pt-6">
+            <Link href="/tools/code" className="w-full">
+              <Button className="w-full bg-[#18181a] hover:bg-[#2c2c30] dark:bg-[#e6dfd8] dark:hover:bg-[#ffffff] text-white dark:text-[#111111] border-2 border-[#111111] dark:border-[#e6dfd8] text-xs font-bold py-7 rounded-none vintage-shadow flex items-center justify-center gap-2 transition-transform hover:-translate-y-1">
+                Launch IDE
+                <Code2 className="h-4 w-4" />
+              </Button>
+            </Link>
+
             <Link href="/news" className="w-full">
               <Button className="w-full bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] text-xs font-bold py-7 rounded-none vintage-shadow flex items-center justify-center gap-2 transition-transform hover:-translate-y-1">
                 Newsroom
@@ -130,14 +138,34 @@ export default function LandingPage() {
               One Spot For All Developers
             </h2>
             <p className="text-sm font-mono opacity-75">
-              Four massive pillars of engineering intelligence, custom-tuned for high-retention learning.
+              Five massive pillars of engineering intelligence, custom-tuned for high-retention learning and rapid prototyping.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-6">
             
+            {/* IDE */}
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#18181a] dark:bg-[#0d0d0e] text-white p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1 md:col-span-2 lg:col-span-2">
+              <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-white opacity-30 group-hover:opacity-100 transition-colors"></div>
+              <div className="space-y-4">
+                <div className="h-12 w-12 border-2 border-white text-white flex items-center justify-center vintage-shadow-sm group-hover:bg-white group-hover:text-[#18181a] transition-colors">
+                  <Code2 className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold uppercase font-newspaper leading-tight">In-Browser<br/>IDE</h3>
+                <p className="text-sm leading-relaxed opacity-85">
+                  Write, execute, and test code directly in a blazing-fast browser-based sandbox. Instantly validate ideas without touching your local filesystem.
+                </p>
+              </div>
+              <Link href="/tools/code" className="pt-6 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 group-hover:underline">
+                  Launch Sandbox
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            </div>
+
             {/* News */}
-            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1">
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1 lg:col-span-2">
               <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current opacity-30 group-hover:border-[#cc785c] group-hover:opacity-100 transition-colors"></div>
               <div className="space-y-4">
                 <div className="h-12 w-12 border-2 border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
@@ -157,7 +185,7 @@ export default function LandingPage() {
             </div>
 
             {/* Docs */}
-            <div className="group border-2 border-[#cc785c] bg-[#cc785c]/5 dark:bg-[#cc785c]/10 p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1 transform lg:-translate-y-2 lg:hover:-translate-y-4">
+            <div className="group border-2 border-[#cc785c] bg-[#cc785c]/5 dark:bg-[#cc785c]/10 p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1 transform lg:-translate-y-2 lg:hover:-translate-y-4 lg:col-span-2">
               <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-[#cc785c] opacity-50 group-hover:opacity-100 transition-colors"></div>
               <div className="space-y-4">
                 <div className="h-12 w-12 border-2 border-[#cc785c] text-[#cc785c] bg-white dark:bg-[#1f1e1b] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
@@ -177,7 +205,7 @@ export default function LandingPage() {
             </div>
 
             {/* Blog */}
-            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1">
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1 lg:col-span-3">
               <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current opacity-30 group-hover:border-[#cc785c] group-hover:opacity-100 transition-colors"></div>
               <div className="space-y-4">
                 <div className="h-12 w-12 border-2 border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
@@ -197,7 +225,7 @@ export default function LandingPage() {
             </div>
 
             {/* Playables */}
-            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1">
+            <div className="group border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 sm:p-8 space-y-6 vintage-shadow hover:vintage-shadow-lg transition-all duration-300 relative flex flex-col justify-between hover:-translate-y-1 lg:col-span-3">
               <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current opacity-30 group-hover:border-[#cc785c] group-hover:opacity-100 transition-colors"></div>
               <div className="space-y-4">
                 <div className="h-12 w-12 border-2 border-current text-[#cc785c] flex items-center justify-center vintage-shadow-sm group-hover:bg-[#cc785c] group-hover:text-white transition-colors">
