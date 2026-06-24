@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
-import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2 } from "lucide-react";
+import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2, LayoutTemplate } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -27,6 +27,8 @@ export default function NodeSandbox() {
   const [files, setFiles] = useState<FSNode[]>([]);
   const [currentFile, setCurrentFile] = useState<string>("/index.js");
   const [code, setCode] = useState(INITIAL_CODE);
+  const [serverUrl, setServerUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
   
   const [newItemName, setNewItemName] = useState("");
   const [newItemType, setNewItemType] = useState<"file" | "folder" | null>(null);
@@ -69,6 +71,7 @@ export default function NodeSandbox() {
     setBootStatus("idle");
     setFiles([]);
     setIsTerminalOpen(false);
+    setServerUrl(null);
   };
 
   const loadFileSystem = useCallback(async (dirPath: string = '/', depth: number = 0) => {
@@ -127,6 +130,11 @@ export default function NodeSandbox() {
             }, null, 2) 
           }
         }
+      });
+
+      wc.on('server-ready', (port, url) => {
+        setServerUrl(url);
+        console.log(`Server ready on port ${port} at ${url}`);
       });
 
       // We wait to initialize terminal until the user opens it or we just create it invisibly
@@ -238,17 +246,35 @@ export default function NodeSandbox() {
     }
   };
 
-  const handleModuleTypeChange = async (type: "commonjs" | "module") => {
-    setModuleType(type);
-    if (wcRef.current) {
-      try {
-        const pkgJsonRaw = await wcRef.current.fs.readFile('/package.json', 'utf-8');
-        const pkgJson = JSON.parse(pkgJsonRaw);
-        pkgJson.type = type;
-        await wcRef.current.fs.writeFile('/package.json', JSON.stringify(pkgJson, null, 2));
-      } catch (err) {
-        console.error("Failed to update package.json type", err);
+  const handleTemplateChange = async (type: "commonjs" | "module" | "static") => {
+    setModuleType(type as any); // keep state just in case, though it's acting more like a template now
+    if (!wcRef.current) return;
+    
+    try {
+      if (type === "static") {
+        const html = '<!DOCTYPE html>\n<html>\n<head>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <h1>Hello Web!</h1>\n  <p>Run <code>npm start</code> in the terminal to see this page.</p>\n  <script src="script.js"></script>\n</body>\n</html>';
+        await wcRef.current.fs.writeFile('/index.html', html);
+        await wcRef.current.fs.writeFile('/style.css', 'body {\n  font-family: system-ui, sans-serif;\n  background: #111;\n  color: #fff;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n  margin: 0;\n}');
+        await wcRef.current.fs.writeFile('/script.js', 'console.log("Hello from Static JS!");');
+        await wcRef.current.fs.writeFile('/package.json', JSON.stringify({
+          name: "static-sandbox",
+          scripts: { start: "npx serve ." }
+        }, null, 2));
+        setCurrentFile('/index.html');
+        setCode(html);
+      } else {
+        await wcRef.current.fs.writeFile('/index.js', INITIAL_CODE);
+        await wcRef.current.fs.writeFile('/package.json', JSON.stringify({
+          name: "sandbox",
+          type: type,
+          dependencies: {}
+        }, null, 2));
+        setCurrentFile('/index.js');
+        setCode(INITIAL_CODE);
       }
+      await refreshFiles();
+    } catch (err) {
+      console.error("Failed to apply template", err);
     }
   };
 
@@ -258,6 +284,68 @@ export default function NodeSandbox() {
     if (path.endsWith('.css')) return 'css';
     if (path.endsWith('.py')) return 'python';
     return 'javascript';
+  };
+
+  const handleEditorWillMount = (monaco: any) => {
+    // 1. Configure JavaScript for Node.js
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      allowNonTsExtensions: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.CommonJS,
+    });
+
+    // 2. Add basic Node.js and Express types
+    monaco.languages.typescript.javascriptDefaults.addExtraLib(
+      `
+      declare module 'os' { export function platform(): string; export function arch(): string; export function cpus(): any[]; }
+      declare module 'fs' { export function readFileSync(p: string, enc?: string): any; export function writeFileSync(p: string, d: any): void; }
+      declare module 'path' { export function join(...p: string[]): string; export function resolve(...p: string[]): string; }
+      declare module 'express' { function express(): any; export default express; }
+      `,
+      'node_core.d.ts'
+    );
+
+    // 3. Add custom Python snippets (Monaco already handles HTML/CSS/JS well)
+    monaco.languages.registerCompletionItemProvider('python', {
+      provideCompletionItems: (model: any, position: any) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+        return {
+          suggestions: [
+            {
+              label: 'def',
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              insertText: 'def ${1:function_name}(${2:args}):\n\t${3:pass}',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              documentation: 'Python Function Definition',
+              range
+            },
+            {
+              label: 'print',
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              insertText: 'print(${1:message})',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              documentation: 'Print statement',
+              range
+            },
+            {
+              label: 'class',
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              insertText: 'class ${1:ClassName}:\n\tdef __init__(self):\n\t\t${2:pass}',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              documentation: 'Python Class Definition',
+              range
+            }
+          ]
+        };
+      }
+    });
   };
 
   return (
@@ -275,16 +363,23 @@ export default function NodeSandbox() {
             </h1>
             
             {bootStatus === "ready" && (
-              <div className="flex items-center gap-2 ml-4">
-                <span className="text-[10px] font-mono text-white/50 uppercase">Environment:</span>
-                <select
-                  value={moduleType}
-                  onChange={(e) => handleModuleTypeChange(e.target.value as "commonjs" | "module")}
-                  className="bg-black/50 border border-white/20 text-white font-mono text-[10px] uppercase px-2 py-1 focus:outline-none cursor-pointer rounded-sm"
-                >
-                  <option value="module">ES Modules</option>
-                  <option value="commonjs">CommonJS</option>
-                </select>
+              <div className="flex items-center ml-6 bg-[#1a1a1a] border border-white/10 rounded-md px-1.5 py-1 shadow-inner relative group hover:border-white/20 transition-colors">
+                <div className="flex items-center gap-2 px-2 border-r border-white/10">
+                  <LayoutTemplate className="h-3.5 w-3.5 text-[#cc785c] group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">Template</span>
+                </div>
+                <div className="relative pl-1">
+                  <select
+                    value={moduleType}
+                    onChange={(e) => handleTemplateChange(e.target.value as any)}
+                    className="appearance-none bg-transparent text-[#e0e0e0] font-mono text-[11px] uppercase tracking-wider pl-2 pr-6 py-1 focus:outline-none cursor-pointer hover:text-white transition-colors"
+                  >
+                    <option value="module" className="bg-[#1e1e1e]">Node (ESM)</option>
+                    <option value="commonjs" className="bg-[#1e1e1e]">Node (CJS)</option>
+                    <option value="static" className="bg-[#1e1e1e]">Static Web</option>
+                  </select>
+                  <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none group-hover:text-white/70 transition-colors" />
+                </div>
               </div>
             )}
           </div>
@@ -406,24 +501,66 @@ export default function NodeSandbox() {
             <div className="flex-1 flex flex-col bg-[#1e1e1e] min-w-0 overflow-hidden relative">
               
               {/* Editor Tabs Area */}
-              <div className="bg-[#2d2d2d] flex items-center border-b border-black shrink-0">
-                {currentFile && (
-                  <div className="bg-[#1e1e1e] text-[#cc785c] text-[10px] font-mono px-4 py-2 border-r border-black border-t-2 border-t-[#cc785c] flex items-center gap-2">
-                    <File className="h-3 w-3" />
-                    <span>{currentFile.split('/').pop()}</span>
-                  </div>
-                )}
+              <div className="bg-[#2d2d2d] flex items-center justify-between border-b border-black shrink-0 pr-4">
+                <div className="flex items-center">
+                  {currentFile && (
+                    <button 
+                      onClick={() => setActiveTab("editor")}
+                      className={`text-[10px] font-mono px-4 py-2 border-r border-black flex items-center gap-2 transition-colors ${
+                        activeTab === "editor" ? "bg-[#1e1e1e] text-[#cc785c] border-t-2 border-t-[#cc785c]" : "bg-[#2d2d2d] text-white/50 hover:text-white border-t-2 border-t-transparent"
+                      }`}
+                    >
+                      <File className="h-3 w-3" />
+                      <span>{currentFile.split('/').pop()}</span>
+                    </button>
+                  )}
+                  {serverUrl && (
+                    <button 
+                      onClick={() => setActiveTab("preview")}
+                      className={`text-[10px] font-mono px-4 py-2 border-r border-black flex items-center gap-2 transition-colors ${
+                        activeTab === "preview" ? "bg-[#1e1e1e] text-emerald-400 border-t-2 border-t-emerald-400" : "bg-[#2d2d2d] text-white/50 hover:text-white border-t-2 border-t-transparent"
+                      }`}
+                    >
+                      <Play className="h-3 w-3" />
+                      <span>Browser Preview</span>
+                    </button>
+                  )}
+                </div>
               </div>
               
-              {/* Editor Area */}
+              {/* Main Area (Editor or Preview) */}
               <div className="flex-1 relative overflow-hidden">
-                {currentFile ? (
+                {activeTab === "preview" && serverUrl ? (
+                  <div className="w-full h-full bg-white flex flex-col">
+                    <div className="bg-gray-100 border-b border-gray-300 p-2 flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 px-2">
+                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                      </div>
+                      <div className="flex-1 bg-white border border-gray-300 rounded px-3 py-1 text-xs font-mono text-gray-600 truncate flex items-center justify-between">
+                        <span>{serverUrl}</span>
+                        <button onClick={() => {
+                          const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
+                          if (iframe) iframe.src = iframe.src;
+                        }} className="hover:text-black">↻</button>
+                      </div>
+                    </div>
+                    <iframe 
+                      id="preview-iframe"
+                      src={serverUrl} 
+                      className="w-full flex-1 border-none bg-white" 
+                      allow="cross-origin-isolated"
+                    />
+                  </div>
+                ) : currentFile ? (
                   <Editor
                     height="100%"
                     language={getLanguage(currentFile)}
                     theme="vs-dark"
                     value={code}
                     onChange={handleCodeChange}
+                    beforeMount={handleEditorWillMount}
                     options={{
                       minimap: { enabled: false },
                       fontSize: 14,
