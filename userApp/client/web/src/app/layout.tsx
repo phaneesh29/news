@@ -62,9 +62,9 @@ export const metadata: Metadata = {
     images: ["/devbits-logo.png"],
   },
   icons: {
-    icon: "/devbits-logo.png",
-    shortcut: "/devbits-logo.png",
-    apple: "/devbits-logo.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 

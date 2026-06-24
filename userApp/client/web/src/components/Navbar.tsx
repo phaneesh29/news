@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import authClient, { useSession, signIn, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -54,11 +55,9 @@ export default function Navbar() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <Link href="/news" className="flex items-center gap-2.5 group select-none">
-              {/* Newspaper Metal Press Block Icon */}
-              <div className="flex h-8 w-8 items-center justify-center border-2 border-current bg-current/5 text-current transition-transform group-hover:scale-105 duration-200">
-                <span className="font-serif text-base font-black tracking-tighter uppercase font-blackletter">
-                  DB
-                </span>
+              {/* DevBits Logo */}
+              <div className="relative flex h-12 w-12 items-center justify-center border-2 border-current bg-transparent text-current transition-transform group-hover:scale-105 duration-200 overflow-hidden rounded-md">
+                <Image src="/devbits-logo.png" alt="DevBits Logo" fill className="object-cover scale-[1.3]" />
               </div>
               <div className="flex flex-col items-start leading-none">
                 <span className="font-serif text-lg font-black tracking-tight text-current uppercase font-newspaper">

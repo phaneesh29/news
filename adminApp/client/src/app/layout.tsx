@@ -33,6 +33,11 @@ const vt323 = VT323({
 export const metadata: Metadata = {
  title: "DEV.NEWS | Neural Archive",
  description: "Dossier & Cybermag fusion admin portal.",
+ icons: {
+  icon: "/favicon.png",
+  shortcut: "/favicon.png",
+  apple: "/favicon.png",
+ },
 };
 
 export default function RootLayout({
