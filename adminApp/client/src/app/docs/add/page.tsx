@@ -152,7 +152,7 @@ ${content || "(empty)"}
 User Update Instructions:
 "${agentQuery}"
 
-Please modify or rewrite the documentation page according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
+Please modify or rewrite the documentation page according to the user instructions. Make sure to respond with the complete updated schema (title, slug, content, parentId, and orderIndex).`;
       }
 
       const res = await fetch(`${API_BASE_URL}/agent/draft/doc`, {
@@ -169,6 +169,12 @@ Please modify or rewrite the documentation page according to the user instructio
         setContent(draft.content || "");
         if (draft.slug) {
           setSlug(draft.slug);
+        }
+        if (draft.parentId !== undefined) {
+          setParentId(draft.parentId);
+        }
+        if (draft.orderIndex !== undefined) {
+          setOrderIndex(draft.orderIndex);
         }
         setAgentQuery("");
       } else {

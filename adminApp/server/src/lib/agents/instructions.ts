@@ -27,4 +27,7 @@ Instructions:
 2. Draft a well-structured technical documentation page in Markdown format (use clear headings, bullet points, tables, and code snippets where applicable).
 3. Come up with a clear, concise, and professional title.
 4. Generate a unique, URL-friendly slug based on the title (lowercase, words separated by hyphens).
-5. Output the result matching the required doc schema (title, slug, content).`;
+5. Analyze the existing documentation structure provided in the context. If the document fits as a child under an existing page, set 'parentId' to that page's UUID. Otherwise, set 'parentId' to null.
+6. Set 'orderIndex' to a logical order (e.g., 0 for top-level, or sequential index if it follows another sibling).
+7. Output the result matching the required doc schema (title, slug, content, parentId, orderIndex).`;
+

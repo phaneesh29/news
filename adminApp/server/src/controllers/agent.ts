@@ -34,15 +34,20 @@ export const draftBlog = async (c: Context) => {
 export const draftDoc = async (c: Context) => {
   const { query } = (c.req as any).valid('json') as { query: string }
 
+  // Query existing documents to provide cross-linking and parenting context for the agent
   const existingDocs = await db.select({
+    id: docs.id,
     title: docs.title,
     slug: docs.slug
   }).from(docs)
 
   let crossLinkContext = ''
   if (existingDocs.length > 0) {
-    crossLinkContext = `\n\nHere are the existing documentation titles and slugs in the system. When appropriate, write markdown links to these pages using their slugs (e.g., [Title](/docs/slug)):\n` +
-      existingDocs.map(d => `- "${d.title}" (slug: /docs/${d.slug})`).join('\n')
+    crossLinkContext = `\n\nHere are the existing documentation titles, IDs, and slugs in the system. Use this list to determine if the document you are drafting should have a parent (nesting), to cross-link pages when appropriate, and to select a logical orderIndex:\n` +
+      existingDocs.map(d => `- "${d.title}" (ID: ${d.id}, slug: /docs/${d.slug})`).join('\n') +
+      `\n\nIf this document belongs under one of the existing pages as a child, set the 'parentId' field to that page's ID (UUID). Otherwise, set 'parentId' to null. Select a logical 'orderIndex' (0 or higher) relative to other documents.`;
+  } else {
+    crossLinkContext = `\n\nThere are no existing documents, so 'parentId' should be null and 'orderIndex' should be 0.`;
   }
 
   const result = await docDraftAgent.generate({

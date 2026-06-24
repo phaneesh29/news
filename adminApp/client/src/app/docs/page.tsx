@@ -234,7 +234,7 @@ ${editContent || "(empty)"}
 User Update Instructions:
 "${agentQuery}"
 
-Please modify or rewrite the documentation page according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
+Please modify or rewrite the documentation page according to the user instructions. Make sure to respond with the complete updated schema (title, slug, content, parentId, and orderIndex).`;
 
       const res = await fetch(`${API_BASE_URL}/agent/draft/doc`, {
         method: "POST",
@@ -250,6 +250,12 @@ Please modify or rewrite the documentation page according to the user instructio
         setEditContent(draft.content || "");
         if (draft.slug) {
           setEditSlug(draft.slug);
+        }
+        if (draft.parentId !== undefined) {
+          setEditParentId(draft.parentId);
+        }
+        if (draft.orderIndex !== undefined) {
+          setEditOrderIndex(draft.orderIndex);
         }
         setAgentQuery("");
         addLog("WIRE: AI agent successfully updated edit draft fields");
