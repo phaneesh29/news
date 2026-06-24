@@ -101,6 +101,16 @@ export default function Navbar() {
               Blog
             </Link>
 
+            {/* Docs Tab */}
+            <Link 
+              href="/docs" 
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname.startsWith("/docs") ? "text-current" : "text-current/60 hover:text-current"
+              }`}
+            >
+              Docs
+            </Link>
+
             {/* Liked News Tab */}
             <Link 
               href="/liked" 
@@ -109,6 +119,16 @@ export default function Navbar() {
               }`}
             >
               Liked News
+            </Link>
+
+            {/* Tools Tab */}
+            <Link 
+              href="/tools" 
+              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
+                pathname.startsWith("/tools") ? "text-current" : "text-current/60 hover:text-current"
+              }`}
+            >
+              Tools
             </Link>
 
             {/* Playables Tab */}
@@ -121,15 +141,7 @@ export default function Navbar() {
               Playables
             </Link>
 
-            {/* Docs Tab */}
-            <Link 
-              href="/docs" 
-              className={`hidden sm:inline-block text-xs font-bold uppercase tracking-wider transition-colors border-l border-current/15 pl-4 ${
-                pathname.startsWith("/docs") ? "text-current" : "text-current/60 hover:text-current"
-              }`}
-            >
-              Docs
-            </Link>
+
 
             {/* Settings Tab */}
             <Link 
@@ -217,11 +229,25 @@ export default function Navbar() {
                 Blog
               </Link>
               <Link 
+                href="/docs" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname.startsWith("/docs") ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Docs
+              </Link>
+              <Link 
                 href="/liked" 
                 className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname === "/liked" ? "text-current" : "text-current/70"}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Liked News
+              </Link>
+              <Link 
+                href="/tools" 
+                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname.startsWith("/tools") ? "text-current" : "text-current/70"}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Tools
               </Link>
               <Link 
                 href="/playables" 
@@ -230,13 +256,7 @@ export default function Navbar() {
               >
                 Playables
               </Link>
-              <Link 
-                href="/docs" 
-                className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname.startsWith("/docs") ? "text-current" : "text-current/70"}`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Docs
-              </Link>
+
               <Link 
                 href="/settings" 
                 className={`text-sm font-bold uppercase tracking-wider transition-colors ${pathname === "/settings" ? "text-current" : "text-current/70"}`}
