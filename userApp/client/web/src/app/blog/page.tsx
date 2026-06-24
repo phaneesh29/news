@@ -189,7 +189,7 @@ export default function BlogListPage() {
                       year: "numeric"
                     })}
                   </div>
-                  <Link href={`/blog/${blog.id}`} className="block group">
+                  <Link href={`/blog/${blog.slug}`} className="block group">
                     <h3 className="font-serif text-xl sm:text-2xl font-black tracking-tight hover:text-[#cc785c] cursor-pointer transition-colors leading-tight font-newspaper">
                       {blog.title}
                     </h3>
@@ -199,7 +199,7 @@ export default function BlogListPage() {
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-[#111111]/15 dark:border-[#e6dfd8]/15 flex justify-end">
-                  <Link href={`/blog/${blog.id}`}>
+                  <Link href={`/blog/${blog.slug}`}>
                     <Button variant="ghost" size="sm" className="text-xs font-bold uppercase tracking-wider text-[#cc785c] hover:text-[#a9583e] hover:bg-[#cc785c]/10 border border-[#cc785c]/20 hover:border-[#cc785c] px-3.5 py-1.5 flex items-center gap-1.5 group rounded-none transition-all cursor-pointer">
                       Read chronicle
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />

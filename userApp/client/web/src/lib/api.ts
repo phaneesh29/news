@@ -193,8 +193,8 @@ export async function fetchBlogsList(cursor?: string): Promise<ApiResponse<{ blo
   return response.json();
 }
 
-export async function fetchBlogById(id: string): Promise<ApiResponse<{ blog: BlogItem }>> {
-  const response = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+export async function fetchBlogBySlug(slug: string): Promise<ApiResponse<{ blog: BlogItem }>> {
+  const response = await fetch(`${API_BASE_URL}/blogs/${encodeURIComponent(slug)}`, {
     method: "GET",
     credentials: "include",
   });

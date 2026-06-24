@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { fetchBlogById, type BlogItem } from "@/lib/api";
+import { fetchBlogBySlug, type BlogItem } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ShareBriefing from "@/components/ShareBriefing";
@@ -28,7 +28,6 @@ interface TocItem {
 }
 
 function parseToc(markdown: string): TocItem[] {
-  // Strip carriage returns to prevent Windows carriage return '\r' from becoming trailing hyphens in slug IDs
   const cleanMarkdown = markdown.replace(/\r/g, "");
   const lines = cleanMarkdown.split("\n");
   const items: TocItem[] = [];
@@ -37,7 +36,7 @@ function parseToc(markdown: string): TocItem[] {
     const match = line.match(/^(#{1,3})\s+(.+)$/);
     if (match) {
       const level = match[1].length;
-      const text = match[2].trim().replace(/[*_`#]/g, ""); // strip markdown styling characters
+      const text = match[2].trim().replace(/[*_`#]/g, ""); 
       const id = text.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
       items.push({ id, text, level });
     }
@@ -47,10 +46,9 @@ function parseToc(markdown: string): TocItem[] {
 
 function injectHeaderIds(html: string): string {
   return html.replace(/<h([1-3])([^>]*?)>([\s\S]*?)<\/h[1-3]>/gi, (match, level, attrs, content) => {
-    const cleanText = content.replace(/<[^>]+>/g, ""); // strip inner HTML tags
+    const cleanText = content.replace(/<[^>]+>/g, ""); 
     const slug = cleanText.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
     
-    // Custom old newspaper styled header styling
     let headerClasses = "";
     if (level === "1") {
       headerClasses = "scroll-mt-24 font-serif font-black text-3xl sm:text-4xl tracking-tight text-inherit mt-12 mb-6 pb-3 border-b-2 border-double border-current/30 w-full uppercase font-newspaper";
@@ -65,7 +63,7 @@ function injectHeaderIds(html: string): string {
 }
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default function BlogDetailPage({ params }: PageProps) {
@@ -91,15 +89,13 @@ export default function BlogDetailPage({ params }: PageProps) {
   const [shareUrl, setShareUrl] = useState("");
 
   const resolvedParams = use(params);
-  const blogId = resolvedParams?.id;
+  const blogSlug = resolvedParams?.slug;
 
   // Process markdown to HTML & extract TOC
   useEffect(() => {
     if (blog?.content) {
-      // Create TOC
       setToc(parseToc(blog.content));
 
-      // Parse markdown to HTML
       const parsed = marked.parse(blog.content);
       if (parsed instanceof Promise) {
         parsed.then((res) => setHtmlContent(injectHeaderIds(res))).catch(console.error);
@@ -108,19 +104,19 @@ export default function BlogDetailPage({ params }: PageProps) {
       }
 
       if (typeof window !== "undefined") {
-        setShareUrl(window.location.origin + `/blog/${blog.id}`);
+        setShareUrl(window.location.origin + `/blog/${blog.slug}`);
       }
     }
   }, [blog]);
 
   // Load Blog Details
   useEffect(() => {
-    if (!blogId) return;
+    if (!blogSlug) return;
 
     async function loadBlog() {
       try {
         setLoading(true);
-        const res = await fetchBlogById(blogId);
+        const res = await fetchBlogBySlug(blogSlug);
         if (res.status === "success" && res.data?.blog) {
           setBlog(res.data.blog);
         } else {
@@ -134,7 +130,7 @@ export default function BlogDetailPage({ params }: PageProps) {
       }
     }
     loadBlog();
-  }, [blogId]);
+  }, [blogSlug]);
 
   // Scroll spy to find active header based on viewport scroll position
   useEffect(() => {
@@ -154,7 +150,6 @@ export default function BlogDetailPage({ params }: PageProps) {
 
       if (headings.length === 0) return;
 
-      // 140px threshold to clear the sticky navbar (64px) + layout offsets
       const threshold = 140;
       const passedHeadings = headings.filter((h) => h.top <= threshold);
       
@@ -166,7 +161,6 @@ export default function BlogDetailPage({ params }: PageProps) {
       }
     };
 
-    // Run spy with a tiny frame delay to ensure elements are fully painted in DOM
     const timer = setTimeout(handleScrollSpy, 100);
 
     window.addEventListener("scroll", handleScrollSpy);
@@ -233,7 +227,7 @@ export default function BlogDetailPage({ params }: PageProps) {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: window.location.origin + `/blog/${blogId}`
+        callbackURL: window.location.origin + `/blog/${blogSlug}`
       });
     } catch (err) {
       console.error("Authentication redirect error:", err);
@@ -248,7 +242,6 @@ export default function BlogDetailPage({ params }: PageProps) {
       return;
     }
     
-    // Defensive fallback: scroll by heading index inside the article container
     const articleEl = document.querySelector(".markdown-content");
     if (articleEl) {
       const headingElements = Array.from(articleEl.querySelectorAll("h1, h2, h3")) as HTMLElement[];

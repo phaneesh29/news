@@ -74,13 +74,13 @@ export const getPublishedBlogs = async (req, res) => {
   });
 };
 
-export const getPublishedBlogById = async (req, res) => {
-  const id = req.params.id;
+export const getPublishedBlogBySlug = async (req, res) => {
+  const slug = req.params.slug;
 
   const blogItems = await db
     .select(blogSelect)
     .from(blogs)
-    .where(and(eq(blogs.id, id), eq(blogs.isPublished, true)))
+    .where(and(eq(blogs.slug, slug), eq(blogs.isPublished, true)))
     .limit(1);
 
   const blog = blogItems[0];
