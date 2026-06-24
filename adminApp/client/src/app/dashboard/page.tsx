@@ -390,6 +390,8 @@ Please modify or rewrite the news article according to the user instructions. Ma
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
             <span className="text-stone-400">|</span>
+            <Link href="/docs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Docs Feed</Link>
+            <span className="text-stone-400">|</span>
             <Link href="/digest" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Digest Wire</Link>
             {isAdmin && (
               <>

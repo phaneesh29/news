@@ -53,7 +53,8 @@ export const adminUsersRelations = relations(adminUsers, ({ many }) => ({
   otps: many(adminOtps),
   sessions: many(adminSessions),
   news: many(devNews),
-  blogs: many(blogs)
+  blogs: many(blogs),
+  docs: many(docs)
 }))
 
 export const adminOtpsRelations = relations(adminOtps, ({ one }) => ({
@@ -120,5 +121,36 @@ export const blogsRelations = relations(blogs, ({ one }) => ({
   author: one(adminUsers, {
     fields: [blogs.authorId],
     references: [adminUsers.id]
+  })
+}))
+
+export const docs = pgTable('docs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  content: text('content').notNull(),
+  parentId: uuid('parent_id').references((): any => docs.id, { onDelete: 'cascade' }),
+  orderIndex: integer('order_index').notNull().default(0),
+  authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+  isPublished: boolean('is_published').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+}, (table) => [
+  index('docs_created_at_idx').on(table.createdAt),
+  index('docs_parent_id_idx').on(table.parentId)
+])
+
+export const docsRelations = relations(docs, ({ one, many }) => ({
+  author: one(adminUsers, {
+    fields: [docs.authorId],
+    references: [adminUsers.id]
+  }),
+  parent: one(docs, {
+    fields: [docs.parentId],
+    references: [docs.id],
+    relationName: 'doc_hierarchy'
+  }),
+  children: many(docs, {
+    relationName: 'doc_hierarchy'
   })
 }))

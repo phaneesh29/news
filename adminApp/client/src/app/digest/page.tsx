@@ -333,6 +333,8 @@ Please modify or rewrite the news draft according to the user instructions. Make
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
             <span className="text-stone-400">|</span>
+            <Link href="/docs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Docs Feed</Link>
+            <span className="text-stone-400">|</span>
             <Link href="/digest" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Digest Wire</Link>
             {isAdmin && (
               <>

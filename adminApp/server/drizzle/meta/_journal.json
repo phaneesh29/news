@@ -43,6 +43,13 @@
       "when": 1781848723205,
       "tag": "0005_slow_doctor_doom",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782286179501,
+      "tag": "0006_complete_betty_brant",
+      "breakpoints": true
     }
   ]
 }

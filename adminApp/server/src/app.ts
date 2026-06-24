@@ -13,6 +13,7 @@ import { whitelistRoutes } from './routes/whitelist.js'
 import { newsRoutes } from './routes/news.js'
 import { agentRoutes } from './routes/agent.js'
 import { blogRoutes } from './routes/blog.js'
+import { docRoutes } from './routes/doc.js'
 import { feedbackRoutes } from './routes/feedback.js'
 import { digestRoutes } from './routes/digest.js'
 import { globalRateLimiter } from './middlewares/rateLimit.js'
@@ -54,6 +55,7 @@ app.route('/api/whitelist', whitelistRoutes)
 app.route('/api/news', newsRoutes)
 app.route('/api/agent', agentRoutes)
 app.route('/api/blogs', blogRoutes)
+app.route('/api/docs', docRoutes)
 app.route('/api/feedback', feedbackRoutes)
 app.route('/api/digest', digestRoutes)
 

@@ -135,6 +135,8 @@ export default function FeedbackPage() {
             <span className="text-stone-400">|</span>
             <Link href="/blogs" className="text-stone-755 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
             <span className="text-stone-400">|</span>
+            <Link href="/docs" className="text-stone-755 hover:text-stone-950 transition-colors">&gt; Docs Feed</Link>
+            <span className="text-stone-400">|</span>
             <Link href="/digest" className="text-stone-755 hover:text-stone-950 transition-colors">&gt; Digest Wire</Link>
             <span className="text-stone-400">|</span>
             <Link href="/feedback" className="text-stone-900 border-b-2 border-red-850 pb-0.5 font-black">&gt; User Feedback</Link>

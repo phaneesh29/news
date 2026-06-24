@@ -6,42 +6,48 @@ import Link from "next/link";
 import { API_BASE_URL } from "../../config";
 import { marked } from "marked";
 
-interface BlogItem {
+interface DocItem {
   id: string;
   title: string;
   slug: string;
   content: string;
+  parentId: string | null;
+  orderIndex: number;
   createdAt: string;
   status: string;
   isPublished: boolean;
 }
 
-export default function BlogsDashboardPage() {
+export default function DocsDashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const [blogList, setBlogList] = useState<BlogItem[]>([]);
+  const [docList, setDocList] = useState<DocItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchLoading, setFetchLoading] = useState(false);
 
-  const [selectedBlog, setSelectedBlog] = useState<BlogItem | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<DocItem | null>(null);
   const [systemTime, setSystemTime] = useState("");
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editSlug, setEditSlug] = useState("");
+  const [editParentId, setEditParentId] = useState<string | null>(null);
+  const [editOrderIndex, setEditOrderIndex] = useState<number>(0);
   const [editIsPublished, setEditIsPublished] = useState(false);
   
+  const [parentOptions, setParentOptions] = useState<DocItem[]>([]);
+
   const [agentQuery, setAgentQuery] = useState("");
   const [agentLoading, setAgentLoading] = useState(false);
 
   const [serverHealth, setServerHealth] = useState<any>(null);
   const [clientInfo, setClientInfo] = useState<any>(null);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "DESK_INIT: Preparing editorial log...",
+    "DESK_INIT: Preparing documentation log...",
     "WIRE: Connection to central press active.",
   ]);
 
@@ -50,40 +56,52 @@ export default function BlogsDashboardPage() {
     setTerminalLogs((prev) => [`[${time}] ${msg}`, ...prev.slice(0, 15)]);
   };
 
-  const fetchBlogs = async (cursor: string | null = null, query: string = "", isAppend = false) => {
+  const fetchDocs = async (cursor: string | null = null, query: string = "", isAppend = false) => {
     try {
       setFetchLoading(true);
       let url = "";
       if (query) {
-        url = `${API_BASE_URL}/blogs/search?q=${encodeURIComponent(query)}&limit=10`;
+        url = `${API_BASE_URL}/docs/search?q=${encodeURIComponent(query)}&limit=10`;
         addLog(`WIRE_SEARCH: Querying nodes for '${query}'`);
       } else {
-        url = `${API_BASE_URL}/blogs?limit=10${cursor ? `&cursor=${cursor}` : ""}`;
+        url = `${API_BASE_URL}/docs?limit=10${cursor ? `&cursor=${cursor}` : ""}`;
         addLog(cursor ? `WIRE: Loading next block ${cursor.slice(0, 8)}...` : "WIRE: Refreshing printing press feeds...");
       }
 
       const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch blogs");
+      if (!res.ok) throw new Error("Failed to fetch docs");
       const data = await res.json();
       
-      const items = (data.blogs || []).map((item: any) => ({
+      const items = (data.docs || []).map((item: any) => ({
         ...item,
         status: "SYNCED"
       }));
 
       if (isAppend) {
-        setBlogList((prev) => [...prev, ...items]);
+        setDocList((prev) => [...prev, ...items]);
       } else {
-        setBlogList(items);
+        setDocList(items);
       }
       
       setNextCursor(query ? null : data.nextCursor || null);
       addLog(`WIRE: Feed updated with ${items.length} print records`);
     } catch (err) {
-      console.error("Fetch blogs error:", err);
+      console.error("Fetch docs error:", err);
       addLog("WARNING: Wire connection timed out or database empty");
     } finally {
       setFetchLoading(false);
+    }
+  };
+
+  const fetchParentOptions = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/docs?limit=150`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setParentOptions(data.docs || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch parents:", err);
     }
   };
 
@@ -129,7 +147,7 @@ export default function BlogsDashboardPage() {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if (profile) fetchBlogs(null, searchQuery, false);
+      if (profile) fetchDocs(null, searchQuery, false);
     }, 450);
     return () => clearTimeout(delayDebounce);
   }, [searchQuery, profile]);
@@ -147,15 +165,16 @@ export default function BlogsDashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedBlog) {
+    if (selectedDoc) {
       document.body.style.overflow = "hidden";
+      fetchParentOptions();
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [selectedBlog]);
+  }, [selectedDoc]);
 
   const handleLogout = async () => {
     try {
@@ -167,27 +186,29 @@ export default function BlogsDashboardPage() {
 
   const handleUpdatePayload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editTitle || !editContent || !selectedBlog) return;
+    if (!editTitle || !editContent || !selectedDoc) return;
     try {
       const payload = {
         title: editTitle.toUpperCase(),
         content: editContent,
         slug: editSlug.toLowerCase(),
+        parentId: editParentId || null,
+        orderIndex: Number(editOrderIndex),
         isPublished: editIsPublished
       };
-      const res = await fetch(`${API_BASE_URL}/blogs/${selectedBlog.id}`, {
+      const res = await fetch(`${API_BASE_URL}/docs/${selectedDoc.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         credentials: "include"
       });
-      if (!res.ok) throw new Error("Failed to update blog");
+      if (!res.ok) throw new Error("Failed to update doc");
       const data = await res.json();
-      const updatedItem = { ...data.blog, status: "SYNCED" };
-      setBlogList(prev => prev.map(item => item.id === selectedBlog.id ? updatedItem : item));
-      setSelectedBlog(updatedItem);
+      const updatedItem = { ...data.doc, status: "SYNCED" };
+      setDocList(prev => prev.map(item => item.id === selectedDoc.id ? updatedItem : item));
+      setSelectedDoc(updatedItem);
       setIsEditing(false);
-      addLog(`WIRE: Record ${selectedBlog.id.slice(0, 8)} updated successfully`);
+      addLog(`WIRE: Record ${selectedDoc.id.slice(0, 8)} updated successfully`);
     } catch (err) {
       console.error("Update error:", err);
       addLog("WARNING: Payload modification failed (Slug might not be unique)");
@@ -200,7 +221,7 @@ export default function BlogsDashboardPage() {
 
     setAgentLoading(true);
     try {
-      const promptWithContext = `You are updating/revising an existing blog post. 
+      const promptWithContext = `You are updating/revising an existing documentation page. 
 
 Here is the current edit draft:
 ---
@@ -213,15 +234,15 @@ ${editContent || "(empty)"}
 User Update Instructions:
 "${agentQuery}"
 
-Please modify or rewrite the blog post according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
+Please modify or rewrite the documentation page according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
 
-      const res = await fetch(`${API_BASE_URL}/agent/draft/blog`, {
+      const res = await fetch(`${API_BASE_URL}/agent/draft/doc`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: promptWithContext }),
         credentials: "include"
       });
-      if (!res.ok) throw new Error("Agent failed to draft blog");
+      if (!res.ok) throw new Error("Agent failed to draft doc");
       const data = await res.json();
       if (data.success) {
         const draft = data.draft;
@@ -233,7 +254,7 @@ Please modify or rewrite the blog post according to the user instructions. Make 
         setAgentQuery("");
         addLog("WIRE: AI agent successfully updated edit draft fields");
       } else {
-        throw new Error(data.error?.message || "Failed to draft blog");
+        throw new Error(data.error?.message || "Failed to draft doc");
       }
     } catch (err: any) {
       console.error(err);
@@ -243,10 +264,10 @@ Please modify or rewrite the blog post according to the user instructions. Make 
     }
   };
 
-  const handleTogglePublish = async (blogId: string, currentStatus: boolean) => {
+  const handleTogglePublish = async (docId: string, currentStatus: boolean) => {
     try {
-      addLog(`WIRE: Toggling publish status for record ${blogId.slice(0, 8)}`);
-      const res = await fetch(`${API_BASE_URL}/blogs/${blogId}`, {
+      addLog(`WIRE: Toggling publish status for record ${docId.slice(0, 8)}`);
+      const res = await fetch(`${API_BASE_URL}/docs/${docId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isPublished: !currentStatus }),
@@ -254,10 +275,10 @@ Please modify or rewrite the blog post according to the user instructions. Make 
       });
       if (!res.ok) throw new Error("Failed to toggle publish status");
       const data = await res.json();
-      const updatedItem = { ...data.blog, status: "SYNCED" };
-      setBlogList(prev => prev.map(item => item.id === blogId ? updatedItem : item));
-      if (selectedBlog?.id === blogId) setSelectedBlog(updatedItem);
-      addLog(`WIRE: Record ${blogId.slice(0, 8)} publish status updated`);
+      const updatedItem = { ...data.doc, status: "SYNCED" };
+      setDocList(prev => prev.map(item => item.id === docId ? updatedItem : item));
+      if (selectedDoc?.id === docId) setSelectedDoc(updatedItem);
+      addLog(`WIRE: Record ${docId.slice(0, 8)} publish status updated`);
     } catch (err) {
       console.error("Toggle publish error:", err);
       addLog("WARNING: Publish toggle operation failed");
@@ -267,10 +288,10 @@ Please modify or rewrite the blog post according to the user instructions. Make 
   const handlePurge = async (id: string) => {
     try {
       addLog(`WIRE: Issuing purge command for record ${id.slice(0, 8)}`);
-      const res = await fetch(`${API_BASE_URL}/blogs/${id}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Failed to delete blog");
-      setBlogList((prev) => prev.filter(item => item.id !== id));
-      if (selectedBlog?.id === id) setSelectedBlog(null);
+      const res = await fetch(`${API_BASE_URL}/docs/${id}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error("Failed to delete doc");
+      setDocList((prev) => prev.filter(item => item.id !== id));
+      if (selectedDoc?.id === id) setSelectedDoc(null);
       addLog(`WIRE: Record ${id.slice(0, 8)} successfully deleted`);
     } catch (err) {
       console.error("Purge error:", err);
@@ -307,9 +328,9 @@ Please modify or rewrite the blog post according to the user instructions. Make 
           <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
             <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; News Feed</Link>
             <span className="text-stone-400">|</span>
-            <Link href="/blogs" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Blogs Feed</Link>
+            <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
             <span className="text-stone-400">|</span>
-            <Link href="/docs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Docs Feed</Link>
+            <Link href="/docs" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Docs Feed</Link>
             <span className="text-stone-400">|</span>
             <Link href="/digest" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Digest Wire</Link>
             {isAdmin && (
@@ -342,13 +363,13 @@ Please modify or rewrite the blog post according to the user instructions. Make 
         <div className="w-full flex flex-col relative">
           <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
             <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
-              <span>DAILY WIRE LOGS</span>
-              <span>LATEST BLOGS</span>
+              <span>SYSTEM DOCUMENTATION</span>
+              <span>LATEST DOCS</span>
             </div>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-[4px] border-double border-black pb-4 mb-6 pl-2 gap-3">
               <div>
                 <h2 className="font-['Playfair_Display',_Georgia,_serif] text-4xl sm:text-5xl font-black drop-shadow-sm text-black tracking-tighter uppercase leading-none select-none text-left">
-                  LATEST BLOGS
+                  SYSTEM DOCS
                 </h2>
                 <div className="flex gap-2.5 text-[10px] font-bold text-black border-b border-black mt-2 uppercase tracking-wide">
                   <span>PRINT QUEUE FEED</span>
@@ -356,12 +377,12 @@ Please modify or rewrite the blog post according to the user instructions. Make 
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
                 {canAdd && (
-                  <Link href="/blogs/add" className="vintage-stamp text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider">
-                    WRITE BLOG
+                  <Link href="/docs/add" className="vintage-stamp text-center py-2 px-3.5 text-[10px] flex items-center justify-center font-bold tracking-wider">
+                    CREATE DOC
                   </Link>
                 )}
                 <div className="relative w-full sm:w-52">
-                  <input type="text" placeholder="Search blog reports..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#f5f2e9] text-stone-900 text-xs pl-3 pr-8 py-2 font-mono outline-none border-2 border-stone-950 focus:border-red-800 rounded shadow-sm" />
+                  <input type="text" placeholder="Search doc reports..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#f5f2e9] text-stone-900 text-xs pl-3 pr-8 py-2 font-mono outline-none border-2 border-stone-950 focus:border-red-800 rounded shadow-sm" />
                   <svg className="w-3.5 h-3.5 text-stone-700 absolute right-2.5 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
               </div>
@@ -369,17 +390,19 @@ Please modify or rewrite the blog post according to the user instructions. Make 
             <div className="flex flex-col gap-6 pl-2">
               <div className="bg-[#fcfaf2] border-2 border-stone-950 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
                 <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-                  {blogList.map((item) => (
+                  {docList.map((item) => (
                     <div 
                       key={item.id} 
                       onClick={() => { 
-                        setSelectedBlog(item); 
+                        setSelectedDoc(item); 
                         setIsEditing(false); 
                         setEditTitle(item.title); 
                         setEditContent(item.content); 
                         setEditSlug(item.slug); 
+                        setEditParentId(item.parentId);
+                        setEditOrderIndex(item.orderIndex);
                         setEditIsPublished(item.isPublished); 
-                        addLog(`VIEW: Focus shifted to blog ${item.id.slice(0, 8)}`); 
+                        addLog(`VIEW: Focus shifted to doc ${item.id.slice(0, 8)}`); 
                       }} 
                       className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50/80 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#111] transition-all flex flex-col gap-2.5 relative group/item shadow cursor-pointer text-left rounded"
                     >
@@ -390,6 +413,14 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                           </span>
                           <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
                             {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                          </span>
+                          {item.parentId && (
+                            <span className="font-mono text-[9px] border border-blue-600 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded tracking-wide uppercase font-bold">
+                              SUB-DOC
+                            </span>
+                          )}
+                          <span className="font-mono text-[9px] border border-stone-500 text-stone-700 bg-stone-50 px-1.5 py-0.5 rounded tracking-wide uppercase font-bold">
+                            ORDER: {item.orderIndex}
                           </span>
                         </div>
                         <span className="font-mono text-[9px] text-stone-500 uppercase tracking-widest">
@@ -415,16 +446,16 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                       </div>
                     </div>
                   ))}
-                  {blogList.length === 0 && (
+                  {docList.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                       <div className="w-12 h-12 text-stone-400 mb-4"><svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="7" y1="8" x2="17" y2="8" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="7" y1="16" x2="13" y2="16" /></svg></div>
                       <h3 className="font-playfair text-stone-800 text-lg font-black uppercase">Wire Archives Empty</h3>
-                      <p className="font-serif text-sm text-stone-600 max-w-sm leading-relaxed mt-2">No blogs are currently logged on the wire feed.</p>
+                      <p className="font-serif text-sm text-stone-600 max-w-sm leading-relaxed mt-2">No documentation files are currently logged on the wire feed.</p>
                     </div>
                   )}
                   {nextCursor && (
                     <div className="text-center pt-2">
-                      <button onClick={(e) => { e.stopPropagation(); fetchBlogs(nextCursor, searchQuery, true); }} disabled={fetchLoading} className="vintage-stamp text-xs tracking-widest disabled:opacity-50 cursor-pointer bg-white">
+                      <button onClick={(e) => { e.stopPropagation(); fetchDocs(nextCursor, searchQuery, true); }} disabled={fetchLoading} className="vintage-stamp text-xs tracking-widest disabled:opacity-50 cursor-pointer bg-white">
                         {fetchLoading ? "[ RE-READING WIRE... ]" : "LOAD NEXT DISPATCHES"}
                       </button>
                     </div>
@@ -434,26 +465,54 @@ Please modify or rewrite the blog post according to the user instructions. Make 
             </div>
           </div>
         </div>
-
-
       </div>
 
-      {selectedBlog && (
+      {selectedDoc && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className={`w-full ${isEditing ? 'max-w-5xl' : 'max-w-2xl'} bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded transition-all duration-300`}>
-            <button onClick={() => { setSelectedBlog(null); addLog("INSPECTOR: Dossier closed"); }} className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs">[ CLOSE ]</button>
+            <button onClick={() => { setSelectedDoc(null); addLog("INSPECTOR: Dossier closed"); }} className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs">[ CLOSE ]</button>
             <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-6 text-stone-900">
               {isEditing ? (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                   <form onSubmit={handleUpdatePayload} className="lg:col-span-2 flex flex-col gap-4 font-serif text-stone-900 text-left">
                     <div className="flex flex-col border-b border-stone-400 pb-2">
                       <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">TRANSMISSION HEADLINE</label>
-                      <input type="text" required value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-950 placeholder-stone-600/40 font-serif" />
+                      <input type="text" required value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-955 placeholder-stone-600/40 font-serif font-black" />
                     </div>
                     <div className="flex flex-col border-b border-stone-400 pb-2">
                       <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
                       <input type="text" required value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono" />
                     </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 border-b border-stone-400 pb-3">
+                      <div className="flex flex-col">
+                        <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">PARENT CATEGORY</label>
+                        <select 
+                          value={editParentId || ""} 
+                          onChange={(e) => setEditParentId(e.target.value || null)} 
+                          className="bg-transparent border-2 border-stone-450 p-1 font-mono text-xs outline-none"
+                        >
+                          <option value="">[ NONE - TOP LEVEL ]</option>
+                          {parentOptions
+                            .filter(opt => opt.id !== selectedDoc.id) // Prevent self-referencing loops
+                            .map(opt => (
+                              <option key={opt.id} value={opt.id}>{opt.title}</option>
+                            ))
+                          }
+                        </select>
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">ORDER INDEX</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={editOrderIndex} 
+                          onChange={(e) => setEditOrderIndex(parseInt(e.target.value, 10) || 0)} 
+                          className="bg-transparent border-2 border-stone-450 p-1 font-mono text-xs outline-none"
+                        />
+                      </div>
+                    </div>
+
                     <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
                       <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">DRAFT CHRONICLE DETAILS</label>
                       <textarea required value={editContent} onChange={(e) => setEditContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar" rows={8} />
@@ -483,13 +542,13 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                       </div>
                       <div className="flex-1 bg-[#fcfaf2] flex flex-col relative">
                         <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
-                          <p className="font-serif text-xs text-stone-700 leading-relaxed">Provide instructions or a topic. The Staff Agent will search the web using <strong>Tavily Search</strong>, synthesize details, and return a print-ready blog draft.</p>
+                          <p className="font-serif text-xs text-stone-700 leading-relaxed">Provide instructions or a topic. The Staff Agent will search the web using <strong>Tavily Search</strong>, synthesize details, and return a print-ready doc draft.</p>
                           <div className="flex flex-col border-[2px] border-black p-2 bg-[#fcfaf2]">
                             <label className="font-mono text-[9px] font-bold text-black uppercase tracking-widest mb-1.5">Enter Topic or Wire Request:</label>
-                            <textarea required placeholder="e.g. Write a blog about the evolution of JavaScript." value={agentQuery} onChange={(e) => setAgentQuery(e.target.value)} className="w-full bg-transparent outline-none text-xs text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-20 resize-none typewriter-field" disabled={agentLoading} />
+                            <textarea required placeholder="e.g. Write a documentation guide about using the Hono framework." value={agentQuery} onChange={(e) => setAgentQuery(e.target.value)} className="w-full bg-transparent outline-none text-xs text-stone-955 placeholder-stone-400 font-serif leading-relaxed h-20 resize-none typewriter-field" disabled={agentLoading} />
                           </div>
                           <button type="submit" className="vintage-stamp w-full text-center py-2 bg-black text-[#fcfaf2] border-black hover:bg-stone-800 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs" disabled={agentLoading || !agentQuery.trim()}>
-                            {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH BLOG AGENT"}
+                            {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH DOC AGENT"}
                           </button>
                           {agentLoading && (
                             <div className="mt-2 p-2 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-[10px] text-stone-700 flex flex-col gap-1">
@@ -507,33 +566,33 @@ Please modify or rewrite the blog post according to the user instructions. Make 
               ) : (
                 <>
                   <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
-                    <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">WIRE REPORT INDEX ID: {selectedBlog.id.slice(0, 8)}</span>
-                    <h3 className="font-playfair text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-stone-950">{selectedBlog.title}</h3>
+                    <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">WIRE REPORT INDEX ID: {selectedDoc.id.slice(0, 8)}</span>
+                    <h3 className="font-playfair text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-stone-955">{selectedDoc.title}</h3>
                   </div>
                   <div 
                     className="font-serif text-base leading-relaxed text-justify space-y-4 markdown-content text-stone-900"
-                    dangerouslySetInnerHTML={{ __html: marked.parse(selectedBlog.content) as string }}
+                    dangerouslySetInnerHTML={{ __html: marked.parse(selectedDoc.content) as string }}
                   />
                   <div className="mt-6 border-t border-stone-300 pt-3 text-left">
-                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase block mb-1">BLOG SLUG</span>
-                    <span className="font-mono text-[10px] text-stone-900 font-bold">{selectedBlog.slug}</span>
+                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase block mb-1">DOC SLUG</span>
+                    <span className="font-mono text-[10px] text-stone-900 font-bold">/{selectedDoc.slug}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-6 border-t border-stone-300 pt-4 font-mono text-[10px] text-stone-600 font-bold text-left">
-                    <div><span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span><span className="text-stone-950">{new Date(selectedBlog.createdAt).toLocaleString()}</span></div>
-                    <div><span className="block text-[8px] text-stone-500 uppercase tracking-wide">STATUS</span><span className={`font-bold ${selectedBlog.isPublished ? "text-green-700" : "text-stone-500"}`}>{selectedBlog.isPublished ? 'PUBLISHED' : 'DRAFT'}</span></div>
+                    <div><span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span><span className="text-stone-950">{new Date(selectedDoc.createdAt).toLocaleString()}</span></div>
+                    <div><span className="block text-[8px] text-stone-500 uppercase tracking-wide">STATUS</span><span className={`font-bold ${selectedDoc.isPublished ? "text-green-700" : "text-stone-500"}`}>{selectedDoc.isPublished ? 'PUBLISHED' : 'DRAFT'}</span></div>
                   </div>
                   <div className="mt-8 border-t-4 border-double border-stone-950 pt-4 flex flex-wrap justify-between items-center gap-4">
                     <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">WIRE RECORDS SYSTEM CONTROL</span>
                     <div className="flex gap-3">
                       {(profile?.role === "admin" || profile?.role === "editor") && (
                         <>
-                          <button onClick={() => handleTogglePublish(selectedBlog.id, selectedBlog.isPublished)} className="font-mono text-[10px] text-stone-900 border-2 border-stone-900 px-3 py-1 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
-                            {selectedBlog.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
+                          <button onClick={() => handleTogglePublish(selectedDoc.id, selectedDoc.isPublished)} className="font-mono text-[10px] text-stone-900 border-2 border-stone-900 px-3 py-1 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
+                            {selectedDoc.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
                           </button>
                           <button onClick={() => setIsEditing(true)} className="font-mono text-[10px] text-blue-900 border-2 border-blue-900 px-3 py-1 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
                             AMEND RECORD
                           </button>
-                          <button onClick={() => handlePurge(selectedBlog.id)} className="font-mono text-[10px] text-stone-900 border-b border-stone-900 border-2 border-red-800 px-3 py-1 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
+                          <button onClick={() => handlePurge(selectedDoc.id)} className="font-mono text-[10px] text-stone-900 border-b border-stone-900 border-2 border-red-850 px-3 py-1 hover:bg-red-850 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
                             PURGE RECORD
                           </button>
                         </>
