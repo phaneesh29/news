@@ -56,8 +56,10 @@ export default function Navbar() {
           <div className="flex items-center gap-6">
             <Link href="/news" className="flex items-center gap-2.5 group select-none">
               {/* DevBits Logo */}
-              <div className="relative flex h-12 w-12 items-center justify-center border-2 border-current bg-transparent text-current transition-transform group-hover:scale-105 duration-200 overflow-hidden rounded-md">
-                <Image src="/devbits-logo.png" alt="DevBits Logo" fill sizes="48px" className="object-cover scale-[1.3]" />
+              <div className="flex h-10 w-10 p-[2px] items-center justify-center border-2 border-current bg-transparent text-current transition-transform group-hover:scale-105 duration-200 rounded-md">
+                <div className="relative w-full h-full">
+                  <Image src="/devbits-logo.png" alt="DevBits Logo" fill sizes="36px" className="object-contain" />
+                </div>
               </div>
               <div className="flex flex-col items-start leading-none">
                 <span className="font-serif text-lg font-black tracking-tight text-current uppercase font-newspaper">
