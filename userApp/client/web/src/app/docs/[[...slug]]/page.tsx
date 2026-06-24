@@ -16,11 +16,19 @@ import {
   ArrowRight,
   Search,
   FileText,
-  Bookmark
+  Bookmark,
+  Folder,
+  File
 } from "lucide-react";
 import { marked } from "marked";
 import Navbar from "@/components/Navbar";
+import ShareBriefing from "@/components/ShareBriefing";
 import { useRouter } from "next/navigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TocItem {
   id: string;
@@ -119,15 +127,20 @@ function DocsContent({ urlSlug }: DocsContentProps) {
   const [toc, setToc] = useState<TocItem[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [readProgress, setReadProgress] = useState(0);
+  const [shareUrl, setShareUrl] = useState("");
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, [selectedDoc]);
 
   // Redirect if logged out
   useEffect(() => {
     if (!isPending && !activeUser) {
       router.push("/login");
     }
-  }, [activeUser, isPending, router]);
+  }, [activeUser?.id, isPending, router]);
 
   // Fetch all documents
   useEffect(() => {
@@ -171,7 +184,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
     }
 
     loadDocs();
-  }, [activeUser, urlSlug, router]);
+  }, [activeUser?.id, urlSlug, router]);
 
   // Sync selected doc when URL slug changes
   useEffect(() => {
@@ -230,9 +243,12 @@ function DocsContent({ urlSlug }: DocsContentProps) {
   useEffect(() => {
     if (!htmlContent || toc.length === 0) return;
 
-    const handleScroll = () => {
+    let rafId: number | null = null;
+
+    const performScrollUpdate = () => {
       const article = document.querySelector(".markdown-content");
       if (!article) return;
+      
       const rect = article.getBoundingClientRect();
       const articleHeight = rect.height;
       const windowHeight = window.innerHeight;
@@ -248,7 +264,8 @@ function DocsContent({ urlSlug }: DocsContentProps) {
       }
 
       // Scroll Spy
-      const headingElements = Array.from(article.querySelectorAll("h1, h2, h3")) as HTMLElement[];
+      const headingElements = Array.from(article.querySelectorAll("h1, h2, h3"));
+      
       const headings = headingElements
         .map((el) => {
           if (!el.id) return null;
@@ -265,11 +282,22 @@ function DocsContent({ urlSlug }: DocsContentProps) {
           setActiveHeadingId(headings[0].id);
         }
       }
+      rafId = null;
     };
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (!rafId) {
+        rafId = window.requestAnimationFrame(performScrollUpdate);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    performScrollUpdate();
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, [htmlContent, toc]);
 
   const handleSelectDoc = (doc: DocItem) => {
@@ -303,25 +331,36 @@ function DocsContent({ urlSlug }: DocsContentProps) {
       const hasChildren = node.children.length > 0;
       return (
         <div key={node.id} className="flex flex-col">
-          <button
-            onClick={() => handleSelectDoc(node)}
-            className={`text-left py-1.5 px-3 my-0.5 text-xs font-serif tracking-tight border-l-2 hover:bg-[#cc785c]/5 transition-colors cursor-pointer w-full flex items-center justify-between ${
-              isSelected
-                ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/10"
-                : "border-transparent text-current/75 hover:text-current font-medium"
-            }`}
-            style={{ paddingLeft: `${Math.max(12, depth * 16 + 12)}px` }}
-          >
-            <span className="truncate flex items-center gap-1.5">
-              <span className="opacity-60">{depth > 0 ? "↳" : "§"}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => handleSelectDoc(node)}
+                className={`text-left py-2 px-3 my-0.5 text-xs font-serif tracking-tight border-l-2 hover:bg-[#cc785c]/10 transition-colors cursor-pointer w-full flex items-center justify-between ${
+                  isSelected
+                    ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/15"
+                    : "border-transparent text-current/80 hover:text-current font-semibold"
+                }`}
+                style={{ paddingLeft: `${Math.max(12, depth * 16 + 12)}px` }}
+              >
+                <span className="truncate flex items-center gap-2">
+                  {hasChildren ? (
+                    <Folder className={`h-3.5 w-3.5 shrink-0 ${isSelected ? "opacity-100" : "opacity-60"}`} />
+                  ) : (
+                    <File className={`h-3 w-3 shrink-0 ${isSelected ? "opacity-100" : "opacity-50"}`} />
+                  )}
+                  {node.title}
+                </span>
+                {hasChildren && (
+                  <span className="text-[9px] opacity-50 font-mono scale-90">
+                    [{node.children.length}]
+                  </span>
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-serif text-xs bg-[#1f1e1b] text-[#fcfaf2] border-[#cc785c]/30">
               {node.title}
-            </span>
-            {hasChildren && (
-              <span className="text-[9px] opacity-50 font-mono scale-90">
-                [{node.children.length}]
-              </span>
-            )}
-          </button>
+            </TooltipContent>
+          </Tooltip>
           {hasChildren && (
             <div className="flex flex-col ml-1">
               {renderDocTree(node.children, depth + 1)}
@@ -417,7 +456,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
               </button>
 
               {/* Documentation Tree List */}
-              <nav className={`flex flex-col ${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex max-h-[50vh] overflow-y-auto pr-1 border-t border-current/10 pt-2 lg:border-t-0 lg:pt-0`}>
+              <nav className={`flex flex-col ${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex max-h-[calc(100vh-18rem)] overflow-y-auto pr-1 border-t border-current/10 pt-2 lg:border-t-0 lg:pt-0`}>
                 {searchMode ? (
                   searchResults.length > 0 ? (
                     <div className="flex flex-col">
@@ -425,18 +464,24 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                         Search Results ({searchResults.length})
                       </span>
                       {searchResults.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => handleSelectDoc(item)}
-                          className={`text-left py-1.5 px-3 my-0.5 text-xs font-serif border-l-2 hover:bg-[#cc785c]/5 transition-colors cursor-pointer w-full flex items-center gap-1.5 ${
-                            selectedDoc?.id === item.id
-                              ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/10"
-                              : "border-transparent text-current/75 hover:text-current font-medium"
-                          }`}
-                        >
-                          <FileText className="h-3.5 w-3.5 scale-90 opacity-60 shrink-0" />
-                          <span className="truncate">{item.title}</span>
-                        </button>
+                        <Tooltip key={item.id}>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => handleSelectDoc(item)}
+                              className={`text-left py-1.5 px-3 my-0.5 text-xs font-serif border-l-2 hover:bg-[#cc785c]/5 transition-colors cursor-pointer w-full flex items-center gap-1.5 ${
+                                selectedDoc?.id === item.id
+                                  ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/10"
+                                  : "border-transparent text-current/75 hover:text-current font-medium"
+                              }`}
+                            >
+                              <FileText className="h-3.5 w-3.5 scale-90 opacity-60 shrink-0" />
+                              <span className="truncate">{item.title}</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="font-serif text-xs bg-[#1f1e1b] text-[#fcfaf2] border-[#cc785c]/30">
+                            {item.title}
+                          </TooltipContent>
+                        </Tooltip>
                       ))}
                     </div>
                   ) : (
@@ -457,7 +502,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
             </aside>
 
             {/* Document Content View Pane */}
-            <div className="lg:col-span-9 bg-[#fcfaf2] dark:bg-[#252320] border-2 border-current p-6 md:p-10 vintage-shadow">
+            <div className="lg:col-span-9 bg-[#fcfaf2] dark:bg-[#252320] border-2 border-current p-6 sm:p-10 md:p-14 vintage-shadow">
               {selectedDoc ? (
                 <div className="max-w-3xl mx-auto space-y-6">
                   {/* Article header metadata */}
@@ -479,6 +524,11 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                     <h2 className="font-serif text-2xl sm:text-4xl font-black leading-tight text-inherit uppercase font-newspaper">
                       {selectedDoc.title}
                     </h2>
+
+                    {/* Share buttons */}
+                    {shareUrl && (
+                      <ShareBriefing url={shareUrl} title={selectedDoc.title} className="pt-3 border-t border-[#e6dfd8]/30 dark:border-current/10 mt-4" />
+                    )}
                   </div>
 
                   {/* Inner Page Headings (Table of Contents) for quick scroll navigation */}
@@ -487,19 +537,19 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                       <p className="font-mono text-[10px] font-black uppercase text-[#cc785c] tracking-widest mb-2 px-1">
                         Document Outline Index
                       </p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 px-1 font-mono text-[10.5px]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 px-1 font-mono text-[10.5px] mt-3">
                         {toc.map((item, index) => (
                           <button
                             key={index}
                             onClick={() => handleScrollToHeading(item.id)}
-                            className={`hover:text-[#cc785c] hover:underline transition-colors flex items-center gap-1 cursor-pointer ${
+                            className={`hover:text-[#cc785c] text-left transition-colors flex items-center gap-2 cursor-pointer border-l-2 pl-2 py-0.5 ${
                               activeHeadingId === item.id 
-                                ? "text-[#cc785c] font-bold" 
-                                : "text-current/60"
+                                ? "text-[#cc785c] font-bold border-[#cc785c]" 
+                                : "text-current/70 border-current/15 hover:border-[#cc785c]/40"
                             }`}
                           >
-                            <Bookmark className="h-2.5 w-2.5 scale-75" />
-                            {item.text}
+                            <Bookmark className={`h-2.5 w-2.5 scale-75 shrink-0 ${activeHeadingId === item.id ? "opacity-100" : "opacity-40"}`} />
+                            <span className="truncate w-full">{item.text}</span>
                           </button>
                         ))}
                       </div>
@@ -508,7 +558,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
 
                   {/* Parsed Markdown Body */}
                   <div 
-                    className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35 newspaper-body"
+                    className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35"
                     dangerouslySetInnerHTML={{ __html: htmlContent }}
                   />
 

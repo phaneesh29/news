@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, JetBrains_Mono, Playfair_Display, UnifrakturMaguntia } from "next/font/google";
 import { SettingsProvider } from "@/components/SettingsProvider";
 import { Analytics } from "@vercel/analytics/next";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,9 +82,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <SettingsProvider>
-          {children}
-        </SettingsProvider>
+        <TooltipProvider>
+          <SettingsProvider>
+            {children}
+          </SettingsProvider>
+        </TooltipProvider>
         <Analytics />
       </body>
     </html>
