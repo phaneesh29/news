@@ -121,6 +121,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMode, setSearchMode] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const [htmlContent, setHtmlContent] = useState("");
@@ -200,19 +201,24 @@ function DocsContent({ urlSlug }: DocsContentProps) {
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchMode(false);
+      setIsSearching(false);
       setSearchResults([]);
       return;
     }
 
+    setIsSearching(true);
+    setSearchMode(true);
+
     const delayDebounceFn = setTimeout(async () => {
       try {
-        setSearchMode(true);
         const res = await searchDocsList(searchQuery);
         if (res.status === "success" && res.data) {
           setSearchResults(res.data.docs);
         }
       } catch (err) {
         console.error("Search docs error:", err);
+      } finally {
+        setIsSearching(false);
       }
     }, 300);
 
@@ -444,6 +450,9 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                   onChange={(e) => setSearchQuery(e.target.value)} 
                   className="w-full bg-transparent outline-none border-none p-0 text-inherit text-xs font-mono"
                 />
+                {isSearching && (
+                  <Loader2 className="h-3 w-3 animate-spin text-[#cc785c] shrink-0" />
+                )}
               </div>
 
               {/* Sidebar mobile menu toggle (only visible on small screens) */}
@@ -458,7 +467,12 @@ function DocsContent({ urlSlug }: DocsContentProps) {
               {/* Documentation Tree List */}
               <nav className={`flex flex-col ${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex max-h-[calc(100vh-18rem)] overflow-y-auto pr-1 border-t border-current/10 pt-2 lg:border-t-0 lg:pt-0`}>
                 {searchMode ? (
-                  searchResults.length > 0 ? (
+                  isSearching ? (
+                    <span className="font-serif text-xs italic px-3 py-4 text-center text-current/60 flex items-center justify-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[#cc785c]" />
+                      Searching...
+                    </span>
+                  ) : searchResults.length > 0 ? (
                     <div className="flex flex-col">
                       <span className="text-[10px] font-mono text-[#cc785c] uppercase pb-2 px-3 tracking-wider font-bold">
                         Search Results ({searchResults.length})
