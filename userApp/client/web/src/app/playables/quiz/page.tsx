@@ -12,8 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, RefreshCw, CheckCircle2, XCircle, Flame, Trophy, ChevronDown } from "lucide-react";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 type GameState = "start" | "playing" | "results";
 
 export default function QuizPage() {
@@ -102,7 +100,7 @@ export default function QuizPage() {
         </div>
 
         {gameState === "start" && (
-          <div className="border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-8 vintage-shadow-lg text-center space-y-8 relative overflow-hidden">
+          <div className="border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-8 vintage-shadow-lg text-center space-y-8 relative">
             {/* Decorative corners */}
             <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-current"></div>
             <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-current"></div>
@@ -116,51 +114,62 @@ export default function QuizPage() {
               </p>
             </div>
 
-            <div className="max-w-xs mx-auto space-y-6 pt-4 text-left relative z-10">
-              <div className="space-y-2">
+            <div className="max-w-3xl mx-auto space-y-10 pt-4 text-center relative z-10">
+              <div className="space-y-4">
                 <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
                   SELECT ROLE:
                 </label>
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 h-14 text-sm font-mono transition-all hover:-translate-y-1 vintage-shadow-sm focus:ring-0 focus:ring-offset-0 focus:border-[#cc785c]">
-                    <SelectValue placeholder="Jack of All Trades" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow-sm p-0">
-                    <SelectItem value="all" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3">Jack of All Trades</SelectItem>
-                    {roles.map(r => (
-                      <SelectItem key={r} value={r} className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">
-                        {r}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button 
+                    onClick={() => setRoleFilter("all")}
+                    className={`px-4 py-2 text-sm font-mono border-2 transition-all cursor-pointer ${roleFilter === "all" ? "border-[#cc785c] bg-[#cc785c] text-white vintage-shadow-sm -translate-y-0.5" : "border-[#111111] dark:border-[#e6dfd8] bg-transparent hover:border-[#cc785c] hover:text-[#cc785c]"}`}
+                  >
+                    Jack of All Trades
+                  </button>
+                  {roles.map(r => (
+                    <button 
+                      key={r}
+                      onClick={() => setRoleFilter(r)}
+                      className={`px-4 py-2 text-sm font-mono border-2 transition-all cursor-pointer ${roleFilter === r ? "border-[#cc785c] bg-[#cc785c] text-white vintage-shadow-sm -translate-y-0.5" : "border-[#111111] dark:border-[#e6dfd8] bg-transparent hover:border-[#cc785c] hover:text-[#cc785c]"}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
                   DIFFICULTY LEVEL:
                 </label>
-                <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-                  <SelectTrigger className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 h-14 text-sm font-mono transition-all hover:-translate-y-1 vintage-shadow-sm focus:ring-0 focus:ring-offset-0 focus:border-[#cc785c]">
-                    <SelectValue placeholder="Mixed Difficulty" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow-sm p-0">
-                    <SelectItem value="all" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3">Mixed Difficulty</SelectItem>
-                    <SelectItem value="easy" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Easy</SelectItem>
-                    <SelectItem value="medium" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Medium</SelectItem>
-                    <SelectItem value="hard" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Hard</SelectItem>
-                    <SelectItem value="expert" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Expert</SelectItem>
-                    <SelectItem value="chaos" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Chaos</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {[
+                    { label: "Mixed Difficulty", value: "all" },
+                    { label: "Easy", value: "easy" },
+                    { label: "Medium", value: "medium" },
+                    { label: "Hard", value: "hard" },
+                    { label: "Expert", value: "expert" },
+                    { label: "Chaos", value: "chaos" }
+                  ].map(d => (
+                    <button 
+                      key={d.value}
+                      onClick={() => setDifficultyFilter(d.value as Difficulty | "all")}
+                      className={`px-4 py-2 text-sm font-mono border-2 transition-all cursor-pointer ${difficultyFilter === d.value ? "border-[#cc785c] bg-[#cc785c] text-white vintage-shadow-sm -translate-y-0.5" : "border-[#111111] dark:border-[#e6dfd8] bg-transparent hover:border-[#cc785c] hover:text-[#cc785c]"}`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <Button 
-                onClick={startGame}
-                className="w-full bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] font-bold uppercase tracking-widest h-14 rounded-none vintage-shadow-sm transition-all text-sm mt-4 cursor-pointer hover:-translate-y-1"
-              >
-                Commence Quiz
-              </Button>
+              <div className="pt-6 max-w-sm mx-auto">
+                <Button 
+                  onClick={startGame}
+                  className="w-full bg-[#cc785c] hover:bg-[#a9583e] text-white border-2 border-[#111111] font-bold uppercase tracking-widest h-14 rounded-none vintage-shadow-sm transition-all text-sm cursor-pointer hover:-translate-y-1"
+                >
+                  Commence Quiz
+                </Button>
+              </div>
             </div>
           </div>
         )}
