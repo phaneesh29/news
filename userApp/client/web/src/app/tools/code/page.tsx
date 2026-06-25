@@ -36,6 +36,7 @@ export default function NodeSandbox() {
   // Terminal UI State
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [terminalHeight, setTerminalHeight] = useState(250); // pixels
+  const [sidebarWidth, setSidebarWidth] = useState(256); // pixels
 
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
@@ -43,11 +44,18 @@ export default function NodeSandbox() {
   const xtermRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
 
-  // Cleanup on unmount or navigation away
+
   useEffect(() => {
     return () => {
       killSandbox();
     };
+  }, []);
+
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.crossOriginIsolated) {
+      window.location.reload();
+    }
   }, []);
 
   // Whenever terminal is toggled or resized, fit the xterm
@@ -174,7 +182,9 @@ export default function NodeSandbox() {
               terminal.write(data);
             }
           })
-        );
+        ).catch((err) => {
+          console.log("Terminal output stream closed:", err?.message || err);
+        });
 
         const inputWriter = shellProcess.input.getWriter();
         terminal.onData((data) => {
@@ -426,7 +436,10 @@ export default function NodeSandbox() {
           <div className="flex-1 flex overflow-hidden">
             
             {/* File Explorer Sidebar */}
-            <div className="w-64 border-r border-black bg-[#181818] flex flex-col shrink-0 overflow-hidden">
+            <div 
+              className="border-r border-black bg-[#181818] flex flex-col shrink-0 overflow-hidden"
+              style={{ width: `${sidebarWidth}px` }}
+            >
               <div className="bg-[#1e1e1e] p-2 flex items-center justify-between shrink-0">
                 <span className="font-mono text-[10px] text-white/50 font-bold uppercase tracking-widest">Explorer</span>
                 <div className="flex items-center gap-1">
@@ -496,6 +509,29 @@ export default function NodeSandbox() {
                 ))}
               </div>
             </div>
+
+            {/* Sidebar Resizer Handle */}
+            <div 
+              className="w-1 -ml-1 cursor-ew-resize hover:bg-[#cc785c] shrink-0 z-10 transition-colors relative"
+              onMouseDown={(e) => {
+                const startX = e.clientX;
+                const startWidth = sidebarWidth;
+                
+                const onMouseMove = (moveEvent: MouseEvent) => {
+                  const newWidth = startWidth + (moveEvent.clientX - startX);
+                  // clamp width between 150px and 800px
+                  setSidebarWidth(Math.max(150, Math.min(800, newWidth)));
+                };
+                
+                const onMouseUp = () => {
+                  document.removeEventListener('mousemove', onMouseMove);
+                  document.removeEventListener('mouseup', onMouseUp);
+                };
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+              }}
+            />
 
             {/* Middle: Editor + Terminal */}
             <div className="flex-1 flex flex-col bg-[#1e1e1e] min-w-0 overflow-hidden relative">
