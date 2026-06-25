@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import JSZip from "jszip";
-import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, ChevronRight, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download, Upload, FolderUp, Copy } from "lucide-react";
+import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, ChevronRight, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download, Upload, FolderUp, Copy, GitBranch } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -45,6 +45,7 @@ export default function NodeSandbox() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
   const ataRef = useRef<((code: string) => void) | null>(null);
 
@@ -426,6 +427,52 @@ export default function NodeSandbox() {
     }
   };
 
+  const handleGithubImport = async () => {
+    const repo = prompt("Enter GitHub repository to clone (e.g., facebook/react):");
+    if (!repo) return;
+    if (!wcRef.current) return;
+    
+    let repoPath = repo;
+    try {
+      if (repo.includes('github.com/')) {
+        const url = new URL(repo.startsWith('http') ? repo : `https://${repo}`);
+        const parts = url.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+          repoPath = `${parts[0]}/${parts[1]}`;
+        }
+      }
+    } catch(e) {}
+    
+    try {
+      setIsImporting(true);
+      if (xtermRef.current) {
+        xtermRef.current.write(`\r\n\x1b[36mImporting ${repoPath} from GitHub...\x1b[0m\r\n`);
+      }
+      
+      const process = await wcRef.current.spawn('npx', ['degit', repoPath, '.', '--force']);
+      
+      process.output.pipeTo(new WritableStream({
+        write(data) {
+          if (xtermRef.current) xtermRef.current.write(data);
+        }
+      }));
+      
+      const exitCode = await process.exit;
+      if (exitCode === 0) {
+        await refreshFiles();
+        if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[32mSuccessfully imported ${repoPath}!\x1b[0m\r\n`);
+      } else {
+        if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[31mFailed to import ${repoPath}. Make sure it is a public repository.\x1b[0m\r\n`);
+        alert("Failed to import repository. Please check terminal for details.");
+      }
+    } catch (err) {
+      console.error("Import failed", err);
+      alert("An error occurred while importing.");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
@@ -705,6 +752,14 @@ export default function NodeSandbox() {
                     title="Upload Folder"
                   >
                     <FolderUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button 
+                    onClick={handleGithubImport}
+                    disabled={isImporting}
+                    className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors disabled:opacity-50"
+                    title="Import from GitHub"
+                  >
+                    {isImporting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#cc785c]" /> : <GitBranch className="h-3.5 w-3.5" />}
                   </button>
                   <button 
                     onClick={() => refreshFiles()}
