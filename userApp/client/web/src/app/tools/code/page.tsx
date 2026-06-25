@@ -46,6 +46,20 @@ export default function NodeSandbox() {
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [showGithubModal, setShowGithubModal] = useState(false);
+  const [githubRepoInput, setGithubRepoInput] = useState('');
+  const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
+
+  const handleMouseEnter = (text: string) => (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({
+      text,
+      x: rect.left + rect.width / 2,
+      y: rect.bottom + 8
+    });
+  };
+  const handleMouseLeave = () => setTooltip(null);
+  
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
   const ataRef = useRef<((code: string) => void) | null>(null);
 
@@ -427,10 +441,12 @@ export default function NodeSandbox() {
     }
   };
 
-  const handleGithubImport = async () => {
-    const repo = prompt("Enter GitHub repository to clone (e.g., facebook/react):");
+  const confirmGithubImport = async () => {
+    const repo = githubRepoInput.trim();
     if (!repo) return;
     if (!wcRef.current) return;
+    setShowGithubModal(false);
+    setGithubRepoInput('');
     
     let repoPath = repo;
     try {
@@ -449,7 +465,7 @@ export default function NodeSandbox() {
         xtermRef.current.write(`\r\n\x1b[36mImporting ${repoPath} from GitHub...\x1b[0m\r\n`);
       }
       
-      const process = await wcRef.current.spawn('npx', ['degit', repoPath, '.', '--force']);
+      const process = await wcRef.current.spawn('npx', ['-y', 'giget@latest', `github:${repoPath}`, '.', '--force']);
       
       process.output.pipeTo(new WritableStream({
         write(data) {
@@ -681,7 +697,7 @@ export default function NodeSandbox() {
               <button 
                 onClick={downloadProjectAsZip}
                 className="bg-[#1e1e1e] border border-white/20 text-white font-bold text-[10px] uppercase px-4 py-1.5 flex items-center gap-2 hover:bg-white/10 transition-colors shadow-sm rounded-sm"
-                title="Download full project as .zip"
+                onMouseEnter={handleMouseEnter("Download full project as .zip")} onMouseLeave={handleMouseLeave}
               >
                 <Download className="h-3 w-3" />
                 Export ZIP
@@ -742,43 +758,43 @@ export default function NodeSandbox() {
                   <button 
                     onClick={() => fileInputRef.current?.click()}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
-                    title="Upload File"
+                    onMouseEnter={handleMouseEnter("Upload File")} onMouseLeave={handleMouseLeave}
                   >
                     <Upload className="h-3.5 w-3.5" />
                   </button>
                   <button 
                     onClick={() => folderInputRef.current?.click()}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
-                    title="Upload Folder"
+                    onMouseEnter={handleMouseEnter("Upload Folder")} onMouseLeave={handleMouseLeave}
                   >
                     <FolderUp className="h-3.5 w-3.5" />
                   </button>
                   <button 
-                    onClick={handleGithubImport}
+                    onClick={() => setShowGithubModal(true)}
                     disabled={isImporting}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors disabled:opacity-50"
-                    title="Import from GitHub"
+                    onMouseEnter={handleMouseEnter("Import from GitHub")} onMouseLeave={handleMouseLeave}
                   >
                     {isImporting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#cc785c]" /> : <GitBranch className="h-3.5 w-3.5" />}
                   </button>
                   <button 
                     onClick={() => refreshFiles()}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
-                    title="Refresh"
+                    onMouseEnter={handleMouseEnter("Refresh")} onMouseLeave={handleMouseLeave}
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
                   </button>
                   <button 
                     onClick={() => setNewItemType(newItemType === "file" ? null : "file")}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
-                    title="New File"
+                    onMouseEnter={handleMouseEnter("New File")} onMouseLeave={handleMouseLeave}
                   >
                     <FilePlus className="h-3.5 w-3.5" />
                   </button>
                   <button 
                     onClick={() => setNewItemType(newItemType === "folder" ? null : "folder")}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
-                    title="New Folder"
+                    onMouseEnter={handleMouseEnter("New Folder")} onMouseLeave={handleMouseLeave}
                   >
                     <FolderPlus className="h-3.5 w-3.5" />
                   </button>
@@ -847,7 +863,7 @@ export default function NodeSandbox() {
                       <button 
                         onClick={(e) => handleDeleteFile(file.path, e)}
                         className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-1 transition-opacity"
-                        title="Delete"
+                        onMouseEnter={handleMouseEnter("Delete")} onMouseLeave={handleMouseLeave}
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
@@ -1155,6 +1171,60 @@ export default function NodeSandbox() {
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {/* Custom Github Modal */}
+      {showGithubModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1e1e1e] border border-[#cc785c]/30 rounded-lg shadow-2xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <GitBranch className="h-6 w-6 text-[#cc785c]" />
+              <h3 className="text-white font-serif text-xl font-bold uppercase tracking-wider">Import Repository</h3>
+            </div>
+            <p className="text-white/50 text-xs font-mono mb-6 leading-relaxed">
+              Enter a GitHub repository (e.g., <span className="text-white/80 bg-white/10 px-1 py-0.5 rounded">facebook/react</span>) or URL. We will pull down the latest code directly into your workspace.
+            </p>
+            <input 
+              type="text" 
+              value={githubRepoInput}
+              onChange={e => setGithubRepoInput(e.target.value)}
+              placeholder="username/repo"
+              autoFocus
+              onKeyDown={e => {
+                if (e.key === 'Enter') confirmGithubImport();
+                if (e.key === 'Escape') setShowGithubModal(false);
+              }}
+              className="w-full bg-[#111111] border border-white/10 rounded px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-[#cc785c] transition-colors mb-6"
+            />
+            <div className="flex items-center justify-end gap-3">
+              <button 
+                onClick={() => setShowGithubModal(false)}
+                className="px-4 py-2 text-xs font-mono font-bold uppercase text-white/50 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmGithubImport}
+                className="bg-[#cc785c] hover:bg-[#b06349] text-white px-5 py-2 rounded text-xs font-mono font-bold uppercase transition-colors shadow-lg"
+              >
+                Import Code
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Tooltip */}
+      {tooltip && (
+        <div 
+          className="fixed z-[100] flex flex-col items-center pointer-events-none animate-in fade-in zoom-in-95 duration-100"
+          style={{ top: tooltip.y, left: tooltip.x, transform: 'translateX(-50%)' }}
+        >
+          <div className="w-2 h-2 -mb-1 bg-[#1e1e1e] rotate-45 border-t border-l border-[#cc785c]/50"></div>
+          <div className="bg-[#1e1e1e] text-[#cc785c] text-[10px] font-mono px-3 py-1.5 rounded border border-[#cc785c]/50 shadow-2xl whitespace-nowrap font-bold uppercase tracking-wider backdrop-blur-md">
+            {tooltip.text}
+          </div>
         </div>
       )}
 
