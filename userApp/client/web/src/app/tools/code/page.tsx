@@ -3,21 +3,16 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import JSZip from "jszip";
-import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download } from "lucide-react";
+import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, ChevronRight, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download, Upload, FolderUp, Copy } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import { WebContainer } from "@webcontainer/api";
+import { setupTypeAcquisition } from "@typescript/ata";
+import ts from "typescript";
 
-const INITIAL_CODE = `import os from 'os';
 
-console.log("Hello from WebContainers!\\n");
-console.log("Platform:", os.platform());
-console.log("Architecture:", os.arch());
-
-// Python is also supported! Just create a main.py file and type 'python main.py' in the terminal below.
-`;
 
 type FSNode = { name: string; isDirectory: boolean; path: string; depth: number };
 
@@ -30,13 +25,12 @@ type ContextMenuState = {
 
 export default function NodeSandbox() {
   const [bootStatus, setBootStatus] = useState<"idle" | "booting" | "ready" | "error">("idle");
-  const [moduleType, setModuleType] = useState<"commonjs" | "module">("module");
-  
   const [files, setFiles] = useState<FSNode[]>([]);
-  const [currentFile, setCurrentFile] = useState<string>("/index.js");
-  const [code, setCode] = useState(INITIAL_CODE);
+  const [currentFile, setCurrentFile] = useState<string>("");
+  const [code, setCode] = useState("");
   const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
+  const [openFiles, setOpenFiles] = useState<string[]>([]);
   
   const [newItemName, setNewItemName] = useState("");
   const [newItemType, setNewItemType] = useState<"file" | "folder" | null>(null);
@@ -47,6 +41,12 @@ export default function NodeSandbox() {
   const [sidebarWidth, setSidebarWidth] = useState(256); // pixels
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
+  const ataRef = useRef<((code: string) => void) | null>(null);
 
   useEffect(() => {
     const closeMenu = () => setContextMenu(null);
@@ -146,14 +146,15 @@ export default function NodeSandbox() {
         const fsTree = await loadFileSystem();
         setFiles(fsTree);
         
-        // If current file was deleted from terminal, reset editor
-        if (currentFileRef.current) {
-          const exists = fsTree.some(f => f.path === currentFileRef.current);
-          if (!exists) {
+        // If files were deleted from terminal, update open files
+        setOpenFiles(prev => {
+          const next = prev.filter(p => fsTree.some(f => f.path === p));
+          if (currentFileRef.current && !next.includes(currentFileRef.current)) {
             setCurrentFile("");
             setCode("");
           }
-        }
+          return next;
+        });
       }, 2000);
     }
     return () => {
@@ -169,20 +170,7 @@ export default function NodeSandbox() {
       const wc = await WebContainer.boot();
       wcRef.current = wc;
 
-      await wc.mount({
-        'index.js': {
-          file: { contents: INITIAL_CODE }
-        },
-        'package.json': {
-          file: { 
-            contents: JSON.stringify({ 
-              name: "sandbox", 
-              type: "module", 
-              dependencies: {} 
-            }, null, 2) 
-          }
-        }
-      });
+      await wc.mount({});
 
       wc.on('server-ready', (port, url) => {
         setServerUrl(url);
@@ -248,14 +236,53 @@ export default function NodeSandbox() {
   }, [bootStatus, isTerminalOpen]);
 
   const handleFileSelect = async (path: string, isDirectory: boolean) => {
-    if (isDirectory || !wcRef.current) return;
+    if (isDirectory) {
+      setCollapsedFolders(prev => {
+        const next = new Set(prev);
+        if (next.has(path)) next.delete(path);
+        else next.add(path);
+        return next;
+      });
+      return;
+    }
+    if (!wcRef.current) return;
+    try {
+      const content = await wcRef.current.fs.readFile(path, 'utf-8');
+      setOpenFiles(prev => prev.includes(path) ? prev : [...prev, path]);
+      setCurrentFile(path);
+      setCode(content);
+      setActiveTab("editor");
+    } catch (err) {
+      console.error("Failed to open file", err);
+    }
+  };
+
+  const handleTabSelect = async (path: string) => {
+    if (!wcRef.current) return;
     try {
       const content = await wcRef.current.fs.readFile(path, 'utf-8');
       setCurrentFile(path);
       setCode(content);
+      setActiveTab("editor");
     } catch (err) {
       console.error("Failed to open file", err);
     }
+  };
+
+  const handleTabClose = (e: React.MouseEvent, path: string) => {
+    e.stopPropagation();
+    setOpenFiles(prev => {
+      const next = prev.filter(p => p !== path);
+      if (currentFile === path) {
+        if (next.length > 0) {
+          handleTabSelect(next[next.length - 1]);
+        } else {
+          setCurrentFile("");
+          setCode("");
+        }
+      }
+      return next;
+    });
   };
 
   const downloadProjectAsZip = async () => {
@@ -300,6 +327,10 @@ export default function NodeSandbox() {
     if (wcRef.current && currentFile) {
       wcRef.current.fs.writeFile(currentFile, newCode).catch(console.error);
     }
+    
+    if (ataRef.current && (currentFile.endsWith('.js') || currentFile.endsWith('.ts') || currentFile.endsWith('.jsx') || currentFile.endsWith('.tsx'))) {
+      ataRef.current(newCode);
+    }
   };
 
   const handleCreateItem = async () => {
@@ -310,6 +341,7 @@ export default function NodeSandbox() {
         await wcRef.current.fs.mkdir(targetPath);
       } else {
         await wcRef.current.fs.writeFile(targetPath, "");
+        setOpenFiles(prev => prev.includes(targetPath) ? prev : [...prev, targetPath]);
         setCurrentFile(targetPath);
         setCode("");
       }
@@ -326,46 +358,120 @@ export default function NodeSandbox() {
     if (!wcRef.current) return;
     try {
       await wcRef.current.fs.rm(path, { recursive: true });
-      if (currentFile === path) {
-        setCurrentFile("");
-        setCode("");
-      }
+      setOpenFiles(prev => {
+        const next = prev.filter(p => !p.startsWith(path));
+        if (currentFile.startsWith(path)) {
+          if (next.length > 0) {
+            handleTabSelect(next[next.length - 1]);
+          } else {
+            setCurrentFile("");
+            setCode("");
+          }
+        }
+        return next;
+      });
       await refreshFiles();
     } catch (err) {
       console.error("Failed to delete", err);
     }
   };
 
-  const handleTemplateChange = async (type: "commonjs" | "module" | "static") => {
-    setModuleType(type as any); // keep state just in case, though it's acting more like a template now
+
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const processEntry = async (entry: any, path: string) => {
     if (!wcRef.current) return;
     
-    try {
-      if (type === "static") {
-        const html = '<!DOCTYPE html>\n<html>\n<head>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <h1>Hello Web!</h1>\n  <p>Run <code>npm start</code> in the terminal to see this page.</p>\n  <script src="script.js"></script>\n</body>\n</html>';
-        await wcRef.current.fs.writeFile('/index.html', html);
-        await wcRef.current.fs.writeFile('/style.css', 'body {\n  font-family: system-ui, sans-serif;\n  background: #111;\n  color: #fff;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n  margin: 0;\n}');
-        await wcRef.current.fs.writeFile('/script.js', 'console.log("Hello from Static JS!");');
-        await wcRef.current.fs.writeFile('/package.json', JSON.stringify({
-          name: "static-sandbox",
-          scripts: { start: "npx serve ." }
-        }, null, 2));
-        setCurrentFile('/index.html');
-        setCode(html);
-      } else {
-        await wcRef.current.fs.writeFile('/index.js', INITIAL_CODE);
-        await wcRef.current.fs.writeFile('/package.json', JSON.stringify({
-          name: "sandbox",
-          type: type,
-          dependencies: {}
-        }, null, 2));
-        setCurrentFile('/index.js');
-        setCode(INITIAL_CODE);
+    if (entry.isFile) {
+      const file = await new Promise<File>((resolve) => entry.file(resolve));
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      await wcRef.current.fs.writeFile(path === '' ? `/${file.name}` : `${path}/${file.name}`, uint8Array);
+    } else if (entry.isDirectory) {
+      const dirPath = path === '' ? `/${entry.name}` : `${path}/${entry.name}`;
+      try {
+        await wcRef.current.fs.mkdir(dirPath);
+      } catch (e) { /* ignore if exists */ }
+      
+      const dirReader = entry.createReader();
+      const readEntries = async () => {
+        let allEntries: any[] = [];
+        let hasMore = true;
+        while (hasMore) {
+          const entries = await new Promise<any[]>((resolve) => {
+            dirReader.readEntries(resolve);
+          });
+          if (entries.length === 0) {
+            hasMore = false;
+          } else {
+            allEntries = allEntries.concat(entries);
+          }
+        }
+        return allEntries;
+      };
+      
+      const entries = await readEntries();
+      for (const childEntry of entries) {
+        await processEntry(childEntry, dirPath);
       }
-      await refreshFiles();
-    } catch (err) {
-      console.error("Failed to apply template", err);
     }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (!wcRef.current) return;
+
+    const items = e.dataTransfer.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const entry = item.webkitGetAsEntry();
+        if (entry) {
+          await processEntry(entry, '');
+        }
+      }
+    }
+    await refreshFiles();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!wcRef.current || !e.target.files) return;
+    for (let i = 0; i < e.target.files.length; i++) {
+      const file = e.target.files[i];
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      const filePath = file.webkitRelativePath ? `/${file.webkitRelativePath}` : `/${file.name}`;
+      
+      if (file.webkitRelativePath) {
+        const parts = file.webkitRelativePath.split('/');
+        parts.pop(); 
+        let currentPath = '';
+        for (const part of parts) {
+          currentPath += `/${part}`;
+          try {
+            await wcRef.current.fs.mkdir(currentPath);
+          } catch (err) {
+          }
+        }
+      }
+      
+      await wcRef.current.fs.writeFile(filePath, uint8Array);
+    }
+    await refreshFiles();
+    if (e.target) e.target.value = '';
   };
 
   const getLanguage = (path: string) => {
@@ -373,6 +479,7 @@ export default function NodeSandbox() {
     if (path.endsWith('.html')) return 'html';
     if (path.endsWith('.css')) return 'css';
     if (path.endsWith('.py')) return 'python';
+    if (path.endsWith('.log') || path.endsWith('.gitignore') || path.endsWith('.env') || path.endsWith('.txt') || path.endsWith('.md')) return 'plaintext';
     return 'javascript';
   };
 
@@ -434,7 +541,6 @@ export default function NodeSandbox() {
         };
         export default path;
       }
-      declare module 'express' { function express(): any; export default express; }
       `,
       'node_core.d.ts'
     );
@@ -479,6 +585,31 @@ export default function NodeSandbox() {
         };
       }
     });
+
+    try {
+      const ata = setupTypeAcquisition({
+        projectName: 'WebContainerSandbox',
+        typescript: ts,
+        logger: console,
+        delegate: {
+          receivedFile: (code, path) => {
+            monaco.languages.typescript.javascriptDefaults.addExtraLib(code, `file://${path}`);
+          },
+          started: () => console.log('ATA start'),
+          progress: (downloaded, total) => console.log(`Got ${downloaded} out of ${total}`),
+          finished: f => console.log('ATA done')
+        }
+      });
+      ataRef.current = ata;
+    } catch (e) {
+      console.error("ATA setup failed", e);
+    }
+  };
+
+  const handleEditorDidMount = (editor: any, monaco: any) => {
+    if (ataRef.current && code) {
+      ataRef.current(code);
+    }
   };
 
   return (
@@ -496,27 +627,6 @@ export default function NodeSandbox() {
               <Code2 className="h-5 w-5" />
               DevBits IDE
             </h1>
-            
-            {bootStatus === "ready" && (
-              <div className="flex items-center ml-6 bg-[#1a1a1a] border border-white/10 rounded-md px-1.5 py-1 shadow-inner relative group hover:border-white/20 transition-colors">
-                <div className="flex items-center gap-2 px-2 border-r border-white/10">
-                  <LayoutTemplate className="h-3.5 w-3.5 text-[#cc785c] group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">Template</span>
-                </div>
-                <div className="relative pl-1">
-                  <select
-                    value={moduleType}
-                    onChange={(e) => handleTemplateChange(e.target.value as any)}
-                    className="appearance-none bg-transparent text-[#e0e0e0] font-mono text-[11px] uppercase tracking-wider pl-2 pr-6 py-1 focus:outline-none cursor-pointer hover:text-white transition-colors"
-                  >
-                    <option value="module" className="bg-[#1e1e1e]">Node (ESM)</option>
-                    <option value="commonjs" className="bg-[#1e1e1e]">Node (CJS)</option>
-                    <option value="static" className="bg-[#1e1e1e]">Static Web</option>
-                  </select>
-                  <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none group-hover:text-white/70 transition-colors" />
-                </div>
-              </div>
-            )}
           </div>
           
           <div className="flex items-center gap-3">
@@ -573,12 +683,29 @@ export default function NodeSandbox() {
             
             {/* File Explorer Sidebar */}
             <div 
-              className="border-r border-black bg-[#181818] flex flex-col shrink-0 overflow-hidden"
+              className={`border-r border-black bg-[#181818] flex flex-col shrink-0 overflow-hidden transition-colors ${isDragging ? 'bg-[#2a2a2a] border-[#cc785c] border-2 border-dashed' : ''}`}
               style={{ width: `${sidebarWidth}px` }}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
               <div className="bg-[#1e1e1e] p-2 flex items-center justify-between shrink-0">
                 <span className="font-mono text-[10px] text-white/50 font-bold uppercase tracking-widest">Explorer</span>
                 <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
+                    title="Upload File"
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                  </button>
+                  <button 
+                    onClick={() => folderInputRef.current?.click()}
+                    className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
+                    title="Upload Folder"
+                  >
+                    <FolderUp className="h-3.5 w-3.5" />
+                  </button>
                   <button 
                     onClick={() => refreshFiles()}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
@@ -628,7 +755,11 @@ export default function NodeSandbox() {
                   setContextMenu({ x: e.clientX, y: e.clientY, type: 'explorer-bg' });
                 }}
               >
-                {files.map((file) => (
+                {files.filter(file => {
+                  return Array.from(collapsedFolders).every(collapsed => 
+                    !(file.path.startsWith(collapsed + '/') && file.path !== collapsed)
+                  );
+                }).map((file) => (
                   <div
                     key={file.path}
                     className={`w-full group flex items-center justify-between px-2 py-1.5 text-left font-mono text-xs transition-colors cursor-pointer ${
@@ -642,11 +773,18 @@ export default function NodeSandbox() {
                       setContextMenu({ x: e.clientX, y: e.clientY, type: 'explorer-file', path: file.path });
                     }}
                   >
-                    <div className="flex items-center gap-2 overflow-hidden">
+                    <div className="flex items-center gap-1 overflow-hidden">
                       {file.isDirectory ? (
-                        <Folder className={`h-3.5 w-3.5 shrink-0 ${currentFile === file.path ? 'text-[#cc785c]' : 'text-[#cc785c]/70'}`} />
+                        <>
+                          {collapsedFolders.has(file.path) ? (
+                            <ChevronRight className={`h-3 w-3 shrink-0 ${currentFile === file.path ? 'text-[#cc785c]' : 'text-[#cc785c]/70'}`} />
+                          ) : (
+                            <ChevronDown className={`h-3 w-3 shrink-0 ${currentFile === file.path ? 'text-[#cc785c]' : 'text-[#cc785c]/70'}`} />
+                          )}
+                          <Folder className={`h-3.5 w-3.5 shrink-0 ${currentFile === file.path ? 'text-[#cc785c]' : 'text-[#cc785c]/70'}`} />
+                        </>
                       ) : (
-                        <File className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                        <File className="h-3.5 w-3.5 shrink-0 opacity-70 ml-[16px]" />
                       )}
                       <span className="truncate">{file.name}</span>
                     </div>
@@ -691,23 +829,36 @@ export default function NodeSandbox() {
             <div className="flex-1 flex flex-col bg-[#1e1e1e] min-w-0 overflow-hidden relative">
               
               {/* Editor Tabs Area */}
-              <div className="bg-[#2d2d2d] flex items-center justify-between border-b border-black shrink-0 pr-4">
-                <div className="flex items-center">
-                  {currentFile && (
-                    <button 
-                      onClick={() => setActiveTab("editor")}
-                      className={`text-[10px] font-mono px-4 py-2 border-r border-black flex items-center gap-2 transition-colors ${
-                        activeTab === "editor" ? "bg-[#1e1e1e] text-[#cc785c] border-t-2 border-t-[#cc785c]" : "bg-[#2d2d2d] text-white/50 hover:text-white border-t-2 border-t-transparent"
+              <div className="bg-[#2d2d2d] flex items-center justify-between border-b border-black shrink-0 pr-4 overflow-x-auto no-scrollbar">
+                <div className="flex items-center min-w-max">
+                  {openFiles.map(path => (
+                    <div 
+                      key={path}
+                      onClick={() => handleTabSelect(path)}
+                      className={`text-[10px] font-mono px-3 py-2 border-r border-black flex items-center gap-2 transition-colors cursor-pointer group ${
+                        activeTab === "editor" && currentFile === path 
+                          ? "bg-[#1e1e1e] text-[#cc785c] border-t-2 border-t-[#cc785c]" 
+                          : "bg-[#2d2d2d] text-white/50 hover:text-white border-t-2 border-t-transparent"
                       }`}
                     >
                       <File className="h-3 w-3" />
-                      <span>{currentFile.split('/').pop()}</span>
-                    </button>
-                  )}
+                      <span>{path.split('/').pop()}</span>
+                      <button 
+                        onClick={(e) => handleTabClose(e, path)}
+                        className={`p-0.5 rounded-sm transition-colors ${
+                          activeTab === "editor" && currentFile === path
+                            ? "opacity-100 hover:bg-[#cc785c]/20"
+                            : "opacity-0 group-hover:opacity-100 hover:bg-white/10"
+                        }`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                   {serverUrl && (
                     <button 
                       onClick={() => setActiveTab("preview")}
-                      className={`text-[10px] font-mono px-4 py-2 border-r border-black flex items-center gap-2 transition-colors ${
+                      className={`text-[10px] font-mono px-4 py-2 border-r border-black flex items-center gap-2 transition-colors shrink-0 ${
                         activeTab === "preview" ? "bg-[#1e1e1e] text-emerald-400 border-t-2 border-t-emerald-400" : "bg-[#2d2d2d] text-white/50 hover:text-white border-t-2 border-t-transparent"
                       }`}
                     >
@@ -751,6 +902,7 @@ export default function NodeSandbox() {
                     value={code}
                     onChange={handleCodeChange}
                     beforeMount={handleEditorWillMount}
+                    onMount={handleEditorDidMount}
                     options={{
                       minimap: { enabled: false },
                       fontSize: 14,
@@ -841,6 +993,21 @@ export default function NodeSandbox() {
         )}
       </main>
 
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileUpload} 
+        className="hidden" 
+        multiple 
+      />
+      <input 
+        type="file" 
+        ref={folderInputRef} 
+        onChange={handleFileUpload} 
+        className="hidden" 
+        {...{ webkitdirectory: "" } as any}
+      />
+
       {/* Custom Context Menu */}
       {contextMenu && (
         <div 
@@ -891,6 +1058,22 @@ export default function NodeSandbox() {
 
           {contextMenu.type === 'terminal' && (
             <>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2"
+                onClick={async () => {
+                  try {
+                    const selectedText = xtermRef.current?.getSelection();
+                    if (selectedText) {
+                      await navigator.clipboard.writeText(selectedText);
+                    }
+                  } catch (e) {
+                    console.error("Copy failed", e);
+                  }
+                  setContextMenu(null);
+                }}
+              >
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </button>
               <button 
                 className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2"
                 onClick={async () => {
