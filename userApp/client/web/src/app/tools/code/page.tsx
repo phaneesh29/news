@@ -465,25 +465,48 @@ export default function NodeSandbox() {
         xtermRef.current.write(`\r\n\x1b[36mImporting ${repoPath} from GitHub...\x1b[0m\r\n`);
       }
       
-      const process = await wcRef.current.spawn('npx', ['-y', 'giget@latest', `github:${repoPath}`, '.', '--force']);
+      const apiRes = await fetch(`https://api.github.com/repos/${repoPath}`);
+      if (!apiRes.ok) throw new Error("Repository not found or private");
+      const repoData = await apiRes.json();
+      const branch = repoData.default_branch || 'main';
       
-      process.output.pipeTo(new WritableStream({
-        write(data) {
-          if (xtermRef.current) xtermRef.current.write(data);
+      if (xtermRef.current) xtermRef.current.write(`\x1b[36mDownloading zip archive...\x1b[0m\r\n`);
+      const zipUrl = `https://corsproxy.io/?${encodeURIComponent(`https://codeload.github.com/${repoPath}/zip/refs/heads/${branch}`)}`;
+      const zipRes = await fetch(zipUrl);
+      if (!zipRes.ok) throw new Error("Failed to download repository archive");
+      const arrayBuffer = await zipRes.arrayBuffer();
+      
+      if (xtermRef.current) xtermRef.current.write(`\x1b[36mExtracting files...\x1b[0m\r\n`);
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      
+      for (const relativePath in zip.files) {
+        const file = zip.files[relativePath];
+        const parts = relativePath.split('/');
+        parts.shift();
+        const cleanPath = parts.join('/');
+        if (!cleanPath) continue;
+        if (file.dir) {
+          await wcRef.current.fs.mkdir(cleanPath, { recursive: true });
         }
-      }));
-      
-      const exitCode = await process.exit;
-      if (exitCode === 0) {
-        await refreshFiles();
-        if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[32mSuccessfully imported ${repoPath}!\x1b[0m\r\n`);
-      } else {
-        if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[31mFailed to import ${repoPath}. Make sure it is a public repository.\x1b[0m\r\n`);
-        alert("Failed to import repository. Please check terminal for details.");
       }
-    } catch (err) {
+      
+      for (const relativePath in zip.files) {
+        const file = zip.files[relativePath];
+        const parts = relativePath.split('/');
+        parts.shift();
+        const cleanPath = parts.join('/');
+        if (!cleanPath || file.dir) continue;
+        
+        const content = await file.async("uint8array");
+        await wcRef.current.fs.writeFile(cleanPath, content);
+      }
+      
+      await refreshFiles();
+      if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[32mSuccessfully imported ${repoPath}!\x1b[0m\r\n`);
+    } catch (err: any) {
       console.error("Import failed", err);
-      alert("An error occurred while importing.");
+      if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[31mFailed to import ${repoPath}: ${err.message}\x1b[0m\r\n`);
+      alert(`Failed to import repository: ${err.message}`);
     } finally {
       setIsImporting(false);
     }
