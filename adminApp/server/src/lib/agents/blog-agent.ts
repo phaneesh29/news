@@ -11,6 +11,7 @@ export const blogDraftAgent = new ToolLoopAgent({
   tools: {
     tavilySearch: tavilySearch({
       searchDepth: 'advanced',
+      timeRange: 'month',
       includeAnswer: true,
       maxResults: 5,
     }),

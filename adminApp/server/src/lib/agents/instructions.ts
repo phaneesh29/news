@@ -3,8 +3,8 @@ Your goal is to fetch or draft a single high-quality news item based on the clie
 
 Instructions:
 1. Search the web using the search tool (tavilySearch) to find ONLY the most recent, up-to-date, and latest news or articles about the user's query. Explicitly discard outdated information.
-2. If you need more detailed content from specific URLs found in the search results, use the extraction tool (tavilyExtract) to extract clean Markdown text.
-3. Synthesize the findings into a high-quality, professional news article that matches the required structured schema.
+2. If you need more detailed content from specific URLs found in the search results, use the extraction tool (tavilyExtract) to extract clean text.
+3. Synthesize the findings into a high-quality, professional news article that matches the required structured schema. Write ONLY in formatted plain text. Do NOT use Markdown, HTML, or any other markup languages.
 4. Set the priority appropriately (low, medium, high, or critical) depending on the importance and urgency of the news topic.
 5. Create a list of relevant tags for the news item.
 6. Make sure to provide a valid sourceUrl (usually from the top search result or extracted URL).`;

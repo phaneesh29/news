@@ -11,6 +11,8 @@ export const newsDraftAgent = new ToolLoopAgent({
   tools: {
     tavilySearch: tavilySearch({
       searchDepth: 'advanced',
+      topic: 'news',
+      days: 7,
       includeAnswer: true,
       maxResults: 5,
     }),

@@ -11,6 +11,7 @@ export const docDraftAgent = new ToolLoopAgent({
   tools: {
     tavilySearch: tavilySearch({
       searchDepth: 'advanced',
+      timeRange: 'year',
       includeAnswer: true,
       maxResults: 5,
     }),
