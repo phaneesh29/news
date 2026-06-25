@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2, LayoutTemplate, ArrowLeft } from "lucide-react";
+import JSZip from "jszip";
+import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -19,6 +20,13 @@ console.log("Architecture:", os.arch());
 `;
 
 type FSNode = { name: string; isDirectory: boolean; path: string; depth: number };
+
+type ContextMenuState = {
+  x: number;
+  y: number;
+  type: 'explorer-file' | 'explorer-bg' | 'terminal';
+  path?: string;
+} | null;
 
 export default function NodeSandbox() {
   const [bootStatus, setBootStatus] = useState<"idle" | "booting" | "ready" | "error">("idle");
@@ -37,6 +45,14 @@ export default function NodeSandbox() {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [terminalHeight, setTerminalHeight] = useState(250); // pixels
   const [sidebarWidth, setSidebarWidth] = useState(256); // pixels
+
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
+
+  useEffect(() => {
+    const closeMenu = () => setContextMenu(null);
+    document.addEventListener("click", closeMenu);
+    return () => document.removeEventListener("click", closeMenu);
+  }, []);
 
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
@@ -116,6 +132,34 @@ export default function NodeSandbox() {
     const fsTree = await loadFileSystem();
     setFiles(fsTree);
   }, [loadFileSystem]);
+
+  const currentFileRef = useRef(currentFile);
+  useEffect(() => {
+    currentFileRef.current = currentFile;
+  }, [currentFile]);
+
+  // Poll files every 2 seconds to keep explorer and editor in sync with terminal changes
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (bootStatus === "ready") {
+      interval = setInterval(async () => {
+        const fsTree = await loadFileSystem();
+        setFiles(fsTree);
+        
+        // If current file was deleted from terminal, reset editor
+        if (currentFileRef.current) {
+          const exists = fsTree.some(f => f.path === currentFileRef.current);
+          if (!exists) {
+            setCurrentFile("");
+            setCode("");
+          }
+        }
+      }, 2000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [bootStatus, loadFileSystem]);
 
   const bootContainer = async () => {
     if (wcRef.current) return;
@@ -214,6 +258,42 @@ export default function NodeSandbox() {
     }
   };
 
+  const downloadProjectAsZip = async () => {
+    if (!wcRef.current) return;
+    try {
+      const zip = new JSZip();
+      
+      const readDirToZip = async (dirPath: string, zipFolder: JSZip) => {
+        const entries = await wcRef.current!.fs.readdir(dirPath, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.name === "node_modules" || entry.name === ".next" || entry.name === ".git") continue;
+          const fullPath = dirPath === "/" ? `/${entry.name}` : `${dirPath}/${entry.name}`;
+          if (entry.isDirectory()) {
+            const subFolder = zipFolder.folder(entry.name);
+            if (subFolder) await readDirToZip(fullPath, subFolder);
+          } else {
+            const content = await wcRef.current!.fs.readFile(fullPath);
+            zipFolder.file(entry.name, content);
+          }
+        }
+      };
+      
+      await readDirToZip("/", zip);
+      const blob = await zip.generateAsync({ type: "blob" });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sandbox-project.zip";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download zip", err);
+    }
+  };
+
   const handleCodeChange = (val: string | undefined) => {
     const newCode = val || "";
     setCode(newCode);
@@ -303,14 +383,57 @@ export default function NodeSandbox() {
       allowNonTsExtensions: true,
       moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
       module: monaco.languages.typescript.ModuleKind.CommonJS,
+      allowSyntheticDefaultImports: true,
+      esModuleInterop: true,
     });
 
     // 2. Add basic Node.js and Express types
     monaco.languages.typescript.javascriptDefaults.addExtraLib(
       `
-      declare module 'os' { export function platform(): string; export function arch(): string; export function cpus(): any[]; }
-      declare module 'fs' { export function readFileSync(p: string, enc?: string): any; export function writeFileSync(p: string, d: any): void; }
-      declare module 'path' { export function join(...p: string[]): string; export function resolve(...p: string[]): string; }
+      declare module 'os' { 
+        function platform(): string; 
+        function arch(): string; 
+        function cpus(): any[]; 
+        const os: { platform: typeof platform; arch: typeof arch; cpus: typeof cpus; };
+        export default os;
+      }
+      declare module 'fs' { 
+        function readFileSync(path: string, options?: any): any; 
+        function writeFileSync(path: string, data: any, options?: any): void; 
+        function readdirSync(path: string, options?: any): string[]; 
+        function existsSync(path: string): boolean;
+        function statSync(path: string, options?: any): any;
+        namespace promises {
+          function readFile(path: string, options?: any): Promise<any>;
+          function writeFile(path: string, data: any, options?: any): Promise<void>;
+          function readdir(path: string, options?: any): Promise<string[]>;
+          function stat(path: string, options?: any): Promise<any>;
+        }
+        const fs: {
+          readFileSync: typeof readFileSync;
+          writeFileSync: typeof writeFileSync;
+          readdirSync: typeof readdirSync;
+          existsSync: typeof existsSync;
+          statSync: typeof statSync;
+          promises: typeof promises;
+        };
+        export default fs;
+      }
+      declare module 'path' { 
+        function join(...paths: string[]): string; 
+        function resolve(...paths: string[]): string; 
+        function basename(path: string, ext?: string): string;
+        function dirname(path: string): string;
+        function extname(path: string): string;
+        const path: {
+          join: typeof join;
+          resolve: typeof resolve;
+          basename: typeof basename;
+          dirname: typeof dirname;
+          extname: typeof extname;
+        };
+        export default path;
+      }
       declare module 'express' { function express(): any; export default express; }
       `,
       'node_core.d.ts'
@@ -397,6 +520,17 @@ export default function NodeSandbox() {
           </div>
           
           <div className="flex items-center gap-3">
+            {bootStatus === "ready" && (
+              <button 
+                onClick={downloadProjectAsZip}
+                className="bg-[#1e1e1e] border border-white/20 text-white font-bold text-[10px] uppercase px-4 py-1.5 flex items-center gap-2 hover:bg-white/10 transition-colors shadow-sm rounded-sm"
+                title="Download full project as .zip"
+              >
+                <Download className="h-3 w-3" />
+                Export ZIP
+              </button>
+            )}
+
             {bootStatus === "idle" && (
               <button 
                 onClick={bootContainer}
@@ -446,6 +580,13 @@ export default function NodeSandbox() {
                 <span className="font-mono text-[10px] text-white/50 font-bold uppercase tracking-widest">Explorer</span>
                 <div className="flex items-center gap-1">
                   <button 
+                    onClick={() => refreshFiles()}
+                    className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
+                    title="Refresh"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </button>
+                  <button 
                     onClick={() => setNewItemType(newItemType === "file" ? null : "file")}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
                     title="New File"
@@ -480,7 +621,13 @@ export default function NodeSandbox() {
                 </div>
               )}
 
-              <div className="flex-1 overflow-y-auto py-2 space-y-px">
+              <div 
+                className="flex-1 overflow-y-auto py-2 space-y-px"
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setContextMenu({ x: e.clientX, y: e.clientY, type: 'explorer-bg' });
+                }}
+              >
                 {files.map((file) => (
                   <div
                     key={file.path}
@@ -489,6 +636,11 @@ export default function NodeSandbox() {
                     }`}
                     style={{ paddingLeft: `${(file.depth * 12) + 8}px` }}
                     onClick={() => handleFileSelect(file.path, file.isDirectory)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setContextMenu({ x: e.clientX, y: e.clientY, type: 'explorer-file', path: file.path });
+                    }}
                   >
                     <div className="flex items-center gap-2 overflow-hidden">
                       {file.isDirectory ? (
@@ -673,7 +825,13 @@ export default function NodeSandbox() {
                   </div>
 
                   {/* Terminal Content */}
-                  <div className="flex-1 relative p-2 overflow-hidden bg-[#0a0400]">
+                  <div 
+                    className="flex-1 relative p-2 overflow-hidden bg-[#0a0400]"
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setContextMenu({ x: e.clientX, y: e.clientY, type: 'terminal' });
+                    }}
+                  >
                     <div ref={terminalRef} className="absolute inset-2" />
                   </div>
                 </div>
@@ -682,6 +840,86 @@ export default function NodeSandbox() {
           </div>
         )}
       </main>
+
+      {/* Custom Context Menu */}
+      {contextMenu && (
+        <div 
+          className="fixed z-50 bg-[#181818] border-2 border-[#cc785c]/50 shadow-2xl font-mono text-xs py-1 min-w-[180px]"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.type === 'explorer-bg' && (
+            <>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2"
+                onClick={() => { setNewItemType('file'); setContextMenu(null); }}
+              >
+                <FilePlus className="h-3.5 w-3.5" /> New File
+              </button>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2"
+                onClick={() => { setNewItemType('folder'); setContextMenu(null); }}
+              >
+                <FolderPlus className="h-3.5 w-3.5" /> New Folder
+              </button>
+              <div className="h-px bg-[#cc785c]/20 my-1 mx-2" />
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2 font-bold"
+                onClick={() => { downloadProjectAsZip(); setContextMenu(null); }}
+              >
+                <Download className="h-3.5 w-3.5" /> Download ZIP
+              </button>
+            </>
+          )}
+          
+          {contextMenu.type === 'explorer-file' && (
+            <>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-red-500/20 text-red-400 flex items-center gap-2"
+                onClick={(e) => { 
+                  if (contextMenu.path && contextMenu.path !== '/package.json') {
+                    handleDeleteFile(contextMenu.path, e as any); 
+                  }
+                  setContextMenu(null); 
+                }}
+                disabled={contextMenu.path === '/package.json'}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </button>
+            </>
+          )}
+
+          {contextMenu.type === 'terminal' && (
+            <>
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2"
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (xtermRef.current) xtermRef.current.paste(text);
+                  } catch (e) {
+                    console.error("Paste failed", e);
+                  }
+                  setContextMenu(null);
+                }}
+              >
+                <SquareTerminal className="h-3.5 w-3.5" /> Paste
+              </button>
+              <div className="h-px bg-[#cc785c]/20 my-1 mx-2" />
+              <button 
+                className="w-full text-left px-4 py-2 hover:bg-[#cc785c]/20 text-[#cc785c] flex items-center gap-2"
+                onClick={() => { 
+                  if (xtermRef.current) xtermRef.current.clear(); 
+                  setContextMenu(null); 
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Clear Terminal
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
