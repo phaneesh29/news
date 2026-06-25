@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import Navbar from "@/components/Navbar";
-import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2, LayoutTemplate } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, Play, Trash2, LayoutTemplate, ArrowLeft } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -360,13 +360,15 @@ export default function NodeSandbox() {
 
   return (
     <div className="h-screen flex flex-col bg-[#111111] text-[#fcfaf2] overflow-hidden">
-      <Navbar />
-      
-      <main className="flex-1 flex flex-col w-full h-full overflow-hidden border-t-2 border-[#cc785c]/30">
+      <main className="flex-1 flex flex-col w-full h-full overflow-hidden">
         
         {/* Editor Toolbar */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-2 shrink-0 bg-[#1e1e1e] border-b border-black">
           <div className="flex items-center gap-3">
+            <Link href="/tools" className="flex items-center gap-1 text-white/50 hover:text-[#cc785c] transition-colors pr-3 border-r border-white/10 text-[10px] font-mono uppercase tracking-wider">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back
+            </Link>
             <h1 className="font-serif text-lg font-black uppercase tracking-tight font-newspaper flex items-center gap-2 text-[#cc785c]">
               <Code2 className="h-5 w-5" />
               DevBits IDE
