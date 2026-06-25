@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, RefreshCw, CheckCircle2, XCircle, Flame, Trophy, ChevronDown } from "lucide-react";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 type GameState = "start" | "playing" | "results";
 
 export default function QuizPage() {
@@ -26,13 +28,17 @@ export default function QuizPage() {
   const [maxStreak, setMaxStreak] = useState(0);
   
   // Settings
-  const [roleFilter, setRoleFilter] = useState<string>("");
-  const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "">("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
 
   const roles = getUniqueRoles();
 
   const startGame = () => {
-    const q = getRandomQuestions(999, roleFilter || undefined, (difficultyFilter as Difficulty) || undefined);
+    const q = getRandomQuestions(
+      999, 
+      roleFilter === "all" ? undefined : roleFilter, 
+      difficultyFilter === "all" ? undefined : (difficultyFilter as Difficulty)
+    );
     if (q.length === 0) {
       alert("No questions found for the selected filters. Please adjust and try again.");
       return;
@@ -115,43 +121,38 @@ export default function QuizPage() {
                 <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
                   SELECT ROLE:
                 </label>
-                <div className="relative group">
-                  <select 
-                    className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 pr-10 text-sm font-mono outline-none appearance-none cursor-pointer transition-all hover:-translate-y-1 vintage-shadow-sm focus:border-[#cc785c] focus:outline-none"
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                  >
-                    <option value="" className="bg-background text-foreground">Jack of All Trades</option>
-                    {roles.map(t => (
-                      <option key={t} value={t} className="bg-background text-foreground">{t}</option>
+                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                  <SelectTrigger className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 h-14 text-sm font-mono transition-all hover:-translate-y-1 vintage-shadow-sm focus:ring-0 focus:ring-offset-0 focus:border-[#cc785c]">
+                    <SelectValue placeholder="Jack of All Trades" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow-sm p-0">
+                    <SelectItem value="all" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3">Jack of All Trades</SelectItem>
+                    {roles.map(r => (
+                      <SelectItem key={r} value={r} className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">
+                        {r}
+                      </SelectItem>
                     ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-current group-hover:text-[#cc785c] transition-colors">
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </div>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
                   DIFFICULTY LEVEL:
                 </label>
-                <div className="relative group">
-                  <select 
-                    className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 pr-10 text-sm font-mono outline-none appearance-none cursor-pointer transition-all hover:-translate-y-1 vintage-shadow-sm focus:border-[#cc785c] focus:outline-none"
-                    value={difficultyFilter}
-                    onChange={(e) => setDifficultyFilter(e.target.value as Difficulty)}
-                  >
-                    <option value="" className="bg-background text-foreground">Mixed Difficulty</option>
-                    <option value="easy" className="bg-background text-foreground">Easy</option>
-                    <option value="medium" className="bg-background text-foreground">Medium</option>
-                    <option value="hard" className="bg-background text-foreground">Hard</option>
-                    <option value="expert" className="bg-background text-foreground">Expert</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-current group-hover:text-[#cc785c] transition-colors">
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </div>
+                <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+                  <SelectTrigger className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 h-14 text-sm font-mono transition-all hover:-translate-y-1 vintage-shadow-sm focus:ring-0 focus:ring-offset-0 focus:border-[#cc785c]">
+                    <SelectValue placeholder="Mixed Difficulty" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow-sm p-0">
+                    <SelectItem value="all" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3">Mixed Difficulty</SelectItem>
+                    <SelectItem value="easy" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Easy</SelectItem>
+                    <SelectItem value="medium" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Medium</SelectItem>
+                    <SelectItem value="hard" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Hard</SelectItem>
+                    <SelectItem value="expert" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Expert</SelectItem>
+                    <SelectItem value="chaos" className="font-mono cursor-pointer hover:bg-[#cc785c]/10 focus:bg-[#cc785c] focus:!text-white focus:*:text-white rounded-none p-3 border-t border-[#111111]/10 dark:border-[#e6dfd8]/10">Chaos</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button 
