@@ -117,7 +117,7 @@ export default function QuizPage() {
                 </label>
                 <div className="relative group">
                   <select 
-                    className="w-full rounded-none border-2 border-current bg-transparent p-3 pr-10 text-sm font-mono focus:border-[#cc785c] focus:bg-[#cc785c]/10 outline-none appearance-none cursor-pointer transition-all hover:bg-[#cc785c]/5"
+                    className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 pr-10 text-sm font-mono outline-none appearance-none cursor-pointer transition-all hover:-translate-y-1 vintage-shadow-sm focus:border-[#cc785c] focus:outline-none"
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
                   >
@@ -138,7 +138,7 @@ export default function QuizPage() {
                 </label>
                 <div className="relative group">
                   <select 
-                    className="w-full rounded-none border-2 border-current bg-transparent p-3 pr-10 text-sm font-mono focus:border-[#cc785c] focus:bg-[#cc785c]/10 outline-none appearance-none cursor-pointer transition-all hover:bg-[#cc785c]/5"
+                    className="w-full rounded-none border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-3 pr-10 text-sm font-mono outline-none appearance-none cursor-pointer transition-all hover:-translate-y-1 vintage-shadow-sm focus:border-[#cc785c] focus:outline-none"
                     value={difficultyFilter}
                     onChange={(e) => setDifficultyFilter(e.target.value as Difficulty)}
                   >
