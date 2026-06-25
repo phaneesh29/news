@@ -5,12 +5,12 @@ import Link from "next/link";
 import { 
   quizQuestions, 
   getRandomQuestions, 
-  getUniqueTopics, 
+  getUniqueRoles, 
   QuizQuestion, 
   Difficulty 
 } from "@/lib/quiz-data";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, RefreshCw, CheckCircle2, XCircle, Flame, Trophy } from "lucide-react";
+import { ArrowRight, ArrowLeft, RefreshCw, CheckCircle2, XCircle, Flame, Trophy, ChevronDown } from "lucide-react";
 
 type GameState = "start" | "playing" | "results";
 
@@ -26,13 +26,13 @@ export default function QuizPage() {
   const [maxStreak, setMaxStreak] = useState(0);
   
   // Settings
-  const [topicFilter, setTopicFilter] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "">("");
 
-  const topics = getUniqueTopics();
+  const roles = getUniqueRoles();
 
   const startGame = () => {
-    const q = getRandomQuestions(999, topicFilter || undefined, (difficultyFilter as Difficulty) || undefined);
+    const q = getRandomQuestions(999, roleFilter || undefined, (difficultyFilter as Difficulty) || undefined);
     if (q.length === 0) {
       alert("No questions found for the selected filters. Please adjust and try again.");
       return;
@@ -104,44 +104,54 @@ export default function QuizPage() {
             <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-current"></div>
 
             <div className="space-y-4 relative z-10">
-              <h1 className="font-blackletter text-5xl sm:text-6xl text-current tracking-wide">Developer Trivia</h1>
+              <h1 className="font-blackletter text-4xl sm:text-5xl text-current tracking-wide">Technical Interview Simulator</h1>
               <p className="font-sans text-sm italic opacity-80 uppercase tracking-widest max-w-lg mx-auto">
-                Test your knowledge on web technologies, tools, and computer science.
+                Rigorous, role-based technical interview preparation to test your depth of engineering knowledge.
               </p>
             </div>
 
             <div className="max-w-xs mx-auto space-y-6 pt-4 text-left relative z-10">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
-                  SELECT TOPIC:
+                  SELECT ROLE:
                 </label>
-                <select 
-                  className="w-full rounded-none border-2 border-current bg-transparent p-3 text-sm font-mono focus:border-[#cc785c] outline-none"
-                  value={topicFilter}
-                  onChange={(e) => setTopicFilter(e.target.value)}
-                >
-                  <option value="">All Topics</option>
-                  {topics.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                <div className="relative group">
+                  <select 
+                    className="w-full rounded-none border-2 border-current bg-transparent p-3 pr-10 text-sm font-mono focus:border-[#cc785c] focus:bg-[#cc785c]/10 outline-none appearance-none cursor-pointer transition-all hover:bg-[#cc785c]/5"
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                  >
+                    <option value="" className="bg-background text-foreground">Jack of All Trades</option>
+                    {roles.map(t => (
+                      <option key={t} value={t} className="bg-background text-foreground">{t}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-current group-hover:text-[#cc785c] transition-colors">
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c]">
                   DIFFICULTY LEVEL:
                 </label>
-                <select 
-                  className="w-full rounded-none border-2 border-current bg-transparent p-3 text-sm font-mono focus:border-[#cc785c] outline-none"
-                  value={difficultyFilter}
-                  onChange={(e) => setDifficultyFilter(e.target.value as Difficulty)}
-                >
-                  <option value="">Mixed Difficulty</option>
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
-                  <option value="expert">Expert</option>
-                </select>
+                <div className="relative group">
+                  <select 
+                    className="w-full rounded-none border-2 border-current bg-transparent p-3 pr-10 text-sm font-mono focus:border-[#cc785c] focus:bg-[#cc785c]/10 outline-none appearance-none cursor-pointer transition-all hover:bg-[#cc785c]/5"
+                    value={difficultyFilter}
+                    onChange={(e) => setDifficultyFilter(e.target.value as Difficulty)}
+                  >
+                    <option value="" className="bg-background text-foreground">Mixed Difficulty</option>
+                    <option value="easy" className="bg-background text-foreground">Easy</option>
+                    <option value="medium" className="bg-background text-foreground">Medium</option>
+                    <option value="hard" className="bg-background text-foreground">Hard</option>
+                    <option value="expert" className="bg-background text-foreground">Expert</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-current group-hover:text-[#cc785c] transition-colors">
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </div>
               </div>
 
               <Button 
@@ -186,7 +196,7 @@ export default function QuizPage() {
                 {questions[currentIndex].difficulty}
               </div>
               <div className="text-[10px] font-bold uppercase font-sans tracking-[0.15em] opacity-80 block text-[#cc785c] mb-3">
-                SUBJECT: {questions[currentIndex].topic}
+                ROLE: {questions[currentIndex].role}
               </div>
 
               <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-6">
@@ -306,8 +316,8 @@ export default function QuizPage() {
 
              <div className="flex flex-wrap justify-center gap-4 text-sm font-mono mt-6">
                <div className="border-2 border-current px-4 py-2 bg-[#cc785c]/10">
-                 <span className="opacity-60 text-xs uppercase tracking-wider block mb-1">Topic</span>
-                 <span className="font-bold">{topicFilter || "All Topics"}</span>
+                 <span className="opacity-60 text-xs uppercase tracking-wider block mb-1">Role</span>
+                 <span className="font-bold">{roleFilter || "Jack of All Trades"}</span>
                </div>
                <div className="border-2 border-current px-4 py-2 bg-[#cc785c]/10 capitalize">
                  <span className="opacity-60 text-xs uppercase tracking-wider block mb-1">Difficulty</span>
@@ -315,9 +325,9 @@ export default function QuizPage() {
                </div>
              </div>
 
-             <div className="flex flex-wrap justify-center gap-4 mt-8">
+              <div className="flex flex-wrap justify-center gap-4 mt-8">
                 <a 
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I just scored ${score} on the ${topicFilter || 'General'} (${difficultyFilter || 'Mixed'}) Developer Trivia! Can you beat my score?`)}`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I just scored ${score} on the ${roleFilter || 'Jack of All Trades'} (${difficultyFilter || 'Mixed'}) Technical Interview Simulator! Can you beat my score?`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 border-2 border-current px-4 py-3 hover:bg-[#cc785c] hover:text-white hover:border-[#cc785c] transition-colors font-bold uppercase text-xs tracking-widest"
@@ -325,7 +335,7 @@ export default function QuizPage() {
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg> Share to X
                 </a>
                 <a 
-                  href={`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(`I just scored ${score} on the ${topicFilter || 'General'} (${difficultyFilter || 'Mixed'}) Developer Trivia! Can you beat my score?`)}`}
+                  href={`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(`I just scored ${score} on the ${roleFilter || 'Jack of All Trades'} (${difficultyFilter || 'Mixed'}) Technical Interview Simulator! Can you beat my score?`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 border-2 border-current px-4 py-3 hover:bg-[#cc785c] hover:text-white hover:border-[#cc785c] transition-colors font-bold uppercase text-xs tracking-widest"

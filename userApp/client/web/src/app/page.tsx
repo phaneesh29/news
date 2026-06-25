@@ -129,6 +129,18 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Latest Updates Ticker */}
+      <section className="border-b-4 border-double border-current bg-[#cc785c]/5 py-4 px-4 text-xs font-mono flex justify-center">
+        <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <span className="font-bold uppercase tracking-widest text-[#cc785c] bg-background px-2 py-1 border border-current vintage-shadow-sm">Latest Updates</span>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 opacity-90 font-semibold">
+            <span className="flex items-center gap-1.5"><Code2 className="h-4 w-4 text-[#cc785c]" /> Full In-Browser Sandbox IDE Added</span>
+            <span className="hidden sm:inline opacity-50">|</span>
+            <span className="flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-[#cc785c]" /> Technical Interview Simulator Added</span>
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid & Tactile Dossiers */}
       <section className="py-16 md:py-24 px-4 bg-transparent">
         <div className="mx-auto max-w-7xl space-y-12">

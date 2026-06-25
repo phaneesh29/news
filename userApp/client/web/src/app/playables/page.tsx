@@ -48,9 +48,9 @@ export default function PlayablesHub() {
               </div>
             </div>
 
-            <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Developer Trivia</h2>
+            <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Technical Interview Simulator</h2>
             <p className="font-mono text-sm opacity-80 leading-relaxed mb-8">
-              Test your knowledge on web technologies, tools, and computer science. A challenging evaluation for the modern engineer.
+              Rigorous, role-based technical interview preparation to test your depth of engineering knowledge.
             </p>
 
             <div className="flex items-center text-[#cc785c] font-bold uppercase tracking-wider text-sm">
