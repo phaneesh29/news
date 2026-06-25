@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import JSZip from "jszip";
-import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, ChevronRight, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download, Upload, FolderUp, Copy, GitBranch } from "lucide-react";
+import { Loader2, Power, Code2, SquareTerminal, File, Folder, Plus, FilePlus, FolderPlus, X, ChevronUp, ChevronDown, ChevronRight, Play, Trash2, LayoutTemplate, ArrowLeft, RefreshCw, Download, Upload, FolderUp, Copy } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -45,9 +45,6 @@ export default function NodeSandbox() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [showGithubModal, setShowGithubModal] = useState(false);
-  const [githubRepoInput, setGithubRepoInput] = useState('');
   const [tooltip, setTooltip] = useState<{ text: string, x: number, y: number } | null>(null);
 
   const handleMouseEnter = (text: string) => (e: React.MouseEvent) => {
@@ -441,76 +438,6 @@ export default function NodeSandbox() {
     }
   };
 
-  const confirmGithubImport = async () => {
-    const repo = githubRepoInput.trim();
-    if (!repo) return;
-    if (!wcRef.current) return;
-    setShowGithubModal(false);
-    setGithubRepoInput('');
-    
-    let repoPath = repo;
-    try {
-      if (repo.includes('github.com/')) {
-        const url = new URL(repo.startsWith('http') ? repo : `https://${repo}`);
-        const parts = url.pathname.split('/').filter(Boolean);
-        if (parts.length >= 2) {
-          repoPath = `${parts[0]}/${parts[1]}`;
-        }
-      }
-    } catch(e) {}
-    
-    try {
-      setIsImporting(true);
-      if (xtermRef.current) {
-        xtermRef.current.write(`\r\n\x1b[36mImporting ${repoPath} from GitHub...\x1b[0m\r\n`);
-      }
-      
-      const apiRes = await fetch(`https://api.github.com/repos/${repoPath}`);
-      if (!apiRes.ok) throw new Error("Repository not found or private");
-      const repoData = await apiRes.json();
-      const branch = repoData.default_branch || 'main';
-      
-      if (xtermRef.current) xtermRef.current.write(`\x1b[36mDownloading zip archive...\x1b[0m\r\n`);
-      const zipUrl = `https://corsproxy.io/?${encodeURIComponent(`https://codeload.github.com/${repoPath}/zip/refs/heads/${branch}`)}`;
-      const zipRes = await fetch(zipUrl);
-      if (!zipRes.ok) throw new Error("Failed to download repository archive");
-      const arrayBuffer = await zipRes.arrayBuffer();
-      
-      if (xtermRef.current) xtermRef.current.write(`\x1b[36mExtracting files...\x1b[0m\r\n`);
-      const zip = await JSZip.loadAsync(arrayBuffer);
-      
-      for (const relativePath in zip.files) {
-        const file = zip.files[relativePath];
-        const parts = relativePath.split('/');
-        parts.shift();
-        const cleanPath = parts.join('/');
-        if (!cleanPath) continue;
-        if (file.dir) {
-          await wcRef.current.fs.mkdir(cleanPath, { recursive: true });
-        }
-      }
-      
-      for (const relativePath in zip.files) {
-        const file = zip.files[relativePath];
-        const parts = relativePath.split('/');
-        parts.shift();
-        const cleanPath = parts.join('/');
-        if (!cleanPath || file.dir) continue;
-        
-        const content = await file.async("uint8array");
-        await wcRef.current.fs.writeFile(cleanPath, content);
-      }
-      
-      await refreshFiles();
-      if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[32mSuccessfully imported ${repoPath}!\x1b[0m\r\n`);
-    } catch (err: any) {
-      console.error("Import failed", err);
-      if (xtermRef.current) xtermRef.current.write(`\r\n\x1b[31mFailed to import ${repoPath}: ${err.message}\x1b[0m\r\n`);
-      alert(`Failed to import repository: ${err.message}`);
-    } finally {
-      setIsImporting(false);
-    }
-  };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -792,14 +719,7 @@ export default function NodeSandbox() {
                   >
                     <FolderUp className="h-3.5 w-3.5" />
                   </button>
-                  <button 
-                    onClick={() => setShowGithubModal(true)}
-                    disabled={isImporting}
-                    className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors disabled:opacity-50"
-                    onMouseEnter={handleMouseEnter("Import from GitHub")} onMouseLeave={handleMouseLeave}
-                  >
-                    {isImporting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#cc785c]" /> : <GitBranch className="h-3.5 w-3.5" />}
-                  </button>
+
                   <button 
                     onClick={() => refreshFiles()}
                     className="p-1 hover:bg-white/10 text-white/70 hover:text-white rounded transition-colors"
@@ -1197,46 +1117,7 @@ export default function NodeSandbox() {
         </div>
       )}
 
-      {/* Custom Github Modal */}
-      {showGithubModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#1e1e1e] border border-[#cc785c]/30 rounded-lg shadow-2xl p-6 w-full max-w-md animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <GitBranch className="h-6 w-6 text-[#cc785c]" />
-              <h3 className="text-white font-serif text-xl font-bold uppercase tracking-wider">Import Repository</h3>
-            </div>
-            <p className="text-white/50 text-xs font-mono mb-6 leading-relaxed">
-              Enter a GitHub repository (e.g., <span className="text-white/80 bg-white/10 px-1 py-0.5 rounded">facebook/react</span>) or URL. We will pull down the latest code directly into your workspace.
-            </p>
-            <input 
-              type="text" 
-              value={githubRepoInput}
-              onChange={e => setGithubRepoInput(e.target.value)}
-              placeholder="username/repo"
-              autoFocus
-              onKeyDown={e => {
-                if (e.key === 'Enter') confirmGithubImport();
-                if (e.key === 'Escape') setShowGithubModal(false);
-              }}
-              className="w-full bg-[#111111] border border-white/10 rounded px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-[#cc785c] transition-colors mb-6"
-            />
-            <div className="flex items-center justify-end gap-3">
-              <button 
-                onClick={() => setShowGithubModal(false)}
-                className="px-4 py-2 text-xs font-mono font-bold uppercase text-white/50 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmGithubImport}
-                className="bg-[#cc785c] hover:bg-[#b06349] text-white px-5 py-2 rounded text-xs font-mono font-bold uppercase transition-colors shadow-lg"
-              >
-                Import Code
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Global Tooltip */}
       {tooltip && (
