@@ -27,7 +27,17 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
 4. **Operative Feedback Node**
    - Submit direct feedback, diagnostics, or inquiries back to the Nexus Core administration.
 
-5. **Legal & Compliance Interfaces**
+5. **DevBits IDE (Code Sandbox)**
+   - Fully functional, browser-based Node.js micro-OS powered by WebContainers.
+   - Integrated Monaco Editor and xterm.js terminal for in-browser script execution and prototyping.
+
+6. **Interactive Playables & Quizzes**
+   - Engage operatives with training scenarios, interactive incidents, and knowledge quizzes.
+
+7. **Intelligence Digests & Documentation**
+   - Subscription-based intelligence digests and a comprehensive documentation hub.
+
+8. **Legal & Compliance Interfaces**
    - Built-in `privacy` and `terms` terminals ensuring operational compliance.
 
 ---
@@ -57,9 +67,12 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
   - [src/app/liked](file:///D:/news/userApp/client/web/src/app/liked) — Curated list of liked intel dispatches.
   - [src/app/blog](file:///D:/news/userApp/client/web/src/app/blog) — Long-form manifest browser.
   - [src/app/profile](file:///D:/news/userApp/client/web/src/app/profile) & [settings](file:///D:/news/userApp/client/web/src/app/settings) — Operative account management.
+  - [src/app/tools/code](file:///D:/news/userApp/client/web/src/app/tools/code) — DevBits IDE WebContainer Sandbox.
+  - [src/app/playables](file:///D:/news/userApp/client/web/src/app/playables) — Interactive incidents and quizzes.
+  - [src/app/digest](file:///D:/news/userApp/client/web/src/app/digest) & [docs](file:///D:/news/userApp/client/web/src/app/docs) — Intelligence digests and platform documentation.
   - [src/app/privacy](file:///D:/news/userApp/client/web/src/app/privacy) & [terms](file:///D:/news/userApp/client/web/src/app/terms) — Compliance documentation.
 - [server](file:///D:/news/userApp/server) — Express.js Backend & Database Interface
-  - [src/routes](file:///D:/news/userApp/server/src/routes) — API route definitions for handling auth, news, blogs, and feedback.
+  - [src/routes](file:///D:/news/userApp/server/src/routes) — API route definitions for handling auth, news, blogs, feedback, digests, and docs.
   - [src/db/schema.js](file:///D:/news/userApp/server/src/db/schema.js) — Drizzle ORM schema defining User Auth, `dev_news`, `blogs`, `news_likes`, and `feedbacks` tables.
 
 ---
