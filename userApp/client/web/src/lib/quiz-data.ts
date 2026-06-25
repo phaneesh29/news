@@ -391,7 +391,7 @@ export const quizQuestions: QuizQuestion[] = [
     ],
     correctAnswer: 1,
     explanation: "Attackers use injections (like 'Ignore previous instructions...') to hijack the LLM. Using strict delimiters separates the instructions from the payload. Placing core system instructions at the very end of the prompt also leverages the 'recency bias' of attention mechanisms, overriding the attacker's payload."
-  }
+  },
   {
     id: "aia-1",
     role: "AI Lead Architect",
