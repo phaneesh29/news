@@ -145,15 +145,30 @@ export async function sendEmail(content, subject) {
 
     console.log(`📧 Sending news digest to ${whitelistedEmails.length} recipient(s) via Resend...`);
 
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: whitelistedEmails,
-      subject: emailSubject,
-      html: htmlContent,
-    });
+    let data, error;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const response = await resend.emails.send({
+        from: FROM_EMAIL,
+        to: whitelistedEmails,
+        subject: emailSubject,
+        html: htmlContent,
+      });
+      data = response.data;
+      error = response.error;
+
+      if (!error) {
+        break;
+      }
+      
+      console.warn(`  ⚠️ Email attempt ${attempt} failed: ${error.message}`);
+      if (attempt < 3) {
+        console.log(`  ⏳ Retrying in 2 seconds...`);
+        await new Promise(res => setTimeout(res, 2000));
+      }
+    }
 
     if (error) {
-      console.error(`  ❌ Email failed: ${error.message}`);
+      console.error(`  ❌ Email ultimately failed: ${error.message}`);
       return { success: false, error: error.message };
     }
 
