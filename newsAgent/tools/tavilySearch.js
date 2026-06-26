@@ -7,25 +7,27 @@ export async function tavilySearch(query) {
     return [];
   }
 
-  console.log(`[Tavily Search] Querying (12h Freshness Filter): "${query}"`);
+  console.log(`[Tavily Search] Querying (${config.freshnessHours}h Freshness Filter): "${query}"`);
   try {
     const tvly = tavily({ apiKey: config.tavilyApiKey });
     const response = await tvly.search(query, {
       searchDepth: 'advanced',
-      maxResults: 8,
+      maxResults: 10,
       includeAnswer: true,
+      topic: 'news',
+      days: Math.max(1, Math.ceil(config.freshnessHours / 24)),
     });
 
     if (!response || !response.results) return [];
 
-    const twelveHoursAgoMs = Date.now() - 12 * 60 * 60 * 1000;
+    const freshAfterMs = Date.now() - config.freshnessHours * 60 * 60 * 1000;
     
     const results = response.results
       .filter((result) => {
         const dateStr = result.publishedDate || result.published_date;
         if (!dateStr) return true;
         const pubTime = new Date(dateStr).getTime();
-        return pubTime >= twelveHoursAgoMs;
+        return Number.isFinite(pubTime) && pubTime >= freshAfterMs;
       })
       .map((result) => {
         return {

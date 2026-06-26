@@ -8,15 +8,15 @@ export async function exaSearch(query) {
     return [];
   }
 
-  const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
-  console.log(`[Exa Search] Querying (12h Freshness Filter): "${query}"`);
+  const freshAfter = new Date(Date.now() - config.freshnessHours * 60 * 60 * 1000);
+  console.log(`[Exa Search] Querying (${config.freshnessHours}h Freshness Filter): "${query}"`);
   
   try {
     const exa = new Exa(config.exaApiKey);
     const response = await exa.searchAndContents(query, {
       type: 'auto',
-      numResults: 8,
-      startPublishedDate: twelveHoursAgo.toISOString(),
+      numResults: 10,
+      startPublishedDate: freshAfter.toISOString(),
       contents: {
         text: true,
         summary: true,
@@ -25,12 +25,12 @@ export async function exaSearch(query) {
 
     if (!response || !response.results) return [];
 
-    const twelveHoursAgoMs = twelveHoursAgo.getTime();
+    const freshAfterMs = freshAfter.getTime();
     return response.results
       .filter((result) => {
         if (!result.publishedDate) return true;
         const pubTime = new Date(result.publishedDate).getTime();
-        return pubTime >= twelveHoursAgoMs;
+        return Number.isFinite(pubTime) && pubTime >= freshAfterMs;
       })
       .map((result) => {
         const snippet = result.summary || (result.text ? result.text.substring(0, 300) + '...' : '');

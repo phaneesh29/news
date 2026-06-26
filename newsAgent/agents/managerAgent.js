@@ -15,7 +15,7 @@ export const managerAgent = new Agent({
   tools: [
     searchAgent.asTool({
       toolName: 'invoke_SearchAgent',
-      toolDescription: 'Asks the SearchAgent to query Exa/Tavily for general developer and AI company blog updates.'
+      toolDescription: 'Asks the SearchAgent to query both Exa and Tavily for general developer, AI, chip, acquisition, and security updates.'
     }),
     enrichAgent.asTool({
       toolName: 'invoke_EnrichAgent',
@@ -23,11 +23,11 @@ export const managerAgent = new Agent({
     }),
     synthesisAgent.asTool({
       toolName: 'invoke_SynthesisAgent',
-      toolDescription: 'Asks the SynthesisAgent to take all raw data, deduplicate, score impact, community, freshness, and source authority, and return ranked JSON.'
+      toolDescription: 'Asks the SynthesisAgent to take all raw data, deduplicate, cross-reference, tag, internally score, and return ranked JSON.'
     }),
     editorAgent.asTool({
       toolName: 'invoke_EditorAgent',
-      toolDescription: 'Asks the EditorAgent to take structured ranked JSON and format it into a premium news.md bulletin.'
+      toolDescription: 'Asks the EditorAgent to take structured ranked JSON and format it into a premium score-free news.md bulletin.'
     })
   ],
 });
