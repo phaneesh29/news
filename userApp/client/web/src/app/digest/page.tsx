@@ -15,6 +15,7 @@ import {
   Loader2,
   AlertCircle,
   Link2,
+  Tag,
   Sliders
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -258,11 +259,24 @@ export default function DigestPage() {
               <div className="lg:col-span-2 border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1f1e1b] p-6 vintage-shadow relative flex flex-col justify-between">
                 <div className="space-y-3">
                   <h3 className="font-serif text-xl md:text-2xl font-black uppercase font-newspaper border-b border-current pb-2 flex items-center gap-2">
-                    <span>📋</span> Executive Summary (TL;DR)
+                    <span>📋</span> TL;DR
                   </h3>
-                  <p className="text-xs md:text-sm leading-relaxed opacity-95 pt-2 whitespace-pre-line font-newspaper font-medium">
-                    {digest.executiveSummary}
-                  </p>
+                  <ul className="space-y-2.5 pt-2">
+                    {digest.executiveSummary.split('\n').filter(Boolean).map((bullet, idx) => {
+                      const text = bullet.replace(/^-\s*/, '');
+                      const boldMatch = text.match(/^\*\*(.+?):\*\*\s*(.+)$/);
+                      return (
+                        <li key={idx} className="text-xs md:text-sm leading-relaxed opacity-95 font-newspaper font-medium flex gap-2">
+                          <span className="text-[#cc785c] dark:text-[#ff9d3b] font-mono text-[10px] mt-0.5">▸</span>
+                          <span>
+                            {boldMatch ? (
+                              <><strong className="font-black">{boldMatch[1]}:</strong> {boldMatch[2]}</>
+                            ) : text}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               </div>
 
@@ -292,7 +306,7 @@ export default function DigestPage() {
             {digest.trends && digest.trends.length > 0 && (
               <div className="border-2 border-double border-[#111111] dark:border-[#e6dfd8] bg-[#efe9de]/15 dark:bg-[#1f1e1b]/40 p-6 vintage-shadow">
                 <h3 className="font-serif text-xl font-black uppercase font-newspaper border-b border-current pb-2 flex items-center gap-2 mb-4">
-                  <span>📈</span> Key Industry Trends
+                  <span>📈</span> Signals To Watch
                 </h3>
                 <ul className="grid md:grid-cols-3 gap-6">
                   {digest.trends.map((item, idx) => (
@@ -317,7 +331,7 @@ export default function DigestPage() {
               {digest.categories.map((cat, catIdx) => (
                 <div key={catIdx} className="space-y-6">
                   <h2 className="font-serif text-2xl sm:text-3xl font-black uppercase font-newspaper border-b-2 border-current pb-2 flex items-center gap-2">
-                    <span>{cat.emoji}</span> {cat.name}
+                    {cat.emoji && <span>{cat.emoji}</span>} {cat.name}
                   </h2>
 
                   <div className={`grid ${settings.doubleColumn ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"} border-t border-l border-current`}>
@@ -327,21 +341,14 @@ export default function DigestPage() {
                         className="border-b border-r border-current p-6 flex flex-col justify-between hover:bg-current/[0.015] dark:hover:bg-[#201f1c]/30 transition-colors relative group"
                       >
                         <div>
-                          <div className="flex items-center justify-between pb-2 mb-3 text-[10px] font-mono uppercase tracking-wider opacity-75 border-b border-dashed border-current/15">
-                            <span className="flex items-center gap-1.5 font-bold">
-                              <span className={
-                                item.type.toLowerCase().includes("breaking")
-                                  ? "text-red-600 dark:text-red-400"
-                                  : item.type.toLowerCase().includes("trending")
-                                  ? "text-amber-600 dark:text-amber-400"
-                                  : "text-blue-600 dark:text-blue-400"
-                              }>
-                                ●
-                              </span>
-                              {item.type}
-                            </span>
-                            <span className="font-bold opacity-80">
-                              Impact: {item.impact}/10
+                          <div className="flex flex-wrap items-center gap-1.5 pb-2 mb-3 border-b border-dashed border-current/15">
+                            {item.tags && item.tags.length > 0 && item.tags.map((tag, tagIdx) => (
+                              <Badge key={tagIdx} className="bg-transparent border border-current/30 text-[9px] font-mono font-bold tracking-wider uppercase rounded-none px-1.5 py-0 text-inherit opacity-70 hover:opacity-100">
+                                {tag}
+                              </Badge>
+                            ))}
+                            <span className="ml-auto text-[9px] font-mono font-bold opacity-70">
+                              <span className="text-[#cc785c] dark:text-[#ff9d3b]">●</span> {item.confidence}
                             </span>
                           </div>
 
@@ -401,19 +408,22 @@ export default function DigestPage() {
               
               {/* Header Info */}
               <div className="space-y-4 border-b border-[#e6dfd8] pb-6">
-                <div className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-[#cc785c] flex flex-wrap items-center gap-4">
+                <div className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-[#cc785c] flex flex-wrap items-center gap-3">
                   <span className="flex items-center gap-1.5">
                     <Clock className="h-4 w-4" />
-                    CONFIDENCE CLASSIFICATION: {selectedArticle.confidence}
+                    CONFIDENCE: {selectedArticle.confidence}
                   </span>
-                  
-                  <Badge className="border-2 border-current text-[9px] font-bold tracking-widest uppercase bg-transparent rounded-none px-2.5 py-0.5 text-[#cc785c]">
-                    {selectedArticle.emoji} {selectedArticle.type}
-                  </Badge>
 
-                  <span className="font-bold">
-                    IMPACT SCORE: {selectedArticle.impact}/10
-                  </span>
+                  {selectedArticle.tags && selectedArticle.tags.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 opacity-60" />
+                      {selectedArticle.tags.map((tag, tagIdx) => (
+                        <Badge key={tagIdx} className="border border-current text-[9px] font-bold tracking-widest uppercase bg-transparent rounded-none px-2 py-0 text-[#cc785c]">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <DialogTitle className="font-serif text-2xl sm:text-3xl lg:text-4xl font-black leading-tight text-inherit uppercase font-newspaper">

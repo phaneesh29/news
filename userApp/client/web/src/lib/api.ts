@@ -304,11 +304,12 @@ export interface DigestArticle {
   emoji: string;
   confidence: string;
   title: string;
-  impact: number;
+  impact: number | null;
   sourceName: string;
   sourceUrl: string;
   summary: string;
-  score: number;
+  tags: string[];
+  score: number | null;
   scoringBreakdown: Record<string, number>;
   sources: DigestSource[];
 }
