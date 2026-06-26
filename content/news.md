@@ -1,130 +1,99 @@
 # ✦ NewsFetch Digest
-### Developer-Focused AI News • Thu, 25 Jun 2026 13:34:19 GMT
+### Developer-Focused AI News • Fri, 26 Jun 2026 13:27:41 GMT
 
-✦ Last updated: Thu, 25 Jun 2026 13:34:19 GMT
+✦ Last updated: Fri, 26 Jun 2026 13:27:41 GMT
 
 ## 📋 Executive Summary (TL;DR)
-The developer landscape is currently facing a critical security crisis with widespread supply-chain attacks across PyPI and npm, alongside major RCEs in GitHub and NGINX. Simultaneously, the AI sector sees a massive consolidation as SpaceX acquires Anysphere (Cursor) for $60B to launch the 'Origin' AI Git platform.
+The developer ecosystem is facing a critical security crisis with massive supply chain compromises affecting Axios, TanStack, and MistralAI PyPI packages. Meanwhile, the AI landscape sees a strategic shift as OpenAI pivots to low-latency "Instant" models and NVIDIA open-sources DFlash to drastically accelerate LLM inference.
 
 ## 📈 Key Industry Trends
-- **Supply Chain Warfare:** Massive coordinated attacks targeting core JS/Python ecosystems (npm/PyPI) and tool-chain compromises.
-- **Hardware-Driven Inference:** A shift toward custom ASICs (OpenAI/Broadcom) and specialized kernels to crash inference costs.
-- **The Rise of Agentic Native Tooling:** Integration of reasoning agents directly into SDKs (Vercel) and local runtime stacks.
+* **Supply Chain Weaponization:** Increased targeting of high-profile package managers (PyPI/npm) to steal AI credentials and cloud keys.
+* **Inference Optimization:** A strong push toward specialized acceleration (DFlash, Zen architectures) to reduce LLM latency.
+* **Model Geopolitics:** Growing tension and accusations of industrial-scale model distillation between US and Chinese AI labs.
 
 ## 🛠️ Developer Tools & Platforms
 
-### <u>🔥 Breaking</u>
-**[Confidence: High] Next.js 16.4: React Compiler Ported to Rust (Impact: 9.2) | [Source](https://nextjs.org/blog)**
-**Summary:** Next.js 16.4 introduces a Rust-based port of the React Compiler, resulting in build speed increases exceeding 40%. This significantly reduces CI/CD pipeline latency for large-scale applications.
-**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.5, Community: 9.0, Freshness: 9.0, Authority: 9.0)
+### <u>📌 Notable</u>
+**[Confidence: High] OpenCode v1.17 Adds MCP Support and Headless Mode (Impact: 7.5) | [Source](https://byteiota.com/opencode-v1-17-mcp-resources-oauth-fix-mini-mode/)**
+**Summary:** OpenCode v1.17 introduces Model Context Protocol (MCP) resource support and a new --mini CLI mode optimized for CI/CD pipelines.
+**Scoring Breakdown:** `Score: 7.5/10` (Impact: 7.5, Community: 7, Freshness: 8, Authority: 7)
 **Sources:**
-* [Next.js Blog](https://nextjs.org/blog)
-
-### <u>📈 Trending</u>
-**[Confidence: High] VS Code 1.123 Update Delay (Impact: 7.5) | [Source](https://code.visualstudio.com/updates)**
-**Summary:** Microsoft has implemented a strategic 2-hour update delay for VS Code 1.123 to mitigate potential supply chain attacks. This introduces a safety buffer for verification before wide distribution.
-**Scoring Breakdown:** `Score: 7.5/10` (Impact: 7.0, Community: 8.0, Freshness: 8.0, Authority: 9.0)
-**Sources:**
-* [VS Code Updates](https://code.visualstudio.com/updates)
+* [ByteIota](https://byteiota.com/opencode-v1-17-mcp-resources-oauth-fix-mini-mode/)
 
 ### <u>📌 Notable</u>
-**[Confidence: High] TypeScript v6.0.3 Released (Impact: 6.0) | [Source](https://devblogs.microsoft.com/typescript/)**
-**Summary:** A maintenance release of TypeScript v6.0.3 is now available, focusing on stability and bug fixes.
-**Scoring Breakdown:** `Score: 6.0/10` (Impact: 6.0, Community: 6.0, Freshness: 7.0, Authority: 9.0)
+**[Confidence: High] vLLM v22.0 Released with AMD Zen Acceleration (Impact: 6.5) | [Source](https://github.com/vllm-project/vllm/releases)**
+**Summary:** vLLM v22.0 adds support for JetBrains' Mellum v2 and zentorch-accelerated linear inference on AMD Zen architectures.
+**Scoring Breakdown:** `Score: 6.5/10` (Impact: 6.5, Community: 7, Freshness: 8, Authority: 9)
 **Sources:**
-* [TypeScript Blog](https://devblogs.microsoft.com/typescript/)
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] Zero 1.0 Launch (Impact: 5.5) | [Source](https://zero.dev)**
-**Summary:** Zero 1.0 has launched as a local-first sync engine featuring deep integration with Supabase hooks for real-time state synchronization.
-**Scoring Breakdown:** `Score: 5.5/10` (Impact: 6.0, Community: 5.0, Freshness: 6.0, Authority: 6.0)
-**Sources:**
-* [Zero Dev](https://zero.dev)
+* [GitHub](https://github.com/vllm-project/vllm/releases)
 
 ## 🤖 AI & Machine Learning
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] SpaceX Acquires Anysphere (Cursor) for $60B (Impact: 9.8) | [Source](https://spacex.com/news)**
-**Summary:** In a massive industry shift, SpaceX has acquired Cursor to launch 'Origin', a next-generation AI Git platform and Cursor Mobile. The deal includes the release of a new 1.5T parameter model.
-**Scoring Breakdown:** `Score: 9.8/10` (Impact: 10, Community: 9.5, Freshness: 9.0, Authority: 10)
+**[Confidence: High] OpenAI GPT-5.6 Rollout Delayed; GPT-5.5 Instant Released (Impact: 9.2) | [Source](https://www.newsbytesapp.com/news/science/us-government-urges-openai-to-slow-gpt-5-6-rollout/story)**
+**Summary:** OpenAI has released GPT-5.5 Instant for low-latency tasks while the broader GPT-5.6 rollout is delayed following US government requests for a phased, safety-first approach. Additionally, OpenAI is developing a custom 'Jalapeno' AI chip.
+**Scoring Breakdown:** `Score: 9.2/10` (Impact: 9.5, Community: 9, Freshness: 9, Authority: 9)
 **Sources:**
-* [SpaceX News](https://spacex.com/news)
+* [NewsBytes](https://www.newsbytesapp.com/news/science/us-government-urges-openai-to-slow-gpt-5-6-rollout/story)
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] OpenAI 'Jalapeño' Custom ASIC with Broadcom (Impact: 8.8) | [Source](https://openai.com/news)**
-**Summary:** OpenAI is collaborating with Broadcom on the 'Jalapeño' ASIC to reduce inference costs by 50%. Prototypes are expected to ship in late 2026.
-**Scoring Breakdown:** `Score: 8.8/10` (Impact: 9.0, Community: 8.0, Freshness: 8.5, Authority: 9.0)
+**[Confidence: High] Anthropic's Claude Fable 5 Returns Amid Espionage Claims (Impact: 8.5) | [Source](https://www.geeky-gadgets.com/anthropic-accuses-alibaba-ai-theft/)**
+**Summary:** Claude Fable 5 is back with updated safeguards. Anthropic has publicly accused Chinese labs, including Alibaba, of using 25,000 fraudulent accounts for industrial-scale model distillation.
+**Scoring Breakdown:** `Score: 8.5/10` (Impact: 8, Community: 8, Freshness: 9, Authority: 9)
 **Sources:**
-* [OpenAI News](https://openai.com/news)
+* [Geeky Gadgets](https://www.geeky-gadgets.com/anthropic-accuses-alibaba-ai-theft/)
+
+### <u>🔥 Breaking</u>
+**[Confidence: High] NVIDIA Open Sources DFlash for 15x Inference Boost (Impact: 8.2) | [Source](https://www.opensourceforu.com/2026/06/nvidia-open-sources-dflash-for-faster-llm-inference/)**
+**Summary:** NVIDIA released DFlash, a block diffusion model that significantly accelerates LLM inference. It is already integrated with vLLM, SGLang, and TensorRT-LLM.
+**Scoring Breakdown:** `Score: 8.2/10` (Impact: 9, Community: 7, Freshness: 8, Authority: 10)
+**Sources:**
+* [Open Source For U](https://www.opensourceforu.com/2026/06/nvidia-open-sources-dflash-for-faster-llm-inference/)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] Google Gemini 3.5 Flash Native 'Computer Use' (Impact: 8.2) | [Source](https://deepmind.google/technologies/gemini/)**
-**Summary:** Gemini 3.5 Flash now supports native 'Computer Use' capabilities via API, allowing the model to interact directly with OS-level interfaces.
-**Scoring Breakdown:** `Score: 8.2/10` (Impact: 8.0, Community: 8.0, Freshness: 8.5, Authority: 9.0)
+**[Confidence: High] Zhipu AI Releases GLM-5.2 Open-Weight Coding Model (Impact: 7.8) | [Source](https://www.scmp.com/tech/big-tech/article/3358434/chinas-zhipu-ai-sparks-new-deepseek-moment-cost-effective-coding-model)**
+**Summary:** Zhipu AI has launched GLM-5.2, a cost-effective coding model performing exceptionally well on global benchmarks. It is being hailed as a 'daily driver' for developers.
+**Scoring Breakdown:** `Score: 7.8/10` (Impact: 8, Community: 7, Freshness: 8, Authority: 8)
 **Sources:**
-* [Google DeepMind](https://deepmind.google/technologies/gemini/)
+* [SCMP](https://www.scmp.com/tech/big-tech/article/3358434/chinas-zhipu-ai-sparks-new-deepseek-moment-cost-effective-coding-model)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] Vercel AI SDK 7: Reasoning Agents (Impact: 7.8) | [Source](https://vercel.com/docs/ai)**
-**Summary:** The new Vercel AI SDK 7 introduces a sandbox runtime, terminal UI, and native support for reasoning agents to build complex autonomous workflows.
-**Scoring Breakdown:** `Score: 7.8/10` (Impact: 8.0, Community: 7.5, Freshness: 8.0, Authority: 8.5)
+**[Confidence: High] Google Previews 'Omni' Video Model; Gemini 3.5 Pro Delayed (Impact: 7.2) | [Source](https://khelangkyi.com/article/gemini-s-new-video-model-omni-a-sneak-peek-at-the-future-of-ai-generated-videos)**
+**Summary:** While Gemini 3.5 Pro's launch is postponed, Google DeepMind has previewed 'Omni,' a next-generation video generation model potentially succeeding Veo.
+**Scoring Breakdown:** `Score: 7.2/10` (Impact: 7, Community: 7, Freshness: 8, Authority: 9)
 **Sources:**
-* [Vercel Docs](https://vercel.com/docs/ai)
+* [Khelangkyi](https://khelangkyi.com/article/gemini-s-new-video-model-omni-a-sneak-peek-at-the-future-of-ai-generated-videos)
 
-### <u>📌 Notable</u>
-**[Confidence: High] Alibaba Qwen-AgentWorld (Impact: 6.5) | [Source](https://github.com/QwenLM)**
-**Summary:** Alibaba released Qwen-AgentWorld (397B/35B) under Apache 2.0, designed specifically for general-purpose agentic behavior.
-**Scoring Breakdown:** `Score: 6.5/10` (Impact: 7.0, Community: 6.0, Freshness: 6.0, Authority: 7.0)
+### <u>📈 Trending</u>
+**[Confidence: High] Ollama Expands Support for Chinese Models (GLM-5, DeepSeek) (Impact: 6.8) | [Source](https://dev.to/xu_xu_b2179aa8fc958d531d1/ollamas-chinese-model-support-is-real-but-running-kimi-and-deepseek-locally-has-a-hidden-cost-1e8n)**
+**Summary:** Ollama now supports Kimi-K2.5, GLM-5, and DeepSeek. Experts recommend Q5 or FP16 quantization for 70B models to avoid quality degradation.
+**Scoring Breakdown:** `Score: 6.8/10` (Impact: 6, Community: 8, Freshness: 7, Authority: 7)
 **Sources:**
-* [Qwen GitHub](https://github.com/QwenLM)
-
-### <u>📌 Notable</u>
-**[Confidence: Medium] Local AI Updates: vLLM v22.0 & Gemma 4-12B (Impact: 6.2) | [Source](https://ollama.com)**
-**Summary:** vLLM v22.0 adds support for JetBrains Mellum v2 and AMD Zen. Simultaneously, Gemma 4-12B Agentic GGUF is available for multi-step tool use on low VRAM (4.5GB).
-**Scoring Breakdown:** `Score: 6.2/10` (Impact: 6.0, Community: 6.0, Freshness: 7.0, Authority: 7.0)
-**Sources:**
-* [Ollama](https://ollama.com)
+* [Dev.to](https://dev.to/xu_xu_b2179aa8fc958d531d1/ollamas-chinese-model-support-is-real-but-running-kimi-and-deepseek-locally-has-a-hidden-cost-1e8n)
 
 ## 🛡️ Security & Advisories
 
 ### <u>🔥 Breaking</u>
-**[Confidence: High] Critical Supply Chain Attacks: PyPI & npm (Impact: 10.0) | [Source](https://pypi.org/security)**
-**Summary:** Multiple malicious packages detected: `mistralai v2.4.6` (PyPI dropper), `@tanstack/*` (npm cache poisoning), and `axios` (RAT). Users are urged to audit lockfiles immediately.
-**Scoring Breakdown:** `Score: 10.0/10` (Impact: 10, Community: 10, Freshness: 10, Authority: 10)
+**[Confidence: High] Massive Supply Chain Compromise: Axios, TanStack, and MistralAI PyPI Packages (Impact: 9.8) | [Source](https://cybersecuritynews.com/miasma-malware-uses-binding-gyp-and-bun/)**
+**Summary:** Critical security alert: Multiple high-profile packages compromised. Axios versions (1.14.1, 0.30.4) deploy RATs; @tanstack packages exfiltrate cloud/SSH keys via OIDC theft; MistralAI PyPI (2.4.6) contains a Linux dropper.
+**Scoring Breakdown:** `Score: 9.8/10` (Impact: 10, Community: 9, Freshness: 10, Authority: 10)
 **Sources:**
-* [PyPI Security](https://pypi.org/security)
-* [npm Security](https://npm.com/advisories)
-
-### <u>🔥 Breaking</u>
-**[Confidence: High] High-Impact RCEs: GitHub, NGINX, Langflow (Impact: 9.5) | [Source](https://cve.mitre.org)**
-**Summary:** Critical Remote Code Execution vulnerabilities disclosed: GitHub (CVE-2026-3854), NGINX (CVE-2026-9256), and Langflow (upgrade to v1.9.4 immediately).
-**Scoring Breakdown:** `Score: 9.5/10` (Impact: 10, Community: 9.0, Freshness: 9.0, Authority: 10)
-**Sources:**
-* [CVE Mitre](https://cve.mitre.org)
-
-### <u>🔥 Breaking</u>
-**[Confidence: High] Infrastructure Breaches: Vercel & Trivy (Impact: 8.5) | [Source](https://vercel.com/security)**
-**Summary:** Vercel API breach via Context.ai requires immediate key rotation. Additionally, a Trivy compromise has led to the 'CanisterWorm' K8s wiper targeting clusters.
-**Scoring Breakdown:** `Score: 8.5/10` (Impact: 9.0, Community: 7.0, Freshness: 8.0, Authority: 9.0)
-**Sources:**
-* [Vercel Security](https://vercel.com/security)
+* [Cyber Security News](https://cybersecuritynews.com/miasma-malware-uses-binding-gyp-and-bun/)
 
 ### <u>📈 Trending</u>
-**[Confidence: High] Node.js & Claude Code Vulnerabilities (Impact: 7.8) | [Source](https://nodejs.org/en/blog)**
-**Summary:** Node.js released critical security patches for CVE-2026-48618 and CVE-2026-48933. Separately, a Claude Code OAuth flaw allowing token exfiltration has been reported.
-**Scoring Breakdown:** `Score: 7.8/10` (Impact: 8.0, Community: 7.0, Freshness: 8.0, Authority: 9.0)
+**[Confidence: High] Vercel and Supabase Security Breaches Reported (Impact: 7.0) | [Source](https://devfortress.net/blog/semi-annual-2026)**
+**Summary:** Reports indicate a Vercel breach involving Lumma Stealer (Google Workspace OAuth) and a Supabase key leak exposing plaintext OpenAI and Anthropic keys in client-side JS.
+**Scoring Breakdown:** `Score: 7.0/10` (Impact: 8, Community: 6, Freshness: 7, Authority: 7)
 **Sources:**
-* [Node.js Blog](https://nodejs.org/en/blog)
-
----
+* [DevFortress](https://devfortress.net/blog/semi-annual-2026)
 
 ## 📊 Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Total Items Verified | 18 |
-| ✅ High Confidence | 16 |
-| ⚠️ Medium Confidence | 2 |
+| Total Items Verified | 11 |
+| ✅ High Confidence | 11 |
+| ⚠️ Medium Confidence | 0 |
 | ❌ Low Confidence | 0 |
-| 🔍 Cross-Referenced | 4 |
+| 🔍 Cross-Referenced | 0 |
 | ⏰ Freshness Window | Last 12 hours |
-| 🕐 Generated At | Thu, 25 Jun 2026 13:34:19 GMT |
+| 🕐 Generated At | Fri, 26 Jun 2026 13:27:41 GMT |
