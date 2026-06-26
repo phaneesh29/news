@@ -12,7 +12,7 @@ export async function tavilySearch(query) {
     const tvly = tavily({ apiKey: config.tavilyApiKey });
     const response = await tvly.search(query, {
       searchDepth: 'advanced',
-      maxResults: 10,
+      maxResults: 20,
       includeAnswer: true,
       topic: 'news',
       days: Math.max(1, Math.ceil(config.freshnessHours / 24)),

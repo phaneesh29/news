@@ -20,8 +20,8 @@ Specialized tools:
 Strict execution plan:
 1. Call SearchAgent first.
 2. Call EnrichAgent second.
-3. Combine the raw findings and pass them to SynthesisAgent.
-4. Pass only the structured stories from SynthesisAgent to EditorAgent.
+3. CALL SynthesisAgent: Pass ALL raw data from Search and Enrich. It will return ranked JSON.
+4. CALL EditorAgent: Pass the structured JSON to generate the final markdown. CRITICAL: You MUST provide the EditorAgent with the EXACT markdown header and exact timestamp provided in your system prompt, and tell it to copy them verbatim.
 5. Verify that the final markdown was written and summarize the count of stories sent.
 
 Rules:
@@ -90,6 +90,7 @@ You are the synthesis, deduplication, verification, tagging, and internal rankin
 Input: raw findings from SearchAgent and EnrichAgent.
 
 Filter hard:
+- AS A SENIOR DEV: Verify whether the news is actually suited for developers. If it is just general consumer tech, business hype, or non-technical product announcements, REJECT IT.
 - Remove consumer gadgets, phone rumors, gaming, celebrity tech, crypto prices, generic business news, and funding-only startup news.
 - Keep acquisitions only when they directly affect AI, developer tooling, semiconductors, cloud infrastructure, security, or open source.
 - Remove stories outside the configured freshness window unless a primary source proves the update is fresh.
@@ -98,6 +99,7 @@ Verification:
 - Prefer primary sources. If a story is only from Reddit/HN, mark confidence Low unless another source verifies it.
 - Cross-reference important claims with multiple URLs when possible.
 - Preserve exact names, version numbers, dates, repo names, model names, and company names.
+- Include ALL valid news stories you found. Do not drop stories just because they only have a generic root URL.
 
 Internal ranking:
 - Calculate score and scoringBreakdown internally using impact, community, freshness, and source authority.
@@ -122,17 +124,12 @@ Hard rules:
 - Do not show scores, impact values, scoring breakdowns, ranking formulas, or raw model reasoning anywhere.
 - Do not include placeholder links, "#", fake sources, or naked invalid URLs.
 - Include tags for every story.
-- Include at least two specific source links for every story whenever possible.
-- Source links must point to specific articles, releases, advisories, papers, repositories, commits, or docs pages. Do not use generic homepages like https://openai.com or https://github.com.
-- Prefer fewer, stronger stories over filler. If quality is low, write a smaller digest.
+- Include source links for every story. It is okay if the URL is a generic homepage if a specific article URL is not available.
+- Prefer comprehensive coverage. If you found a big breaking story (like a GPT-5.6 release or major acquisition), include it even if the source link isn't perfect.
 
 Markdown style:
 
-# NewsFetch Digest
-### Developer-Focused AI and Tech Briefing - [Current UTC date/time]
-
-Last updated: [Current UTC date/time]
-Freshness window: ${freshnessWindow}
+CRITICAL HEADER RULE: The manager will provide you with the EXACT header block starting with "# NewsFetch Digest". You MUST start your response by copying that exact header block VERBATIM. Do not invent your own header or use a 2025 date.
 
 ## TL;DR
 [2-4 tight bullets about the highest-impact updates.]
@@ -170,8 +167,8 @@ End with:
 | Medium Confidence | [count] |
 | Low Confidence | [count] |
 | Cross-Referenced Stories | [count with 2+ URLs] |
-| Freshness Window | ${freshnessWindow} |
-| Generated At | [Current UTC date/time] |
+| Freshness Window | [Copy from manager] |
+| Generated At | [Copy exact timestamp from manager] |
 
 Do not mention scoring in Pipeline Stats.
 `;

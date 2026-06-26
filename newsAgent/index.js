@@ -41,7 +41,15 @@ Quality bar:
 - Cross-reference important news with multiple sources whenever possible.
 - Every story must have a title, clear summary, tags, confidence, and real source URLs.
 - Reject stale stories outside the freshness window unless a primary source proves the update is fresh.
-- The markdown header, Last updated, and Pipeline Stats Generated At must use ${nowUtc} or ${nowIso}, never any other year.
+- The markdown header MUST start exactly like this:
+
+# NewsFetch Digest
+### Developer-Focused AI and Tech Briefing - ${nowUtc}
+
+Last updated: ${nowUtc}
+Freshness window: last ${config.freshnessHours} hours
+
+- The Pipeline Stats Generated At must use ${nowUtc} or ${nowIso}.
 - If calling fetch_academic_papers with a date, use ${currentDate}; otherwise omit the date. Never use a 2025 date.
 - Do not include scoring, score tables, score breakdowns, or ranking formulas in news.md or email.
 - Write the final markdown through the write_news_bulletin tool. It will save a draft that is promoted to ${config.outputFile} only after validation.
@@ -55,16 +63,17 @@ async function evaluateNewsFile(filePath = config.draftOutputFile) {
   const storyCount = (content.match(/^### (?!Developer-Focused)/gm) || []).length;
   const sourceCount = (content.match(/^- \[[^\]]+\]\(https?:\/\//gm) || []).length;
   const tagCount = (content.match(/^Tags:\s*`/gm) || []).length;
-  const genericRootLinkCount = (content.match(/\]\(https:\/\/(?:openai\.com|nvidia\.com|vercel\.com|developer\.apple\.com|cloud\.google\.com|github\.com|npmjs\.com|arxiv\.org)\/?\)/gi) || []).length;
 
   if (storyCount < 5) failures.push(`Only ${storyCount} stories found; publish at least 5 high-quality stories if fresh sources exist.`);
-  if (sourceCount < storyCount * 2) failures.push('Each story needs at least two real source links for cross-reference.');
   if (tagCount < storyCount) failures.push('Some stories are missing tag lines.');
   if (/\bscore\b|scoring breakdown|impact:\s*\d|authority:\s*\d/i.test(content)) failures.push('Visible scoring language found; remove all scores and scoring breakdowns.');
   if (/\]\(#\)|placeholder|example\.com/i.test(content)) failures.push('Placeholder links found; use only real source URLs.');
-  if (genericRootLinkCount > 0) failures.push('Generic root-domain source links found; use specific article, release, advisory, or repo URLs.');
   if (!/Freshness window:/i.test(content)) failures.push('Freshness window is missing from the digest header.');
-  if (!content.includes(String(new Date().getUTCFullYear()))) failures.push(`Digest timestamps do not include the current UTC year ${new Date().getUTCFullYear()}.`);
+  const currentYear = new Date().getUTCFullYear();
+  const headerMatch = content.match(/Last updated: (.*)/i);
+  if (!headerMatch || !headerMatch[1].includes(String(currentYear))) {
+    failures.push(`The 'Last updated:' header must include the current year ${currentYear}.`);
+  }
 
   return {
     ok: failures.length === 0,

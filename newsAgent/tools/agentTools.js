@@ -146,7 +146,7 @@ export const extractPageContentTool = tool({
             title: result.title || 'Extracted Page',
             url: result.url,
             summary: result.summary || 'No summary available.',
-            content: result.text ? result.text.substring(0, 6000) : 'No content retrieved.'
+            content: result.text ? result.text.substring(0, 25000) : 'No content retrieved.'
           });
         }
       } catch (e) {
@@ -167,7 +167,7 @@ export const extractPageContentTool = tool({
             title: 'Extracted Page',
             url: result.url,
             summary: 'Summary not supported in Tavily extract natively.',
-            content: result.rawContent || result.content ? (result.rawContent || result.content).substring(0, 6000) : 'No content retrieved.'
+            content: result.rawContent || result.content ? (result.rawContent || result.content).substring(0, 25000) : 'No content retrieved.'
           });
         }
       } catch (e) {

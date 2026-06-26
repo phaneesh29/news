@@ -15,7 +15,7 @@ export async function exaSearch(query) {
     const exa = new Exa(config.exaApiKey);
     const response = await exa.searchAndContents(query, {
       type: 'auto',
-      numResults: 10,
+      numResults: 20,
       startPublishedDate: freshAfter.toISOString(),
       contents: {
         text: true,
@@ -33,7 +33,7 @@ export async function exaSearch(query) {
         return Number.isFinite(pubTime) && pubTime >= freshAfterMs;
       })
       .map((result) => {
-        const snippet = result.summary || (result.text ? result.text.substring(0, 300) + '...' : '');
+        const snippet = result.summary || (result.text ? result.text.substring(0, 1500) + '...' : '');
 
         return {
           title: result.title || 'Untitled',

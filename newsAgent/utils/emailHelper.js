@@ -11,10 +11,7 @@ function markdownToHtml(md) {
   md = md.replace(/### Developer-Focused AI News[^\n]*/gi, '');
   md = md.replace(/✦ Last updated:[^\n]*/gi, '');
 
-  md = md.replace(/[\u{1F300}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}]/gu, '');
-
-  // Safely remove emojis without destroying math symbols like < and >
-  md = md.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
+  md = md.replace(/([\p{Emoji_Presentation}\p{Extended_Pictographic}]+)/gu, `<span style="font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';">$1</span>`);
 
   let html = marked.parse(md);
 

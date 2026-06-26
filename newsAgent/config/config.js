@@ -14,7 +14,7 @@ export const config = {
   llmModel: 'gemma4:31b',
   llmModelSettings: {},
 
-  freshnessHours: Number(process.env.FRESHNESS_HOURS || 48),
+  freshnessHours: Number(process.env.FRESHNESS_HOURS || 24),
   outputFile: path.resolve(__dirname, '..', '..', 'content', 'news.md'),
   draftOutputFile: path.resolve(__dirname, '..', '..', 'content', 'news.draft.md'),
 };
