@@ -40,7 +40,7 @@ export default function NewsBroadcastsPage() {
     if (!isPending && !activeUser) {
       router.push("/login");
     }
-  }, [activeUser, isPending, router]);
+  }, [activeUser?.id, isPending, router]);
 
   const getModalThemeClasses = () => {
     let baseTheme = "";
@@ -190,7 +190,7 @@ export default function NewsBroadcastsPage() {
     }, 400);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, priorityFilter, activeUser, isPending]);
+  }, [searchQuery, priorityFilter, activeUser?.id, isPending]);
 
   const handleLoadMore = async () => {
     if (!nextCursor || loadingMore || !activeUser) return;
@@ -215,7 +215,7 @@ export default function NewsBroadcastsPage() {
         console.warn("Google One Tap automatic prompt failed to initialize:", err);
       });
     }
-  }, [activeUser, isPending]);
+  }, [activeUser?.id, isPending]);
 
   const handleLikeToggle = async (id: string) => {
     if (!activeUser) return;

@@ -26,7 +26,7 @@ export default function BlogListPage() {
     if (!isPending && !activeUser) {
       router.push("/login");
     }
-  }, [activeUser, isPending, router]);
+  }, [activeUser?.id, isPending, router]);
 
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ export default function BlogListPage() {
     }, 400);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, activeUser]);
+  }, [searchQuery, activeUser?.id]);
 
   const handleLoadMore = async () => {
     if (!nextCursor || loadingMore || !activeUser) return;

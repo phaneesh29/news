@@ -33,7 +33,7 @@ export default function DigestPage() {
     if (!isPending && !activeUser) {
       router.push("/login");
     }
-  }, [activeUser, isPending, router]);
+  }, [activeUser?.id, isPending, router]);
 
   const [digest, setDigest] = useState<DigestData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,7 +106,7 @@ export default function DigestPage() {
       }
     }
     loadDigest();
-  }, [activeUser]);
+  }, [activeUser?.id]);
 
   const triggerGoogleLogin = async () => {
     try {
@@ -264,13 +264,13 @@ export default function DigestPage() {
                   <ul className="space-y-2.5 pt-2">
                     {digest.executiveSummary.split('\n').filter(Boolean).map((bullet, idx) => {
                       const text = bullet.replace(/^-\s*/, '');
-                      const boldMatch = text.match(/^\*\*(.+?):\*\*\s*(.+)$/);
+                      const boldMatch = text.match(/^\*\*(.+?)\*\*(.*)$/);
                       return (
                         <li key={idx} className="text-xs md:text-sm leading-relaxed opacity-95 font-newspaper font-medium flex gap-2">
                           <span className="text-[#cc785c] dark:text-[#ff9d3b] font-mono text-[10px] mt-0.5">▸</span>
                           <span>
                             {boldMatch ? (
-                              <><strong className="font-black">{boldMatch[1]}:</strong> {boldMatch[2]}</>
+                              <><strong className="font-black">{boldMatch[1]}</strong>{boldMatch[2]}</>
                             ) : text}
                           </span>
                         </li>
