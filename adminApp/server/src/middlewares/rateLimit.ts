@@ -4,7 +4,7 @@ import { getClientIp } from '../lib/auth.js'
 import { redis } from '../lib/redis.js'
 
 export const globalRateLimiter = rateLimiter({
-  windowMs: 60 * 1000,
+  windowMs: 5 * 60 * 1000,
   limit: 100,
   standardHeaders: 'draft-7',
   skip: (c: Context) => c.req.method === 'OPTIONS',
