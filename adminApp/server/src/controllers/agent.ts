@@ -34,7 +34,6 @@ export const draftBlog = async (c: Context) => {
 export const draftDoc = async (c: Context) => {
   const { query } = (c.req as any).valid('json') as { query: string }
 
-  // Query existing documents to provide cross-linking and parenting context for the agent
   const existingDocs = await db.select({
     id: docs.id,
     title: docs.title,
