@@ -227,7 +227,7 @@ export function parseMarkdown(md: string): DigestData {
         } else {
           data.trends.push({
             trend: '',
-            description: bulletText.replace(/\*\*/g, '').trim()
+            description: bulletText.trim()
           });
         }
       }

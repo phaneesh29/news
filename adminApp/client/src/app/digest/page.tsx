@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
+import { marked } from "marked";
 
 interface DigestTrend {
   trend: string;
@@ -419,15 +420,13 @@ Please modify or rewrite the news draft according to the user instructions. Make
                   <ul className="space-y-2 text-left">
                     {digest.executiveSummary.split('\n').filter(Boolean).map((bullet, idx) => {
                       const text = bullet.replace(/^-\s*/, '');
-                      const boldMatch = text.match(/^\*\*(.+?):\*\*\s*(.+)$/);
                       return (
                         <li key={idx} className="text-[14px] leading-relaxed text-stone-850 font-serif flex gap-2">
                           <span className="text-red-800 font-mono text-[10px] mt-1">▸</span>
-                          <span>
-                            {boldMatch ? (
-                              <><strong className="font-black">{boldMatch[1]}:</strong> {boldMatch[2]}</>
-                            ) : text}
-                          </span>
+                          <span 
+                            className="[&_strong]:font-black"
+                            dangerouslySetInnerHTML={{ __html: marked.parseInline(text) as string }} 
+                          />
                         </li>
                       );
                     })}
@@ -463,8 +462,16 @@ Please modify or rewrite the news draft according to the user instructions. Make
                     {digest.trends.map((item, idx) => (
                       <div key={idx} className="space-y-1.5 border-r last:border-none border-dashed border-stone-300 pr-4">
                         <span className="font-mono text-[10px] font-bold text-red-850 block">TREND 0{idx + 1}</span>
-                        <h4 className="font-bold text-sm uppercase text-stone-950">{item.trend}</h4>
-                        <p className="text-xs text-stone-700 leading-relaxed">{item.description}</p>
+                        {item.trend && (
+                          <h4 
+                            className="font-bold text-sm uppercase text-stone-950 [&_strong]:font-black"
+                            dangerouslySetInnerHTML={{ __html: marked.parseInline(item.trend) as string }}
+                          />
+                        )}
+                        <p 
+                          className="text-xs text-stone-700 leading-relaxed [&_strong]:font-black"
+                          dangerouslySetInnerHTML={{ __html: marked.parseInline(item.description) as string }}
+                        />
                       </div>
                     ))}
                   </div>
@@ -515,9 +522,10 @@ Please modify or rewrite the news draft according to the user instructions. Make
                                 {article.title}
                               </h4>
 
-                              <p className="text-xs text-stone-800 leading-relaxed font-serif text-justify">
-                                {article.summary}
-                              </p>
+                              <p 
+                                className="text-xs text-stone-800 leading-relaxed font-serif text-justify [&_strong]:font-black"
+                                dangerouslySetInnerHTML={{ __html: marked.parseInline(article.summary) as string }}
+                              />
                               
                               {article.sourceUrl && (
                                 <div className="pt-2">
