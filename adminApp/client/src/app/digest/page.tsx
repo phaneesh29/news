@@ -24,6 +24,7 @@ interface DigestArticle {
   sourceName: string;
   sourceUrl: string;
   summary: string;
+  tags: string[];
   score: number | null;
   scoringBreakdown: Record<string, number>;
   sources: DigestSource[];
@@ -162,12 +163,11 @@ export default function DigestPage() {
     }
   };
 
-  // Maps article type to db priority levels
-  const mapTypeToPriority = (type: string) => {
-    const cleanType = type.toLowerCase();
-    if (cleanType.includes("breaking") || cleanType.includes("fire")) return "critical";
-    if (cleanType.includes("trending")) return "medium";
-    if (cleanType.includes("notable") || cleanType.includes("pin")) return "low";
+  // Maps confidence level to db priority levels
+  const mapConfidenceToPriority = (confidence: string) => {
+    const level = confidence.toLowerCase();
+    if (level === "high") return "high";
+    if (level === "medium") return "medium";
     return "low";
   };
 
@@ -176,8 +176,8 @@ export default function DigestPage() {
     setSelectedCategoryName(categoryName);
     setFormTitle(article.title.toUpperCase());
     setFormContent(article.summary);
-    setFormPriority(mapTypeToPriority(article.type));
-    setFormTags(categoryName.toUpperCase().replace(/[^\w\s]/g, "").trim());
+    setFormPriority(mapConfidenceToPriority(article.confidence));
+    setFormTags(article.tags && article.tags.length > 0 ? article.tags.join(", ").toUpperCase() : categoryName.toUpperCase().replace(/[^\w\s]/g, "").trim());
     setFormSourceUrl(article.sourceUrl || "");
     setFormIsPublished(true);
     setShowVerifyModal(true);
@@ -414,11 +414,24 @@ Please modify or rewrite the news draft according to the user instructions. Make
                 {/* Executive Summary */}
                 <div className="md:col-span-8 pr-0 md:pr-6 border-b md:border-b-0 md:border-r border-stone-300 text-left">
                   <h3 className="font-['Playfair_Display',_Georgia,_serif] text-xl font-bold uppercase mb-2 text-stone-900 border-b border-stone-200 pb-1">
-                    📋 Executive Summary
+                    📋 TL;DR
                   </h3>
-                  <p className="text-[14px] leading-relaxed text-justify text-stone-850 whitespace-pre-line font-serif">
-                    {digest.executiveSummary}
-                  </p>
+                  <ul className="space-y-2 text-left">
+                    {digest.executiveSummary.split('\n').filter(Boolean).map((bullet, idx) => {
+                      const text = bullet.replace(/^-\s*/, '');
+                      const boldMatch = text.match(/^\*\*(.+?):\*\*\s*(.+)$/);
+                      return (
+                        <li key={idx} className="text-[14px] leading-relaxed text-stone-850 font-serif flex gap-2">
+                          <span className="text-red-800 font-mono text-[10px] mt-1">▸</span>
+                          <span>
+                            {boldMatch ? (
+                              <><strong className="font-black">{boldMatch[1]}:</strong> {boldMatch[2]}</>
+                            ) : text}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
 
                 {/* Pipeline Stats */}
@@ -444,7 +457,7 @@ Please modify or rewrite the news draft according to the user instructions. Make
               {digest.trends && digest.trends.length > 0 && (
                 <div className="py-6 border-b-2 border-stone-300 text-left">
                   <h3 className="font-['Playfair_Display',_Georgia,_serif] text-xl font-bold uppercase mb-3 text-stone-900">
-                    📈 Key Industry Trends
+                    📈 Signals To Watch
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {digest.trends.map((item, idx) => (
@@ -468,7 +481,7 @@ Please modify or rewrite the news draft according to the user instructions. Make
                 {digest.categories.map((category, catIdx) => (
                   <div key={catIdx} className="space-y-4 text-left">
                     <h3 className="font-['Playfair_Display',_Georgia,_serif] text-2xl font-black uppercase text-stone-900 border-b border-stone-950 pb-1.5 flex items-center gap-2">
-                      <span>{category.emoji}</span> {category.name}
+                      {category.emoji && <span>{category.emoji}</span>} {category.name}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -481,21 +494,21 @@ Please modify or rewrite the news draft according to the user instructions. Make
                             className="bg-white border-2 border-stone-950 p-5 rounded shadow-sm hover:shadow transition-all flex flex-col justify-between"
                           >
                             <div className="space-y-2">
-                              {/* Metadata */}
-                              <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 border-b border-dashed border-stone-300 pb-1.5">
-                                <span className="font-bold uppercase tracking-wider flex items-center gap-1">
+                              {/* Tags & Confidence Metadata */}
+                              <div className="flex flex-wrap items-center gap-1 text-[10px] font-mono text-stone-600 border-b border-dashed border-stone-300 pb-1.5">
+                                {article.tags && article.tags.length > 0 && article.tags.map((tag, tagIdx) => (
+                                  <span key={tagIdx} className="border border-stone-400 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider">
+                                    {tag}
+                                  </span>
+                                ))}
+                                <span className="ml-auto font-bold flex items-center gap-1">
                                   <span className={
-                                    article.type.toLowerCase().includes("breaking")
-                                      ? "text-red-600"
-                                      : article.type.toLowerCase().includes("trending")
-                                      ? "text-amber-600"
-                                      : "text-blue-600"
+                                    article.confidence === 'High' ? 'text-green-700'
+                                    : article.confidence === 'Medium' ? 'text-amber-600'
+                                    : 'text-stone-500'
                                   }>●</span>
-                                  {article.type}
+                                  {article.confidence}
                                 </span>
-                                {article.impact && (
-                                  <span className="font-bold">IMPACT: {article.impact}/10</span>
-                                )}
                               </div>
 
                               <h4 className="font-['Playfair_Display',_Georgia,_serif] text-lg font-black uppercase text-black leading-snug">
