@@ -72,15 +72,20 @@ export function parseMarkdown(md: string): DigestData {
     if (currentArticle && summaryLines.length > 0) {
       currentArticle.summary = summaryLines.join(' ').trim();
       if (!currentArticle.sourceName && currentArticle.sources.length > 0) {
-        currentArticle.sourceName = currentArticle.sources[0].name;
-        currentArticle.sourceUrl = currentArticle.sources[0].url;
+        const firstSource = currentArticle.sources[0];
+        if (firstSource) {
+          currentArticle.sourceName = firstSource.name;
+          currentArticle.sourceUrl = firstSource.url;
+        }
       }
       summaryLines = [];
     }
   };
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const lineStr = lines[i];
+    if (lineStr === undefined) continue;
+    const line = lineStr.trim();
 
     if (line.startsWith('Freshness window:')) continue;
 
@@ -253,7 +258,7 @@ export function parseMarkdown(md: string): DigestData {
     if (section === 'category' && currentArticle) {
       if (line.startsWith('Tags:')) {
         const tagMatches = line.matchAll(/`([^`]+)`/g);
-        currentArticle.tags = [...tagMatches].map(m => m[1].trim());
+        currentArticle.tags = [...tagMatches].map(m => (m[1] || '').trim());
         inSources = false;
         continue;
       }
