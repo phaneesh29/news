@@ -32,6 +32,7 @@ export default function BlogsDashboardPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const [editSlug, setEditSlug] = useState("");
   const [editIsPublished, setEditIsPublished] = useState(false);
   
@@ -455,8 +456,17 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                       <input type="text" required value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono" />
                     </div>
                     <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
-                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">DRAFT CHRONICLE DETAILS</label>
-                      <textarea required value={editContent} onChange={(e) => setEditContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar" rows={8} />
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">DRAFT CHRONICLE DETAILS</label>
+                        <button type="button" onClick={() => setShowPreview(!showPreview)} className="font-mono text-[9px] font-bold text-black hover:text-stone-700 uppercase border border-black px-2 py-0.5 rounded cursor-pointer transition-colors">
+                          {showPreview ? "Edit Mode" : "Preview"}
+                        </button>
+                      </div>
+                      {showPreview ? (
+                        <div className="w-full bg-transparent border-none outline-none text-sm text-stone-950 min-h-[140px] leading-relaxed prose prose-stone max-w-none overflow-y-auto" dangerouslySetInnerHTML={{ __html: marked.parse(editContent || "*No content*") as string }} />
+                      ) : (
+                        <textarea required value={editContent} onChange={(e) => setEditContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar" rows={8} />
+                      )}
                     </div>
                     <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-2">
                       <div className="flex flex-col">
