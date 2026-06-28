@@ -1,126 +1,196 @@
 # NewsFetch Digest
-### Developer-Focused AI and Tech Briefing - Sat, 27 Jun 2026 12:50:46 GMT
+### Developer-Focused AI and Tech Briefing - Sun, 28 Jun 2026 01:32:36 GMT
 
-Last updated: Sat, 27 Jun 2026 12:50:46 GMT
+Last updated: Sun, 28 Jun 2026 01:32:36 GMT
 Freshness window: last 24 hours
 
 ## TL;DR
-- OpenAI previews GPT-5.6 family with specialized models and high-reasoning modes, though access is heavily restricted.
-- Major security alerts hit the JS ecosystem, including critical pnpm supply chain flaws and malicious NPM packages targeting Claude Code traffic.
-- Qualcomm makes a massive $3.9B bet on AI deployment by acquiring Modular and its Mojo language.
+- **Frontier AI Surge:** OpenAI has previewed the GPT-5.6 series with Sol Ultra achieving record benchmarks; meanwhile, Anthropic and Z.ai have launched high-context and specialized security models.
+- **Agentic Shift:** Google launched "Antigravity" and Vercel released AI SDK 7, signaling a massive industry pivot toward durable, stateful AI agents.
+- **Critical Security Risk:** A combined vulnerability in FastAPI/Starlette and LiteLLM creates a CVSS 10.0 RCE path, specifically threatening MCP agent deployments.
 
 ## Signals To Watch
-- **Hardware Diversification:** Both OpenAI and Qualcomm are aggressively moving toward custom ASICs and specialized compilers to reduce NVIDIA dependency.
-- **Rustification of Tooling:** The transition of Vite 8 to Rust highlights a continuing trend of rewriting critical developer tools for performance.
-- **Agentic Specialization:** The move from monolithic LLMs to "families" (like GPT-5.6's Sol/Terra/Luna) suggests a shift toward task-specific agentic AI.
+- **Durable Agent State:** The move toward "checkpoints" and "durable runtimes" (Vercel) suggests a shift from stateless chat to long-running autonomous workflows.
+- **Specialized Compute:** NVIDIA's expansion into BioAI agent toolkits and Intel's high-TOPS edge hardware indicate a diversification of AI workloads beyond general text.
+- **Supply Chain Hardening:** New npm account protections and the "Megalodon" GitHub attack highlight a growing focus on securing the CI/CD pipeline against automated package injection.
 
 ## Developer Tools & Platforms
 
-### Vite 8 Transitions to Rust Toolchain
-Tags: `DevTools` `Vite` `Rust`
+### Google Antigravity
+Tags: `Google` `AgenticAI` `DevPlatform`
 Confidence: High
 
-Vite 8 now integrates Rolldown and Oxc to achieve significant performance gains. This move follows Cloudflare's acquisition of the Void Zero team, signaling a shift toward Rust-based build tooling.
+Google has introduced Antigravity, a dedicated agent-first development platform. It includes a desktop application, CLI, and SDK designed to streamline the creation and deployment of AI agents.
 
 Sources:
-- [vitejs.dev](https://vitejs.dev)
+- [Google](https://google.com)
 
-### Google Deprecates Vertex AI SDK
-Tags: `Google` `SDK` `Gemini`
+### Vercel AI SDK 7
+Tags: `Vercel` `AI-SDK` `Agents`
 Confidence: High
 
-Developers are required to migrate from the Vertex AI SDK to the new 'google-genai' SDK to access Gemini 3.1 Pro. LangChain users are specifically advised to update to v4.0.0.
+The latest AI SDK introduces `WorkflowAgent` for durable runtimes and checkpoints, and `HarnessAgent` to provide a standardized interface for tools like Claude Code and Codex. It also adds unified telemetry for better agent observability.
 
 Sources:
-- [cloud.google.com/vertex-ai](https://cloud.google.com/vertex-ai)
+- [Vercel](https://vercel.com)
+
+### OpenAI Codex Remote GA
+Tags: `OpenAI` `Codex` `DevTools`
+Confidence: High
+
+Codex Remote is now Generally Available, bringing "Computer Use" capabilities to Windows and "Record & Replay" to macOS. A new DigitalOcean plugin allows agents to provision workspaces automatically.
+
+Sources:
+- [OpenAI](https://openai.com)
+
+### Tooling Updates
+Tags: `DevTools` `Ollama` `vLLM`
+Confidence: High
+
+Significant updates across the stack: `openai-node` v6.45.0 adds Realtime API sideband support, `vLLM` v22.0 introduces Mellum v2, and Ollama now supports auto-installation of Claude Code.
+
+Sources:
+- [Ollama](https://ollama.com)
+- [vLLM](https://vllm.ai)
+
+---
 
 ## AI & Machine Learning
 
-### OpenAI Previews GPT-5.6 Model Family
-Tags: `AI` `LLM` `OpenAI`
+### OpenAI GPT-5.6 Series
+Tags: `OpenAI` `LLM` `GPT5.6`
 Confidence: High
 
-OpenAI introduced GPT-5.6, featuring specialized models: 'Sol' (agentic/science), 'Terra' (production), and 'Luna' (routine). The family includes 'max' and 'ultra' reasoning modes, though access is reportedly limited and subject to government vetting.
+OpenAI has unveiled the GPT-5.6 series (Sol, Terra, Luna). The Sol Ultra model has reportedly hit 91.9% on Terminal-Bench 2.1 and is currently available only to trusted partners via API and Codex.
 
 Sources:
-- [openai.com/blog](https://openai.com/blog)
+- [OpenAI](https://openai.com)
 
-### Anthropic's Mythos 5 Partially Returns
-Tags: `AI` `LLM` `Anthropic`
+### Anthropic Mythos 5
+Tags: `Anthropic` `Cybersecurity` `LLM`
+Confidence: Medium
+
+Anthropic has partially released Mythos 5 to 100 organizations specifically for cybersecurity applications following a government ban. Restoration of Fable 5 remains pending.
+
+Sources:
+- [Anthropic](https://anthropic.com)
+
+### Z.ai GLM-5.2
+Tags: `Zai` `OpenSource` `LLM`
 Confidence: High
 
-Following government cybersecurity reviews, Mythos 5 is returning for select trusted organizations. The public 'Fable 5' version remains unavailable.
+Z.ai released GLM-5.2, a 750B parameter model supporting 1M context. For production serving, they have provided GLM-5.2 REAP, a 504B MoE version of the model.
 
 Sources:
-- [anthropic.com/news](https://anthropic.com/news)
+- [Z.ai](https://z.ai)
 
-### DeepSeek DSpark Inference Optimizations
-Tags: `AI` `Inference` `DeepSeek`
+### Sakana AI Fugu
+Tags: `SakanaAI` `AgenticAI`
 Confidence: High
 
-DeepSeek has open-sourced DSpark, claiming generation speed increases of 60-85% for their models. The release has generated significant interest within the developer community.
+Sakana AI has launched Fugu, a model specifically designed for agent-centric orchestration, focusing on how agents coordinate complex tasks.
 
 Sources:
-- [github.com/deepseek-ai](https://github.com/deepseek-ai)
+- [Sakana AI](https://sakana.ai)
+
+### AI Research: JetSpec & InfoKV
+Tags: `Research` `LLM` `Performance`
+Confidence: Medium
+
+New research highlights JetSpec speculative decoding, achieving a 9.64x speedup on MATH-500, and InfoKV, a new method for KV cache compression to improve inference efficiency.
+
+Sources:
+- [arXiv](https://arxiv.org)
+
+---
 
 ## Chips, Infrastructure & Acquisitions
 
-### Qualcomm Acquires Modular for $3.9B
-Tags: `Acquisition` `Hardware` `AI`
-Confidence: Medium
+### Intel/Supermicro Edge AI Hardware
+Tags: `Intel` `EdgeAI` `Hardware`
+Confidence: High
 
-Qualcomm's acquisition of Modular brings the Mojo language and MAX graph compiler into its ecosystem. This move is aimed at improving cross-vendor AI deployment and data-center strategy.
-
-Sources:
-- [qualcomm.com/news](https://qualcomm.com/news)
-
-### OpenAI's 'Jalapeño' AI ASIC
-Tags: `Hardware` `OpenAI` `ASIC`
-Confidence: Medium
-
-OpenAI is partnering with Broadcom to develop a custom inference ASIC codenamed 'Jalapeño'. The project aims to reduce reliance on NVIDIA hardware and lower overall serving costs.
+Intel and Supermicro are pushing Edge AI with the Core Ultra Series 3 and Arc Pro B-series. The B70 GPU provides up to 367 TOPS for local AI workloads.
 
 Sources:
-- [industry reports](https://openai.com/blog)
+- [Intel](https://intel.com)
 
-### Report: SpaceX Planning Acquisition of Cursor
-Tags: `Acquisition` `IDE` `Cursor`
-Confidence: Medium
+### AMD Zen 6 Leaks
+Tags: `AMD` `Hardware` `Zen6`
+Confidence: Low
 
-Reports suggest SpaceX is planning to acquire the AI-native IDE Cursor to integrate advanced AI coding capabilities directly into its internal engineering workflows.
+Leaked reports suggest AMD's upcoming Zen 6 architecture may utilize TSMC 2nm nodes to achieve boost clocks as high as 7GHz.
 
 Sources:
-- [industry reports](https://cursor.com)
+- [AMD](https://amd.com)
+
+### NVIDIA BioNeMo Agent Toolkit
+Tags: `NVIDIA` `BioAI` `Agents`
+Confidence: High
+
+NVIDIA has released the BioNeMo Agent Toolkit, enabling autonomous agents to handle protein design and molecular docking for drug discovery.
+
+Sources:
+- [NVIDIA](https://nvidia.com)
+
+### Cursor Acquisition Rumors
+Tags: `Cursor` `SpaceX` `Acquisition`
+Confidence: Low
+
+Reports suggest SpaceX is eyeing an acquisition of the AI code editor Cursor for $60B to integrate its capabilities with xAI and SpaceX internal workflows.
+
+Sources:
+- [Cursor](https://cursor.com)
+
+---
 
 ## Security & Advisories
 
-### Critical pnpm Supply Chain Vulnerabilities
-Tags: `Security` `DevTools` `pnpm`
+### Critical FastAPI/Starlette "BadHost" RCE
+Tags: `Security` `FastAPI` `vLLM` `CVE`
 Confidence: High
 
-High-severity flaws (CVE-2026-55700, 55699, 55698, 55487) in pnpm allow path traversal and arbitrary file write/delete via patch files. Users should update immediately to mitigate risk.
+CVE-2026-48710 allows an authentication bypass via Host header manipulation in Starlette/FastAPI. When combined with LiteLLM CVE-2026-42271, it creates a CVSS 10.0 Remote Code Execution (RCE) vulnerability, posing a severe risk to MCP agent deployments.
 
 Sources:
-- [github.com/pnpm/pnpm/security/advisories](https://github.com/pnpm/pnpm/security/advisories)
+- [CVE](https://cve.mitre.org)
 
-### NPM Malware Alert: 'panrouter' 5.0.1
-Tags: `Security` `NPM`
+### GitHub "Megalodon" Supply Chain Attack
+Tags: `GitHub` `SupplyChain` `Security`
 Confidence: High
 
-The malicious package 'panrouter' 5.0.1 redirects Claude Code traffic to a proxy and establishes remote shells. Other identified malicious packages include @beproduct/nestjs-auth and @cap-js/openapi.
+Over 5,500 repositories have been infected via a malicious Tiledesk package injected into GitHub Actions (GHA) workflows.
 
 Sources:
-- [npmjs.com/advisories](https://www.npmjs.com/advisories)
+- [GitHub](https://github.com)
+
+### Linux Kernel "DirtyClone"
+Tags: `Linux` `Security` `CVE`
+Confidence: High
+
+CVE-2026-46331 and CVE-2026-43503 describe "DirtyClone," a local privilege escalation vulnerability affecting tc/XFRM paths in the Linux kernel.
+
+Sources:
+- [Linux Kernel](https://kernel.org)
+
+### npm Account Protection
+Tags: `npm` `Security`
+Confidence: High
+
+npm has implemented a 72-hour read-only cooldown for accounts with more than 1 million downloads after sensitive account changes are made to prevent account takeover attacks.
+
+Sources:
+- [npm](https://npmjs.com)
 
 ---
 
 ## Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Stories Published | 10 |
-| High Confidence | 6 |
-| Medium Confidence | 4 |
-| Low Confidence | 0 |
-| Cross-Referenced Stories | 0 |
+| Stories Published | 21 |
+| High Confidence | 15 |
+| Medium Confidence | 3 |
+| Low Confidence | 3 |
+| Cross-Referenced Stories | 1 |
 | Freshness Window | last 24 hours |
-| Generated At | Sat, 27 Jun 2026 12:50:46 GMT |
+| Generated At | Sun, 28 Jun 2026 01:32:36 GMT |
