@@ -40,6 +40,8 @@ export const metadata: Metadata = {
  },
 };
 
+import AdminFooter from "@/components/AdminFooter";
+
 export default function RootLayout({
  children,
 }: Readonly<{
@@ -51,8 +53,13 @@ export default function RootLayout({
  className={`${playfair.variable} ${oldStandard.variable} ${alegreya.variable} ${courier.variable} ${vt323.variable} h-full antialiased`}
  >
  <body className="min-h-full flex flex-col">
-  {children}
+  <main className="flex-1">
+    {children}
+  </main>
   <Analytics />
+  <div className="bg-[#fcfaf2] w-full px-4 pb-2">
+    <AdminFooter />
+  </div>
  </body>
  </html>
  );

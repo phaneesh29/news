@@ -26,6 +26,7 @@ export default function Home() {
       .then((data) => {
         setServerHealth(data);
         if (data.ip) {
+          sessionStorage.setItem("userIp", data.ip);
           setClientInfo((prev: any) => prev ? { ...prev, ip: data.ip } : { os: "Unknown", browser: "Unknown", ip: data.ip });
         }
       })
@@ -38,10 +39,12 @@ export default function Home() {
       : "Unknown";
     
     let browser = "Unknown";
-    if (ua.includes("Chrome")) browser = "Chrome";
+    if ((window.navigator as any).brave !== undefined) browser = "Brave";
+    else if (ua.includes("Edg/") || ua.includes("Edge")) browser = "Edge";
+    else if (ua.includes("OPR/") || ua.includes("Opera")) browser = "Opera";
+    else if (ua.includes("Chrome")) browser = "Chrome";
     else if (ua.includes("Firefox")) browser = "Firefox";
-    else if (ua.includes("Safari")) browser = "Safari";
-    else if (ua.includes("Edge")) browser = "Edge";
+    else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
 
     setClientInfo({
       os,
