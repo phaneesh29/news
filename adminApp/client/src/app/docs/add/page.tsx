@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
+import { marked } from "marked";
 
 interface DocItem {
   id: string;
@@ -18,6 +19,7 @@ export default function AddDocPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [slug, setSlug] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const [parentId, setParentId] = useState<string | null>(null);
   const [orderIndex, setOrderIndex] = useState<number>(0);
   
@@ -301,8 +303,17 @@ Please modify or rewrite the documentation page according to the user instructio
                 </div>
 
                 <div className="flex flex-col min-h-[300px]">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">CHRONICLE DETAILS (Markdown)</label>
-                  <textarea required placeholder="Write documentation here. Supporting full markdown styling..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-transparent border-2 border-stone-400 p-3 outline-none text-sm text-stone-950 placeholder-stone-605/30 resize-none flex-1 leading-relaxed custom-paper-scrollbar font-serif" rows={15} />
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">CHRONICLE DETAILS (Markdown)</label>
+                    <button type="button" onClick={() => setShowPreview(!showPreview)} className="font-mono text-[9px] font-bold text-black hover:text-stone-700 uppercase border border-black px-2 py-0.5 rounded cursor-pointer transition-colors">
+                      {showPreview ? "Edit Mode" : "Preview"}
+                    </button>
+                  </div>
+                  {showPreview ? (
+                    <div className="w-full bg-transparent border-2 border-stone-400 p-3 outline-none text-sm text-stone-950 flex-1 leading-relaxed prose prose-stone max-w-none overflow-y-auto" dangerouslySetInnerHTML={{ __html: marked.parse(content || "*No content*") as string }} />
+                  ) : (
+                    <textarea required placeholder="Write documentation here. Supporting full markdown styling..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-transparent border-2 border-stone-400 p-3 outline-none text-sm text-stone-950 placeholder-stone-605/30 resize-none flex-1 leading-relaxed custom-paper-scrollbar font-serif" rows={15} />
+                  )}
                 </div>
                 <div className="mt-4">
                   <button type="submit" className="w-full bg-stone-950 text-[#fcfaf2] border-2 border-stone-950 font-mono font-bold text-sm py-3 hover:bg-transparent hover:text-black transition-all cursor-pointer uppercase tracking-widest rounded shadow-md">

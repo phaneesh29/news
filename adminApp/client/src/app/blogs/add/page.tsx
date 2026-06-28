@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
+import { marked } from "marked";
 
 export default function AddBlogPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -13,6 +14,7 @@ export default function AddBlogPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [slug, setSlug] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   
   const [injectionStatus, setInjectionStatus] = useState({ active: false, phase: "", progress: 0 });
   const [systemTime, setSystemTime] = useState("");
@@ -251,8 +253,17 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                   <input type="text" required placeholder="url-friendly-slug-here" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/30 font-mono" />
                 </div>
                 <div className="flex flex-col flex-1 min-h-[140px] border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">BLOG CONTENT</label>
-                  <textarea required placeholder="Write blog content or dispatch records here..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/30 min-h-[180px] leading-relaxed custom-paper-scrollbar" />
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">BLOG CONTENT</label>
+                    <button type="button" onClick={() => setShowPreview(!showPreview)} className="font-mono text-[9px] font-bold text-black hover:text-stone-700 uppercase border border-black px-2 py-0.5 rounded cursor-pointer transition-colors">
+                      {showPreview ? "Edit Mode" : "Preview"}
+                    </button>
+                  </div>
+                  {showPreview ? (
+                    <div className="w-full bg-transparent border-none outline-none text-sm text-stone-950 min-h-[180px] leading-relaxed prose prose-stone max-w-none" dangerouslySetInnerHTML={{ __html: marked.parse(content || "*No content*") as string }} />
+                  ) : (
+                    <textarea required placeholder="Write blog content or dispatch records here..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/30 min-h-[180px] leading-relaxed custom-paper-scrollbar" />
+                  )}
                 </div>
                 <div className="flex gap-4 mt-2">
                   <Link href="/blogs" className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-300 font-mono font-bold text-xs py-3.5 uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer hover:bg-stone-400">Cancel</Link>
