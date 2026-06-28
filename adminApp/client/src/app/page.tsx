@@ -23,7 +23,12 @@ export default function Home() {
 
     fetch(`${API_BASE_URL}/health`)
       .then((res) => res.json())
-      .then((data) => setServerHealth(data))
+      .then((data) => {
+        setServerHealth(data);
+        if (data.ip) {
+          setClientInfo((prev: any) => prev ? { ...prev, ip: data.ip } : { os: "Unknown", browser: "Unknown", ip: data.ip });
+        }
+      })
       .catch(() => setServerHealth({ status: "UNREACHABLE", timestamp: new Date() }));
 
     const ua = window.navigator.userAgent;
