@@ -155,7 +155,7 @@ export default function DnsResolver() {
                   onValueChange={setRecordType}
                   disabled={loading || isPending}
                 >
-                  <SelectTrigger className="w-[180px] !h-[68px] border-4 border-l-0 border-current bg-[#fcfaf2] dark:bg-[#252320] font-bold font-mono text-sm uppercase rounded-none ring-offset-background focus:ring-inset focus:ring-4 focus:ring-[#cc785c]/30 focus:outline-none cursor-pointer">
+                  <SelectTrigger className="w-[180px] !h-[68px] border-4 border-l-0 border-current bg-[#fcfaf2] dark:bg-[#252320] font-bold font-mono text-sm uppercase rounded-none !ring-offset-0 focus:!ring-0 focus-visible:!ring-0 !outline-none focus:!outline-none focus-visible:!outline-none cursor-pointer">
                     <SelectValue placeholder="Record Type" />
                   </SelectTrigger>
                   <SelectContent className="border-4 border-current rounded-none bg-[#fcfaf2] dark:bg-[#252320] font-mono font-bold text-xs uppercase vintage-shadow-sm p-0">
