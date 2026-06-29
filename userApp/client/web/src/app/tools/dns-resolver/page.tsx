@@ -6,6 +6,7 @@ import { ArrowLeft, Search, Globe, Shield, Server, Activity, Database, AlertCirc
 import { useSession, signIn } from "@/lib/auth-client";
 import { resolveDnsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function DnsResolver() {
   const { data: sessionData, isPending } = useSession();
@@ -149,20 +150,24 @@ export default function DnsResolver() {
                   className="w-full pl-12 pr-4 py-4 border-4 border-r-0 border-current bg-[#fcfaf2] dark:bg-[#1a1917] font-mono text-lg focus:outline-none focus:ring-inset focus:ring-4 focus:ring-[#cc785c]/30 placeholder:opacity-40"
                   disabled={loading || isPending}
                 />
-                <select 
+                <Select 
                   value={recordType}
-                  onChange={(e) => setRecordType(e.target.value)}
+                  onValueChange={setRecordType}
                   disabled={loading || isPending}
-                  className="px-4 py-4 border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] font-bold font-mono text-sm uppercase focus:outline-none focus:ring-inset focus:ring-4 focus:ring-[#cc785c]/30 cursor-pointer"
                 >
-                  <option value="ALL">ALL (Extensive)</option>
-                  <option value="A">A (IPv4)</option>
-                  <option value="AAAA">AAAA (IPv6)</option>
-                  <option value="MX">MX (Mail)</option>
-                  <option value="TXT">TXT (Text)</option>
-                  <option value="NS">NS (Nameserver)</option>
-                  <option value="CNAME">CNAME (Alias)</option>
-                </select>
+                  <SelectTrigger className="w-[180px] !h-[68px] border-4 border-l-0 border-current bg-[#fcfaf2] dark:bg-[#252320] font-bold font-mono text-sm uppercase rounded-none ring-offset-background focus:ring-inset focus:ring-4 focus:ring-[#cc785c]/30 focus:outline-none cursor-pointer">
+                    <SelectValue placeholder="Record Type" />
+                  </SelectTrigger>
+                  <SelectContent className="border-4 border-current rounded-none bg-[#fcfaf2] dark:bg-[#252320] font-mono font-bold text-xs uppercase vintage-shadow-sm p-0">
+                    <SelectItem value="ALL" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">ALL (Extensive)</SelectItem>
+                    <SelectItem value="A" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">A (IPv4)</SelectItem>
+                    <SelectItem value="AAAA" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">AAAA (IPv6)</SelectItem>
+                    <SelectItem value="MX" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">MX (Mail)</SelectItem>
+                    <SelectItem value="TXT" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">TXT (Text)</SelectItem>
+                    <SelectItem value="NS" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">NS (Nameserver)</SelectItem>
+                    <SelectItem value="CNAME" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer">CNAME (Alias)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
