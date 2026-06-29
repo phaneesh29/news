@@ -89,38 +89,51 @@ export default function DnsResolver() {
     if (types.length === 0) return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
 
     return (
-      <div className="border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow p-2 sm:p-6">
-        <Tabs defaultValue={types[0]} className="w-full">
-          <TabsList className="flex flex-wrap h-auto w-full justify-start gap-2 bg-transparent p-0 mb-6 border-b-4 border-current pb-4 rounded-none">
+      <Tabs defaultValue={types[0]} orientation="vertical" className="w-full flex flex-col md:flex-row border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow">
+        {/* Sidebar / Tabs */}
+        <div className="w-full md:w-64 lg:w-72 border-b-4 md:border-b-0 md:border-r-4 border-current flex flex-col bg-black/5 dark:bg-white/5 p-4 sm:p-6 shrink-0">
+          <h3 className="font-blackletter text-2xl mb-6 border-b-2 border-current pb-2 uppercase tracking-widest">Index</h3>
+          <TabsList className="flex flex-col h-auto w-full justify-start gap-3 bg-transparent p-0 items-stretch">
             {types.map(type => (
               <TabsTrigger 
                 key={type} 
                 value={type}
-                className="border-2 border-current rounded-none font-blackletter text-xl px-8 py-3 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="justify-between border-2 border-current rounded-none font-blackletter text-xl px-4 py-3 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white data-[state=active]:border-[#cc785c] hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left group"
               >
-                {type} <span className="ml-2 text-xs font-mono opacity-70">({recordsObj[type].length})</span>
+                <span>{type}</span>
+                <span className="font-mono text-xs font-bold bg-current text-background px-2 py-1 transition-colors">{recordsObj[type].length}</span>
               </TabsTrigger>
             ))}
           </TabsList>
-          
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 p-6 sm:p-8 min-h-[400px]">
           {types.map(type => (
-            <TabsContent key={type} value={type} className="mt-0 outline-none">
-              <div className="bg-black/5 dark:bg-white/5 border-2 border-current p-4 min-h-[300px]">
-                <h4 className="font-blackletter text-2xl mb-4 border-b border-current/20 pb-2 flex items-center gap-2">
-                  <Server className="h-5 w-5 text-[#cc785c]" /> {type} Records Dossier
+            <TabsContent key={type} value={type} className="mt-0 outline-none h-full flex flex-col">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b-4 border-current pb-4 mb-6 gap-4">
+                <h4 className="font-blackletter text-4xl flex items-center gap-3">
+                  <Server className="h-8 w-8 text-[#cc785c]" /> {type}
                 </h4>
-                <ul className="space-y-3 font-mono text-sm overflow-x-auto">
+                <span className="font-mono text-sm uppercase tracking-widest font-bold px-3 py-1.5 bg-[#cc785c] text-white vintage-shadow-sm border-2 border-current">
+                  {recordsObj[type].length} {recordsObj[type].length === 1 ? 'Entry' : 'Entries'}
+                </span>
+              </div>
+              
+              <div className="flex-1 overflow-x-auto">
+                <ul className="flex flex-col">
                   {recordsObj[type].map((record: any, idx: number) => (
-                    <li key={idx} className="bg-background border-l-4 border-[#cc785c] p-3 whitespace-pre-wrap break-words vintage-shadow-sm">
-                      {typeof record === "string" ? record : JSON.stringify(record, null, 2)}
+                    <li key={idx} className="font-mono text-sm sm:text-base py-4 border-b-2 border-dashed border-current/30 last:border-0 whitespace-pre-wrap break-words hover:bg-black/5 dark:hover:bg-white/5 px-2 -mx-2 transition-colors flex items-start gap-4">
+                      <span className="text-[#cc785c] font-bold opacity-50 pt-0.5 select-none w-6 shrink-0">{(idx + 1).toString().padStart(2, '0')}</span>
+                      <span className="flex-1 text-current">{typeof record === "string" ? record : JSON.stringify(record, null, 2)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             </TabsContent>
           ))}
-        </Tabs>
-      </div>
+        </div>
+      </Tabs>
     );
   };
 
