@@ -406,3 +406,29 @@ export async function searchDocsList(query: string): Promise<ApiResponse<{ docs:
   return response.json();
 }
 
+export async function resolveDnsApi(domain: string, type: string = 'ALL'): Promise<ApiResponse<any>> {
+  const url = `${API_BASE_URL}/tool/dns-resolver?domain=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to resolve DNS");
+  }
+  return response.json();
+}
+
+export async function fetchWhoisApi(domain: string): Promise<ApiResponse<any>> {
+  const url = `${API_BASE_URL}/tool/whois?domain=${encodeURIComponent(domain)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to fetch WHOIS data");
+  }
+  return response.json();
+}
+
