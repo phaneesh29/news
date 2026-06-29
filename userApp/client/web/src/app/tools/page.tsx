@@ -64,6 +64,43 @@ export default function ToolsHub() {
             </div>
           </Link>
 
+          {/* Image Compression Tool Card */}
+          <Link 
+            href="/tools/image-compressor" 
+            className="group block border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-8 vintage-shadow-lg transition-all hover:-translate-y-1 hover:border-[#cc785c] duration-300 relative overflow-hidden"
+          >
+            {/* Decorative corners */}
+            <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+
+            <div className="flex items-start justify-between mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10 text-current group-hover:text-[#cc785c] transition-colors">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+              </svg>
+              <div className="bg-current text-background text-[10px] font-bold uppercase tracking-widest px-2 py-1 font-mono">
+                Utility
+              </div>
+            </div>
+
+            <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Image Compressor</h2>
+            <p className="font-mono text-sm opacity-80 leading-relaxed mb-6">
+              Fully client-side image compression. Upload or paste images to optimize them without sending any data to a server. High quality, zero latency.
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-8">
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Client-side</span>
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Paste Support</span>
+            </div>
+
+            <div className="flex items-center text-[#cc785c] font-bold uppercase tracking-wider text-sm">
+              Open Tool <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
+            </div>
+          </Link>
+
           {/* Coming Soon Placeholder 1 */}
           <div className="group block border-4 border-dashed border-[#111111]/30 dark:border-[#e6dfd8]/30 bg-[#fcfaf2]/50 dark:bg-[#252320]/50 p-8 relative overflow-hidden">
             <div className="flex items-start justify-between mb-6 opacity-40">
