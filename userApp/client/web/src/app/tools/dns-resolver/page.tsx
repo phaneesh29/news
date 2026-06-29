@@ -120,7 +120,7 @@ export default function DnsResolver() {
                 </span>
               </div>
               
-              <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-black/5 dark:[&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-track]:border-l-2 [&::-webkit-scrollbar-track]:border-current [&::-webkit-scrollbar-thumb]:bg-[#cc785c] hover:[&::-webkit-scrollbar-thumb]:bg-[#a9583e]">
                 <ul className="flex flex-col">
                   {recordsObj[type].map((record: any, idx: number) => (
                     <li key={idx} className="font-mono text-sm sm:text-base py-4 border-b-2 border-dashed border-current/30 last:border-0 whitespace-pre-wrap break-words hover:bg-black/5 dark:hover:bg-white/5 px-2 transition-colors flex items-start gap-4">
