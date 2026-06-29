@@ -7,6 +7,7 @@ import { useSession, signIn } from "@/lib/auth-client";
 import { resolveDnsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DnsResolver() {
   const { data: sessionData, isPending } = useSession();
@@ -84,26 +85,41 @@ export default function DnsResolver() {
       );
     }
 
-    // ALL type mapping
     const types = Object.keys(recordsObj);
     if (types.length === 0) return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {types.map(type => (
-          <div key={type} className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-4 vintage-shadow-sm flex flex-col h-full">
-            <h4 className="font-blackletter text-xl mb-3 flex items-center gap-2 border-b-2 border-current pb-2">
-              <Server className="h-4 w-4 text-[#cc785c]" /> {type} Records
-            </h4>
-            <ul className="space-y-2 font-mono text-xs overflow-x-auto flex-1">
-              {recordsObj[type].map((record: any, idx: number) => (
-                <li key={idx} className="bg-black/5 dark:bg-white/5 p-2 whitespace-pre-wrap break-words border-l-2 border-[#cc785c]">
-                  {typeof record === "string" ? record : JSON.stringify(record, null, 2)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <div className="border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow p-2 sm:p-6">
+        <Tabs defaultValue={types[0]} className="w-full">
+          <TabsList className="flex flex-wrap h-auto w-full justify-start gap-2 bg-transparent p-0 mb-6 border-b-4 border-current pb-4 rounded-none">
+            {types.map(type => (
+              <TabsTrigger 
+                key={type} 
+                value={type}
+                className="border-2 border-current rounded-none font-blackletter text-lg px-4 py-2 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              >
+                {type} <span className="ml-2 text-xs font-mono opacity-70">({recordsObj[type].length})</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          {types.map(type => (
+            <TabsContent key={type} value={type} className="mt-0 outline-none">
+              <div className="bg-black/5 dark:bg-white/5 border-2 border-current p-4 min-h-[300px]">
+                <h4 className="font-blackletter text-2xl mb-4 border-b border-current/20 pb-2 flex items-center gap-2">
+                  <Server className="h-5 w-5 text-[#cc785c]" /> {type} Records Dossier
+                </h4>
+                <ul className="space-y-3 font-mono text-sm overflow-x-auto">
+                  {recordsObj[type].map((record: any, idx: number) => (
+                    <li key={idx} className="bg-background border-l-4 border-[#cc785c] p-3 whitespace-pre-wrap break-words vintage-shadow-sm">
+                      {typeof record === "string" ? record : JSON.stringify(record, null, 2)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     );
   };
