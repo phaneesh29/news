@@ -6,6 +6,7 @@ import blogRouter from './blog.route.js';
 import feedbackRouter from './feedback.route.js';
 import digestRouter from './digest.route.js';
 import docRouter from './doc.route.js';
+import toolRouter from './tool.route.js';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use('/blogs', blogRouter);
 router.use('/feedbacks', feedbackRouter);
 router.use('/digest', digestRouter);
 router.use('/docs', docRouter);
+router.use('/tool', toolRouter);
 
 router.all('*any', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
