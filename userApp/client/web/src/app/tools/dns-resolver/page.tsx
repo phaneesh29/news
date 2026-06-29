@@ -159,13 +159,13 @@ export default function DnsResolver() {
                     <SelectValue placeholder="Record Type" />
                   </SelectTrigger>
                   <SelectContent className="border-4 border-current rounded-none bg-[#fcfaf2] dark:bg-[#252320] font-mono font-bold text-xs uppercase vintage-shadow-sm p-0">
-                    <SelectItem value="ALL" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">ALL (Extensive)</SelectItem>
-                    <SelectItem value="A" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">A (IPv4)</SelectItem>
-                    <SelectItem value="AAAA" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">AAAA (IPv6)</SelectItem>
-                    <SelectItem value="MX" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">MX (Mail)</SelectItem>
-                    <SelectItem value="TXT" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">TXT (Text)</SelectItem>
-                    <SelectItem value="NS" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">NS (Nameserver)</SelectItem>
-                    <SelectItem value="CNAME" className="focus:bg-[#cc785c] focus:text-white rounded-none py-3 px-4 cursor-pointer">CNAME (Alias)</SelectItem>
+                    <SelectItem value="ALL" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">ALL (Extensive)</SelectItem>
+                    <SelectItem value="A" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">A (IPv4)</SelectItem>
+                    <SelectItem value="AAAA" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">AAAA (IPv6)</SelectItem>
+                    <SelectItem value="MX" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">MX (Mail)</SelectItem>
+                    <SelectItem value="TXT" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">TXT (Text)</SelectItem>
+                    <SelectItem value="NS" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer border-b-2 border-current/20">NS (Nameserver)</SelectItem>
+                    <SelectItem value="CNAME" className="focus:bg-[#cc785c] focus:!text-white focus:[&_*]:!text-white hover:bg-[#cc785c] hover:!text-white hover:[&_*]:!text-white rounded-none py-3 px-4 cursor-pointer">CNAME (Alias)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
