@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, Globe, Shield, Server, Activity, Database, AlertCircle } from "lucide-react";
+import { ArrowLeft, Search, Globe, Shield, Server, Activity, Database, AlertCircle, Clock } from "lucide-react";
 import { useSession, signIn } from "@/lib/auth-client";
-import { resolveDnsApi, fetchWhoisApi } from "@/lib/api";
+import { resolveDnsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 export default function DnsResolver() {
@@ -14,8 +14,8 @@ export default function DnsResolver() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
   const [dnsData, setDnsData] = useState<any>(null);
-  const [whoisData, setWhoisData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recordType, setRecordType] = useState("ALL");
 
   const handleLookup = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -24,22 +24,13 @@ export default function DnsResolver() {
     setLoading(true);
     setError(null);
     setDnsData(null);
-    setWhoisData(null);
 
     try {
-      const [dnsRes, whoisRes] = await Promise.allSettled([
-        resolveDnsApi(domain.trim(), "ALL"),
-        fetchWhoisApi(domain.trim())
-      ]);
-
-      if (dnsRes.status === "fulfilled" && dnsRes.value.status === "success") {
-        setDnsData(dnsRes.value.data);
-      } else if (dnsRes.status === "rejected") {
-        setError(dnsRes.reason.message || "Failed to resolve DNS");
-      }
-
-      if (whoisRes.status === "fulfilled" && whoisRes.value.status === "success") {
-        setWhoisData(whoisRes.value.data);
+      const res = await resolveDnsApi(domain.trim(), recordType);
+      if (res.status === "success") {
+        setDnsData(res.data);
+      } else {
+        setError(res.message || "Failed to resolve DNS");
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -55,7 +46,7 @@ export default function DnsResolver() {
           <Shield className="h-12 w-12 mx-auto mb-4 text-[#cc785c]" />
           <h2 className="font-blackletter text-3xl mb-4">Restricted Tool Access</h2>
           <p className="font-mono text-sm opacity-80 mb-8">
-            The advanced DNS and WHOIS resolver requires identity verification.
+            The advanced DNS resolver requires identity verification.
           </p>
           <Button 
             onClick={() => signIn.social({ provider: "google", callbackURL: window.location.origin + "/tools/dns-resolver" })}
@@ -68,21 +59,44 @@ export default function DnsResolver() {
     );
   }
 
-  const renderDnsRecords = (recordsObj: any) => {
+  const renderDnsRecords = (recordsObj: any, specificType: string) => {
     if (!recordsObj) return null;
+    
+    // If specificType is not ALL, recordsObj is just an array, not an object mapping
+    if (specificType !== "ALL") {
+      if (!Array.isArray(recordsObj) || recordsObj.length === 0) {
+        return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
+      }
+      return (
+        <div className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-4 vintage-shadow-sm">
+          <h4 className="font-blackletter text-xl mb-3 flex items-center gap-2 border-b-2 border-current pb-2">
+            <Server className="h-4 w-4 text-[#cc785c]" /> Record Type: {specificType}
+          </h4>
+          <ul className="space-y-2 font-mono text-xs overflow-x-auto">
+            {recordsObj.map((record: any, idx: number) => (
+              <li key={idx} className="bg-black/5 dark:bg-white/5 p-2 whitespace-pre-wrap break-words">
+                {typeof record === "string" ? record : JSON.stringify(record, null, 2)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    // ALL type mapping
     const types = Object.keys(recordsObj);
     if (types.length === 0) return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
 
     return (
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {types.map(type => (
-          <div key={type} className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-4 vintage-shadow-sm">
+          <div key={type} className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-4 vintage-shadow-sm flex flex-col h-full">
             <h4 className="font-blackletter text-xl mb-3 flex items-center gap-2 border-b-2 border-current pb-2">
-              <Server className="h-4 w-4 text-[#cc785c]" /> Record Type: {type}
+              <Server className="h-4 w-4 text-[#cc785c]" /> {type} Records
             </h4>
-            <ul className="space-y-2 font-mono text-xs overflow-x-auto">
+            <ul className="space-y-2 font-mono text-xs overflow-x-auto flex-1">
               {recordsObj[type].map((record: any, idx: number) => (
-                <li key={idx} className="bg-black/5 dark:bg-white/5 p-2 whitespace-pre-wrap break-words">
+                <li key={idx} className="bg-black/5 dark:bg-white/5 p-2 whitespace-pre-wrap break-words border-l-2 border-[#cc785c]">
                   {typeof record === "string" ? record : JSON.stringify(record, null, 2)}
                 </li>
               ))}
@@ -104,36 +118,58 @@ export default function DnsResolver() {
           </Link>
         </div>
 
-        <div className="mb-8 border-b-4 border-double border-current pb-6 flex items-center justify-between">
+        <div className="mb-8 border-b-4 border-double border-current pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h1 className="font-blackletter text-4xl sm:text-5xl text-current tracking-wide mb-2">Network Investigator</h1>
             <p className="font-sans text-sm italic opacity-80 uppercase tracking-widest flex items-center gap-2">
-              <Globe className="h-4 w-4" /> DNS & WHOIS Information Retrieval
+              <Globe className="h-4 w-4" /> DNS Telemetry & IP Tracing
             </p>
           </div>
+          {dnsData?.queryTimeMs !== undefined && (
+            <div className="flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-widest border-2 border-current px-3 py-1.5 bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow-sm">
+              <Clock className="h-3 w-3 text-[#cc785c]" /> Latency: {dnsData.queryTimeMs}ms
+            </div>
+          )}
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleLookup} className="mb-12">
-          <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 w-full space-y-2">
               <label className="font-bold uppercase tracking-widest text-xs">Target Domain / IP Address</label>
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50" />
+              <div className="relative flex">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  <Search className="h-5 w-5 opacity-50" />
+                </div>
                 <input 
                   type="text" 
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                   placeholder="e.g. google.com or 8.8.8.8"
-                  className="w-full pl-12 pr-4 py-4 border-4 border-current bg-[#fcfaf2] dark:bg-[#1a1917] font-mono text-lg focus:outline-none focus:ring-4 focus:ring-[#cc785c]/30 placeholder:opacity-40"
+                  className="w-full pl-12 pr-4 py-4 border-4 border-r-0 border-current bg-[#fcfaf2] dark:bg-[#1a1917] font-mono text-lg focus:outline-none focus:ring-inset focus:ring-4 focus:ring-[#cc785c]/30 placeholder:opacity-40"
                   disabled={loading || isPending}
                 />
+                <select 
+                  value={recordType}
+                  onChange={(e) => setRecordType(e.target.value)}
+                  disabled={loading || isPending}
+                  className="px-4 py-4 border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] font-bold font-mono text-sm uppercase focus:outline-none focus:ring-inset focus:ring-4 focus:ring-[#cc785c]/30 cursor-pointer"
+                >
+                  <option value="ALL">ALL (Extensive)</option>
+                  <option value="A">A (IPv4)</option>
+                  <option value="AAAA">AAAA (IPv6)</option>
+                  <option value="MX">MX (Mail)</option>
+                  <option value="TXT">TXT (Text)</option>
+                  <option value="NS">NS (Nameserver)</option>
+                  <option value="CNAME">CNAME (Alias)</option>
+                </select>
               </div>
             </div>
+            
             <Button 
               type="submit" 
               disabled={loading || isPending || !domain.trim()}
-              className="bg-[#cc785c] hover:bg-[#b06148] text-white border-4 border-current h-[68px] px-8 font-bold text-lg rounded-none vintage-shadow flex items-center gap-2 transition-all active:translate-y-1 active:shadow-none disabled:opacity-50"
+              className="bg-[#cc785c] hover:bg-[#b06148] text-white border-4 border-current h-[68px] px-8 font-bold text-lg rounded-none vintage-shadow flex items-center gap-2 transition-all active:translate-y-1 active:shadow-none disabled:opacity-50 w-full md:w-auto justify-center"
             >
               {loading ? <Activity className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
               {loading ? "Scanning..." : "Execute"}
@@ -149,66 +185,33 @@ export default function DnsResolver() {
         )}
 
         {/* Results */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Main Column - DNS Records */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
+          {dnsData || loading || error ? (
             <h3 className="font-blackletter text-3xl border-b-2 border-current pb-3">DNS Telegraph</h3>
-            
-            {!dnsData && !loading && !error && (
-              <div className="border-4 border-dashed border-current/20 p-12 text-center opacity-50">
-                <Database className="h-8 w-8 mx-auto mb-3" />
-                <p className="font-mono text-sm">Awaiting domain target instruction...</p>
-              </div>
-            )}
+          ) : (
+            <div className="border-4 border-dashed border-current/20 p-12 text-center opacity-50">
+              <Database className="h-8 w-8 mx-auto mb-3" />
+              <p className="font-mono text-sm">Awaiting domain target instruction...</p>
+            </div>
+          )}
 
-            {dnsData && (
-              <div className="space-y-4">
-                {dnsData.type === 'REVERSE' ? (
-                  <div className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-6 vintage-shadow">
-                    <h4 className="font-blackletter text-2xl mb-4 border-b border-current pb-2">Reverse DNS Mapping</h4>
-                    <p className="font-mono text-sm opacity-80 mb-2">Hostnames mapped to IP: {dnsData.domain}</p>
-                    <ul className="list-disc pl-5 font-bold space-y-1">
-                      {dnsData.records.map((r: string) => <li key={r}>{r}</li>)}
-                    </ul>
-                  </div>
-                ) : (
-                  renderDnsRecords(dnsData.records)
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar - WHOIS Data */}
-          <div className="lg:col-span-1">
-            <div className="border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#1a1917] p-6 vintage-shadow sticky top-8">
-              <h3 className="font-blackletter text-2xl mb-4 border-b-2 border-current pb-2 flex items-center gap-2">
-                <Shield className="h-5 w-5 text-[#cc785c]" /> WHOIS Dossier
-              </h3>
-              
-              {!whoisData && !loading && !error && (
-                <p className="font-mono text-xs opacity-50 italic">Dossier unavailable until execution.</p>
-              )}
-
-              {loading && (
-                <div className="flex items-center gap-2 font-mono text-xs opacity-70">
-                  <Activity className="h-3 w-3 animate-spin" /> Fetching registry data...
+          {dnsData && (
+            <div className="space-y-4">
+              {dnsData.type === 'REVERSE' ? (
+                <div className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-6 vintage-shadow">
+                  <h4 className="font-blackletter text-2xl mb-4 border-b border-current pb-2">Reverse DNS Mapping</h4>
+                  <p className="font-mono text-sm opacity-80 mb-2">Hostnames mapped to IP: {dnsData.domain}</p>
+                  <ul className="list-disc pl-5 font-bold space-y-1">
+                    {dnsData.records.map((r: string) => <li key={r}>{r}</li>)}
+                  </ul>
                 </div>
-              )}
-
-              {whoisData && (
-                <div className="font-mono text-[10px] sm:text-xs overflow-x-auto max-h-[600px] overflow-y-auto bg-black/5 dark:bg-white/5 p-4 border border-current">
-                  <pre className="whitespace-pre-wrap word-break-all">
-                    {typeof whoisData === 'object' 
-                      ? Object.entries(whoisData).map(([k, v]) => `${k.toUpperCase()}:\n${v}\n\n`).join('')
-                      : whoisData}
-                  </pre>
-                </div>
+              ) : (
+                renderDnsRecords(dnsData.records, dnsData.type)
               )}
             </div>
-          </div>
-          
+          )}
         </div>
+
       </div>
     </div>
   );

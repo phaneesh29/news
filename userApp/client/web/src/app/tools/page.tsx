@@ -121,11 +121,11 @@ export default function ToolsHub() {
 
             <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Network Investigator</h2>
             <p className="font-mono text-sm opacity-80 leading-relaxed mb-6">
-              Advanced DNS resolver and WHOIS data retrieval. Fetch massive multi-record DNS dossiers and trace domain origins in a single click.
+              Advanced DNS resolver. Fetch massive multi-record DNS dossiers and trace domain origins in a single click with lightning fast response times.
             </p>
 
             <div className="flex flex-wrap gap-2 mb-8">
-              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">WHOIS</span>
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">DNS Lookup</span>
               <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Protected</span>
             </div>
 

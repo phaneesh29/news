@@ -6,7 +6,3 @@ export const dnsResolverQuerySchema = z.object({
     errorMap: () => ({ message: "Invalid DNS record type." }),
   }).optional().default('A'),
 });
-
-export const whoisQuerySchema = z.object({
-  domain: z.string().min(1, "Domain is required"),
-});

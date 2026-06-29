@@ -1,10 +1,10 @@
 import { promises as dns } from 'node:dns';
 import net from 'node:net';
-import whois from 'whois-json';
 
 export const resolveDns = async (req, res, next) => {
   try {
     const { domain, type } = req.query;
+    const startTime = performance.now();
 
     if (net.isIP(domain)) {
       const hostnames = await dns.reverse(domain);
@@ -14,6 +14,7 @@ export const resolveDns = async (req, res, next) => {
           domain,
           type: 'REVERSE',
           records: hostnames,
+          queryTimeMs: Math.round(performance.now() - startTime),
         },
       });
     }
@@ -44,6 +45,7 @@ export const resolveDns = async (req, res, next) => {
           domain,
           type: 'ALL',
           records: allRecords,
+          queryTimeMs: Math.round(performance.now() - startTime),
         },
       });
     }
@@ -56,6 +58,7 @@ export const resolveDns = async (req, res, next) => {
         domain,
         type,
         records,
+        queryTimeMs: Math.round(performance.now() - startTime),
       },
     });
   } catch (error) {
@@ -65,21 +68,6 @@ export const resolveDns = async (req, res, next) => {
         message: `No ${req.query.type} records found for ${req.query.domain}`,
       });
     }
-    next(error);
-  }
-};
-
-export const getWhois = async (req, res, next) => {
-  try {
-    const { domain } = req.query;
-
-    const data = await whois(domain);
-
-    res.status(200).json({
-      status: 'success',
-      data,
-    });
-  } catch (error) {
     next(error);
   }
 };
