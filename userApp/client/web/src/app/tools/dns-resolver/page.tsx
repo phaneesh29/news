@@ -96,7 +96,7 @@ export default function DnsResolver() {
               <TabsTrigger 
                 key={type} 
                 value={type}
-                className="border-2 border-current rounded-none font-blackletter text-lg px-4 py-2 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="border-2 border-current rounded-none font-blackletter text-xl px-8 py-3 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 {type} <span className="ml-2 text-xs font-mono opacity-70">({recordsObj[type].length})</span>
               </TabsTrigger>
