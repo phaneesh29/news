@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Code2, Terminal, Database, Activity } from "lucide-react";
+import { ArrowLeft, ArrowRight, Code2, Terminal, Database, Activity, Globe } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -101,24 +101,38 @@ export default function ToolsHub() {
             </div>
           </Link>
 
-          {/* Coming Soon Placeholder 1 */}
-          <div className="group block border-4 border-dashed border-[#111111]/30 dark:border-[#e6dfd8]/30 bg-[#fcfaf2]/50 dark:bg-[#252320]/50 p-8 relative overflow-hidden">
-            <div className="flex items-start justify-between mb-6 opacity-40">
-              <Database className="h-10 w-10 text-current" />
-              <div className="border border-current text-[10px] font-bold uppercase tracking-widest px-2 py-1 font-mono">
-                Pending
+          {/* DNS Resolver Tool Card */}
+          <Link 
+            href="/tools/dns-resolver" 
+            className="group block border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-8 vintage-shadow-lg transition-all hover:-translate-y-1 hover:border-[#cc785c] duration-300 relative overflow-hidden"
+          >
+            {/* Decorative corners */}
+            <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+
+            <div className="flex items-start justify-between mb-6">
+              <Globe className="h-10 w-10 text-current group-hover:text-[#cc785c] transition-colors" />
+              <div className="bg-current text-background text-[10px] font-bold uppercase tracking-widest px-2 py-1 font-mono">
+                Network
               </div>
             </div>
 
-            <h2 className="font-blackletter text-3xl mb-3 opacity-40">Cloud Database</h2>
-            <p className="font-mono text-sm opacity-40 leading-relaxed mb-8">
-              Instant, zero-config PostgreSQL visualizer. Connect to databases and execute queries securely from the client.
+            <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Network Investigator</h2>
+            <p className="font-mono text-sm opacity-80 leading-relaxed mb-6">
+              Advanced DNS resolver and WHOIS data retrieval. Fetch massive multi-record DNS dossiers and trace domain origins in a single click.
             </p>
 
-            <div className="flex items-center font-bold uppercase tracking-wider text-sm opacity-30">
-              Coming Soon
+            <div className="flex flex-wrap gap-2 mb-8">
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">WHOIS</span>
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Protected</span>
             </div>
-          </div>
+
+            <div className="flex items-center text-[#cc785c] font-bold uppercase tracking-wider text-sm">
+              Open Tool <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
+            </div>
+          </Link>
 
           {/* Coming Soon Placeholder 2 */}
           <div className="group block border-4 border-dashed border-[#111111]/30 dark:border-[#e6dfd8]/30 bg-[#fcfaf2]/50 dark:bg-[#252320]/50 p-8 relative overflow-hidden">
