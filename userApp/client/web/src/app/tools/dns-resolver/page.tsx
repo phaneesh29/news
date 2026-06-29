@@ -7,7 +7,7 @@ import { useSession, signIn } from "@/lib/auth-client";
 import { resolveDnsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function DnsResolver() {
   const { data: sessionData, isPending } = useSession();
@@ -64,76 +64,84 @@ export default function DnsResolver() {
   const renderDnsRecords = (recordsObj: any, specificType: string) => {
     if (!recordsObj) return null;
     
-    // If specificType is not ALL, recordsObj is just an array, not an object mapping
+    // Group records by type
+    let groupedRecords: { [key: string]: any[] } = {};
+    
     if (specificType !== "ALL") {
       if (!Array.isArray(recordsObj) || recordsObj.length === 0) {
         return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
       }
-      return (
-        <div className="border-2 border-current bg-[#fcfaf2] dark:bg-[#252320] p-4 vintage-shadow-sm">
-          <h4 className="font-blackletter text-xl mb-3 flex items-center gap-2 border-b-2 border-current pb-2">
-            <Server className="h-4 w-4 text-[#cc785c]" /> Record Type: {specificType}
-          </h4>
-          <ul className="space-y-2 font-mono text-xs overflow-x-auto">
-            {recordsObj.map((record: any, idx: number) => (
-              <li key={idx} className="bg-black/5 dark:bg-white/5 p-2 whitespace-pre-wrap break-words">
-                {typeof record === "string" ? record : JSON.stringify(record, null, 2)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
+      groupedRecords[specificType] = recordsObj;
+    } else {
+      const types = Object.keys(recordsObj);
+      if (types.length === 0) return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
+      groupedRecords = recordsObj;
     }
 
-    const types = Object.keys(recordsObj);
-    if (types.length === 0) return <p className="font-mono text-xs opacity-70 p-4 border border-dashed border-current">No records found.</p>;
+    const types = Object.keys(groupedRecords);
+    let totalRecords = 0;
+    types.forEach(t => { totalRecords += groupedRecords[t].length; });
 
     return (
-      <Tabs defaultValue={types[0]} orientation="vertical" className="w-full flex flex-col md:flex-row border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] vintage-shadow">
-        {/* Sidebar / Tabs */}
-        <div className="w-full md:w-64 lg:w-72 border-b-4 md:border-b-0 md:border-r-4 border-current flex flex-col bg-black/5 dark:bg-white/5 p-4 sm:p-6 shrink-0">
-          <h3 className="font-blackletter text-2xl mb-6 border-b-2 border-current pb-2 uppercase tracking-widest">Index</h3>
-          <TabsList className="flex flex-col h-auto w-full justify-start gap-3 bg-transparent p-0 items-stretch">
-            {types.map(type => (
-              <TabsTrigger 
-                key={type} 
-                value={type}
-                className="justify-between border-2 border-current rounded-none font-blackletter text-xl px-4 py-3 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white data-[state=active]:border-[#cc785c] hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left group"
-              >
-                <span>{type}</span>
-                <span className="font-mono text-xs opacity-60">({recordsObj[type].length})</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      <div className="border-4 border-current bg-[#fcfaf2] dark:bg-[#252320] p-6 vintage-shadow">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b-4 border-current pb-4 mb-6 gap-4">
+          <h4 className="font-blackletter text-3xl flex items-center gap-3">
+            <Server className="h-6 w-6 text-[#cc785c]" /> 
+            {specificType === "ALL" ? "All DNS Records" : `${specificType} Records`}
+          </h4>
+          <span className="font-mono text-sm uppercase tracking-widest font-bold px-3 py-1.5 bg-[#cc785c] text-white vintage-shadow-sm border-2 border-current">
+            {totalRecords} {totalRecords === 1 ? 'Entry' : 'Entries'}
+          </span>
         </div>
         
-        {/* Content */}
-        <div className="flex-1 p-6 sm:p-8 min-h-[400px]">
-          {types.map(type => (
-            <TabsContent key={type} value={type} className="mt-0 outline-none h-full flex flex-col">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b-4 border-current pb-4 mb-6 gap-4">
-                <h4 className="font-blackletter text-4xl flex items-center gap-3">
-                  <Server className="h-8 w-8 text-[#cc785c]" /> {type}
-                </h4>
-                <span className="font-mono text-sm uppercase tracking-widest font-bold px-3 py-1.5 bg-[#cc785c] text-white vintage-shadow-sm border-2 border-current">
-                  {recordsObj[type].length} {recordsObj[type].length === 1 ? 'Entry' : 'Entries'}
-                </span>
+        <div className="max-h-[600px] overflow-y-auto overflow-x-hidden pr-2 [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-black/5 dark:[&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-track]:border-l-2 [&::-webkit-scrollbar-track]:border-current [&::-webkit-scrollbar-thumb]:bg-[#cc785c] hover:[&::-webkit-scrollbar-thumb]:bg-[#a9583e]">
+          <div className="w-full space-y-8">
+            {types.map((type) => (
+              <div key={type} className="border-current border-4 bg-white dark:bg-[#1a1917] vintage-shadow-sm flex flex-col">
+                <div className="px-4 py-3 border-b-4 border-current bg-black/5 dark:bg-white/5 flex items-center justify-between w-full">
+                  <span className="font-blackletter text-2xl tracking-wide flex items-center gap-2">
+                    <Server className="h-5 w-5 text-[#cc785c]" /> {type} Records
+                  </span>
+                  <span className="font-mono text-xs uppercase font-bold px-2 py-1 bg-[#cc785c] text-white border-2 border-current">
+                    {groupedRecords[type].length}
+                  </span>
+                </div>
+                <div className="p-4 bg-[#fcfaf2] dark:bg-[#1a1917]">
+                  <Accordion type="multiple" className="w-full space-y-2 font-mono text-xs">
+                    {groupedRecords[type].map((record: any, idx: number) => {
+                      if (typeof record === "string") {
+                        return (
+                          <div key={idx} className="border-current border-2 bg-white dark:bg-[#1a1917] px-3 py-2 flex items-center gap-4 text-left w-full overflow-hidden">
+                            <span className="font-bold text-[#cc785c] opacity-80 w-6 shrink-0">{(idx + 1).toString().padStart(2, '0')}</span>
+                            <span className="truncate pr-4 text-sm font-bold opacity-80">{record}</span>
+                          </div>
+                        );
+                      }
+
+                      const content = JSON.stringify(record, null, 2);
+                      const header = record.exchange || record.nsname || record.address || record.value || `Record ${idx + 1}`;
+                      
+                      return (
+                        <AccordionItem key={idx} value={`item-${type}-${idx}`} className="border-current border-2 bg-white dark:bg-[#1a1917]">
+                          <AccordionTrigger className="hover:no-underline hover:bg-black/5 dark:hover:bg-white/5 px-3 py-2 data-[state=open]:border-b-2 border-current transition-colors">
+                            <div className="flex items-center gap-4 text-left w-full overflow-hidden">
+                              <span className="font-bold text-[#cc785c] opacity-80 w-6 shrink-0">{(idx + 1).toString().padStart(2, '0')}</span>
+                              <span className="truncate pr-4 text-sm font-bold opacity-80">{header}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="bg-black/5 dark:bg-white/5 p-3 whitespace-pre-wrap break-words text-sm border-t border-dashed border-current/20">
+                            {content}
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
+                </div>
               </div>
-              
-              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-black/5 dark:[&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-track]:border-l-2 [&::-webkit-scrollbar-track]:border-current [&::-webkit-scrollbar-thumb]:bg-[#cc785c] hover:[&::-webkit-scrollbar-thumb]:bg-[#a9583e]">
-                <ul className="flex flex-col">
-                  {recordsObj[type].map((record: any, idx: number) => (
-                    <li key={idx} className="font-mono text-sm sm:text-base py-4 border-b-2 border-dashed border-current/30 last:border-0 whitespace-pre-wrap break-words hover:bg-black/5 dark:hover:bg-white/5 px-2 transition-colors flex items-start gap-4">
-                      <span className="text-[#cc785c] font-bold opacity-50 pt-0.5 select-none w-6 shrink-0">{(idx + 1).toString().padStart(2, '0')}</span>
-                      <span className="flex-1 text-current">{typeof record === "string" ? record : JSON.stringify(record, null, 2)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </TabsContent>
-          ))}
+            ))}
+          </div>
         </div>
-      </Tabs>
+      </div>
     );
   };
 
