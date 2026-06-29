@@ -1,144 +1,145 @@
 # NewsFetch Digest
-### Developer-Focused AI and Tech Briefing - Mon, 29 Jun 2026 01:35:43 GMT
+### Developer-Focused AI and Tech Briefing - Mon, 29 Jun 2026 14:56:48 GMT
 
-Last updated: Mon, 29 Jun 2026 01:35:43 GMT
+Last updated: Mon, 29 Jun 2026 14:56:48 GMT
 Freshness window: last 24 hours
 
 ## TL;DR
-- OpenAI previews a tiered GPT-5.6 suite (Sol, Terra, Luna), while Anthropic releases Mythos 5 for vetted cybersecurity firms.
-- NVIDIA and Qualcomm both announce hardware pivots to drive down inference costs, with NVIDIA's Vera Rubin targeting a 10x cost reduction.
-- Critical supply chain attacks (CanisterWorm and Megalodon) are actively targeting npm packages and GitHub Actions.
+- **Critical Security Alerts:** Severe RCE in n8n and a Linux Kernel LPE ('DirtyClone') demand immediate patching across automation and cloud infrastructures.
+- **Agentic AI Shift:** Google Gemini 3.5 Flash introduces 'Computer Use' capabilities, transitioning from chatbots to active desktop agents.
+- **Hardware Efficiency:** NVIDIA's upcoming Rubin platform aims for a 10x reduction in inference costs, signaling a strategic shift toward HBM-centric architecture.
 
 ## Signals To Watch
-- **Agentic Architecture Shift:** A transition from "prompt engineering" to "loop engineering" is emerging, focusing on iterative self-refinement for autonomous agents.
-- **Inference Economics:** Major chip players are aggressively optimizing for token costs and on-device speed (Liquid AI, NVIDIA) to enable scale.
-- **Sovereign AI Controls:** Increased government security reviews are delaying the general release of high-capability models.
+- **Agentic Workflows:** The convergence of 'Computer Use' (Gemini) and structured memory runtimes (EverOS) suggests a move toward autonomous software interaction.
+- **Local AI Optimization:** Continued focus on specialized hardware acceleration, evidenced by vLLM's AMD Zen support and Ollama's MLX integration.
+- **Supply Chain Vulnerability:** Increased sophistication in package hijacking (npm/PyPI) leveraging IDE-specific features for persistence.
 
 ## Developer Tools & Platforms
 
-### Next.js 16.2 Standardizes Deployment Adapter API
-Tags: `Web Dev` `Next.js` `Vercel`
+### Ollama Adds Thinking Capability Detection and Apple Silicon MLX Support
+Tags: `local-ai` `ollama` `apple-silicon` `devtools`
 Confidence: High
 
-Next.js 16.2 introduces a standardized Deployment Adapter API. This move improves the consistency of ISR and PPR across major hosting providers like Vercel, Netlify, and Cloudflare, reducing vendor lock-in for advanced rendering patterns.
+Ollama now detects 'thinking' tokens in models and provides MLX support for Command A and North models on Apple Silicon. This optimization significantly improves local LLM performance for macOS developers.
 
 Sources:
-- [Next.js](https://nextjs.org)
+- [Ollama](https://ollama.com)
 
 ---
 
-## AI & Machine Learning
-
-### OpenAI Previews GPT-5.6 Suite: Sol, Terra, and Luna
-Tags: `AI` `OpenAI` `LLM`
+### EverOS: Open-Source Markdown-First Agent Memory Runtime
+Tags: `open-source` `agents` `devtools` `memory`
 Confidence: High
 
-OpenAI has unveiled a tiered model strategy featuring Sol (complex reasoning), Terra (general purpose), and Luna (high-speed scale). Access is currently limited to a trusted partner program pending US government security reviews.
+Released under Apache 2.0, EverOS provides a structured memory runtime for AI agents. It utilizes a markdown-first approach to state and context management, simplifying how agents store and retrieve persistent information.
+
+Sources:
+- [EverOS GitHub](https://github.com)
+
+---
+
+### OpenAI Node SDK v6.45.0 Updates Realtime API
+Tags: `openai` `sdk` `nodejs` `api`
+Confidence: High
+
+The new Node SDK version introduces the `afterCompletion` hook and sideband `call_id` for the Realtime API. These updates provide developers with more granular control over streaming audio and text interactions.
 
 Sources:
 - [OpenAI](https://openai.com)
 
 ---
 
-### Anthropic Mythos 5 Released for Cybersecurity Specialists
-Tags: `AI` `Anthropic` `Cybersecurity`
+## AI & Machine Learning
+
+### Google Gemini 3.5 Flash Introduces 'Computer Use' Capabilities
+Tags: `ai-model` `google` `agents` `automation`
 Confidence: High
 
-Mythos 5, a model specialized for cybersecurity, is now available to vetted US firms. A general release of Fable 5 is expected soon following the resolution of jailbreak vulnerability negotiations.
+Gemini 3.5 Flash can now see, click, and control a computer interface. This represents a major shift from a passive chatbot to an agent capable of interacting with desktop software directly to complete complex tasks.
 
 Sources:
-- [Anthropic](https://anthropic.com)
+- [Google DeepMind](https://deepmind.google)
 
 ---
 
-### The Shift to 'Loop Engineering' in Agentic AI
-Tags: `Agentic AI` `Software Engineering`
+### vLLM v22.0 Adds AMD Zen-Accelerated Quantized Inference
+Tags: `ai-model` `vllm` `amd` `inference` `open-source`
+Confidence: High
+
+The latest vLLM release introduces support for Mellum v2 and zentorch-accelerated quantized linear inference for AMD Zen architectures. This update is critical for developers scaling local LLM serving on non-NVIDIA hardware.
+
+Sources:
+- [vLLM](https://vllm.ai)
+
+---
+
+### GLM-5.2 Open-Weight Model Matches Top Models in Cybersecurity
+Tags: `ai-model` `open-source` `cybersecurity` `glm`
 Confidence: Medium
 
-Developers are moving away from static prompting toward "loop engineering," where the focus is on designing iterative refinement cycles. This allows AI agents to autonomously test and refine code until verifiable goals are met.
+Z.ai has released GLM-5.2, an open-weight model that demonstrates performance parity with proprietary models like Claude in bug-finding and cybersecurity benchmarks.
 
 Sources:
-- [Anthropic](https://anthropic.com)
-
----
-
-### Local LLM Breakthrough: Gemma-4-12B and Liquid AI LFM2.5
-Tags: `Local LLM` `Hugging Face` `Liquid AI`
-Confidence: High
-
-Gemma-4-12B is demonstrating high reasoning capabilities on <4.5GB VRAM. Meanwhile, Liquid AI's LFM2.5-230M is hitting 213 tokens/sec on mobile hardware, pushing the feasibility of high-speed on-device agents.
-
-Sources:
-- [Hugging Face](https://huggingface.co)
+- [Z.ai](https://z.ai)
 
 ---
 
 ## Chips, Infrastructure & Acquisitions
 
-### NVIDIA Vera Rubin Production Shipments Set for Fall 2026
-Tags: `Chips` `NVIDIA` `Infra`
+### NVIDIA Rubin Platform Promises 10x Lower Inference Costs
+Tags: `chips` `nvidia` `infrastructure` `inference`
 Confidence: High
 
-The upcoming Rubin architecture will utilize HBM4 (22 TB/s) and NVLink 6. These specs aim to provide a 10x reduction in token costs for large-scale AI inference.
+Expected in H2 2026, the Rubin platform focuses on extreme efficiency in inference. The architecture underscores High-Bandwidth Memory (HBM) as the primary technical moat for next-generation AI hardware.
 
 Sources:
 - [NVIDIA](https://nvidia.com)
 
 ---
 
-### Qualcomm Dragonfly C1000 Targets Data Center Inference
-Tags: `Chips` `Qualcomm` `Infra`
-Confidence: High
-
-Qualcomm has announced the Dragonfly C1000 CPU and HBC architecture, positioning itself as a direct competitor to NVIDIA in the data center AI inference market.
-
-Sources:
-- [Qualcomm](https://qualcomm.com)
-
----
-
-### SpaceX Acquires Mesh Optical Technologies
-Tags: `Acquisitions` `SpaceX` `Infra`
-Confidence: Medium
-
-With FTC approval, SpaceX is acquiring Mesh Optical Technologies. The move is intended to integrate high-efficiency optical transceivers into AI data center infrastructure.
-
-Sources:
-- [SpaceX](https://spacex.com)
-
----
-
 ## Security & Advisories
 
-### Critical Supply Chain Alert: CanisterWorm and Megalodon Attacks
-Tags: `Security` `npm` `GitHub`
+### CVE-2026-21858: Critical RCE in n8n via Webhook
+Tags: `security` `rce` `n8n` `vulnerability`
 Confidence: High
 
-Two major threats have been identified: 'CanisterWorm' is spreading through 47 npm packages via stolen tokens, and 'Megalodon' has infected over 5,500 GitHub repositories via malicious Actions workflows.
+A critical vulnerability (CVSS 10.0) in n8n allows remote code execution via webhooks. Developers using n8n for automation workflows must update immediately to prevent full system compromise.
 
 Sources:
-- [NVD](https://nvd.nist.gov)
+- [n8n Security](https://n8n.io)
 
 ---
 
-### Major Security CVEs: Langflow (RCE) and LiteSpeed (CVSS 10.0)
-Tags: `Security` `CVE`
+### CVE-2026-43503 (DirtyClone): Linux Kernel LPE
+Tags: `security` `linux` `lpe` `kernel`
 Confidence: High
 
-Critical vulnerabilities include CVE-2026-5027 in Langflow, allowing RCE via path traversal, and CVE-2026-48172 in LiteSpeed cPanel, which enables root arbitrary script execution.
+A local privilege escalation vulnerability dubbed 'DirtyClone' has been identified in the Linux Kernel. This poses a significant risk to multi-tenant environments and cloud infrastructure providers.
 
 Sources:
-- [NVD](https://nvd.nist.gov)
+- [Linux Kernel Archives](https://kernel.org)
+
+---
+
+### Critical Supply Chain Attack Targets npm and PyPI Packages
+Tags: `security` `supply-chain` `npm` `pypi`
+Confidence: High
+
+Attackers are hijacking popular packages, including versions of `eslint-config-prettier` and `mistralai`, to deploy Python infostealers. The attack notably leverages VS Code's 'folderOpen' tasks to maintain persistence.
+
+Sources:
+- [npm](https://npmjs.com)
+- [PyPI](https://pypi.org)
 
 ---
 
 ## Pipeline Stats
 | Metric | Value |
 |--------|-------|
-| Stories Published | 10 |
-| High Confidence | 8 |
-| Medium Confidence | 2 |
+| Stories Published | 12 |
+| High Confidence | 11 |
+| Medium Confidence | 1 |
 | Low Confidence | 0 |
-| Cross-Referenced Stories | 0 |
+| Cross-Referenced Stories | 1 |
 | Freshness Window | last 24 hours |
-| Generated At | 2026-06-29T01:35:43.709Z |
+| Generated At | Mon, 29 Jun 2026 14:56:48 GMT |
