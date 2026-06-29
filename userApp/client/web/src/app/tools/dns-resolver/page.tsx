@@ -101,7 +101,7 @@ export default function DnsResolver() {
                 className="justify-between border-2 border-current rounded-none font-blackletter text-xl px-4 py-3 data-[state=active]:bg-[#cc785c] data-[state=active]:text-white data-[state=active]:border-[#cc785c] hover:bg-black/10 dark:hover:bg-white/10 transition-all text-left group"
               >
                 <span>{type}</span>
-                <span className="font-mono text-xs font-bold bg-current text-background px-2 py-1 transition-colors">{recordsObj[type].length}</span>
+                <span className="font-mono text-xs opacity-60">({recordsObj[type].length})</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -120,10 +120,10 @@ export default function DnsResolver() {
                 </span>
               </div>
               
-              <div className="flex-1 overflow-x-auto">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden">
                 <ul className="flex flex-col">
                   {recordsObj[type].map((record: any, idx: number) => (
-                    <li key={idx} className="font-mono text-sm sm:text-base py-4 border-b-2 border-dashed border-current/30 last:border-0 whitespace-pre-wrap break-words hover:bg-black/5 dark:hover:bg-white/5 px-2 -mx-2 transition-colors flex items-start gap-4">
+                    <li key={idx} className="font-mono text-sm sm:text-base py-4 border-b-2 border-dashed border-current/30 last:border-0 whitespace-pre-wrap break-words hover:bg-black/5 dark:hover:bg-white/5 px-2 transition-colors flex items-start gap-4">
                       <span className="text-[#cc785c] font-bold opacity-50 pt-0.5 select-none w-6 shrink-0">{(idx + 1).toString().padStart(2, '0')}</span>
                       <span className="flex-1 text-current">{typeof record === "string" ? record : JSON.stringify(record, null, 2)}</span>
                     </li>
