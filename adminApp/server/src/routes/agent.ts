@@ -6,5 +6,5 @@ import { draftRequestSchema, draftDocRequestSchema } from '../schemas/agent.js'
 export const agentRoutes = new Hono()
 
 agentRoutes.post('/draft/news', zValidator('json', draftRequestSchema), draftNews)
-agentRoutes.post('/draft/blog', zValidator('json', draftRequestSchema), draftBlog)
+agentRoutes.post('/draft/blog', zValidator('json', draftDocRequestSchema), draftBlog)
 agentRoutes.post('/draft/doc', zValidator('json', draftDocRequestSchema), draftDoc)

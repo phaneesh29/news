@@ -20,15 +20,15 @@ export const draftNews = async (c: Context) => {
 }
 
 export const draftBlog = async (c: Context) => {
-  const { query } = (c.req as any).valid('json') as { query: string }
+  const { messages } = (c.req as any).valid('json') as { messages: any[] }
+  const query = messages[messages.length - 1].content
 
-  const result = await blogDraftAgent.generate({
+  const result = await blogDraftAgent.stream({
     prompt: query,
   })
 
-  return c.json({
-    success: true,
-    draft: result.output,
+  return createUIMessageStreamResponse({
+    stream: toUIMessageStream({ stream: result.stream }),
   })
 }
 

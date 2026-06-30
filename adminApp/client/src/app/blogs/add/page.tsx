@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
 import { marked } from "marked";
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 
 export default function AddBlogPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -20,7 +22,43 @@ export default function AddBlogPage() {
   const [systemTime, setSystemTime] = useState("");
 
   const [agentQuery, setAgentQuery] = useState("");
-  const [agentLoading, setAgentLoading] = useState(false);
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: `${API_BASE_URL}/agent/draft/blog`
+    }),
+    onFinish: (event) => {
+      const message = event.message;
+      const toolInvs = message.parts ? message.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : [];
+      let outputArgs = toolInvs.find((t: any) => t.args && (t.args.title !== undefined || t.args.content !== undefined))?.args;
+
+      if (!outputArgs) {
+        const textParts = message.parts ? message.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text) : [];
+        const fullText = textParts.join('');
+        try {
+          const startIdx = fullText.indexOf('{');
+          const endIdx = fullText.lastIndexOf('}');
+          if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+            const jsonText = fullText.substring(startIdx, endIdx + 1);
+            const parsed = JSON.parse(jsonText);
+            if (parsed.title !== undefined || parsed.content !== undefined) {
+              outputArgs = parsed;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON output", e);
+        }
+      }
+
+      if (outputArgs) {
+        if (outputArgs.title) setTitle(outputArgs.title);
+        if (outputArgs.content) setContent(outputArgs.content);
+        if (outputArgs.slug) setSlug(outputArgs.slug);
+        setAgentQuery("");
+      }
+    }
+  });
+
+  const agentLoading = status === 'submitted' || status === 'streaming';
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -120,11 +158,9 @@ export default function AddBlogPage() {
     e.preventDefault();
     if (!agentQuery.trim()) return;
 
-    setAgentLoading(true);
-    try {
-      let finalQuery = agentQuery;
-      if (title || content) {
-        finalQuery = `You are updating/revising an existing blog post draft. 
+    let finalQuery = agentQuery;
+    if (title || content) {
+      finalQuery = `You are updating/revising an existing blog post draft. 
 
 Here is the current draft:
 ---
@@ -138,33 +174,9 @@ User Update Instructions:
 "${agentQuery}"
 
 Please modify or rewrite the blog post according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
-      }
-
-      const res = await fetch(`${API_BASE_URL}/agent/draft/blog`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: finalQuery }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Agent failed to draft blog");
-      const data = await res.json();
-      if (data.success) {
-        const draft = data.draft;
-        setTitle(draft.title || "");
-        setContent(draft.content || "");
-        if (draft.slug) {
-          setSlug(draft.slug);
-        }
-        setAgentQuery("");
-      } else {
-        throw new Error(data.error?.message || "Failed to draft blog");
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || "Error generating draft from agent");
-    } finally {
-      setAgentLoading(false);
     }
+
+    sendMessage({ content: finalQuery, role: 'user' } as any);
   };
 
   if (loading) {
@@ -295,6 +307,42 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                 <button type="submit" className="vintage-stamp w-full text-center py-3 bg-black text-[#fcfaf2] border-black hover:bg-stone-800 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs" disabled={agentLoading || !agentQuery.trim()}>
                   {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH BLOG AGENT"}
                 </button>
+                {agentLoading && (
+                  <div className="mt-2 p-2 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-[10px] text-stone-700 flex flex-col gap-1">
+                    <div className="animate-pulse flex items-center justify-center gap-1">
+                      <span className="inline-block w-2 h-2 bg-black rounded-full animate-ping"></span>
+                      <span className="text-black font-bold">[ WIRE AGENT AT WORK ]</span>
+                    </div>
+                  </div>
+                )}
+                {messages.length > 0 && (
+                  <div className="mt-4 border border-stone-400 bg-stone-100 p-2 text-[10px] font-mono h-48 overflow-y-auto custom-paper-scrollbar">
+                    <div className="font-bold border-b border-stone-300 pb-1 mb-2 uppercase text-stone-800">Agent Logs</div>
+                    {messages.map((m, i) => {
+                      const userContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
+                      const agentContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
+                      const toolInvs = (m.parts ? m.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : ((m as any).toolInvocations || []));
+
+                      return (
+                      <div key={i} className="mb-2">
+                        {m.role === 'user' ? (
+                          <div className="text-blue-700">USER: {userContent}</div>
+                        ) : (
+                          <div className="text-green-800">
+                            {agentContent && <div>AGENT: {agentContent}</div>}
+                            {toolInvs.map((t: any, idx: number) => (
+                              <div key={idx} className="ml-2 border-l-2 border-stone-300 pl-2 mt-1">
+                                <span className="font-bold text-orange-700">TOOL CALLED: </span> {t.toolName}
+                                <div className="text-stone-500 truncate">Args: {JSON.stringify(t.args)}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      );
+                    })}
+                  </div>
+                )}
               </form>
             </div>
           </div>
