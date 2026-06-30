@@ -1,6 +1,9 @@
 {
   "name": "server",
   "type": "module",
+  "overrides": {
+    "ai": "$ai"
+  },
   "scripts": {
     "dev": "vc dev",
     "build": "tsc",
