@@ -1,12 +1,12 @@
 import { ToolLoopAgent, Output } from 'ai';
-import { google } from '@ai-sdk/google';
+import { mistral } from '@ai-sdk/mistral';
 import { createDocSchema } from '../../schemas/doc.js';
 import { tavilySearch, tavilyExtract } from '@tavily/ai-sdk';
 import { docDraftInstructions } from './instructions.js';
 
 export const docDraftAgent = new ToolLoopAgent({
   id: 'doc-drafter',
-  model: google('gemini-3.1-flash-lite-preview'),
+  model: mistral('codestral-2508'),
   instructions: docDraftInstructions,
   tools: {
     tavilySearch: tavilySearch({
