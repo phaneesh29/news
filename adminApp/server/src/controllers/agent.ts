@@ -7,15 +7,15 @@ import { docs } from '../db/schema.js'
 import { createUIMessageStreamResponse, toUIMessageStream } from 'ai'
 
 export const draftNews = async (c: Context) => {
-  const { query } = (c.req as any).valid('json') as { query: string }
+  const { messages } = (c.req as any).valid('json') as { messages: any[] }
+  const query = messages[messages.length - 1].content
 
-  const result = await newsDraftAgent.generate({
+  const result = await newsDraftAgent.stream({
     prompt: query,
   })
 
-  return c.json({
-    success: true,
-    draft: result.output,
+  return createUIMessageStreamResponse({
+    stream: toUIMessageStream({ stream: result.stream }),
   })
 }
 

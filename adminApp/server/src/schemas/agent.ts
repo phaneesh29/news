@@ -1,10 +1,6 @@
 import { z } from 'zod'
 
-export const draftRequestSchema = z.object({
-  query: z.string().min(1, 'Query is required'),
-})
-
-export const draftDocRequestSchema = z.object({
+export const agentRequestSchema = z.object({
   messages: z.array(z.object({
     role: z.string(),
     content: z.string()

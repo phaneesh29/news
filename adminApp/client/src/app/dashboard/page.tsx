@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
+import { marked } from "marked";
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 
 interface NewsItem {
   id: string;
@@ -48,7 +51,53 @@ export default function DashboardPage() {
   const [editIsPublished, setEditIsPublished] = useState(false);
 
   const [agentQuery, setAgentQuery] = useState("");
-  const [agentLoading, setAgentLoading] = useState(false);
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: `${API_BASE_URL}/agent/draft/news`
+    }),
+    onFinish: (event) => {
+      const message = event.message;
+      const toolInvs = message.parts ? message.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : [];
+      let outputArgs = toolInvs.find((t: any) => t.args && (t.args.title !== undefined || t.args.content !== undefined))?.args;
+
+      if (!outputArgs) {
+        const textParts = message.parts ? message.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text) : [];
+        const fullText = textParts.join('');
+        try {
+          const startIdx = fullText.indexOf('{');
+          const endIdx = fullText.lastIndexOf('}');
+          if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+            const jsonText = fullText.substring(startIdx, endIdx + 1);
+            const parsed = JSON.parse(jsonText);
+            if (parsed.title !== undefined || parsed.content !== undefined) {
+              outputArgs = parsed;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON output", e);
+        }
+      }
+
+      if (outputArgs) {
+        if (outputArgs.title) setEditTitle(outputArgs.title);
+        if (outputArgs.content) setEditContent(outputArgs.content);
+        if (outputArgs.tags) setEditTags(Array.isArray(outputArgs.tags) ? outputArgs.tags.join(', ') : outputArgs.tags);
+        if (outputArgs.sourceUrl) setEditSourceUrl(outputArgs.sourceUrl);
+        if (outputArgs.priority) {
+          const pr = String(outputArgs.priority).toLowerCase();
+          if (["low", "medium", "high", "critical"].includes(pr)) {
+            setEditPriority(pr);
+          } else {
+            setEditPriority("low");
+          }
+        }
+        setAgentQuery("");
+        addLog("WIRE: AI agent successfully updated edit draft fields");
+      }
+    }
+  });
+
+  const agentLoading = status === 'submitted' || status === 'streaming';
 
 
   // Telemetry status
@@ -239,9 +288,7 @@ export default function DashboardPage() {
     e.preventDefault();
     if (!agentQuery.trim()) return;
 
-    setAgentLoading(true);
-    try {
-      const promptWithContext = `You are updating/revising an existing news article. 
+    const promptWithContext = `You are updating/revising an existing news article. 
 
 Here is the current edit draft:
 ---
@@ -258,43 +305,7 @@ User Update Instructions:
 
 Please modify or rewrite the news article according to the user instructions. Make sure to respond with the complete updated schema (title, content, tags, priority, and sourceUrl).`;
 
-      const res = await fetch(`${API_BASE_URL}/agent/draft/news`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: promptWithContext }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Agent failed to draft news");
-      const data = await res.json();
-      if (data.success) {
-        const draft = data.draft;
-        setEditTitle(draft.title || "");
-        setEditContent(draft.content || "");
-        if (draft.tags) {
-          setEditTags(draft.tags.join(", "));
-        }
-        if (draft.sourceUrl) {
-          setEditSourceUrl(draft.sourceUrl);
-        }
-        if (draft.priority) {
-          const pr = draft.priority.toLowerCase();
-          if (["low", "medium", "high", "critical"].includes(pr)) {
-            setEditPriority(pr);
-          } else {
-            setEditPriority("low");
-          }
-        }
-        setAgentQuery("");
-        addLog("WIRE: AI agent successfully updated edit draft fields");
-      } else {
-        throw new Error(data.error?.message || "Failed to draft news");
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || "Error generating draft from agent");
-    } finally {
-      setAgentLoading(false);
-    }
+    sendMessage({ content: promptWithContext, role: 'user' } as any);
   };
 
   const handleTogglePublish = async (newsId: string, currentStatus: boolean) => {
@@ -770,6 +781,34 @@ Please modify or rewrite the news article according to the user instructions. Ma
                                 <span className="inline-block w-2 h-2 bg-black rounded-full animate-ping"></span>
                                 <span className="text-black font-bold">[ WIRE AGENT AT WORK ]</span>
                               </div>
+                            </div>
+                          )}
+                          {messages.length > 0 && (
+                            <div className="mt-4 border border-stone-400 bg-stone-100 p-2 text-[10px] font-mono h-48 overflow-y-auto custom-paper-scrollbar">
+                              <div className="font-bold border-b border-stone-300 pb-1 mb-2 uppercase text-stone-800">Agent Logs</div>
+                              {messages.map((m, i) => {
+                                const userContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
+                                const agentContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
+                                const toolInvs = (m.parts ? m.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : ((m as any).toolInvocations || []));
+
+                                return (
+                                <div key={i} className="mb-2">
+                                  {m.role === 'user' ? (
+                                    <div className="text-blue-700">USER: {userContent}</div>
+                                  ) : (
+                                    <div className="text-green-800">
+                                      {agentContent && <div>AGENT: {agentContent}</div>}
+                                      {toolInvs.map((t: any, idx: number) => (
+                                        <div key={idx} className="ml-2 border-l-2 border-stone-300 pl-2 mt-1">
+                                          <span className="font-bold text-orange-700">TOOL CALLED: </span> {t.toolName}
+                                          <div className="text-stone-500 truncate">Args: {JSON.stringify(t.args)}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                );
+                              })}
                             </div>
                           )}
                         </form>
