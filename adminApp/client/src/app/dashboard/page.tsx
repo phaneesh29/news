@@ -50,6 +50,39 @@ export default function DashboardPage() {
   const [editSourceUrl, setEditSourceUrl] = useState("");
   const [editIsPublished, setEditIsPublished] = useState(false);
 
+  // Similarity Check State
+  const [similarNews, setSimilarNews] = useState<any[]>([]);
+  const [checkingSimilarity, setCheckingSimilarity] = useState(false);
+  const [hasCheckedSimilarity, setHasCheckedSimilarity] = useState(false);
+  const [similarityError, setSimilarityError] = useState("");
+
+  const handleCheckSimilarity = async () => {
+    if (!editContent.trim()) return;
+    setCheckingSimilarity(true);
+    setSimilarityError("");
+    setSimilarNews([]);
+    setHasCheckedSimilarity(false);
+    try {
+      const res = await fetch(`${API_BASE_URL}/news/check-similarity`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent }),
+        credentials: "include"
+      });
+      if (!res.ok) {
+        throw new Error("Failed to check news wire similarity");
+      }
+      const data = await res.json();
+      setSimilarNews(data.similarNews || []);
+      setHasCheckedSimilarity(true);
+    } catch (err: any) {
+      console.error(err);
+      setSimilarityError(err.message || "An error occurred");
+    } finally {
+      setCheckingSimilarity(false);
+    }
+  };
+
   const [agentQuery, setAgentQuery] = useState("");
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
@@ -537,6 +570,10 @@ Please modify or rewrite the news article according to the user instructions. Ma
                           setEditSourceUrl(item.sourceUrl || "");
                           setEditTags(item.tags.join(", "));
                           setEditIsPublished(item.isPublished);
+                          setSimilarNews([]);
+                          setCheckingSimilarity(false);
+                          setHasCheckedSimilarity(false);
+                          setSimilarityError("");
                           addLog(`VIEW: Focus shifted to article ${item.id.slice(0, 8)}`);
                         }}
                         className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50 transition-all flex flex-col gap-2 relative group/item shadow cursor-pointer text-left rounded"
@@ -676,16 +713,90 @@ Please modify or rewrite the news article according to the user instructions. Ma
                     </div>
 
                     <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
-                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                        DRAFT CHRONICLE DETAILS
-                      </label>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
+                          DRAFT CHRONICLE DETAILS
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleCheckSimilarity}
+                          disabled={checkingSimilarity || !editContent.trim()}
+                          className="font-mono text-[10px] border-2 border-black text-black bg-[#fcfaf2] px-3 py-1 hover:bg-black hover:text-[#fcfaf2] transition-all uppercase tracking-widest font-bold disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                        >
+                          {checkingSimilarity ? "Checking..." : "[ Check Wire Similarity ]"}
+                        </button>
+                      </div>
                       <textarea
                         required
                         value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
+                        onChange={(e) => {
+                          setEditContent(e.target.value);
+                          setSimilarNews([]);
+                          setHasCheckedSimilarity(false);
+                          setSimilarityError("");
+                        }}
                         className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar"
                         rows={8}
                       />
+
+                      {/* Similarity check results dashboard */}
+                      {similarNews.length > 0 && (
+                        <div className="mt-2 border-2 border-dashed border-stone-800 bg-[#e8e4d9]/40 p-3 text-xs font-mono">
+                          <div className="font-bold uppercase tracking-wider text-red-900 mb-2 flex items-center justify-between">
+                            <span>🚨 SIMILAR DISPATCHES DETECTED ON WIRE:</span>
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                setSimilarNews([]);
+                                setHasCheckedSimilarity(false);
+                              }} 
+                              className="text-stone-500 hover:text-black font-bold uppercase tracking-widest cursor-pointer"
+                            >
+                              [Clear]
+                            </button>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {similarNews.map((newsItem, i) => {
+                              const pct = Math.round(newsItem.similarity * 100);
+                              let colorClass = "text-stone-600";
+                              if (pct > 80) colorClass = "text-red-700 font-bold";
+                              else if (pct > 50) colorClass = "text-amber-700 font-bold";
+
+                              return (
+                                <div key={newsItem.id} className="border-b border-stone-300 pb-2 last:border-b-0 last:pb-0">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <span className="font-serif font-bold text-stone-900 uppercase">
+                                      {i + 1}. {newsItem.title}
+                                    </span>
+                                    <span className={`text-[10px] uppercase font-bold tracking-wider ${colorClass}`}>
+                                      {pct}% MATCH
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-stone-600 line-clamp-2 mt-1 leading-relaxed font-serif">
+                                    {newsItem.content}
+                                  </p>
+                                  <div className="text-[8px] text-stone-500 uppercase mt-0.5">
+                                    Priority: {newsItem.priority} • Created: {new Date(newsItem.createdAt).toLocaleString()}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {hasCheckedSimilarity && similarNews.length === 0 && (
+                        <div className="mt-2 border border-green-600 bg-green-50/50 p-2.5 text-[10px] font-mono text-green-800 uppercase flex items-center gap-1.5">
+                          <span>✅</span>
+                          <span>No similar dispatches found on wire. Clear for transmission!</span>
+                        </div>
+                      )}
+
+                      {similarityError && (
+                        <div className="mt-2 border border-red-500 bg-red-100/50 p-2 text-[10px] font-mono text-red-800 uppercase">
+                          ERROR: {similarityError}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1.5">

@@ -91,7 +91,7 @@ export default function AddNewsPage() {
       if (outputArgs) {
         if (outputArgs.title) setTitle(outputArgs.title);
         if (outputArgs.content) setContent(outputArgs.content);
-        if (outputArgs.tags) setTags(outputArgs.tags);
+        if (outputArgs.tags) setTags(Array.isArray(outputArgs.tags) ? outputArgs.tags.join(", ") : String(outputArgs.tags));
         if (outputArgs.sourceUrl) setSourceUrl(outputArgs.sourceUrl);
         if (outputArgs.priority) {
           const pr = String(outputArgs.priority).toLowerCase();
