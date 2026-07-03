@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
 import { marked } from "marked";
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 
 interface DigestTrend {
   trend: string;
@@ -81,8 +83,89 @@ export default function DigestPage() {
   const [formSourceUrl, setFormSourceUrl] = useState("");
   const [formIsPublished, setFormIsPublished] = useState(true);
 
+  // Similarity Check State
+  const [similarNews, setSimilarNews] = useState<any[]>([]);
+  const [checkingSimilarity, setCheckingSimilarity] = useState(false);
+  const [hasCheckedSimilarity, setHasCheckedSimilarity] = useState(false);
+  const [similarityError, setSimilarityError] = useState("");
+
+  const handleCheckSimilarity = async () => {
+    if (!formContent.trim()) return;
+    setCheckingSimilarity(true);
+    setSimilarityError("");
+    setSimilarNews([]);
+    setHasCheckedSimilarity(false);
+    try {
+      const res = await fetch(`${API_BASE_URL}/news/check-similarity`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: formContent }),
+        credentials: "include"
+      });
+      if (!res.ok) {
+        throw new Error("Failed to check news wire similarity");
+      }
+      const data = await res.json();
+      setSimilarNews(data.similarNews || []);
+      setHasCheckedSimilarity(true);
+    } catch (err: any) {
+      console.error(err);
+      setSimilarityError(err.message || "An error occurred");
+    } finally {
+      setCheckingSimilarity(false);
+    }
+  };
+
   const [agentQuery, setAgentQuery] = useState("");
-  const [agentLoading, setAgentLoading] = useState(false);
+  
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: `${API_BASE_URL}/agent/draft/news`
+    }),
+    onFinish: (event) => {
+      const message = event.message;
+      const toolInvs = message.parts ? message.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : [];
+      let outputArgs = toolInvs.find((t: any) => t.args && (t.args.title !== undefined || t.args.content !== undefined))?.args;
+
+      if (!outputArgs) {
+        const textParts = message.parts ? message.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text) : [];
+        const fullText = textParts.join('');
+        try {
+          const startIdx = fullText.indexOf('{');
+          const endIdx = fullText.lastIndexOf('}');
+          if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+            const jsonText = fullText.substring(startIdx, endIdx + 1);
+            const parsed = JSON.parse(jsonText);
+            if (parsed.title !== undefined || parsed.content !== undefined) {
+              outputArgs = parsed;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON output", e);
+        }
+      }
+
+      if (outputArgs) {
+        if (outputArgs.title) setFormTitle(outputArgs.title.toUpperCase());
+        if (outputArgs.content) setFormContent(outputArgs.content);
+        if (outputArgs.tags) {
+          setFormTags(Array.isArray(outputArgs.tags) ? outputArgs.tags.join(", ").toUpperCase() : String(outputArgs.tags).toUpperCase());
+        }
+        if (outputArgs.sourceUrl) setFormSourceUrl(outputArgs.sourceUrl);
+        if (outputArgs.priority) {
+          const pr = String(outputArgs.priority).toLowerCase();
+          if (["low", "medium", "high", "critical"].includes(pr)) {
+            setFormPriority(pr);
+          } else {
+            setFormPriority("low");
+          }
+        }
+        setAgentQuery("");
+      }
+    }
+  });
+
+  const agentLoading = status === 'submitted' || status === 'streaming';
 
   // Successfully verified articles titles tracker
   const [verifiedTitles, setVerifiedTitles] = useState<string[]>([]);
@@ -181,6 +264,10 @@ export default function DigestPage() {
     setFormTags(article.tags && article.tags.length > 0 ? article.tags.join(", ").toUpperCase() : categoryName.toUpperCase().replace(/[^\w\s]/g, "").trim());
     setFormSourceUrl(article.sourceUrl || "");
     setFormIsPublished(true);
+    setSimilarNews([]);
+    setCheckingSimilarity(false);
+    setHasCheckedSimilarity(false);
+    setSimilarityError("");
     setShowVerifyModal(true);
   };
 
@@ -243,9 +330,9 @@ export default function DigestPage() {
     e.preventDefault();
     if (!agentQuery.trim()) return;
 
-    setAgentLoading(true);
-    try {
-      const promptWithContext = `You are refining or drafting a news article based on a neural wire digest dispatch suggestion.
+    let finalQuery = agentQuery;
+    if (formTitle || formContent) {
+      finalQuery = `You are refining or drafting a news article based on a neural wire digest dispatch suggestion.
 
 Here is the current draft state:
 ---
@@ -261,43 +348,9 @@ User Instructions / Topic:
 "${agentQuery}"
 
 Please modify or rewrite the news draft according to the user instructions. Make sure to respond with the complete updated schema (title, content, tags, priority, and sourceUrl).`;
-
-      const res = await fetch(`${API_BASE_URL}/agent/draft/news`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: promptWithContext }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Agent failed to draft news");
-      const data = await res.json();
-      if (data.success) {
-        const draft = data.draft;
-        setFormTitle(draft.title || "");
-        setFormContent(draft.content || "");
-        if (draft.tags) {
-          setFormTags(draft.tags.join(", "));
-        }
-        if (draft.sourceUrl) {
-          setFormSourceUrl(draft.sourceUrl);
-        }
-        if (draft.priority) {
-          const pr = draft.priority.toLowerCase();
-          if (["low", "medium", "high", "critical"].includes(pr)) {
-            setFormPriority(pr);
-          } else {
-            setFormPriority("low");
-          }
-        }
-        setAgentQuery("");
-      } else {
-        throw new Error(data.error?.message || "Failed to draft news");
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || "Error generating draft from agent");
-    } finally {
-      setAgentLoading(false);
     }
+
+    sendMessage({ content: finalQuery, role: 'user' } as any);
   };
 
   if (loading) {
@@ -612,16 +665,90 @@ Please modify or rewrite the news draft according to the user instructions. Make
                 </div>
 
                 <div className="flex flex-col border-b border-stone-400 pb-2">
-                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
-                    CONTENT SUMMARY
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">
+                      CONTENT SUMMARY
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleCheckSimilarity}
+                      disabled={checkingSimilarity || !formContent.trim()}
+                      className="font-mono text-[10px] border-2 border-black text-black bg-[#fcfaf2] px-3 py-1 hover:bg-black hover:text-[#fcfaf2] transition-all uppercase tracking-widest font-bold disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      {checkingSimilarity ? "Checking..." : "[ Check Wire Similarity ]"}
+                    </button>
+                  </div>
                   <textarea
                     required
                     value={formContent}
-                    onChange={(e) => setFormContent(e.target.value)}
+                    onChange={(e) => {
+                      setFormContent(e.target.value);
+                      setSimilarNews([]);
+                      setHasCheckedSimilarity(false);
+                      setSimilarityError("");
+                    }}
                     className="w-full bg-transparent border-none outline-none text-sm text-stone-900 font-serif leading-relaxed"
                     rows={5}
                   />
+
+                  {/* Similarity check results dashboard */}
+                  {similarNews.length > 0 && (
+                    <div className="mt-2 border-2 border-dashed border-stone-800 bg-[#e8e4d9]/40 p-3 text-xs font-mono">
+                      <div className="font-bold uppercase tracking-wider text-red-900 mb-2 flex items-center justify-between">
+                        <span>🚨 SIMILAR DISPATCHES DETECTED ON WIRE:</span>
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setSimilarNews([]);
+                            setHasCheckedSimilarity(false);
+                          }} 
+                          className="text-stone-500 hover:text-black font-bold uppercase tracking-widest cursor-pointer"
+                        >
+                          [Clear]
+                        </button>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {similarNews.map((newsItem, i) => {
+                          const pct = Math.round(newsItem.similarity * 100);
+                          let colorClass = "text-stone-600";
+                          if (pct > 80) colorClass = "text-red-700 font-bold";
+                          else if (pct > 50) colorClass = "text-amber-700 font-bold";
+
+                          return (
+                            <div key={newsItem.id} className="border-b border-stone-300 pb-2 last:border-b-0 last:pb-0">
+                              <div className="flex justify-between items-start gap-2">
+                                <span className="font-serif font-bold text-stone-900 uppercase">
+                                  {i + 1}. {newsItem.title}
+                                </span>
+                                <span className={`text-[10px] uppercase font-bold tracking-wider ${colorClass}`}>
+                                  {pct}% MATCH
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-stone-600 line-clamp-2 mt-1 leading-relaxed font-serif">
+                                {newsItem.content}
+                              </p>
+                              <div className="text-[8px] text-stone-500 uppercase mt-0.5">
+                                Priority: {newsItem.priority} • Created: {new Date(newsItem.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {hasCheckedSimilarity && similarNews.length === 0 && (
+                    <div className="mt-2 border border-green-600 bg-green-50/50 p-2.5 text-[10px] font-mono text-green-800 uppercase flex items-center gap-1.5">
+                      <span>✅</span>
+                      <span>No similar dispatches found on wire. Clear for transmission!</span>
+                    </div>
+                  )}
+
+                  {similarityError && (
+                    <div className="mt-2 border border-red-500 bg-red-100/50 p-2 text-[10px] font-mono text-red-800 uppercase">
+                      ERROR: {similarityError}
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -736,6 +863,33 @@ Please modify or rewrite the news draft according to the user instructions. Make
                             <span className="inline-block w-2 h-2 bg-black rounded-full animate-ping"></span>
                             <span className="text-black font-bold">[ WIRE AGENT AT WORK ]</span>
                           </div>
+                        </div>
+                      )}
+                      {messages.length > 0 && (
+                        <div className="mt-2 border border-stone-400 bg-stone-100 p-2 text-[10px] font-mono h-32 overflow-y-auto custom-paper-scrollbar">
+                          <div className="font-bold border-b border-stone-300 pb-1 mb-2 uppercase text-stone-800">Agent Logs</div>
+                          {messages.map((m, i) => {
+                            const userContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
+                            const agentContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
+                            const toolInvs = (m.parts ? m.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : ((m as any).toolInvocations || []));
+
+                            return (
+                              <div key={i} className="mb-2">
+                                {m.role === 'user' ? (
+                                  <div className="text-blue-700">USER: {userContent}</div>
+                                ) : (
+                                  <div className="text-green-850">
+                                    {agentContent && <div>AGENT: {agentContent}</div>}
+                                    {toolInvs.map((t: any, idx: number) => (
+                                      <div key={idx} className="ml-2 border-l-2 border-stone-300 pl-2 mt-1">
+                                        <span className="font-bold text-orange-700">TOOL CALLED: </span> {t.toolName}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </form>
