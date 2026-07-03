@@ -16,6 +16,7 @@ const envSchema = z.object({
   AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
   UPSTASH_REDIS_REST_URL: z.url('UPSTASH_REDIS_REST_URL must be a valid URL'),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1, 'UPSTASH_REDIS_REST_TOKEN is required'),
+  MISTRAL_API_KEY: z.string().min(1, 'Mistral API Key is required'),
 })
 
 const result = envSchema.safeParse(process.env)

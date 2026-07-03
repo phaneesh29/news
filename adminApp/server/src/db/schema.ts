@@ -1,4 +1,4 @@
-import { pgTable, timestamp, uuid, varchar, integer, text, boolean, pgEnum, index } from 'drizzle-orm/pg-core'
+import { pgTable, timestamp, uuid, varchar, integer, text, boolean, pgEnum, index, vector } from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
 
 
@@ -90,6 +90,7 @@ export const devNews = pgTable('dev_news', {
   tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
   authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
   isPublished: boolean('is_published').notNull().default(false),
+  contentEmbedding: vector('content_embedding', { dimensions: 1024 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 }, (table) => [

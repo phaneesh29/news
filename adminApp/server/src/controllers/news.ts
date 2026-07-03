@@ -1,9 +1,10 @@
 import { Context } from 'hono'
-import { desc, eq, lt, or, and, ilike, sql } from 'drizzle-orm'
+import { desc, eq, lt, or, and, ilike, sql, cosineDistance, asc } from 'drizzle-orm'
 import { db } from '../db/index.js'
 import { adminUsers, devNews } from '../db/schema.js'
 import { newsLikes } from '../db/userSchema.js'
 import { HTTPException } from 'hono/http-exception'
+import { generateNewsEmbedding } from '../utils/embeddings.js'
 
 const canManageNews = (role: string) => role === 'admin' || role === 'editor'
 
@@ -54,6 +55,13 @@ export const createNews = async (c: Context) => {
     isPublished?: boolean
   }
 
+  let contentEmbedding: number[] | null = null
+  try {
+    contentEmbedding = await generateNewsEmbedding(body.content)
+  } catch (err) {
+    console.error('Failed to generate news embedding:', err)
+  }
+
   const insertedNews = await db.insert(devNews)
     .values({
       title: body.title,
@@ -62,7 +70,8 @@ export const createNews = async (c: Context) => {
       priority: body.priority ?? 'low',
       tags: body.tags ?? [],
       isPublished: body.isPublished ?? false,
-      authorId: user.id
+      authorId: user.id,
+      contentEmbedding: contentEmbedding ?? undefined
     })
     .returning()
 
@@ -237,6 +246,11 @@ export const updateNews = async (c: Context) => {
 
   if (body.content !== undefined) {
     updates.content = body.content
+    try {
+      updates.contentEmbedding = await generateNewsEmbedding(body.content)
+    } catch (err) {
+      console.error('Failed to generate news embedding on update:', err)
+    }
   }
 
   if (body.sourceUrl !== undefined) {
@@ -289,4 +303,39 @@ export const deleteNews = async (c: Context) => {
   }
 
   return c.json({ message: 'News deleted successfully', id: news.id })
+}
+
+export const checkSimilarity = async (c: Context) => {
+  const user = c.get('user')
+
+  if (!canManageNews(user.role)) {
+    throw new HTTPException(403, { message: 'Only admins and editors can check news similarity' })
+  }
+
+  const body = (c.req as any).valid('json') as { content: string }
+  if (!body.content || body.content.trim() === '') {
+    return c.json({ message: 'Content is required for similarity check', similarNews: [] }, 200)
+  }
+
+  try {
+    const embedding = await generateNewsEmbedding(body.content)
+    
+    const similarNews = await db.select({
+      id: devNews.id,
+      title: devNews.title,
+      content: devNews.content,
+      priority: devNews.priority,
+      createdAt: devNews.createdAt,
+      similarity: sql<number>`1 - (${cosineDistance(devNews.contentEmbedding, embedding)})`
+    })
+    .from(devNews)
+    .where(sql`${devNews.contentEmbedding} IS NOT NULL`)
+    .orderBy((t) => asc(cosineDistance(devNews.contentEmbedding, embedding)))
+    .limit(1)
+
+    return c.json({ similarNews })
+  } catch (err) {
+    console.error('Failed to check similarity:', err)
+    throw new HTTPException(500, { message: 'Failed to perform similarity check' })
+  }
 }

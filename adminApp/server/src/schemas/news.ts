@@ -34,3 +34,7 @@ export const searchQuerySchema = z.object({
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().int().min(1).max(100))
 })
+
+export const checkSimilaritySchema = z.object({
+  content: z.string().trim().min(1, 'Content is required for similarity check')
+})
