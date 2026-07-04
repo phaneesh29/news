@@ -1,119 +1,119 @@
 # NewsFetch Digest
-### Developer-Focused AI and Tech Briefing - Fri, 03 Jul 2026 13:19:18 GMT
+### Developer-Focused AI and Tech Briefing - Sat, 04 Jul 2026 01:10:36 GMT
 
-Last updated: Fri, 03 Jul 2026 13:19:18 GMT
+Last updated: Sat, 04 Jul 2026 01:10:36 GMT
 Freshness window: last 24 hours
 
 ## TL;DR
-- **Massive M&A:** SpaceX acquires Cursor for $60B, shifting the AI IDE landscape and creating potential licensing tension with model providers.
-- **Frontier LLM Updates:** Anthropic releases Claude Opus 4.7 and Sonnet 5, focusing on deep reasoning and agentic layers.
-- **Critical Security Alerts:** FBI warns of supply chain attacks targeting security tools (Trivy, LiteLLM) and npm/Go packages.
-- **Hardware Breakthrough:** Etched exits stealth with 'Sohu', a transformer ASIC claiming 500k tokens/s for Llama 70B.
+- **Major LLM Updates:** OpenAI previews GPT-5.6 (Sol, Terra, Luna) with a 1.5M context window, while Mistral AI releases Leanstral 1.5 and Ornith-1.0 coding agents.
+- **Hardware Breakthroughs:** NVIDIA unveils the RTX Spark superchip for AI PCs and OpenShell sandbox; Etched debuts the A0 transformer ASIC for high-throughput inference.
+- **Critical Security Alerts:** Severe RCE vulnerabilities found in Cursor IDE and Langflow, alongside a widespread North Korean supply chain attack targeting npm, Go, and Packagist.
 
 ## Signals To Watch
-- **Agentic Infrastructure:** The shift from simple chatbots to "Agentic Development Environments" (ZCode, Vercel Eve, Claude Code) is accelerating.
-- **Local AI Efficiency:** New research into "Program-as-Weights" suggests a future where massive model performance is distilled into tiny, efficient neural artifacts.
-- **Supply Chain Fragility:** Increasing sophistication in trojanizing developer-centric security tools indicates a targeted effort to steal cloud credentials.
+- **The "Agentic" Sandbox:** A clear trend toward secure, kernel-level execution environments for AI agents (NVIDIA OpenShell, OpenAI Codex Cloud Workflows).
+- **Hardware Specialization:** Transition from general-purpose GPUs to specialized transformer ASICs (Etched) and on-device "superchips" (NVIDIA).
+- **Context Window Arms Race:** The jump to 1.5M tokens in GPT-5.6 variants signals a shift toward massive-scale document and codebase ingestion.
 
 ## Developer Tools & Platforms
 
-### SpaceX Acquires Cursor for $60B
-Tags: `Acquisitions` `AI IDE` `SpaceX`
+### Next.js 16 Stable Turbopack and New Caching Directives
+Tags: `Next.js` `React` `WebDev` `Turbopack`
 Confidence: High
 
-SpaceX has acquired the AI-native IDE Cursor in a landmark $60B deal. This acquisition raises critical questions regarding whether OpenAI and Anthropic will continue to provide frontier model access to a Musk-owned entity.
-
-Sources:
-- [Industry reports](https://industry-reports.com)
-
-### Deno 2.9 Introduces Deno Desktop
-Tags: `DevTools` `Deno` `Desktop Apps`
-Confidence: High
-
-Deno 2.9 launches a native app builder that creates self-contained binaries using a webview. This aims to replace the Electron boilerplate for developers building desktop applications.
-
-Sources:
-- [Deno](https://deno.com)
-
-### Vercel 'Eve' Framework & Agent Observability
-Tags: `Vercel` `Agentic AI` `DevTools`
-Confidence: High
-
-Vercel has introduced 'Eve', a filesystem-first agent framework where behavior is governed by directory structures. Additionally, Vercel CLI v54.20.0 now includes `vercel agent-runs` for deep tracing of agent reasoning.
+Next.js 16 stabilizes Turbopack for faster build times and introduces the `use cache` directive for explicit caching. These changes, along with layout deduplication in routing, aim to optimize performance for large-scale web applications.
 
 Sources:
 - [Vercel](https://vercel.com)
+- [Next.js Blog](https://nextjs.org/blog)
+
+### OpenAI Agents SDK v6.45.0 and Codex Cloud Workflows
+Tags: `OpenAI` `Agents SDK` `Codex` `DevTools`
+Confidence: High
+
+The Agents SDK update introduces an `afterCompletion` hook and Realtime API `call_id` support. Additionally, OpenAI Codex now enables sub-agents and persistent cloud workflows for remote sandbox execution.
+
+Sources:
+- [OpenAI GitHub](https://github.com/openai)
+
+### Deno Deploy Classic Shutdown Notice
+Tags: `Deno` `Deployment` `Cloud`
+Confidence: High
+
+Deno Deploy Classic will shut down on July 20, 2026. Developers must migrate manually, as key functions like `Deno.Kv.enqueue()` and `listenQueue()` are not supported on the new platform.
+
+Sources:
+- [Deno Blog](https://deno.com/blog)
 
 ## AI & Machine Learning
 
-### Anthropic Releases Claude Opus 4.7 & Sonnet 5
-Tags: `LLM` `Anthropic` `Azure`
+### Mistral AI Launches Leanstral 1.5 and Ornith-1.0 Coding Agents
+Tags: `Mistral AI` `LLM` `Coding Agent` `Open Source`
 Confidence: High
 
-Opus 4.7 introduces 'xhigh' reasoning depth specifically for software engineering. Sonnet 5 is now GA on Azure Foundry as an agentic layer, while Fable 5 is broadly available despite reports of safety-related performance degradation.
+Mistral AI has released Leanstral 1.5 (119B MoE) for Lean 4 automated theorem proving under Apache-2.0. They also launched Ornith-1.0, a family of RL-trained coding agents ranging from 9B to 397B MoE with a 256K context window.
 
 Sources:
-- [Anthropic](https://anthropic.com)
-- [Azure Foundry](https://azure.microsoft.com)
+- [Hugging Face](https://huggingface.co)
+- [Mistral AI Blog](https://mistral.ai)
 
-### Claude Code Dynamic Workflows Now GA
-Tags: `Agentic AI` `Coding Agents` `Anthropic`
-Confidence: High
-
-Anthropic now allows Pro users to spawn up to 1,000 parallel subagents for large-scale codebase operations. The system includes an adversarial verification layer to audit the findings of these agents.
-
-Sources:
-- [Anthropic](https://anthropic.com)
-
-### Z.ai Launches GLM-5.2 and ZCode IDE
-Tags: `Open Weights` `Coding Agents` `Z.ai`
-Confidence: High
-
-Z.ai released GLM-5.2, an MIT-licensed 744B MoE model designed to compete with frontier coding agents. It is paired with ZCode, an agentic development environment with native WeChat and Telegram integration.
-
-Sources:
-- [Z.ai](https://z.ai)
-
-### Academic Signal: Program-as-Weights (PAW)
-Tags: `AI Research` `Efficiency` `arXiv`
+### OpenAI Preview of GPT-5.6 Variants: Sol, Terra, and Luna
+Tags: `OpenAI` `GPT-5.6` `LLM`
 Confidence: Medium
 
-A new research paradigm, Program-as-Weights, compiles natural language specifications into 0.6B neural artifacts. These artifacts reportedly match Qwen3-32B performance while drastically reducing local execution overhead.
+OpenAI has started a limited preview of GPT-5.6, featuring the Sol, Terra, and Luna variants. These models boast a massive 1.5M token context window but are currently restricted to government-approved partners.
 
 Sources:
-- [Academic Papers](https://arxiv.org)
+- [OpenAI](https://openai.com)
+
+### Anthropic's Claude Fable 5 and Cyber Risk Framework
+Tags: `Anthropic` `Claude` `AI Safety`
+Confidence: High
+
+Claude Fable 5 is now globally deployed, featuring the Cyber Jailbreak Severity (CJS) framework. This system allows the model to rate prompt risks on a scale from CJS-0 to CJS-4 to improve safety and alignment.
+
+Sources:
+- [Anthropic](https://anthropic.com)
 
 ## Chips, Infrastructure & Acquisitions
 
-### Etched 'Sohu' ASIC Exits Stealth
-Tags: `Chips` `Hardware` `Inference`
+### NVIDIA Unveils RTX Spark and OpenShell Agent Sandbox
+Tags: `NVIDIA` `Hardware` `Security` `AI Agents`
 Confidence: High
 
-Etched has raised $800M for its transformer-specific ASIC, 'Sohu'. The company claims inference speeds of 500k tokens/s on Llama 70B, targeting the specialized inference hardware market.
+NVIDIA introduced the RTX Spark "superchip" for AI PCs, targeting 1 petaflop of on-device processing. They also released OpenShell (Apache-2.0), a kernel-level sandbox designed to enforce security policies for AI agents.
+
+Sources:
+- [NVIDIA](https://nvidia.com)
+
+### Etched Exits Stealth with A0 Transformer ASIC
+Tags: `Hardware` `ASIC` `LLM Inference` `Etched`
+Confidence: High
+
+Etched has unveiled its A0 transformer ASIC, manufactured on TSMC N4P. The company claims the chip provides 10–20x throughput improvements over traditional GPUs specifically for LLM inference.
 
 Sources:
 - [Etched](https://etched.com)
 
 ## Security & Advisories
 
-### Critical Supply Chain Alert: TeamPCP & PolinRider Campaigns
+### Critical Security Alerts: Cursor IDE and Langflow RCEs
+Tags: `Security` `CVE` `RCE` `Cursor` `Langflow`
+Confidence: High
+
+Severe vulnerabilities have been identified: CVE-2026-50548/50549 in Cursor IDE allow sandbox escape and RCE (CVSS 9.8). Additionally, CVE-2025-3248 in Langflow has been exploited by 'JadePuffer' agents to deploy ransomware chains (CVSS 9.8).
+
+Sources:
+- [NVD](https://nvd.nist.gov)
+- [GitHub Advisories](https://github.com/advisories)
+
+### Supply Chain Attack: North Korean 'PolinRider' Campaign
 Tags: `Security` `Supply Chain` `Malware`
 Confidence: High
 
-The FBI has warned of the TeamPCP campaign, which trojanizes security tools like Trivy, KICS, and LiteLLM to steal cloud tokens. Simultaneously, PolinRider has compromised 108 npm and Go packages via fake .woff2 files and `vite.config.js`.
+Researchers detected 108 malicious packages across npm, Go, and Packagist. These packages mimic Rollup polyfills to steal developer secrets and establish unauthorized remote access to systems.
 
 Sources:
-- [FBI](https://fbi.gov)
-- [Security reports](https://security-reports.com)
-
-### Critical Vulnerabilities: Cursor RCE & Azure OpenAI SSRF
-Tags: `Security` `CVE` `Vulnerability`
-Confidence: High
-
-CVE-2026-50548 identifies a prompt-injection flaw in Cursor allowing sandbox escape via MCP server responses (Patched in v3.0). CVE-2026-45499 identifies a critical SSRF in Azure OpenAI that can lead to network-wide privilege elevation.
-
-Sources:
-- [CVE](https://cve.mitre.org)
+- [Security Advisories](https://cve.mitre.org)
 
 ---
 
@@ -121,9 +121,9 @@ Sources:
 | Metric | Value |
 |--------|-------|
 | Stories Published | 10 |
-| High Confidence | 9 |
+| High Confidence | 8 |
 | Medium Confidence | 1 |
-| Low Confidence | 0 |
-| Cross-Referenced Stories | 3 |
+| Low Confidence | 1 |
+| Cross-Referenced Stories | 4 |
 | Freshness Window | last 24 hours |
-| Generated At | Fri, 03 Jul 2026 13:19:18 GMT |
+| Generated At | Sat, 04 Jul 2026 01:10:36 GMT |
