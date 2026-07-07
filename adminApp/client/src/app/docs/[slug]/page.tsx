@@ -41,6 +41,12 @@ export default function DocDetailPage() {
   const [showPreview, setShowPreview] = useState(false);
   
   const [parentOptions, setParentOptions] = useState<DocItem[]>([]);
+  const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({});
+
+  const toggleParent = (id: string) => {
+    setExpandedParents(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const [systemTime, setSystemTime] = useState("");
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     "DESK_INIT: Opening documentation dossier...",
@@ -149,6 +155,12 @@ export default function DocDetailPage() {
         setEditOrderIndex(docData.doc.orderIndex);
         setEditIsPublished(docData.doc.isPublished);
         addLog(`WIRE: Loaded record '${docData.doc.title.slice(0, 20)}...'`);
+        
+        if (docData.doc.parentId) {
+          setExpandedParents(prev => ({ ...prev, [docData.doc.parentId]: true }));
+        } else {
+          setExpandedParents(prev => ({ ...prev, [docData.doc.id]: true }));
+        }
         
         fetchParentOptions();
       } catch (err: any) {
@@ -454,6 +466,13 @@ Please modify or rewrite the documentation post according to the user instructio
             </form>
           ) : (
             <article className="text-left">
+              {selectedParent && (
+                <div className="mb-4">
+                  <Link href={`/docs/${selectedParent.slug}`} className="text-xs font-mono font-bold text-red-900 hover:underline uppercase tracking-wide flex items-center gap-1">
+                    &lt; Parent Chronicle: {selectedParent.title}
+                  </Link>
+                </div>
+              )}
               <div className="border-b-4 border-double border-stone-950 pb-4 mb-6 text-center relative">
                 <span className="font-mono text-[9px] text-stone-500 font-bold uppercase tracking-widest block mb-2">
                   DOCUMENTATION RECORD
@@ -485,6 +504,36 @@ Please modify or rewrite the documentation post according to the user instructio
                 className="font-serif text-[17px] leading-relaxed text-justify space-y-6 markdown-content text-stone-900 selection:bg-red-800/10"
                 dangerouslySetInnerHTML={{ __html: marked.parse(doc.content) as string }}
               />
+
+              {/* Sub-chronicles listed at the bottom of a parent */}
+              {(() => {
+                const subChronicles = parentOptions
+                  .filter(p => p.parentId === doc.id)
+                  .sort((a, b) => a.orderIndex - b.orderIndex);
+                
+                if (subChronicles.length === 0) return null;
+
+                return (
+                  <div className="mt-8 pt-6 border-t-4 border-double border-stone-950 text-left">
+                    <h4 className="font-['Playfair_Display',_Georgia,_serif] text-lg font-black uppercase text-stone-955 mb-3">
+                      📂 Sub-Chronicles in this dossier
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {subChronicles.map(child => (
+                        <Link 
+                          key={child.id} 
+                          href={`/docs/${child.slug}`} 
+                          className="bg-white border-2 border-stone-950 p-4 hover:shadow-[4px_4px_0px_#111] transition-all hover:bg-stone-50/50 flex flex-col gap-1 text-left rounded shadow-sm"
+                        >
+                          <span className="font-mono text-[9px] text-stone-500">ORDER: {child.orderIndex}</span>
+                          <h5 className="font-serif font-black text-xs uppercase text-stone-900 line-clamp-1">{child.title}</h5>
+                          <span className="font-mono text-[9px] text-stone-400 mt-1 truncate">/{child.slug}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="mt-8 pt-4 border-t border-dashed border-stone-300 flex flex-wrap justify-between items-center text-xs text-stone-500 font-mono">
                 <div>
@@ -547,6 +596,91 @@ Please modify or rewrite the documentation post according to the user instructio
               <span>SLUG: {doc.slug}</span>
             </div>
           </div>
+
+          {/* Table of Contents / Outline Tree Directory */}
+          {(() => {
+            const rootParents = parentOptions
+              .filter(p => !p.parentId || !parentOptions.some(parent => parent.id === p.parentId))
+              .sort((a, b) => a.orderIndex - b.orderIndex);
+
+            const getChildren = (pId: string) => {
+              return parentOptions.filter(p => p.parentId === pId).sort((a, b) => a.orderIndex - b.orderIndex);
+            };
+
+            return (
+              <div className="bg-[#fcfaf2] border-4 border-stone-950 p-6 flex flex-col relative shadow-[4px_4px_0px_#111] rounded text-left">
+                <h3 className="font-['Playfair_Display',_Georgia,_serif] text-base text-black uppercase tracking-wide font-black border-b-2 border-black pb-2 mb-4">
+                  ARCHIVE OUTLINE DIRECTORY
+                </h3>
+                
+                <div className="flex flex-col gap-1 overflow-y-auto max-h-[40vh] pr-2 custom-paper-scrollbar">
+                  {rootParents.map((node) => {
+                    const children = getChildren(node.id);
+                    const isExpanded = !!expandedParents[node.id];
+                    const hasChildren = children.length > 0;
+                    const isActive = node.id === doc.id;
+
+                    return (
+                      <div key={node.id} className="flex flex-col border-b border-stone-300/30 py-1">
+                        <div className={`flex items-center justify-between py-1 px-1.5 rounded transition-colors cursor-pointer group/node ${isActive ? 'bg-stone-200' : 'hover:bg-stone-200/50'}`}>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {hasChildren ? (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleParent(node.id);
+                                }}
+                                className="w-4 h-4 flex items-center justify-center text-stone-500 hover:text-black font-bold text-xs"
+                              >
+                                {isExpanded ? "▼" : "▶"}
+                              </button>
+                            ) : (
+                              <span className="w-4 h-4 flex items-center justify-center text-stone-300">•</span>
+                            )}
+                            <Link 
+                              href={`/docs/${node.slug}`}
+                              className={`text-xs font-mono font-bold truncate ${isActive ? 'text-red-900 font-black' : 'text-stone-850 hover:text-red-905'}`}
+                            >
+                              {node.title}
+                            </Link>
+                          </div>
+                          {isActive && (
+                            <span className="font-mono text-[8px] text-red-850 uppercase font-black tracking-wider">
+                              ACTIVE
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Nested Tree Children */}
+                        {hasChildren && isExpanded && (
+                          <div className="border-l border-stone-400/50 ml-3 pl-2 flex flex-col gap-1.5 mt-1 pb-1">
+                            {children.map(child => {
+                              const isChildActive = child.id === doc.id;
+                              return (
+                                <div key={child.id} className={`flex items-center justify-between py-0.5 px-1 rounded transition-colors group/subnode ${isChildActive ? 'bg-stone-200/80' : 'hover:bg-stone-200/50'}`}>
+                                  <Link 
+                                    href={`/docs/${child.slug}`}
+                                    className={`text-[11px] font-mono truncate flex-1 ${isChildActive ? 'text-red-900 font-bold' : 'text-stone-600 hover:text-red-900'}`}
+                                  >
+                                    📄 {child.title}
+                                  </Link>
+                                  {isChildActive && (
+                                    <span className="font-mono text-[7px] text-red-850 uppercase font-bold select-none">
+                                      ACTIVE
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* AI Assistant (Only visible when editing) */}
           {isEditing && (
