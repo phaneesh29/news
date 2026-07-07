@@ -332,7 +332,24 @@ Please modify or rewrite the blog post according to the user instructions. Make 
               </div>
 
               <div className="flex flex-col border-b border-stone-400 pb-2">
-                <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">UNIQUE SLUG</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const generated = editTitle
+                        .trim()
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")
+                        .replace(/[^a-z0-9-]/g, "");
+                      setEditSlug(generated);
+                    }}
+                    className="font-mono text-[9px] font-bold text-black hover:text-stone-700 uppercase border border-black px-2 py-0.5 rounded cursor-pointer transition-colors"
+                    disabled={!editTitle.trim()}
+                  >
+                    Generate from Title
+                  </button>
+                </div>
                 <input 
                   type="text" 
                   required 
@@ -389,7 +406,40 @@ Please modify or rewrite the blog post according to the user instructions. Make 
               </div>
             </form>
           ) : (
-            <article className="text-left">
+            <>
+              {/* Horizontal Control Board at the top of the main pane */}
+              <div className="flex flex-wrap items-center gap-3 border-b-2 border-stone-300 pb-4 mb-6 text-left w-full">
+                {canManage && (
+                  <>
+                    <button 
+                      onClick={handleTogglePublish} 
+                      className="font-mono text-[10px] sm:text-xs text-stone-900 border-2 border-stone-900 px-3.5 py-2 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
+                    >
+                      {blog.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
+                    </button>
+                    <button 
+                      onClick={() => { setIsEditing(true); addLog("INSPECTOR: Dossier opened in editing mode"); }} 
+                      className="font-mono text-[10px] sm:text-xs text-blue-900 border-2 border-blue-900 px-3.5 py-2 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
+                    >
+                      AMEND RECORD
+                    </button>
+                    <button 
+                      onClick={handlePurge} 
+                      className="font-mono text-[10px] sm:text-xs text-red-800 border-2 border-red-800 px-3.5 py-2 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
+                    >
+                      PURGE RECORD
+                    </button>
+                  </>
+                )}
+                <Link 
+                  href="/blogs" 
+                  className="font-mono text-[10px] sm:text-xs text-center text-stone-600 border-2 border-dashed border-stone-500 px-3.5 py-2 hover:bg-stone-100 transition-colors uppercase font-bold tracking-wider rounded sm:ml-auto"
+                >
+                  &lt; Return to Archives
+                </Link>
+              </div>
+
+              <article className="text-left">
               <div className="border-b-4 border-double border-stone-950 pb-4 mb-6 text-center relative">
                 <span className="font-mono text-[9px] text-stone-500 font-bold uppercase tracking-widest block mb-2">
                   DAILY DISPATCH WIRE LOG
@@ -427,56 +477,12 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                 </div>
               </div>
             </article>
+            </>
           )}
         </main>
 
         {/* Sidebar Controls & AI Assistant */}
         <aside className="lg:col-span-4 flex flex-col gap-6 w-full lg:sticky lg:top-8">
-          
-          {/* Action Center */}
-          <div className="bg-[#fcfaf2] border-4 border-stone-950 p-6 flex flex-col relative shadow-[4px_4px_0px_#111] rounded text-left">
-            <h3 className="font-['Playfair_Display',_Georgia,_serif] text-lg text-black uppercase tracking-wide font-black border-b-2 border-black pb-2 mb-4">
-              WIRE CONTROL BOARD
-            </h3>
-            
-            <div className="flex flex-col gap-3">
-              {canManage && !isEditing && (
-                <>
-                  <button 
-                    onClick={handleTogglePublish} 
-                    className="font-mono text-xs text-stone-900 border-2 border-stone-900 px-4 py-3 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
-                  >
-                    {blog.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
-                  </button>
-                  <button 
-                    onClick={() => { setIsEditing(true); addLog("INSPECTOR: Dossier opened in editing mode"); }} 
-                    className="font-mono text-xs text-blue-900 border-2 border-blue-900 px-4 py-3 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
-                  >
-                    AMEND RECORD
-                  </button>
-                  <button 
-                    onClick={handlePurge} 
-                    className="font-mono text-xs text-red-800 border-2 border-red-800 px-4 py-3 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
-                  >
-                    PURGE RECORD
-                  </button>
-                </>
-              )}
-              
-              <Link 
-                href="/blogs" 
-                className="font-mono text-xs text-center text-stone-700 border-2 border-dashed border-stone-500 px-4 py-3 hover:bg-stone-55 transition-colors uppercase font-bold tracking-wider rounded mt-2"
-              >
-                &lt; Return to Archives
-              </Link>
-            </div>
-            
-            <div className="mt-6 border-t border-stone-300 pt-4 font-mono text-[9px] text-stone-600 flex flex-col gap-1.5">
-              <span className="font-bold text-stone-850">SYSTEM TELEMETRY:</span>
-              <span className="truncate">RECORD ID: {blog.id}</span>
-              <span>SLUG: {blog.slug}</span>
-            </div>
-          </div>
 
           {/* AI Assistant (Only visible when editing) */}
           {isEditing && (
