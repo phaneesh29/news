@@ -20,7 +20,7 @@ export const updateDocSchema = z.object({
 })
 
 export const docParamsSchema = z.object({
-  id: z.uuid('Invalid doc ID')
+  slug: z.string().trim().min(1, 'Slug is required').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug format')
 })
 
 export const docSearchQuerySchema = z.object({

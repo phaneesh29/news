@@ -149,13 +149,13 @@ export const searchDocs = async (c: Context) => {
   return c.json({ docs: docResults })
 }
 
-export const getDocById = async (c: Context) => {
-  const id = c.req.param('id')!
+export const getDocBySlug = async (c: Context) => {
+  const slug = c.req.param('slug')!
 
   const docItems = await db.select(docSelect)
     .from(docs)
     .leftJoin(adminUsers, eq(docs.authorId, adminUsers.id))
-    .where(eq(docs.id, id))
+    .where(eq(docs.slug, slug))
     .limit(1)
 
   const doc = docItems[0]
@@ -174,7 +174,7 @@ export const updateDoc = async (c: Context) => {
     throw new HTTPException(403, { message: 'Only admins and editors can update docs' })
   }
 
-  const id = c.req.param('id')!
+  const slug = c.req.param('slug')!
 
   const body = await c.req.json() as {
     title?: string
@@ -200,7 +200,7 @@ export const updateDoc = async (c: Context) => {
   try {
     updatedDoc = await db.update(docs)
       .set(updates)
-      .where(eq(docs.id, id))
+      .where(eq(docs.slug, slug))
       .returning()
   } catch (error: any) {
     if (error.code === '23505') {
@@ -225,10 +225,10 @@ export const deleteDoc = async (c: Context) => {
     throw new HTTPException(403, { message: 'Only admins and editors can delete docs' })
   }
 
-  const id = c.req.param('id')!
+  const slug = c.req.param('slug')!
 
   const deletedDoc = await db.delete(docs)
-    .where(eq(docs.id, id))
+    .where(eq(docs.slug, slug))
     .returning({ id: docs.id })
 
   const doc = deletedDoc[0]
