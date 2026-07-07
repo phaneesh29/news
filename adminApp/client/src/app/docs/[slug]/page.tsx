@@ -589,12 +589,6 @@ Please modify or rewrite the documentation post according to the user instructio
                 &lt; Return to Archives
               </Link>
             </div>
-            
-            <div className="mt-6 border-t border-stone-300 pt-4 font-mono text-[9px] text-stone-600 flex flex-col gap-1.5">
-              <span className="font-bold text-stone-850">SYSTEM TELEMETRY:</span>
-              <span className="truncate">RECORD ID: {doc.id}</span>
-              <span>SLUG: {doc.slug}</span>
-            </div>
           </div>
 
           {/* Table of Contents / Outline Tree Directory */}
