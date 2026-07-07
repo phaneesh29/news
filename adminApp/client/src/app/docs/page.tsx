@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
+import Header from "../../components/Header";
 import { marked } from "marked";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -164,53 +165,10 @@ export default function DocsDashboardPage() {
   const canAdd = profile?.role === "admin" || profile?.role === "editor";
 
   return (
-    <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-stone-950 text-stone-900 font-serif">
+    <div className="min-h-screen w-full bg-[#f5f2e9] flex flex-col relative selection:bg-red-800/10 selection:text-stone-955 text-stone-900 font-serif">
       <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
       
-      <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
-        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
-          <div className="flex flex-col text-center md:text-left">
-            <Link href="/dashboard" className="font-['UnifrakturMaguntia',_Georgia,_serif] text-6xl sm:text-7xl drop-shadow-sm tracking-tight text-black select-none hover:opacity-80 border-b-4 border-double border-black transition-opacity pb-1 leading-none">
-              Dev Bits
-            </Link>
-            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase font-bold">
-              EDITORIAL DESK • STAFF ID: <span className="text-black">{profile?.email}</span> ({profile?.role?.toUpperCase()})
-            </span>
-          </div>
-
-          <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; News Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/blogs" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Blogs Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/docs" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Docs Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/digest" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; Digest Wire</Link>
-            {isAdmin && (
-              <>
-                <span className="text-stone-400">|</span>
-                <Link href="/feedback" className="text-stone-700 hover:text-stone-950 transition-colors">&gt; User Feedback</Link>
-              </>
-            )}
-          </div>
-
-          <div className="flex gap-3">
-            {isAdmin && (
-              <Link href="/settings" className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold">
-                Oversight Board
-              </Link>
-            )}
-            <button onClick={handleLogout} className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold cursor-pointer">
-              Log Out
-            </button>
-          </div>
-        </div>
-        <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
-          <span>VOL. CXXVI... No. 47190</span>
-          <span className="font-bold text-stone-950">{systemTime || "[ RETRIEVING TIME ]"}</span>
-          <span>PRICE: 10 CENTS</span>
-        </div>
-      </header>
+      <Header profile={profile} systemTime={systemTime} activeTab="docs" />
       {/* Filtering Logic for Parent-Child Hierarchy */}
       {(() => {
         const parents = docList.filter(item => 
@@ -225,81 +183,9 @@ export default function DocsDashboardPage() {
         const displayedDocs = searchQuery.trim() !== "" ? docList : parents;
 
         return (
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 max-w-[1600px] mx-auto w-full pb-8 items-start">
-            
-            {/* Left Column: Chronicle Outline Archive Tree Directory */}
-            <aside className="lg:col-span-4 bg-[#fcfaf2] border-4 border-stone-950 p-6 flex flex-col relative shadow-[4px_4px_0px_#111] rounded text-left min-h-[300px]">
-              <h3 className="font-['Playfair_Display',_Georgia,_serif] text-base text-black uppercase tracking-wide font-black border-b-2 border-black pb-2 mb-4">
-                ARCHIVE OUTLINE DIRECTORY
-              </h3>
-              <p className="font-serif text-[11px] text-stone-600 mb-4 leading-relaxed">
-                A hierarchical index of all documentation entries registered on the wire. Expand parents to reveal sub-chronicles.
-              </p>
-              
-              <div className="flex flex-col gap-1 overflow-y-auto max-h-[50vh] pr-2 custom-paper-scrollbar">
-                {parents.map((node) => {
-                  const children = getChildrenForParent(node.id);
-                  const isExpanded = !!expandedParents[node.id];
-                  const hasChildren = children.length > 0;
-
-                  return (
-                    <div key={node.id} className="flex flex-col border-b border-stone-300/30 py-1">
-                      <div className="flex items-center justify-between py-1 px-1.5 hover:bg-stone-200/50 rounded transition-colors cursor-pointer group/node">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {hasChildren ? (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleParent(node.id);
-                              }}
-                              className="w-4 h-4 flex items-center justify-center text-stone-500 hover:text-black font-bold text-xs"
-                            >
-                              {isExpanded ? "▼" : "▶"}
-                            </button>
-                          ) : (
-                            <span className="w-4 h-4 flex items-center justify-center text-stone-300">•</span>
-                          )}
-                          <Link 
-                            href={`/docs/${node.slug}`}
-                            className="text-xs font-mono font-bold text-stone-850 hover:text-red-900 truncate"
-                          >
-                            {node.title}
-                          </Link>
-                        </div>
-                        <span className="opacity-0 group-hover/node:opacity-100 font-mono text-[9px] text-stone-400 uppercase select-none">
-                          VIEW
-                        </span>
-                      </div>
-                      
-                      {/* Nested Tree Children */}
-                      {hasChildren && isExpanded && (
-                        <div className="border-l border-stone-400/50 ml-3 pl-2 flex flex-col gap-1.5 mt-1 pb-1">
-                          {children.map(child => (
-                            <div key={child.id} className="flex items-center justify-between py-0.5 px-1 hover:bg-stone-200/50 rounded transition-colors group/subnode">
-                              <Link 
-                                href={`/docs/${child.slug}`}
-                                className="text-[11px] font-mono text-stone-600 hover:text-red-900 truncate flex-1"
-                              >
-                                📄 {child.title}
-                              </Link>
-                              <span className="opacity-0 group-hover/subnode:opacity-100 font-mono text-[8px] text-stone-400 uppercase select-none">
-                                READ
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                {docList.length === 0 && (
-                  <span className="font-mono text-xs text-stone-450 italic">No dossiers loaded.</span>
-                )}
-              </div>
-            </aside>
-
-            {/* Right Column: Main Chronicle Feed */}
-            <main className="lg:col-span-8 w-full flex flex-col relative">
+          <div className="flex-1 max-w-6xl mx-auto w-full pb-8 px-4 sm:px-6 md:px-8 pt-6">
+            {/* Main Chronicle Feed */}
+            <main className="w-full flex flex-col relative">
               <div className="bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-8 shadow-[4px_4px_0px_#111] flex flex-col relative z-10 rounded">
                 <div className="flex justify-between items-center text-[10px] font-mono text-stone-600 uppercase tracking-widest border-b border-stone-300 pb-1.5 mb-2 pl-2">
                   <span>SYSTEM DOCUMENTATION</span>
@@ -329,7 +215,7 @@ export default function DocsDashboardPage() {
 
                 <div className="flex flex-col gap-6 pl-2">
                   <div className="bg-[#fcfaf2] border-2 border-stone-955 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
-                    <div className="space-y-6 relative z-10 max-h-[65vh] overflow-y-auto pr-1 custom-scrollbar">
+                    <div className="space-y-6 relative z-10">
                       {displayedDocs.map((item) => {
                         const children = getChildrenForParent(item.id);
                         const isExpanded = !!expandedParents[item.id];
@@ -344,9 +230,12 @@ export default function DocsDashboardPage() {
                             >
                               <div className="flex flex-wrap gap-2.5 items-center justify-between">
                                 <div className="flex gap-2.5 items-center">
-                                  <span className="font-mono text-[10px] text-stone-600">
-                                    🕒 {new Date(item.createdAt).toLocaleString()}
-                                  </span>
+                                  <div className="flex items-center gap-1 text-stone-500 font-mono text-[10px]">
+                                    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{new Date(item.createdAt).toLocaleString()}</span>
+                                  </div>
                                   <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded tracking-wide uppercase font-bold ${item.isPublished ? "border-green-600 text-green-700 bg-green-50" : "border-stone-400 text-stone-500 bg-stone-100"}`}>
                                     {item.isPublished ? 'PUBLISHED' : 'DRAFT'}
                                   </span>
@@ -390,36 +279,57 @@ export default function DocsDashboardPage() {
                                     e.stopPropagation();
                                     toggleParent(item.id);
                                   }}
-                                  className="font-mono text-[10px] font-bold text-stone-700 hover:text-black flex items-center gap-1.5 transition-colors cursor-pointer border border-stone-400 hover:border-black rounded px-2.5 py-1.5 bg-stone-100"
+                                  className="font-mono text-[10px] font-bold text-stone-900 hover:text-white hover:bg-stone-950 flex items-center gap-2 transition-all cursor-pointer border-2 border-stone-950 rounded px-3 py-1.5 bg-transparent shadow-[2px_2px_0px_#111] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px]"
                                 >
-                                  {isExpanded ? "📖 HIDE SUB-CHRONICLES" : `📂 SHOW SUB-CHRONICLES (${children.length})`}
+                                  <svg 
+                                    className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    strokeWidth="2.5" 
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                  </svg>
+                                  <span>
+                                    {isExpanded ? "HIDE SUB-CHRONICLES" : `SHOW SUB-CHRONICLES (${children.length})`}
+                                  </span>
                                 </button>
-
-                                {isExpanded && (
-                                  <div className="mt-3 pl-4 border-l-2 border-stone-950 flex flex-col gap-3.5 animate-fadeIn">
-                                    {children.map((child) => (
-                                      <div 
-                                        key={child.id}
-                                        onClick={() => router.push(`/docs/${child.slug}`)}
-                                        className="bg-[#fdfcf7] hover:bg-stone-50 border border-stone-400 p-4 rounded shadow-xs cursor-pointer flex flex-col gap-1.5 transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                                      >
-                                        <div className="flex justify-between items-center text-[9px] font-mono text-stone-500">
-                                          <span>ORDER: {child.orderIndex}</span>
-                                          <span className={`px-1 rounded ${child.isPublished ? 'text-green-700 bg-green-50' : 'text-stone-500 bg-stone-100'}`}>
-                                            {child.isPublished ? 'PUBLISHED' : 'DRAFT'}
-                                          </span>
+                                 {isExpanded && (
+                                  <div className="mt-4 pl-4 flex flex-col gap-3 animate-fadeIn">
+                                    {children.map((child, idx) => {
+                                      const isLast = idx === children.length - 1;
+                                      return (
+                                        <div key={child.id} className="relative flex items-center pl-7 group">
+                                          {/* Vertical connector line segment */}
+                                          <div className={`absolute left-0 w-0.5 border-l-2 border-dashed border-stone-400/60 ${isLast ? 'h-[50%] top-0' : 'h-full top-0'}`}></div>
+                                          {/* Horizontal connector line segment */}
+                                          <div className="absolute left-0 top-1/2 w-7 h-0.5 border-t-2 border-dashed border-stone-400/60"></div>
+                                          
+                                          <div 
+                                            onClick={() => router.push(`/docs/${child.slug}`)}
+                                            className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between bg-white hover:bg-stone-50/80 border-2 border-stone-955/20 hover:border-stone-955 p-3.5 rounded shadow-[2px_2px_0px_rgba(0,0,0,0.05)] hover:shadow-[3px_3px_0px_#111] cursor-pointer transition-all gap-2 text-left"
+                                          >
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                              <span className="font-mono text-[9px] bg-red-800/10 text-red-900 border border-red-900/20 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">
+                                                Sub {idx + 1}
+                                              </span>
+                                              <svg className="w-4 h-4 text-stone-500 group-hover:text-red-900 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                              </svg>
+                                              <span className="font-serif font-black text-sm uppercase text-stone-900 group-hover:text-red-900 truncate">
+                                                {child.title}
+                                              </span>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3 font-mono text-[10px] text-stone-500">
+                                              <span className="font-bold text-stone-400 group-hover:text-red-900">
+                                                ORDER Index: {child.orderIndex}
+                                              </span>
+                                            </div>
+                                          </div>
                                         </div>
-                                        <h5 className="font-serif font-black text-sm uppercase text-stone-900 hover:text-red-900 leading-snug">
-                                          {child.title}
-                                        </h5>
-                                        <p className="font-serif text-xs text-stone-650 leading-relaxed line-clamp-1">
-                                          {child.content}
-                                        </p>
-                                        <div className="text-[10px] font-mono text-stone-500 mt-1 border-t border-dotted border-stone-300 pt-1.5">
-                                          slug: /{child.slug}
-                                        </div>
-                                      </div>
-                                    ))}
+                                      );
+                                    })}
                                   </div>
                                 )}
                               </div>
@@ -430,7 +340,14 @@ export default function DocsDashboardPage() {
                       })}
                       {docList.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
-                          <div className="w-12 h-12 text-stone-400 mb-4"><svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="7" y1="8" x2="17" y2="8" /><line x1="7" y1="12" x2="17" y2="12" /><line x1="7" y1="16" x2="13" y2="16" /></svg></div>
+                          <div className="w-12 h-12 text-stone-400 mb-4">
+                            <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <rect x="3" y="4" width="18" height="16" rx="2" />
+                              <line x1="7" y1="8" x2="17" y2="8" />
+                              <line x1="7" y1="12" x2="17" y2="12" />
+                              <line x1="7" y1="16" x2="13" y2="16" />
+                            </svg>
+                          </div>
                           <h3 className="font-playfair text-stone-800 text-lg font-black uppercase">Wire Archives Empty</h3>
                           <p className="font-serif text-sm text-stone-600 max-w-sm leading-relaxed mt-2">No documentation files are currently logged on the wire feed.</p>
                         </div>

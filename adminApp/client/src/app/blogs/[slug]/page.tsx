@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
+import Header from "../../../components/Header";
 import { marked } from "marked";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -264,47 +265,12 @@ Please modify or rewrite the blog post according to the user instructions. Make 
   const canManage = profile?.role === "admin" || profile?.role === "editor";
 
   return (
-    <div className="min-h-screen w-screen bg-[#f5f2e9] flex flex-col p-4 sm:p-6 md:p-8 relative selection:bg-red-800/10 selection:text-stone-950 text-stone-900 font-serif">
+    <div className="min-h-screen w-full bg-[#f5f2e9] flex flex-col relative selection:bg-red-800/10 selection:text-stone-955 text-stone-900 font-serif">
       <div className="absolute inset-0 desk-mat pointer-events-none z-0"></div>
 
-      <header className="w-full flex flex-col items-center border-b-4 border-double border-stone-950 pb-4 mb-6 relative z-10 max-w-[1600px] mx-auto px-1">
-        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 mb-2">
-          <div className="flex flex-col text-center md:text-left">
-            <Link href="/dashboard" className="font-['UnifrakturMaguntia',_Georgia,_serif] text-6xl sm:text-7xl drop-shadow-sm tracking-tight text-black select-none hover:opacity-80 border-b-4 border-double border-black transition-opacity pb-1 leading-none">
-              Dev Bits
-            </Link>
-            <span className="font-mono text-[10px] text-stone-600 tracking-wider mt-2 uppercase font-bold">
-              EDITORIAL DESK • STAFF ID: <span className="text-black">{profile?.email}</span> ({profile?.role?.toUpperCase()})
-            </span>
-          </div>
+      <Header profile={profile} systemTime={systemTime} activeTab="blogs" />
 
-          <div className="flex gap-4 text-xs font-mono font-bold uppercase tracking-widest bg-stone-200/50 px-4 py-2 border border-stone-400/50 rounded">
-            <Link href="/dashboard" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; News Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/blogs" className="text-stone-900 border-b border-stone-900 hover:text-red-900 transition-colors font-black border-b-2 border-red-850 pb-0.5">&gt; Blogs Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/docs" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; Docs Feed</Link>
-            <span className="text-stone-400">|</span>
-            <Link href="/digest" className="text-stone-700 hover:text-stone-955 transition-colors">&gt; Digest Wire</Link>
-          </div>
-
-          <div className="flex gap-3">
-            <Link href="/blogs" className="font-mono text-[10px] sm:text-xs border-2 border-stone-500 text-stone-700 bg-white px-3 py-1.5 hover:bg-stone-100 transition-all uppercase tracking-widest flex items-center font-bold">
-              &lt; Back to Feed
-            </Link>
-            <button onClick={handleLogout} className="font-mono text-[10px] sm:text-xs border-2 border-black text-black bg-white px-3 py-1.5 hover:bg-black hover:text-white transition-all uppercase tracking-widest flex items-center font-bold cursor-pointer">
-              Log Out
-            </button>
-          </div>
-        </div>
-        <div className="w-full flex justify-between items-center border-t border-stone-850 pt-2 text-[10px] font-mono uppercase text-stone-700 tracking-wider">
-          <span>VOL. CXXVI... No. 47190</span>
-          <span className="font-bold text-stone-950">{systemTime || "[ RETRIEVING TIME ]"}</span>
-          <span>PRICE: 10 CENTS</span>
-        </div>
-      </header>
-
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 max-w-7xl mx-auto w-full pb-12 items-start">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 max-w-6xl mx-auto w-full pb-12 items-start px-4 sm:px-6 md:px-8 pt-6">
         
         {/* Main Content Area */}
         <main className={`lg:col-span-8 bg-[#fcfaf2] border-4 border-double border-stone-950 p-6 md:p-10 shadow-[4px_4px_0px_#111] flex flex-col relative rounded transition-all duration-300`}>
