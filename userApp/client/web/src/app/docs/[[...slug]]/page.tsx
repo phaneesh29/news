@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense, use } from "react";
 import { useSession, signIn } from "@/lib/auth-client";
+import { useSettings } from "@/components/SettingsProvider";
 import { fetchDocsList, searchDocsList, type DocItem } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -19,7 +20,10 @@ import {
   FileText,
   Bookmark,
   Folder,
-  File
+  FolderOpen,
+  File,
+  X,
+  Star
 } from "lucide-react";
 import { marked } from "marked";
 import Navbar from "@/components/Navbar";
@@ -112,6 +116,7 @@ interface DocsContentProps {
 function DocsContent({ urlSlug }: DocsContentProps) {
   const { data: sessionData, isPending } = useSession();
   const activeUser = sessionData?.user;
+  const { settings } = useSettings();
   const router = useRouter();
 
   const [allDocs, setAllDocs] = useState<DocItem[]>([]);
@@ -171,15 +176,19 @@ function DocsContent({ urlSlug }: DocsContentProps) {
           const tree = buildDocTree(fetchedDocs);
           setDocTree(tree);
 
-          // Expand all modules by default on the directory page
-          setExpandedModules(new Set(tree.map(n => n.id)));
-
           let initialDoc: DocItem | null = null;
+          const expandedSet = new Set<string>();
 
           if (urlSlug) {
             initialDoc = fetchedDocs.find(d => d.slug === urlSlug) || null;
             if (initialDoc) {
               setSelectedDoc(initialDoc);
+              // Expand the parent module of the selected document so the sidebar tree reveals it
+              if (initialDoc.parentId) {
+                expandedSet.add(initialDoc.parentId);
+              } else {
+                expandedSet.add(initialDoc.id);
+              }
             } else {
               // If slug is provided but not found, redirect to directory
               setSelectedDoc(null);
@@ -188,6 +197,8 @@ function DocsContent({ urlSlug }: DocsContentProps) {
           } else {
             setSelectedDoc(null);
           }
+
+          setExpandedModules(expandedSet);
         } else {
           setError(res.message || "Failed to retrieve documentation.");
         }
@@ -367,36 +378,98 @@ function DocsContent({ urlSlug }: DocsContentProps) {
         })
     : [];
 
+  // Get active parent node from the tree
+  const sidebarParentNode = selectedDoc
+    ? selectedDoc.parentId
+      ? docTree.find((node) => node.id === selectedDoc.parentId) || null
+      : docTree.find((node) => node.id === selectedDoc.id) || null
+    : null;
+
   // Render Sidebar Tree (recursive)
   const renderDocTree = (nodes: DocNode[], depth = 0) => {
     return nodes.map((node) => {
       const isSelected = selectedDoc?.id === node.id;
       const hasChildren = node.children.length > 0;
-      return (
-        <div key={node.id} className="flex flex-col">
-          <Tooltip>
+      const isExpanded = expandedModules.has(node.id);
+      
+      if (depth === 0) {
+        // Root module header card
+        return (
+          <div key={node.id} className="flex flex-col border border-current/15 overflow-hidden bg-current/[0.01]">
+            <div
+              className={`p-1.5 hover:bg-current/[0.03] transition-colors w-full flex items-center justify-between border-b border-current/10 ${
+                isSelected
+                  ? "text-[#cc785c] font-black bg-[#cc785c]/5"
+                  : "text-current"
+              }`}
+            >
+              {/* Left: folder icon & text - selects parent */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleSelectDoc(node)}
+                    className="flex-1 text-left flex items-center gap-2.5 py-2 px-2 text-xs font-serif uppercase tracking-tight truncate cursor-pointer font-bold"
+                  >
+                    {isExpanded ? (
+                      <FolderOpen className="h-4 w-4 text-[#cc785c] shrink-0" />
+                    ) : (
+                      <Folder className="h-4 w-4 text-[#cc785c] shrink-0" />
+                    )}
+                    <span className="truncate">{node.title}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-serif text-xs bg-[#1f1e1b] text-[#fcfaf2] border-[#cc785c]/30">
+                  {node.title}
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Right: chevron - toggles expand/collapse only */}
+              {hasChildren && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleModule(node.id);
+                  }}
+                  className="p-2 hover:bg-current/5 rounded-sm transition-colors text-current/40 hover:text-current/80 cursor-pointer shrink-0 ml-1"
+                  title={isExpanded ? "Collapse" : "Expand"}
+                >
+                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </button>
+              )}
+            </div>
+            
+            {hasChildren && isExpanded && (
+              <div className="relative flex flex-col mb-1 space-y-0.5">
+                {renderDocTree(node.children, depth + 1)}
+              </div>
+            )}
+          </div>
+        );
+      } else {
+        // Child chapters
+        return (
+          <Tooltip key={node.id}>
             <TooltipTrigger asChild>
               <button
                 onClick={() => handleSelectDoc(node)}
-                className={`text-left py-2 px-3 my-0.5 text-xs font-serif tracking-tight border-l-2 hover:bg-[#cc785c]/10 transition-colors cursor-pointer w-full flex items-center justify-between ${
+                className={`text-left py-2.5 pl-2 pr-3 hover:bg-current/[0.03] transition-all cursor-pointer w-full flex items-center justify-between relative border-b border-current/5 last:border-b-0 ${
                   isSelected
-                    ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/15"
-                    : "border-transparent text-current/80 hover:text-current font-semibold"
+                    ? "text-[#cc785c] font-bold bg-[#cc785c]/10"
+                    : "text-current/80 hover:text-current font-medium"
                 }`}
-                style={{ paddingLeft: `${Math.max(12, depth * 16 + 12)}px` }}
               >
-                <span className="truncate flex items-center gap-2">
-                  {hasChildren ? (
-                    <Folder className={`h-3.5 w-3.5 shrink-0 ${isSelected ? "opacity-100" : "opacity-60"}`} />
-                  ) : (
-                    <File className={`h-3 w-3 shrink-0 ${isSelected ? "opacity-100" : "opacity-50"}`} />
-                  )}
+                {/* Active node left vertical accent bar */}
+                {isSelected && (
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#cc785c]" />
+                )}
+
+                <span className="truncate flex items-center gap-2 text-xs font-serif">
+                  <File className={`h-3.5 w-3.5 shrink-0 ${isSelected ? "text-[#cc785c] opacity-100" : "text-current/50"}`} />
                   {node.title}
                 </span>
-                {hasChildren && (
-                  <span className="text-[9px] opacity-50 font-mono scale-90">
-                    [{node.children.length}]
-                  </span>
+
+                {isSelected && (
+                  <Star className="h-3 w-3 text-[#cc785c] fill-[#cc785c]/10 shrink-0 ml-2" />
                 )}
               </button>
             </TooltipTrigger>
@@ -404,13 +477,8 @@ function DocsContent({ urlSlug }: DocsContentProps) {
               {node.title}
             </TooltipContent>
           </Tooltip>
-          {hasChildren && (
-            <div className="flex flex-col ml-1">
-              {renderDocTree(node.children, depth + 1)}
-            </div>
-          )}
-        </div>
-      );
+        );
+      }
     });
   };
 
@@ -441,18 +509,19 @@ function DocsContent({ urlSlug }: DocsContentProps) {
           </div>
         </header>
       ) : (
-        <header className="border-b border-current/10 px-4 bg-transparent select-none">
-          <div className="mx-auto max-w-5xl py-12 sm:py-16">
-            <div className="flex items-center gap-2 text-[11px] font-mono text-[#cc785c] uppercase tracking-widest mb-4">
-              <BookOpen className="h-4 w-4" />
-              Documentation
+        <header className="py-8 md:py-12 border-b-4 border-double border-current px-4 bg-transparent text-inherit text-center select-none">
+          <div className="mx-auto max-w-7xl flex flex-col items-center space-y-4">
+            <div className="w-full flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest border-b border-current pb-2 max-w-5xl">
+              <span>OFFICIAL PUBLICATIONS</span>
+              <span>TECHNICAL REFERENCE LIBRARY</span>
+              <span>SECTION D // DOCUMENTATION</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-inherit">
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-inherit uppercase font-blackletter border-b border-current pb-4 w-full max-w-5xl">
               Developer Docs
             </h1>
-            <p className="text-base sm:text-lg text-current/50 mt-3 max-w-xl">
-              Guides, tutorials, and references to help you build with our platform.
-            </p>
+            <div className="text-center font-serif italic text-sm border-t border-b border-current py-1 max-w-xl px-6 font-newspaper">
+              "Guides, tutorials, and references to help you build with our platform."
+            </div>
           </div>
         </header>
       )}
@@ -484,24 +553,44 @@ function DocsContent({ urlSlug }: DocsContentProps) {
           <div className="grid lg:grid-cols-12 gap-8 items-start relative">
             
             {/* Side Navigation panel — only when viewing a document */}
-            <aside className="lg:col-span-3 lg:sticky lg:top-24 flex flex-col gap-6 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-current p-4 vintage-shadow-sm w-full">
-              <div className="border-b-2 border-current pb-3">
+            <aside className="lg:col-span-3 lg:sticky lg:top-24 flex flex-col gap-6 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-[#111111] dark:border-[#e6dfd8] p-4 vintage-shadow-sm w-full">
+              <div className="border-b border-current/15 pb-2 flex items-center justify-between">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-1.5">
-                  <BookOpen className="h-4 w-4" />
-                  Navigation
+                  <BookOpen className="h-3.5 w-3.5 animate-pulse" />
+                  Archives Index
                 </span>
+                {selectedDoc && (
+                  <button 
+                    onClick={() => {
+                      setSelectedDoc(null);
+                      router.push("/docs");
+                    }}
+                    className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider border border-current/30 hover:border-[#cc785c] hover:text-[#cc785c] px-1.5 py-0.5 transition-colors cursor-pointer font-bold"
+                  >
+                    <ArrowLeft className="h-2.5 w-2.5" />
+                    Close
+                  </button>
+                )}
               </div>
 
               {/* Sidebar search box */}
-              <div className="flex items-center gap-1.5 bg-[#faf9f5] dark:bg-[#252320] border border-current/25 px-2.5 py-1.5 font-mono text-xs">
+              <div className="relative flex items-center gap-1.5 bg-[#faf9f5] dark:bg-[#252320] border border-current/25 focus-within:border-[#cc785c] focus-within:ring-1 focus-within:ring-[#cc785c]/20 px-2.5 py-1.5 font-mono text-xs transition-all duration-150">
                 <Search className="h-3.5 w-3.5 opacity-60 shrink-0" />
                 <input 
                   type="text" 
-                  placeholder="Search articles..." 
+                  placeholder="Filter archives..." 
                   value={searchQuery} 
                   onChange={(e) => setSearchQuery(e.target.value)} 
-                  className="w-full bg-transparent outline-none border-none p-0 text-inherit text-xs font-mono"
+                  className="w-full bg-transparent outline-none border-none p-0 text-inherit text-xs font-mono placeholder:opacity-50"
                 />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery("")} 
+                    className="hover:text-[#cc785c] opacity-60 hover:opacity-100 transition-opacity p-0.5 cursor-pointer shrink-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
                 {isSearching && (
                   <Loader2 className="h-3 w-3 animate-spin text-[#cc785c] shrink-0" />
                 )}
@@ -517,7 +606,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
               </button>
 
               {/* Documentation Tree List */}
-              <nav className={`flex flex-col ${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex max-h-[calc(100vh-18rem)] overflow-y-auto pr-1 border-t border-current/10 pt-2 lg:border-t-0 lg:pt-0`}>
+              <nav className={`flex flex-col ${isMobileMenuOpen ? 'flex' : 'hidden'} lg:flex max-h-[calc(100vh-18rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-1 border-t border-current/10 pt-2 lg:border-t-0 lg:pt-0`}>
                 {searchMode ? (
                   isSearching ? (
                     <span className="font-serif text-xs italic px-3 py-4 text-center text-current/60 flex items-center justify-center gap-2">
@@ -556,84 +645,28 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                     </span>
                   )
                 ) : (
-                  <div>
-                    {/* Back to all docs */}
-                    <button
-                      onClick={() => {
-                        setSelectedDoc(null);
-                        router.push("/docs");
-                      }}
-                      className="flex items-center gap-1.5 w-full text-left py-1.5 px-3 mb-4 text-[10px] font-mono uppercase tracking-wider border border-current/35 hover:bg-[#cc785c]/10 text-current hover:text-[#cc785c] transition-colors cursor-pointer font-bold"
-                    >
-                      <ArrowLeft className="h-3 w-3" />
-                      All Documents
-                    </button>
-
-                    {/* Parent Header */}
-                    {sidebarParent && (
-                      <div className="mb-4 border-b border-current/15 pb-3">
-                        <span className="font-mono text-[8px] uppercase tracking-widest text-[#cc785c] block mb-1 font-bold">
-                          MODULE
-                        </span>
-                        <button
-                          onClick={() => handleSelectDoc(sidebarParent)}
-                          className={`text-left w-full py-2 px-3 border-2 font-serif font-black uppercase text-[11px] tracking-tight transition-colors flex items-center justify-between gap-1.5 cursor-pointer ${
-                            selectedDoc.id === sidebarParent.id
-                              ? "bg-[#cc785c]/15 border-[#cc785c] text-[#cc785c]"
-                              : "bg-[#faf9f5] dark:bg-[#252320] border-current/40 hover:border-[#cc785c] hover:text-[#cc785c] text-current"
-                          }`}
-                        >
-                          <span className="truncate flex items-center gap-1.5">
-                            <BookOpen className="h-3.5 w-3.5 shrink-0" />
-                            {sidebarParent.title}
-                          </span>
-                          {sidebarSiblings.length > 0 && (
-                            <span className="text-[8px] opacity-60 font-mono">
-                              [{sidebarSiblings.length}]
-                            </span>
-                          )}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Chapters list */}
-                    {sidebarSiblings.length > 0 && (
-                      <div className="flex flex-col space-y-0.5">
-                        <span className="font-mono text-[8px] uppercase tracking-widest text-current/50 px-3 mb-1.5 block">
-                          CHAPTERS & SECTIONS
-                        </span>
-                        {sidebarSiblings.map((sibling) => {
-                          const isSelected = selectedDoc.id === sibling.id;
-                          return (
-                            <Tooltip key={sibling.id}>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => handleSelectDoc(sibling)}
-                                  className={`text-left py-2 px-3 text-xs font-serif tracking-tight border-l-2 hover:bg-[#cc785c]/10 transition-colors cursor-pointer w-full flex items-center gap-2 ${
-                                    isSelected
-                                      ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/15"
-                                      : "border-transparent text-current/80 hover:text-current font-semibold"
-                                  }`}
-                                >
-                                  <File className={`h-3 w-3 shrink-0 ${isSelected ? "opacity-100" : "opacity-50"}`} />
-                                  <span className="truncate">{sibling.title}</span>
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" className="font-serif text-xs bg-[#1f1e1b] text-[#fcfaf2] border-[#cc785c]/30">
-                                {sibling.title}
-                              </TooltipContent>
-                            </Tooltip>
-                          );
-                        })}
-                      </div>
+                  <div className="flex flex-col space-y-1">
+                    <span className="font-mono text-[8px] uppercase tracking-widest text-[#cc785c] px-3 mb-2 block font-bold">
+                      CURRENT MODULE INDEX
+                    </span>
+                    {sidebarParentNode ? (
+                      renderDocTree([sidebarParentNode])
+                    ) : (
+                      renderDocTree(docTree)
                     )}
                   </div>
                 )}
               </nav>
+
+              {/* Navigation Tips Footer */}
+              <div className="border-t border-current/10 pt-3 flex items-center gap-1.5 text-[9px] font-mono text-current/50 select-none">
+                <span className="w-3.5 h-3.5 rounded-full border border-current/30 flex items-center justify-center font-bold text-[8px] shrink-0">i</span>
+                <span>Tip: Click folders to toggle chapters</span>
+              </div>
             </aside>
 
             {/* Document Content View Pane */}
-            <div className="lg:col-span-9 bg-[#fcfaf2] dark:bg-[#252320] border-2 border-current p-6 sm:p-10 md:p-14 vintage-shadow">
+            <div className="lg:col-span-9 bg-[#fcfaf2] dark:bg-[#252320] border-2 border-[#111111] dark:border-[#e6dfd8] p-6 sm:p-10 md:p-14 vintage-shadow-lg">
               <div className="max-w-3xl mx-auto space-y-6">
                 {/* Article header metadata */}
                 <div className="space-y-4 border-b border-current/15 pb-4 text-left">
@@ -649,6 +682,32 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                     <span>
                       // SLUG: /{selectedDoc.slug}
                     </span>
+                  </div>
+
+                  {/* Breadcrumbs */}
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono text-current/60 uppercase select-none pb-2 border-b border-current/10">
+                    <button 
+                      onClick={() => {
+                        setSelectedDoc(null);
+                        router.push("/docs");
+                      }}
+                      className="hover:text-[#cc785c] transition-colors uppercase font-bold cursor-pointer"
+                    >
+                      Docs
+                    </button>
+                    <ChevronRight className="h-3 w-3 opacity-60" />
+                    {sidebarParent && (
+                      <>
+                        <button 
+                          onClick={() => handleSelectDoc(sidebarParent)}
+                          className="hover:text-[#cc785c] transition-colors uppercase font-bold cursor-pointer"
+                        >
+                          {sidebarParent.title}
+                        </button>
+                        <ChevronRight className="h-3 w-3 opacity-60" />
+                      </>
+                    )}
+                    <span className="text-[#cc785c] font-black truncate max-w-[200px] sm:max-w-xs">{selectedDoc.title}</span>
                   </div>
 
                   <h2 className="font-serif text-2xl sm:text-4xl font-black leading-tight text-inherit uppercase font-newspaper">
@@ -707,21 +766,19 @@ function DocsContent({ urlSlug }: DocsContentProps) {
 
             {/* Search */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-current/30" />
+              <div className="flex items-center gap-2 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-[#111111] dark:border-[#e6dfd8] px-3 py-3 font-mono text-xs shadow-[2px_2px_0px_#111111] dark:shadow-[2px_2px_0px_#e6dfd8] focus-within:shadow-none transition-all">
+                <span className="text-[#cc785c] font-bold uppercase shrink-0">// SEARCH:</span>
+                <input 
+                  type="text" 
+                  placeholder="Search docs..." 
+                  value={searchQuery} 
+                  onChange={(e) => setSearchQuery(e.target.value)} 
+                  className="w-full bg-transparent outline-none border-none p-0 text-inherit text-xs font-mono"
+                />
+                {isSearching && (
+                  <Loader2 className="h-4 w-4 animate-spin text-[#cc785c] shrink-0" />
+                )}
               </div>
-              <input 
-                type="text" 
-                placeholder="Search docs..." 
-                value={searchQuery} 
-                onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full bg-transparent border border-current/12 focus:border-[#cc785c]/50 focus:ring-1 focus:ring-[#cc785c]/20 rounded-lg pl-11 pr-4 py-2.5 text-sm outline-none transition-all placeholder:text-current/30"
-              />
-              {isSearching && (
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                  <Loader2 className="h-4 w-4 animate-spin text-[#cc785c]" />
-                </div>
-              )}
             </div>
 
             {/* Search results */}
@@ -739,11 +796,11 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                       <Link
                         key={item.id}
                         href={`/docs/${item.slug}`}
-                        className="group flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-current/[0.04] transition-colors"
+                        className="group flex items-center gap-3 px-4 py-3 border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] hover:-translate-y-0.5 transition-all vintage-shadow-sm"
                       >
-                        <FileText className="h-4 w-4 shrink-0 text-current/25 group-hover:text-[#cc785c] transition-colors" />
-                        <span className="text-sm font-medium truncate group-hover:text-[#cc785c] transition-colors">{item.title}</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-current/15 group-hover:text-[#cc785c] ml-auto shrink-0 transition-colors" />
+                        <FileText className="h-4 w-4 shrink-0 text-current/50 group-hover:text-[#cc785c] transition-colors" />
+                        <span className="text-sm font-serif font-bold truncate group-hover:text-[#cc785c] transition-colors">{item.title}</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-[#cc785c] ml-auto shrink-0 transition-all" />
                       </Link>
                     ))}
                   </div>
@@ -759,7 +816,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                 {docTree.map((parent) => {
                   const isExpanded = expandedModules.has(parent.id);
                   return (
-                    <div key={parent.id} className="border border-current/10 rounded-lg overflow-hidden">
+                    <div key={parent.id} className="border-2 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] rounded-none vintage-shadow overflow-hidden">
 
                       {/* Module header */}
                       <div className="flex items-center">
@@ -770,14 +827,18 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                           <div className={`shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}>
                             <ChevronDown className="h-4 w-4 text-current/40" />
                           </div>
-                          <div className="w-8 h-8 rounded-md bg-[#cc785c]/10 flex items-center justify-center shrink-0">
-                            <BookOpen className="h-4 w-4 text-[#cc785c]" />
+                          <div className="w-8 h-8 border border-current bg-current/5 flex items-center justify-center shrink-0">
+                            {isExpanded ? (
+                              <FolderOpen className="h-4 w-4 text-[#cc785c]" />
+                            ) : (
+                              <Folder className="h-4 w-4 text-[#cc785c]" />
+                            )}
                           </div>
                           <div className="min-w-0">
-                            <h3 className="text-sm font-semibold tracking-tight text-inherit truncate">
+                            <h3 className="text-sm font-semibold tracking-tight text-inherit truncate font-serif font-black uppercase">
                               {parent.title}
                             </h3>
-                            <span className="text-xs text-current/40">
+                            <span className="text-xs text-current/40 font-mono">
                               {parent.children.length} chapter{parent.children.length !== 1 ? 's' : ''}
                             </span>
                           </div>
@@ -785,7 +846,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
 
                         <Link
                           href={`/docs/${parent.slug}`}
-                          className="group shrink-0 flex items-center gap-1.5 px-5 py-4 text-xs font-medium text-[#cc785c] hover:underline underline-offset-2 transition-all"
+                          className="group shrink-0 flex items-center gap-1.5 px-5 py-4 text-xs font-bold text-[#cc785c] hover:underline underline-offset-2 transition-all font-mono uppercase"
                         >
                           <span className="hidden sm:inline">Overview</span>
                           <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -801,21 +862,21 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                             opacity: isExpanded ? 1 : 0,
                           }}
                         >
-                          <div className="border-t border-current/8 mx-5" />
-                          <div className="py-2 px-5">
+                          <div className="border-t border-current/10 mx-5" />
+                          <div className="py-2 px-5 flex flex-col space-y-1">
                             {parent.children.map((child) => (
                               <Link
                                 key={child.id}
                                 href={`/docs/${child.slug}`}
-                                className="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-current/[0.04] transition-colors"
+                                className="group flex items-center gap-3 px-3 py-2 hover:bg-current/[0.04] transition-colors w-full"
                               >
-                                <span className="w-5 h-5 rounded bg-current/[0.05] flex items-center justify-center shrink-0">
-                                  <FileText className="h-3 w-3 text-current/30 group-hover:text-[#cc785c] transition-colors" />
+                                <span className="w-5 h-5 border border-current bg-current/5 flex items-center justify-center shrink-0">
+                                  <FileText className="h-3 w-3 text-current/50 group-hover:text-[#cc785c] transition-colors" />
                                 </span>
-                                <span className="text-[13px] text-current/70 group-hover:text-[#cc785c] transition-colors truncate">
+                                <span className="text-[13px] text-current/80 group-hover:text-[#cc785c] transition-colors truncate font-serif font-bold">
                                   {child.title}
                                 </span>
-                                <ChevronRight className="h-3 w-3 text-current/15 group-hover:text-[#cc785c]/50 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-all" />
+                                <ChevronRight className="h-3 w-3 text-current/40 group-hover:text-[#cc785c]/80 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-all" />
                               </Link>
                             ))}
                           </div>

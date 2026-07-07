@@ -294,6 +294,16 @@
   color: #ff9d3b !important;
 }
 
+/* Override background colors of elements that have light mode backgrounds under Amber CRT */
+.--theme-amber-terminal .bg-\[\#fcfaf2\],
+.--theme-amber-terminal .bg-\[\#faf9f5\],
+.--theme-amber-terminal .bg-\[\#efe9de\],
+.--theme-amber-terminal .bg-\[\#efe9de\]\/10,
+.--theme-amber-terminal .bg-\[\#efe9de\]\/20,
+.--theme-amber-terminal .bg-\[\#efe9de\]\/30 {
+  background-color: var(--card) !important;
+}
+
 /* Allow critical status badges, alerts, active buttons, and logs to stand out in Amber CRT */
 .--theme-amber-terminal .text-white { color: #ffffff !important; }
 .--theme-amber-terminal .text-emerald-400 { color: #34d399 !important; }
@@ -320,6 +330,16 @@
 .--theme-green-terminal *:not(.newspaper-theme-nav):not(.newspaper-theme-nav *) {
   border-color: rgba(68, 238, 119, 0.4) !important;
   color: #44ee77 !important;
+}
+
+/* Override background colors of elements that have light mode backgrounds under Green CRT */
+.--theme-green-terminal .bg-\[\#fcfaf2\],
+.--theme-green-terminal .bg-\[\#faf9f5\],
+.--theme-green-terminal .bg-\[\#efe9de\],
+.--theme-green-terminal .bg-\[\#efe9de\]\/10,
+.--theme-green-terminal .bg-\[\#efe9de\]\/20,
+.--theme-green-terminal .bg-\[\#efe9de\]\/30 {
+  background-color: var(--card) !important;
 }
 
 /* Allow critical status badges, alerts, active buttons, and logs to stand out in Green CRT */
