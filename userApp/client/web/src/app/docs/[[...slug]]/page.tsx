@@ -11,6 +11,7 @@ import {
   Loader2,
   BookOpen,
   ChevronRight,
+  ChevronDown,
   Menu,
   Sparkles,
   ArrowRight,
@@ -131,6 +132,19 @@ function DocsContent({ urlSlug }: DocsContentProps) {
   const [shareUrl, setShareUrl] = useState("");
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+
+  const toggleModule = (id: string) => {
+    setExpandedModules(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     setShareUrl(window.location.href);
@@ -157,21 +171,22 @@ function DocsContent({ urlSlug }: DocsContentProps) {
           const tree = buildDocTree(fetchedDocs);
           setDocTree(tree);
 
+          // Expand all modules by default on the directory page
+          setExpandedModules(new Set(tree.map(n => n.id)));
+
           let initialDoc: DocItem | null = null;
 
           if (urlSlug) {
             initialDoc = fetchedDocs.find(d => d.slug === urlSlug) || null;
-          }
-
-          if (!initialDoc && tree.length > 0) {
-            initialDoc = tree[0];
             if (initialDoc) {
-              router.replace(`/docs/${initialDoc.slug}`);
+              setSelectedDoc(initialDoc);
+            } else {
+              // If slug is provided but not found, redirect to directory
+              setSelectedDoc(null);
+              router.replace("/docs");
             }
-          }
-
-          if (initialDoc) {
-            setSelectedDoc(initialDoc);
+          } else {
+            setSelectedDoc(null);
           }
         } else {
           setError(res.message || "Failed to retrieve documentation.");
@@ -187,12 +202,18 @@ function DocsContent({ urlSlug }: DocsContentProps) {
     loadDocs();
   }, [activeUser?.id, urlSlug, router]);
 
-  // Sync selected doc when URL slug changes
+  // Sync selected doc when URL slug changes or is reset
   useEffect(() => {
-    if (allDocs.length > 0 && urlSlug) {
-      const doc = allDocs.find(d => d.slug === urlSlug);
-      if (doc) {
-        setSelectedDoc(doc);
+    if (allDocs.length > 0) {
+      if (urlSlug) {
+        const doc = allDocs.find(d => d.slug === urlSlug);
+        if (doc) {
+          setSelectedDoc(doc);
+        } else {
+          setSelectedDoc(null);
+        }
+      } else {
+        setSelectedDoc(null);
       }
     }
   }, [urlSlug, allDocs]);
@@ -330,6 +351,22 @@ function DocsContent({ urlSlug }: DocsContentProps) {
     }
   };
 
+  // Get active parent & siblings for navigation
+  const sidebarParent = selectedDoc
+    ? selectedDoc.parentId
+      ? allDocs.find((d) => d.id === selectedDoc.parentId) || null
+      : selectedDoc
+    : null;
+
+  const sidebarSiblings = selectedDoc && sidebarParent
+    ? allDocs
+        .filter((d) => d.parentId === sidebarParent.id)
+        .sort((a, b) => {
+          if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        })
+    : [];
+
   // Render Sidebar Tree (recursive)
   const renderDocTree = (nodes: DocNode[], depth = 0) => {
     return nodes.map((node) => {
@@ -389,25 +426,39 @@ function DocsContent({ urlSlug }: DocsContentProps) {
         />
       </div>
 
-      {/* Editorial Documentation Header */}
-      <header className="py-6 border-b-4 border-double border-current px-4 bg-transparent text-center select-none">
-        <div className="mx-auto max-w-7xl flex flex-col items-center space-y-3">
-          <div className="w-full flex justify-between items-center text-[9px] md:text-xs font-mono uppercase tracking-widest border-b border-current pb-1.5 max-w-7xl">
-            <span>OPERATIVE INSTRUCTIONS</span>
-            <span>SYSTEM DIRECTORY & DOCUMENTATION</span>
-            <span>SECTION D // REFERENCE</span>
+      {/* Header */}
+      {selectedDoc ? (
+        <header className="py-6 border-b-4 border-double border-current px-4 bg-transparent text-center select-none">
+          <div className="mx-auto max-w-7xl flex flex-col items-center space-y-3">
+            <div className="w-full flex justify-between items-center text-[9px] md:text-xs font-mono uppercase tracking-widest border-b border-current pb-1.5 max-w-7xl">
+              <span>OPERATIVE INSTRUCTIONS</span>
+              <span>{selectedDoc.title}</span>
+              <span>SECTION D // REFERENCE</span>
+            </div>
+            <h1 className="font-serif text-4xl sm:text-6xl font-black tracking-tight text-inherit uppercase font-blackletter border-b border-current pb-2 w-full max-w-7xl">
+              Reference Board
+            </h1>
           </div>
-          <h1 className="font-serif text-4xl sm:text-6xl font-black tracking-tight text-inherit uppercase font-blackletter border-b border-current pb-2 w-full max-w-7xl">
-            Reference Board
-          </h1>
-          <div className="text-center font-serif italic text-xs md:text-sm border-t border-b border-current py-0.5 max-w-xl px-4 font-newspaper">
-            "Official manuals, operational procedures and technical schematics."
+        </header>
+      ) : (
+        <header className="border-b border-current/10 px-4 bg-transparent select-none">
+          <div className="mx-auto max-w-5xl py-12 sm:py-16">
+            <div className="flex items-center gap-2 text-[11px] font-mono text-[#cc785c] uppercase tracking-widest mb-4">
+              <BookOpen className="h-4 w-4" />
+              Documentation
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-inherit">
+              Developer Docs
+            </h1>
+            <p className="text-base sm:text-lg text-current/50 mt-3 max-w-xl">
+              Guides, tutorials, and references to help you build with our platform.
+            </p>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      {/* Main Grid View */}
-      <main className="flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content */}
+      <main className={`flex-1 mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 ${selectedDoc ? 'max-w-7xl' : 'max-w-5xl'}`}>
         
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -429,14 +480,15 @@ function DocsContent({ urlSlug }: DocsContentProps) {
             <p className="text-sm font-serif italic text-[#c64545]">{error}</p>
           </div>
         ) : (
+          selectedDoc ? (
           <div className="grid lg:grid-cols-12 gap-8 items-start relative">
             
-            {/* Side Navigation panel */}
+            {/* Side Navigation panel — only when viewing a document */}
             <aside className="lg:col-span-3 lg:sticky lg:top-24 flex flex-col gap-6 bg-[#fcfaf2] dark:bg-[#1f1e1b] border-2 border-current p-4 vintage-shadow-sm w-full">
               <div className="border-b-2 border-current pb-3">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#cc785c] flex items-center gap-1.5">
                   <BookOpen className="h-4 w-4" />
-                  Documentation Index
+                  Navigation
                 </span>
               </div>
 
@@ -460,7 +512,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
                 className="lg:hidden flex items-center justify-between border border-current/30 px-3 py-2 text-xs font-serif bg-[#faf9f5] dark:bg-[#252320] font-bold"
               >
-                <span>{selectedDoc ? selectedDoc.title : "Select Document"}</span>
+                <span>{selectedDoc.title}</span>
                 <Menu className="h-4 w-4 text-[#cc785c]" />
               </button>
 
@@ -504,96 +556,286 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                     </span>
                   )
                 ) : (
-                  allDocs.length > 0 ? (
-                    renderDocTree(docTree)
-                  ) : (
-                    <span className="font-serif text-xs italic px-3 py-4 text-center text-current/60">
-                      No documentation files published.
-                    </span>
-                  )
+                  <div>
+                    {/* Back to all docs */}
+                    <button
+                      onClick={() => {
+                        setSelectedDoc(null);
+                        router.push("/docs");
+                      }}
+                      className="flex items-center gap-1.5 w-full text-left py-1.5 px-3 mb-4 text-[10px] font-mono uppercase tracking-wider border border-current/35 hover:bg-[#cc785c]/10 text-current hover:text-[#cc785c] transition-colors cursor-pointer font-bold"
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                      All Documents
+                    </button>
+
+                    {/* Parent Header */}
+                    {sidebarParent && (
+                      <div className="mb-4 border-b border-current/15 pb-3">
+                        <span className="font-mono text-[8px] uppercase tracking-widest text-[#cc785c] block mb-1 font-bold">
+                          MODULE
+                        </span>
+                        <button
+                          onClick={() => handleSelectDoc(sidebarParent)}
+                          className={`text-left w-full py-2 px-3 border-2 font-serif font-black uppercase text-[11px] tracking-tight transition-colors flex items-center justify-between gap-1.5 cursor-pointer ${
+                            selectedDoc.id === sidebarParent.id
+                              ? "bg-[#cc785c]/15 border-[#cc785c] text-[#cc785c]"
+                              : "bg-[#faf9f5] dark:bg-[#252320] border-current/40 hover:border-[#cc785c] hover:text-[#cc785c] text-current"
+                          }`}
+                        >
+                          <span className="truncate flex items-center gap-1.5">
+                            <BookOpen className="h-3.5 w-3.5 shrink-0" />
+                            {sidebarParent.title}
+                          </span>
+                          {sidebarSiblings.length > 0 && (
+                            <span className="text-[8px] opacity-60 font-mono">
+                              [{sidebarSiblings.length}]
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Chapters list */}
+                    {sidebarSiblings.length > 0 && (
+                      <div className="flex flex-col space-y-0.5">
+                        <span className="font-mono text-[8px] uppercase tracking-widest text-current/50 px-3 mb-1.5 block">
+                          CHAPTERS & SECTIONS
+                        </span>
+                        {sidebarSiblings.map((sibling) => {
+                          const isSelected = selectedDoc.id === sibling.id;
+                          return (
+                            <Tooltip key={sibling.id}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={() => handleSelectDoc(sibling)}
+                                  className={`text-left py-2 px-3 text-xs font-serif tracking-tight border-l-2 hover:bg-[#cc785c]/10 transition-colors cursor-pointer w-full flex items-center gap-2 ${
+                                    isSelected
+                                      ? "border-[#cc785c] text-[#cc785c] font-black bg-[#cc785c]/15"
+                                      : "border-transparent text-current/80 hover:text-current font-semibold"
+                                  }`}
+                                >
+                                  <File className={`h-3 w-3 shrink-0 ${isSelected ? "opacity-100" : "opacity-50"}`} />
+                                  <span className="truncate">{sibling.title}</span>
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="font-serif text-xs bg-[#1f1e1b] text-[#fcfaf2] border-[#cc785c]/30">
+                                {sibling.title}
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 )}
               </nav>
             </aside>
 
             {/* Document Content View Pane */}
             <div className="lg:col-span-9 bg-[#fcfaf2] dark:bg-[#252320] border-2 border-current p-6 sm:p-10 md:p-14 vintage-shadow">
-              {selectedDoc ? (
-                <div className="max-w-3xl mx-auto space-y-6">
-                  {/* Article header metadata */}
-                  <div className="space-y-4 border-b border-current/15 pb-4 text-left">
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-[#cc785c] flex flex-wrap items-center gap-4 select-none">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        Refreshed {new Date(selectedDoc.updatedAt).toLocaleDateString(undefined, {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric"
-                        })}
-                      </span>
-                      <span>
-                        // SLUG: /{selectedDoc.slug}
-                      </span>
-                    </div>
-
-                    <h2 className="font-serif text-2xl sm:text-4xl font-black leading-tight text-inherit uppercase font-newspaper">
-                      {selectedDoc.title}
-                    </h2>
-
-                    {/* Share buttons */}
-                    {shareUrl && (
-                      <ShareBriefing url={shareUrl} title={selectedDoc.title} className="pt-3 border-t border-[#e6dfd8]/30 dark:border-current/10 mt-4" />
-                    )}
+              <div className="max-w-3xl mx-auto space-y-6">
+                {/* Article header metadata */}
+                <div className="space-y-4 border-b border-current/15 pb-4 text-left">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#cc785c] flex flex-wrap items-center gap-4 select-none">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      Refreshed {new Date(selectedDoc.updatedAt).toLocaleDateString(undefined, {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                      })}
+                    </span>
+                    <span>
+                      // SLUG: /{selectedDoc.slug}
+                    </span>
                   </div>
 
-                  {/* Inner Page Headings (Table of Contents) for quick scroll navigation */}
-                  {toc.length > 0 && (
-                    <div className="bg-[#efe9de]/30 dark:bg-[#1f1e1b]/40 border-t border-b border-current/15 py-3 select-none">
-                      <p className="font-mono text-[10px] font-black uppercase text-[#cc785c] tracking-widest mb-2 px-1">
-                        Document Outline Index
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 px-1 font-mono text-[10.5px] mt-3">
-                        {toc.map((item, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleScrollToHeading(item.id)}
-                            className={`hover:text-[#cc785c] text-left transition-colors flex items-center gap-2 cursor-pointer border-l-2 pl-2 py-0.5 ${
-                              activeHeadingId === item.id 
-                                ? "text-[#cc785c] font-bold border-[#cc785c]" 
-                                : "text-current/70 border-current/15 hover:border-[#cc785c]/40"
-                            }`}
-                          >
-                            <Bookmark className={`h-2.5 w-2.5 scale-75 shrink-0 ${activeHeadingId === item.id ? "opacity-100" : "opacity-40"}`} />
-                            <span className="truncate w-full">{item.text}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                  <h2 className="font-serif text-2xl sm:text-4xl font-black leading-tight text-inherit uppercase font-newspaper">
+                    {selectedDoc.title}
+                  </h2>
+
+                  {/* Share buttons */}
+                  {shareUrl && (
+                    <ShareBriefing url={shareUrl} title={selectedDoc.title} className="pt-3 border-t border-[#e6dfd8]/30 dark:border-current/10 mt-4" />
                   )}
-
-                  {/* Parsed Markdown Body */}
-                  <div 
-                    className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35"
-                    dangerouslySetInnerHTML={{ __html: htmlContent }}
-                  />
-
-                  {/* Operational Footer info */}
-                  <div className="border-t border-current/15 pt-6 text-[10px] font-mono text-current/60 select-none text-left">
-                    <span className="block">// REFERENCE MANUAL ARCHIVAL SYSTEM</span>
-                    <span className="block mt-1">CONFIDENTIALITY STATUS: APPROVED FOR PUBLIC DISPATCH</span>
-                  </div>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <BookOpen className="h-12 w-12 opacity-35 text-[#cc785c] mb-4 animate-pulse" />
-                  <h3 className="font-serif text-lg font-black uppercase font-newspaper">Dossier Unselected</h3>
-                  <p className="font-serif text-xs text-current/70 max-w-xs mt-2">
-                    Please choose an instruction manual or report from the index on the left.
-                  </p>
+
+                {/* Inner Page Headings (Table of Contents) for quick scroll navigation */}
+                {toc.length > 0 && (
+                  <div className="bg-[#efe9de]/30 dark:bg-[#1f1e1b]/40 border-t border-b border-current/15 py-3 select-none">
+                    <p className="font-mono text-[10px] font-black uppercase text-[#cc785c] tracking-widest mb-2 px-1">
+                      Document Outline Index
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 px-1 font-mono text-[10.5px] mt-3">
+                      {toc.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleScrollToHeading(item.id)}
+                          className={`hover:text-[#cc785c] text-left transition-colors flex items-center gap-2 cursor-pointer border-l-2 pl-2 py-0.5 ${
+                            activeHeadingId === item.id 
+                              ? "text-[#cc785c] font-bold border-[#cc785c]" 
+                              : "text-current/70 border-current/15 hover:border-[#cc785c]/40"
+                          }`}
+                        >
+                          <Bookmark className={`h-2.5 w-2.5 scale-75 shrink-0 ${activeHeadingId === item.id ? "opacity-100" : "opacity-40"}`} />
+                          <span className="truncate w-full">{item.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Parsed Markdown Body */}
+                <div 
+                  className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35"
+                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                />
+
+                {/* Operational Footer info */}
+                <div className="border-t border-current/15 pt-6 text-[10px] font-mono text-current/60 select-none text-left">
+                  <span className="block">// REFERENCE MANUAL ARCHIVAL SYSTEM</span>
+                  <span className="block mt-1">CONFIDENTIALITY STATUS: APPROVED FOR PUBLIC DISPATCH</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          ) : (
+          /* ========== DIRECTORY VIEW — Dev Docs Style ========== */
+          <div className="space-y-8">
+
+            {/* Search */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-current/30" />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Search docs..." 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="w-full bg-transparent border border-current/12 focus:border-[#cc785c]/50 focus:ring-1 focus:ring-[#cc785c]/20 rounded-lg pl-11 pr-4 py-2.5 text-sm outline-none transition-all placeholder:text-current/30"
+              />
+              {isSearching && (
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-[#cc785c]" />
                 </div>
               )}
             </div>
 
+            {/* Search results */}
+            {searchMode ? (
+              <div>
+                {isSearching ? (
+                  <div className="flex items-center justify-center gap-3 py-16">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#cc785c]" />
+                    <span className="text-sm text-current/50">Searching...</span>
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="space-y-1">
+                    <p className="text-xs text-current/40 mb-4">{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</p>
+                    {searchResults.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={`/docs/${item.slug}`}
+                        className="group flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-current/[0.04] transition-colors"
+                      >
+                        <FileText className="h-4 w-4 shrink-0 text-current/25 group-hover:text-[#cc785c] transition-colors" />
+                        <span className="text-sm font-medium truncate group-hover:text-[#cc785c] transition-colors">{item.title}</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-current/15 group-hover:text-[#cc785c] ml-auto shrink-0 transition-colors" />
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-current/40 text-center py-16">
+                    No results found.
+                  </p>
+                )}
+              </div>
+            ) : (
+              /* Modules */
+              <div className="flex flex-col gap-6">
+                {docTree.map((parent) => {
+                  const isExpanded = expandedModules.has(parent.id);
+                  return (
+                    <div key={parent.id} className="border border-current/10 rounded-lg overflow-hidden">
+
+                      {/* Module header */}
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => toggleModule(parent.id)}
+                          className="group flex items-center gap-3 flex-1 px-5 py-4 hover:bg-current/[0.03] transition-colors cursor-pointer text-left"
+                        >
+                          <div className={`shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}>
+                            <ChevronDown className="h-4 w-4 text-current/40" />
+                          </div>
+                          <div className="w-8 h-8 rounded-md bg-[#cc785c]/10 flex items-center justify-center shrink-0">
+                            <BookOpen className="h-4 w-4 text-[#cc785c]" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="text-sm font-semibold tracking-tight text-inherit truncate">
+                              {parent.title}
+                            </h3>
+                            <span className="text-xs text-current/40">
+                              {parent.children.length} chapter{parent.children.length !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </button>
+
+                        <Link
+                          href={`/docs/${parent.slug}`}
+                          className="group shrink-0 flex items-center gap-1.5 px-5 py-4 text-xs font-medium text-[#cc785c] hover:underline underline-offset-2 transition-all"
+                        >
+                          <span className="hidden sm:inline">Overview</span>
+                          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        </Link>
+                      </div>
+
+                      {/* Children */}
+                      {parent.children.length > 0 && (
+                        <div 
+                          className="overflow-hidden transition-all duration-200 ease-in-out"
+                          style={{
+                            maxHeight: isExpanded ? `${parent.children.length * 48 + 16}px` : '0px',
+                            opacity: isExpanded ? 1 : 0,
+                          }}
+                        >
+                          <div className="border-t border-current/8 mx-5" />
+                          <div className="py-2 px-5">
+                            {parent.children.map((child) => (
+                              <Link
+                                key={child.id}
+                                href={`/docs/${child.slug}`}
+                                className="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-current/[0.04] transition-colors"
+                              >
+                                <span className="w-5 h-5 rounded bg-current/[0.05] flex items-center justify-center shrink-0">
+                                  <FileText className="h-3 w-3 text-current/30 group-hover:text-[#cc785c] transition-colors" />
+                                </span>
+                                <span className="text-[13px] text-current/70 group-hover:text-[#cc785c] transition-colors truncate">
+                                  {child.title}
+                                </span>
+                                <ChevronRight className="h-3 w-3 text-current/15 group-hover:text-[#cc785c]/50 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-all" />
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {!searchMode && docTree.length === 0 && (
+              <div className="text-center py-20">
+                <BookOpen className="h-10 w-10 text-current/15 mx-auto mb-4" />
+                <h3 className="text-base font-semibold mb-1">No docs yet</h3>
+                <p className="text-sm text-current/40">Documentation will appear here once published.</p>
+              </div>
+            )}
           </div>
+          )
         )}
       </main>
 
