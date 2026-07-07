@@ -465,7 +465,40 @@ Please modify or rewrite the documentation post according to the user instructio
               </div>
             </form>
           ) : (
-            <article className="text-left">
+            <>
+              {/* Horizontal Control Board at the top of the main pane */}
+              <div className="flex flex-wrap items-center gap-3 border-b-2 border-stone-300 pb-4 mb-6 text-left w-full">
+                {canManage && (
+                  <>
+                    <button 
+                      onClick={handleTogglePublish} 
+                      className="font-mono text-[10px] sm:text-xs text-stone-900 border-2 border-stone-900 px-3.5 py-2 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
+                    >
+                      {doc.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
+                    </button>
+                    <button 
+                      onClick={() => { setIsEditing(true); addLog("INSPECTOR: Dossier opened in editing mode"); }} 
+                      className="font-mono text-[10px] sm:text-xs text-blue-900 border-2 border-blue-900 px-3.5 py-2 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
+                    >
+                      AMEND RECORD
+                    </button>
+                    <button 
+                      onClick={handlePurge} 
+                      className="font-mono text-[10px] sm:text-xs text-red-800 border-2 border-red-800 px-3.5 py-2 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
+                    >
+                      PURGE RECORD
+                    </button>
+                  </>
+                )}
+                <Link 
+                  href="/docs" 
+                  className="font-mono text-[10px] sm:text-xs text-center text-stone-600 border-2 border-dashed border-stone-500 px-3.5 py-2 hover:bg-stone-100 transition-colors uppercase font-bold tracking-wider rounded sm:ml-auto"
+                >
+                  &lt; Return to Archives
+                </Link>
+              </div>
+
+              <article className="text-left">
               {selectedParent && (
                 <div className="mb-4">
                   <Link href={`/docs/${selectedParent.slug}`} className="text-xs font-mono font-bold text-red-900 hover:underline uppercase tracking-wide flex items-center gap-1">
@@ -546,50 +579,12 @@ Please modify or rewrite the documentation post according to the user instructio
                 </div>
               </div>
             </article>
+            </>
           )}
         </main>
 
         {/* Sidebar Controls & AI Assistant */}
         <aside className="lg:col-span-4 flex flex-col gap-6 w-full lg:sticky lg:top-8">
-          
-          {/* Action Center */}
-          <div className="bg-[#fcfaf2] border-4 border-stone-950 p-6 flex flex-col relative shadow-[4px_4px_0px_#111] rounded text-left">
-            <h3 className="font-['Playfair_Display',_Georgia,_serif] text-lg text-black uppercase tracking-wide font-black border-b-2 border-black pb-2 mb-4">
-              DOC CONTROL BOARD
-            </h3>
-            
-            <div className="flex flex-col gap-3">
-              {canManage && !isEditing && (
-                <>
-                  <button 
-                    onClick={handleTogglePublish} 
-                    className="font-mono text-xs text-stone-900 border-2 border-stone-900 px-4 py-3 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
-                  >
-                    {doc.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
-                  </button>
-                  <button 
-                    onClick={() => { setIsEditing(true); addLog("INSPECTOR: Dossier opened in editing mode"); }} 
-                    className="font-mono text-xs text-blue-900 border-2 border-blue-900 px-4 py-3 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
-                  >
-                    AMEND RECORD
-                  </button>
-                  <button 
-                    onClick={handlePurge} 
-                    className="font-mono text-xs text-red-800 border-2 border-red-800 px-4 py-3 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider rounded"
-                  >
-                    PURGE RECORD
-                  </button>
-                </>
-              )}
-              
-              <Link 
-                href="/docs" 
-                className="font-mono text-xs text-center text-stone-700 border-2 border-dashed border-stone-500 px-4 py-3 hover:bg-stone-55 transition-colors uppercase font-bold tracking-wider rounded mt-2"
-              >
-                &lt; Return to Archives
-              </Link>
-            </div>
-          </div>
 
           {/* Table of Contents / Outline Tree Directory */}
           {(() => {
