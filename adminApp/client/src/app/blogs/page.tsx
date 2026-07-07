@@ -28,55 +28,7 @@ export default function BlogsDashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchLoading, setFetchLoading] = useState(false);
 
-  const [selectedBlog, setSelectedBlog] = useState<BlogItem | null>(null);
   const [systemTime, setSystemTime] = useState("");
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
-  const [editContent, setEditContent] = useState("");
-  const [showPreview, setShowPreview] = useState(false);
-  const [editSlug, setEditSlug] = useState("");
-  const [editIsPublished, setEditIsPublished] = useState(false);
-  
-  const [agentQuery, setAgentQuery] = useState("");
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: `${API_BASE_URL}/agent/draft/blog`
-    }),
-    onFinish: (event) => {
-      const message = event.message;
-      const toolInvs = message.parts ? message.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : [];
-      let outputArgs = toolInvs.find((t: any) => t.args && (t.args.title !== undefined || t.args.content !== undefined))?.args;
-
-      if (!outputArgs) {
-        const textParts = message.parts ? message.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text) : [];
-        const fullText = textParts.join('');
-        try {
-          const startIdx = fullText.indexOf('{');
-          const endIdx = fullText.lastIndexOf('}');
-          if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-            const jsonText = fullText.substring(startIdx, endIdx + 1);
-            const parsed = JSON.parse(jsonText);
-            if (parsed.title !== undefined || parsed.content !== undefined) {
-              outputArgs = parsed;
-            }
-          }
-        } catch (e) {
-          console.error("Failed to parse JSON output", e);
-        }
-      }
-
-      if (outputArgs) {
-        if (outputArgs.title) setEditTitle(outputArgs.title);
-        if (outputArgs.content) setEditContent(outputArgs.content);
-        if (outputArgs.slug) setEditSlug(outputArgs.slug);
-        setAgentQuery("");
-        addLog("WIRE: AI agent successfully updated edit draft fields");
-      }
-    }
-  });
-
-  const agentLoading = status === 'submitted' || status === 'streaming';
 
   const [serverHealth, setServerHealth] = useState<any>(null);
   const [clientInfo, setClientInfo] = useState<any>(null);
@@ -186,109 +138,12 @@ export default function BlogsDashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (selectedBlog) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [selectedBlog]);
-
   const handleLogout = async () => {
     try {
       addLog("AUTH: Purging session credentials...");
       await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
       router.push("/login");
     } catch (err) { console.error(err); }
-  };
-
-  const handleUpdatePayload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editTitle || !editContent || !selectedBlog) return;
-    try {
-      const payload = {
-        title: editTitle.toUpperCase(),
-        content: editContent,
-        slug: editSlug.toLowerCase(),
-        isPublished: editIsPublished
-      };
-      const res = await fetch(`${API_BASE_URL}/blogs/${selectedBlog.slug}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Failed to update blog");
-      const data = await res.json();
-      const updatedItem = { ...data.blog, status: "SYNCED" };
-      setBlogList(prev => prev.map(item => item.id === selectedBlog.id ? updatedItem : item));
-      setSelectedBlog(updatedItem);
-      setIsEditing(false);
-      addLog(`WIRE: Record ${selectedBlog.slug} updated successfully`);
-    } catch (err) {
-      console.error("Update error:", err);
-      addLog("WARNING: Payload modification failed (Slug might not be unique)");
-    }
-  };
-
-  const handleAskAgent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!agentQuery.trim()) return;
-
-    const promptWithContext = `You are updating/revising an existing blog post. 
-
-Here is the current edit draft:
----
-TITLE: ${editTitle || "(empty)"}
-SLUG: ${editSlug || "(empty)"}
-CONTENT:
-${editContent || "(empty)"}
----
-
-User Update Instructions:
-"${agentQuery}"
-
-Please modify or rewrite the blog post according to the user instructions. Make sure to respond with the complete updated schema (title, slug, and content).`;
-
-    sendMessage({ content: promptWithContext, role: 'user' } as any);
-  };
-
-  const handleTogglePublish = async (blogId: string, blogSlug: string, currentStatus: boolean) => {
-    try {
-      addLog(`WIRE: Toggling publish status for record ${blogSlug}`);
-      const res = await fetch(`${API_BASE_URL}/blogs/${blogSlug}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPublished: !currentStatus }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Failed to toggle publish status");
-      const data = await res.json();
-      const updatedItem = { ...data.blog, status: "SYNCED" };
-      setBlogList(prev => prev.map(item => item.id === blogId ? updatedItem : item));
-      if (selectedBlog?.id === blogId) setSelectedBlog(updatedItem);
-      addLog(`WIRE: Record ${blogSlug} publish status updated`);
-    } catch (err) {
-      console.error("Toggle publish error:", err);
-      addLog("WARNING: Publish toggle operation failed");
-    }
-  };
-
-  const handlePurge = async (id: string, slug: string) => {
-    try {
-      addLog(`WIRE: Issuing purge command for record ${slug}`);
-      const res = await fetch(`${API_BASE_URL}/blogs/${slug}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Failed to delete blog");
-      setBlogList((prev) => prev.filter(item => item.id !== id));
-      if (selectedBlog?.id === id) setSelectedBlog(null);
-      addLog(`WIRE: Record ${slug} successfully deleted`);
-    } catch (err) {
-      console.error("Purge error:", err);
-      addLog("WARNING: Purge operation denied");
-    }
   };
 
   if (loading) {
@@ -381,18 +236,11 @@ Please modify or rewrite the blog post according to the user instructions. Make 
             </div>
             <div className="flex flex-col gap-6 pl-2">
               <div className="bg-[#fcfaf2] border-2 border-stone-950 rounded p-4 sm:p-6 shadow-sm flex flex-col relative">
-                <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
-                  {blogList.map((item) => (
+                <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">                  {blogList.map((item) => (
                     <div 
                       key={item.id} 
                       onClick={() => { 
-                        setSelectedBlog(item); 
-                        setIsEditing(false); 
-                        setEditTitle(item.title); 
-                        setEditContent(item.content); 
-                        setEditSlug(item.slug); 
-                        setEditIsPublished(item.isPublished); 
-                        addLog(`VIEW: Focus shifted to blog ${item.id.slice(0, 8)}`); 
+                        router.push(`/blogs/${item.slug}`);
                       }} 
                       className="bg-white border-2 border-stone-950 p-5 hover:bg-stone-50/80 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#111] transition-all flex flex-col gap-2.5 relative group/item shadow cursor-pointer text-left rounded"
                     >
@@ -450,152 +298,6 @@ Please modify or rewrite the blog post according to the user instructions. Make 
 
 
       </div>
-
-      {selectedBlog && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className={`w-full ${isEditing ? 'max-w-5xl' : 'max-w-2xl'} bg-[#fcfaf2] border-4 border-stone-950 p-6 shadow-[8px_8px_0px_#111] flex flex-col relative max-h-[90vh] rounded transition-all duration-300`}>
-            <button onClick={() => { setSelectedBlog(null); addLog("INSPECTOR: Dossier closed"); }} className="absolute top-3 right-4 font-mono font-bold text-stone-950 border-2 border-stone-950 px-2 py-0.5 hover:bg-stone-950 hover:text-white transition-colors cursor-pointer text-xs">[ CLOSE ]</button>
-            <div className="flex-1 overflow-y-auto custom-paper-scrollbar mt-6 pr-6 text-stone-900">
-              {isEditing ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                  <form onSubmit={handleUpdatePayload} className="lg:col-span-2 flex flex-col gap-4 font-serif text-stone-900 text-left">
-                    <div className="flex flex-col border-b border-stone-400 pb-2">
-                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">TRANSMISSION HEADLINE</label>
-                      <input type="text" required value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-transparent border-none outline-none font-bold text-lg text-stone-950 placeholder-stone-600/40 font-serif" />
-                    </div>
-                    <div className="flex flex-col border-b border-stone-400 pb-2">
-                      <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
-                      <input type="text" required value={editSlug} onChange={(e) => setEditSlug(e.target.value)} className="w-full bg-transparent border-none outline-none text-xs text-stone-900 placeholder-stone-600/40 font-mono" />
-                    </div>
-                    <div className="flex flex-col min-h-[140px] border-b border-stone-400 pb-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">DRAFT CHRONICLE DETAILS</label>
-                        <button type="button" onClick={() => setShowPreview(!showPreview)} className="font-mono text-[9px] font-bold text-black hover:text-stone-700 uppercase border border-black px-2 py-0.5 rounded cursor-pointer transition-colors">
-                          {showPreview ? "Edit Mode" : "Preview"}
-                        </button>
-                      </div>
-                      {showPreview ? (
-                        <div className="w-full bg-transparent border-none outline-none text-sm text-stone-950 min-h-[140px] leading-relaxed prose prose-stone max-w-none overflow-y-auto" dangerouslySetInnerHTML={{ __html: marked.parse(editContent || "*No content*") as string }} />
-                      ) : (
-                        <textarea required value={editContent} onChange={(e) => setEditContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/40 resize-none flex-1 leading-relaxed custom-paper-scrollbar" rows={8} />
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between border-b border-stone-400 pb-3 mt-2">
-                      <div className="flex flex-col">
-                        <span className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">PUBLICATION STATUS</span>
-                        <span className="font-serif text-xs text-stone-500">Toggle to publish or unpublish this report.</span>
-                      </div>
-                      <button type="button" onClick={() => setEditIsPublished(!editIsPublished)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer border-2 ${editIsPublished ? 'bg-green-700 border-green-800' : 'bg-stone-300 border-stone-400'}`}>
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editIsPublished ? 'translate-x-5' : 'translate-x-1'}`} />
-                      </button>
-                    </div>
-                    <div className="mt-4 flex gap-4">
-                      <button type="submit" className="flex-1 bg-stone-950 text-white border-2 border-stone-950 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer">Save Changes</button>
-                      <button type="button" onClick={() => setIsEditing(false)} className="flex-1 bg-stone-300 text-stone-900 border-2 border-stone-305 font-mono font-bold text-xs py-2.5 rounded uppercase tracking-wider transition-all cursor-pointer">Cancel</button>
-                    </div>
-                  </form>
-                  <div className="lg:col-span-1 flex flex-col relative w-full lg:sticky lg:top-0">
-                    <div className="bg-[#fcfaf2] border-[3px] border-black p-4 flex flex-col relative z-10 shadow-[4px_4px_0px_#111111] rounded">
-                      <div className="absolute top-4 right-4 border-2 border-black text-black border-b border-black font-black text-[9px] px-1.5 -rotate-[10deg] mix-blend-multiply select-none font-['Playfair_Display',_Georgia,_serif] uppercase">
-                        STAFF AI
-                      </div>
-                      <div className="border-b-2 border-black pb-3 mb-4 text-left">
-                        <h3 className="font-['Playfair_Display',_Georgia,_serif] text-base text-black uppercase tracking-wide font-black">EDITORIAL ASSISTANT</h3>
-                        <p className="font-mono text-[9px] text-stone-600 font-bold mt-1 tracking-wider uppercase">AUTOMATED WIRE DESPATCH</p>
-                      </div>
-                      <div className="flex-1 bg-[#fcfaf2] flex flex-col relative">
-                        <form onSubmit={handleAskAgent} className="flex flex-col gap-4 font-serif text-stone-900 text-left">
-                          <p className="font-serif text-xs text-stone-700 leading-relaxed">Provide instructions or a topic. The Staff Agent will search the web using <strong>Tavily Search</strong>, synthesize details, and return a print-ready blog draft.</p>
-                          <div className="flex flex-col border-[2px] border-black p-2 bg-[#fcfaf2]">
-                            <label className="font-mono text-[9px] font-bold text-black uppercase tracking-widest mb-1.5">Enter Topic or Wire Request:</label>
-                            <textarea required placeholder="e.g. Write a blog about the evolution of JavaScript." value={agentQuery} onChange={(e) => setAgentQuery(e.target.value)} className="w-full bg-transparent outline-none text-xs text-stone-950 placeholder-stone-400 font-serif leading-relaxed h-20 resize-none typewriter-field" disabled={agentLoading} />
-                          </div>
-                          <button type="submit" className="vintage-stamp w-full text-center py-2 bg-black text-[#fcfaf2] border-black hover:bg-stone-800 hover:text-[#fcfaf2] font-bold cursor-pointer text-xs" disabled={agentLoading || !agentQuery.trim()}>
-                            {agentLoading ? "COMMISSIONING TELETYPES..." : "DISPATCH BLOG AGENT"}
-                          </button>
-                          {agentLoading && (
-                            <div className="mt-2 p-2 border border-stone-300 bg-[#e8e4d9]/60 text-center font-mono text-[10px] text-stone-700 flex flex-col gap-1">
-                              <div className="animate-pulse flex items-center justify-center gap-1">
-                                <span className="inline-block w-2 h-2 bg-black rounded-full animate-ping"></span>
-                                <span className="text-black font-bold">[ WIRE AGENT AT WORK ]</span>
-                              </div>
-                            </div>
-                          )}
-                          {messages.length > 0 && (
-                            <div className="mt-4 border border-stone-400 bg-stone-100 p-2 text-[10px] font-mono h-48 overflow-y-auto custom-paper-scrollbar">
-                              <div className="font-bold border-b border-stone-300 pb-1 mb-2 uppercase text-stone-800">Agent Logs</div>
-                              {messages.map((m, i) => {
-                                const userContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
-                                const agentContent = (m as any).content || (m.parts && m.parts.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')) || '';
-                                const toolInvs = (m.parts ? m.parts.filter((p: any) => p.type === 'tool-invocation' || p.type === 'dynamic-tool-invocation').map((p: any) => p.toolInvocation) : ((m as any).toolInvocations || []));
-
-                                return (
-                                <div key={i} className="mb-2">
-                                  {m.role === 'user' ? (
-                                    <div className="text-blue-700">USER: {userContent}</div>
-                                  ) : (
-                                    <div className="text-green-800">
-                                      {agentContent && <div>AGENT: {agentContent}</div>}
-                                      {toolInvs.map((t: any, idx: number) => (
-                                        <div key={idx} className="ml-2 border-l-2 border-stone-300 pl-2 mt-1">
-                                          <span className="font-bold text-orange-700">TOOL CALLED: </span> {t.toolName}
-                                          <div className="text-stone-500 truncate">Args: {JSON.stringify(t.args)}</div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="border-b-4 border-double border-stone-950 pb-3 mb-5 text-center relative">
-                    <span className="font-mono text-[9px] text-stone-600 font-bold uppercase tracking-widest block mb-1">WIRE REPORT INDEX ID: {selectedBlog.id.slice(0, 8)}</span>
-                    <h3 className="font-playfair text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight text-stone-950">{selectedBlog.title}</h3>
-                  </div>
-                  <div 
-                    className="font-serif text-base leading-relaxed text-justify space-y-4 markdown-content text-stone-900"
-                    dangerouslySetInnerHTML={{ __html: marked.parse(selectedBlog.content) as string }}
-                  />
-                  <div className="mt-6 border-t border-stone-300 pt-3 text-left">
-                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase block mb-1">BLOG SLUG</span>
-                    <span className="font-mono text-[10px] text-stone-900 font-bold">{selectedBlog.slug}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mt-6 border-t border-stone-300 pt-4 font-mono text-[10px] text-stone-600 font-bold text-left">
-                    <div><span className="block text-[8px] text-stone-500 uppercase tracking-wide">BROADCAST DATE</span><span className="text-stone-950">{new Date(selectedBlog.createdAt).toLocaleString()}</span></div>
-                    <div><span className="block text-[8px] text-stone-500 uppercase tracking-wide">STATUS</span><span className={`font-bold ${selectedBlog.isPublished ? "text-green-700" : "text-stone-500"}`}>{selectedBlog.isPublished ? 'PUBLISHED' : 'DRAFT'}</span></div>
-                  </div>
-                  <div className="mt-8 border-t-4 border-double border-stone-950 pt-4 flex flex-wrap justify-between items-center gap-4">
-                    <span className="font-mono text-[9px] text-stone-500 font-bold uppercase">WIRE RECORDS SYSTEM CONTROL</span>
-                    <div className="flex gap-3">
-                      {(profile?.role === "admin" || profile?.role === "editor") && (
-                        <>
-                          <button onClick={() => handleTogglePublish(selectedBlog.id, selectedBlog.slug, selectedBlog.isPublished)} className="font-mono text-[10px] text-stone-900 border-2 border-stone-900 px-3 py-1 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
-                            {selectedBlog.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
-                          </button>
-                          <button onClick={() => setIsEditing(true)} className="font-mono text-[10px] text-blue-900 border-2 border-blue-900 px-3 py-1 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
-                            AMEND RECORD
-                          </button>
-                          <button onClick={() => handlePurge(selectedBlog.id, selectedBlog.slug)} className="font-mono text-[10px] text-stone-900 border-b border-stone-900 border-2 border-red-800 px-3 py-1 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
-                            PURGE RECORD
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
