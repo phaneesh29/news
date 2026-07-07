@@ -380,7 +380,24 @@ Please modify or rewrite the documentation post according to the user instructio
               </div>
 
               <div className="flex flex-col border-b border-stone-400 pb-2">
-                <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">UNIQUE SLUG</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="font-mono text-[10px] font-bold text-stone-600 uppercase tracking-widest">UNIQUE SLUG</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const generated = editTitle
+                        .trim()
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")
+                        .replace(/[^a-z0-9-]/g, "");
+                      setEditSlug(generated);
+                    }}
+                    className="font-mono text-[9px] font-bold text-black hover:text-stone-700 uppercase border border-black px-2 py-0.5 rounded cursor-pointer transition-colors"
+                    disabled={!editTitle.trim()}
+                  >
+                    Generate from Title
+                  </button>
+                </div>
                 <input 
                   type="text" 
                   required 
