@@ -215,7 +215,7 @@ export default function BlogsDashboardPage() {
         slug: editSlug.toLowerCase(),
         isPublished: editIsPublished
       };
-      const res = await fetch(`${API_BASE_URL}/blogs/${selectedBlog.id}`, {
+      const res = await fetch(`${API_BASE_URL}/blogs/${selectedBlog.slug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -227,7 +227,7 @@ export default function BlogsDashboardPage() {
       setBlogList(prev => prev.map(item => item.id === selectedBlog.id ? updatedItem : item));
       setSelectedBlog(updatedItem);
       setIsEditing(false);
-      addLog(`WIRE: Record ${selectedBlog.id.slice(0, 8)} updated successfully`);
+      addLog(`WIRE: Record ${selectedBlog.slug} updated successfully`);
     } catch (err) {
       console.error("Update error:", err);
       addLog("WARNING: Payload modification failed (Slug might not be unique)");
@@ -256,10 +256,10 @@ Please modify or rewrite the blog post according to the user instructions. Make 
     sendMessage({ content: promptWithContext, role: 'user' } as any);
   };
 
-  const handleTogglePublish = async (blogId: string, currentStatus: boolean) => {
+  const handleTogglePublish = async (blogId: string, blogSlug: string, currentStatus: boolean) => {
     try {
-      addLog(`WIRE: Toggling publish status for record ${blogId.slice(0, 8)}`);
-      const res = await fetch(`${API_BASE_URL}/blogs/${blogId}`, {
+      addLog(`WIRE: Toggling publish status for record ${blogSlug}`);
+      const res = await fetch(`${API_BASE_URL}/blogs/${blogSlug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isPublished: !currentStatus }),
@@ -270,21 +270,21 @@ Please modify or rewrite the blog post according to the user instructions. Make 
       const updatedItem = { ...data.blog, status: "SYNCED" };
       setBlogList(prev => prev.map(item => item.id === blogId ? updatedItem : item));
       if (selectedBlog?.id === blogId) setSelectedBlog(updatedItem);
-      addLog(`WIRE: Record ${blogId.slice(0, 8)} publish status updated`);
+      addLog(`WIRE: Record ${blogSlug} publish status updated`);
     } catch (err) {
       console.error("Toggle publish error:", err);
       addLog("WARNING: Publish toggle operation failed");
     }
   };
 
-  const handlePurge = async (id: string) => {
+  const handlePurge = async (id: string, slug: string) => {
     try {
-      addLog(`WIRE: Issuing purge command for record ${id.slice(0, 8)}`);
-      const res = await fetch(`${API_BASE_URL}/blogs/${id}`, { method: "DELETE", credentials: "include" });
+      addLog(`WIRE: Issuing purge command for record ${slug}`);
+      const res = await fetch(`${API_BASE_URL}/blogs/${slug}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error("Failed to delete blog");
       setBlogList((prev) => prev.filter(item => item.id !== id));
       if (selectedBlog?.id === id) setSelectedBlog(null);
-      addLog(`WIRE: Record ${id.slice(0, 8)} successfully deleted`);
+      addLog(`WIRE: Record ${slug} successfully deleted`);
     } catch (err) {
       console.error("Purge error:", err);
       addLog("WARNING: Purge operation denied");
@@ -577,13 +577,13 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                     <div className="flex gap-3">
                       {(profile?.role === "admin" || profile?.role === "editor") && (
                         <>
-                          <button onClick={() => handleTogglePublish(selectedBlog.id, selectedBlog.isPublished)} className="font-mono text-[10px] text-stone-900 border-2 border-stone-900 px-3 py-1 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
+                          <button onClick={() => handleTogglePublish(selectedBlog.id, selectedBlog.slug, selectedBlog.isPublished)} className="font-mono text-[10px] text-stone-900 border-2 border-stone-900 px-3 py-1 hover:bg-stone-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
                             {selectedBlog.isPublished ? "PULL FROM PRINT" : "APPROVE FOR PRINT"}
                           </button>
                           <button onClick={() => setIsEditing(true)} className="font-mono text-[10px] text-blue-900 border-2 border-blue-900 px-3 py-1 hover:bg-blue-900 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
                             AMEND RECORD
                           </button>
-                          <button onClick={() => handlePurge(selectedBlog.id)} className="font-mono text-[10px] text-stone-900 border-b border-stone-900 border-2 border-red-800 px-3 py-1 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
+                          <button onClick={() => handlePurge(selectedBlog.id, selectedBlog.slug)} className="font-mono text-[10px] text-stone-900 border-b border-stone-900 border-2 border-red-800 px-3 py-1 hover:bg-red-800 hover:text-white transition-colors cursor-pointer uppercase font-bold tracking-wider">
                             PURGE RECORD
                           </button>
                         </>

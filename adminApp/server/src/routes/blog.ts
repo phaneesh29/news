@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { createBlog, deleteBlog, getAllBlogs, getBlogById, updateBlog, searchBlogs } from '../controllers/blog.js'
+import { createBlog, deleteBlog, getAllBlogs, getBlogBySlug, updateBlog, searchBlogs } from '../controllers/blog.js'
 import { requireAuth } from '../middlewares/auth.js'
 import { createBlogSchema, updateBlogSchema, blogParamsSchema, blogSearchQuerySchema } from '../schemas/blog.js'
 
@@ -11,6 +11,6 @@ blogRoutes.use('*', requireAuth)
 blogRoutes.get('/', getAllBlogs)
 blogRoutes.get('/search', zValidator('query', blogSearchQuerySchema), searchBlogs)
 blogRoutes.post('/', zValidator('json', createBlogSchema), createBlog)
-blogRoutes.get('/:id', zValidator('param', blogParamsSchema), getBlogById)
-blogRoutes.patch('/:id', zValidator('param', blogParamsSchema), zValidator('json', updateBlogSchema), updateBlog)
-blogRoutes.delete('/:id', zValidator('param', blogParamsSchema), deleteBlog)
+blogRoutes.get('/:slug', zValidator('param', blogParamsSchema), getBlogBySlug)
+blogRoutes.patch('/:slug', zValidator('param', blogParamsSchema), zValidator('json', updateBlogSchema), updateBlog)
+blogRoutes.delete('/:slug', zValidator('param', blogParamsSchema), deleteBlog)

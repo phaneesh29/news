@@ -133,13 +133,13 @@ export const searchBlogs = async (c: Context) => {
   return c.json({ blogs: blogResults })
 }
 
-export const getBlogById = async (c: Context) => {
-  const id = c.req.param('id')!
+export const getBlogBySlug = async (c: Context) => {
+  const slug = c.req.param('slug')!
 
   const blogItems = await db.select(blogSelect)
     .from(blogs)
     .leftJoin(adminUsers, eq(blogs.authorId, adminUsers.id))
-    .where(eq(blogs.id, id))
+    .where(eq(blogs.slug, slug))
     .limit(1)
 
   const blog = blogItems[0]
@@ -158,7 +158,7 @@ export const updateBlog = async (c: Context) => {
     throw new HTTPException(403, { message: 'Only admins and editors can update blogs' })
   }
 
-  const id = c.req.param('id')!
+  const slug = c.req.param('slug')!
 
   const body = await c.req.json() as {
     title?: string
@@ -180,7 +180,7 @@ export const updateBlog = async (c: Context) => {
   try {
     updatedBlog = await db.update(blogs)
       .set(updates)
-      .where(eq(blogs.id, id))
+      .where(eq(blogs.slug, slug))
       .returning()
   } catch (error: any) {
     if (error.code === '23505') {
@@ -205,10 +205,10 @@ export const deleteBlog = async (c: Context) => {
     throw new HTTPException(403, { message: 'Only admins and editors can delete blogs' })
   }
 
-  const id = c.req.param('id')!
+  const slug = c.req.param('slug')!
 
   const deletedBlog = await db.delete(blogs)
-    .where(eq(blogs.id, id))
+    .where(eq(blogs.slug, slug))
     .returning({ id: blogs.id })
 
   const blog = deletedBlog[0]

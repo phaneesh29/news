@@ -16,7 +16,7 @@ export const updateBlogSchema = z.object({
 })
 
 export const blogParamsSchema = z.object({
-  id: z.uuid('Invalid blog ID')
+  slug: z.string().trim().min(1, 'Slug is required').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug format')
 })
 
 export const blogSearchQuerySchema = z.object({
