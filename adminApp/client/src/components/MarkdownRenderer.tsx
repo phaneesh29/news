@@ -65,7 +65,7 @@ function Mermaid({ chart }: { chart: string }) {
 
   if (svg) {
     return (
-      <div className="relative group border border-stone-200 dark:border-stone-800 rounded-lg p-4 my-4 bg-white dark:bg-stone-900 select-none">
+      <div className="relative group border-2 border-stone-950 rounded p-4 my-4 bg-[#fcfaf2] select-none shadow-[4px_4px_0px_#111111]">
         <style>{`
           .mermaid-svg-container svg {
             width: 100% !important;
@@ -75,22 +75,22 @@ function Mermaid({ chart }: { chart: string }) {
         `}</style>
 
         {/* Floating Controls */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm px-2 py-1 rounded-full border border-stone-200 dark:border-stone-800 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#fcfaf2] px-2 py-1 rounded-full border-2 border-stone-950 shadow-[2px_2px_0px_#111111] z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
             onClick={() => setZoom(prev => Math.max(50, prev - 25))}
-            className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors duration-150"
+            className="p-1 text-stone-800 hover:text-stone-950 hover:bg-stone-200/60 rounded-full transition-colors duration-150"
             title="Zoom Out"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
             </svg>
           </button>
-          <span className="text-[10px] font-mono font-bold px-1 text-stone-600 dark:text-stone-400 min-w-[36px] text-center select-none">
+          <span className="text-[10px] font-mono font-bold px-1 text-stone-900 min-w-[36px] text-center select-none">
             {zoom}%
           </span>
           <button 
             onClick={() => setZoom(prev => Math.min(300, prev + 25))}
-            className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors duration-150"
+            className="p-1.5 text-stone-800 hover:text-stone-950 hover:bg-stone-200/60 rounded-full transition-colors duration-150"
             title="Zoom In"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
@@ -99,7 +99,7 @@ function Mermaid({ chart }: { chart: string }) {
           </button>
           <button 
             onClick={() => setZoom(100)}
-            className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors duration-150"
+            className="p-1.5 text-stone-800 hover:text-stone-950 hover:bg-stone-200/60 rounded-full transition-colors duration-150"
             title="Reset Zoom"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
