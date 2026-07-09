@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../config";
-import { marked } from "marked";
+import ReactMarkdown from "react-markdown";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 
@@ -476,10 +476,7 @@ Please modify or rewrite the news draft according to the user instructions. Make
                       return (
                         <li key={idx} className="text-[14px] leading-relaxed text-stone-850 font-serif flex gap-2">
                           <span className="text-red-800 font-mono text-[10px] mt-1">▸</span>
-                          <span 
-                            className="[&_strong]:font-black"
-                            dangerouslySetInnerHTML={{ __html: marked.parseInline(text) as string }} 
-                          />
+                            <ReactMarkdown components={{ p: ({ children }: any) => <>{children}</> }}>{text}</ReactMarkdown>
                         </li>
                       );
                     })}
@@ -516,15 +513,13 @@ Please modify or rewrite the news draft according to the user instructions. Make
                       <div key={idx} className="space-y-1.5 border-r last:border-none border-dashed border-stone-300 pr-4">
                         <span className="font-mono text-[10px] font-bold text-red-850 block">TREND 0{idx + 1}</span>
                         {item.trend && (
-                          <h4 
-                            className="font-bold text-sm uppercase text-stone-950 [&_strong]:font-black"
-                            dangerouslySetInnerHTML={{ __html: marked.parseInline(item.trend) as string }}
-                          />
+                          <h4 className="font-bold text-sm uppercase text-stone-950 [&_strong]:font-black">
+                             <ReactMarkdown components={{ p: ({ children }: any) => <>{children}</> }}>{item.trend}</ReactMarkdown>
+                          </h4>
                         )}
-                        <p 
-                          className="text-xs text-stone-700 leading-relaxed [&_strong]:font-black"
-                          dangerouslySetInnerHTML={{ __html: marked.parseInline(item.description) as string }}
-                        />
+                        <p className="text-xs text-stone-700 leading-relaxed [&_strong]:font-black">
+                          <ReactMarkdown components={{ p: ({ children }: any) => <>{children}</> }}>{item.description}</ReactMarkdown>
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -575,10 +570,9 @@ Please modify or rewrite the news draft according to the user instructions. Make
                                 {article.title}
                               </h4>
 
-                              <p 
-                                className="text-xs text-stone-800 leading-relaxed font-serif text-justify [&_strong]:font-black"
-                                dangerouslySetInnerHTML={{ __html: marked.parseInline(article.summary) as string }}
-                              />
+                              <p className="text-xs text-stone-800 leading-relaxed font-serif text-justify [&_strong]:font-black">
+                                <ReactMarkdown components={{ p: ({ children }: any) => <>{children}</> }}>{article.summary}</ReactMarkdown>
+                              </p>
                               
                               {article.sourceUrl && (
                                 <div className="pt-2">

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
-import { marked } from "marked";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 
