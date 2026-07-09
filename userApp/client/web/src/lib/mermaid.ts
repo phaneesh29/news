@@ -11,7 +11,8 @@ const mermaidExtension: MarkedExtension = {
   renderer: {
     code({ text, lang }: { text: string; lang?: string | undefined }) {
       if (lang === "mermaid") {
-        return `<div class="mermaid">${text}</div>`;
+        const escapedText = encodeURIComponent(text);
+        return `<div class="mermaid" data-original-code="${escapedText}">${text}</div>`;
       }
       // Return false to fall through to the default renderer
       return false;
@@ -41,18 +42,23 @@ export function useMermaid(deps: unknown[] = []) {
       if (mermaidDivs.length === 0) return;
 
       try {
-        // Dynamically import mermaid from CDN via global
         const mermaid = await getMermaidInstance();
         
-        // Reset all mermaid divs so they can be re-rendered
+        const nodesToRender: HTMLElement[] = [];
         mermaidDivs.forEach((el) => {
-          // If already rendered, mermaid adds data-processed; we need to reset it
-          if (el.getAttribute("data-processed")) {
+          const originalCode = el.getAttribute("data-original-code");
+          if (originalCode) {
+            el.textContent = decodeURIComponent(originalCode);
             el.removeAttribute("data-processed");
+            nodesToRender.push(el);
+          } else if (!el.getAttribute("data-processed")) {
+            nodesToRender.push(el);
           }
         });
 
-        await mermaid.run({ nodes: mermaidDivs });
+        if (nodesToRender.length > 0) {
+          await mermaid.run({ nodes: nodesToRender });
+        }
       } catch (err) {
         console.error("[Mermaid] Failed to render diagrams:", err);
       }
