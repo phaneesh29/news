@@ -109,6 +109,7 @@ function Mermaid({ chart }: { chart: string }) {
             style={{ 
               width: `${zoom}%`,
               maxWidth: "none",
+              flexShrink: 0,
             }}
             dangerouslySetInnerHTML={{ __html: svg }}
           />
