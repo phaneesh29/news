@@ -26,6 +26,7 @@ function Mermaid({ chart }: { chart: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [zoom, setZoom] = useState<number>(100);
 
   useEffect(() => {
     let active = true;
@@ -63,7 +64,57 @@ function Mermaid({ chart }: { chart: string }) {
   }
 
   if (svg) {
-    return <div className="mermaid-rendered my-4" dangerouslySetInnerHTML={{ __html: svg }} />;
+    return (
+      <div className="relative group border border-stone-200 dark:border-stone-800 rounded-lg p-4 my-4 bg-white dark:bg-stone-900 select-none">
+        <style>{`
+          .mermaid-svg-container svg {
+            width: 100% !important;
+            max-width: none !important;
+            height: auto !important;
+          }
+        `}</style>
+
+        {/* Floating Controls */}
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-stone-100/90 dark:bg-stone-800/90 backdrop-blur-sm px-2.5 py-1 rounded-full border border-stone-200/60 dark:border-stone-700/60 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button 
+            onClick={() => setZoom(prev => Math.max(50, prev - 25))}
+            className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-[10px]"
+            title="Zoom Out"
+          >
+            ➖
+          </button>
+          <span className="text-[10px] font-mono font-bold px-1.5 text-stone-600 dark:text-stone-300 min-w-[36px] text-center select-none">
+            {zoom}%
+          </span>
+          <button 
+            onClick={() => setZoom(prev => Math.min(300, prev + 25))}
+            className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-[10px]"
+            title="Zoom In"
+          >
+            ➕
+          </button>
+          <button 
+            onClick={() => setZoom(100)}
+            className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-[10px]"
+            title="Reset Zoom"
+          >
+            🔄
+          </button>
+        </div>
+
+        {/* Scroll wrapper */}
+        <div className="w-full overflow-auto [scrollbar-width:thin] py-2 flex justify-start">
+          <div 
+            className="mermaid-svg-container transition-all duration-150"
+            style={{ 
+              width: `${zoom}%`,
+              maxWidth: "none",
+            }}
+            dangerouslySetInnerHTML={{ __html: svg }}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
