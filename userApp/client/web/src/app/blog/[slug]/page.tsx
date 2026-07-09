@@ -16,13 +16,10 @@ import {
   Sparkles,
   ArrowRight
 } from "lucide-react";
-import { marked } from "marked";
-import { configureMermaidMarked, useMermaid } from "@/lib/mermaid";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
 import { useRouter } from "next/navigation";
-
-configureMermaidMarked();
 
 interface TocItem {
   id: string;
@@ -47,23 +44,7 @@ function parseToc(markdown: string): TocItem[] {
   return items;
 }
 
-function injectHeaderIds(html: string): string {
-  return html.replace(/<h([1-3])([^>]*?)>([\s\S]*?)<\/h[1-3]>/gi, (match, level, attrs, content) => {
-    const cleanText = content.replace(/<[^>]+>/g, ""); 
-    const slug = cleanText.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-    
-    let headerClasses = "";
-    if (level === "1") {
-      headerClasses = "scroll-mt-24 font-serif font-black text-3xl sm:text-4xl tracking-tight text-inherit mt-12 mb-6 pb-3 border-b-2 border-double border-current/30 w-full uppercase font-newspaper";
-    } else if (level === "2") {
-      headerClasses = "scroll-mt-24 font-serif font-black italic text-2xl sm:text-3xl tracking-tight text-inherit mt-10 mb-4 pb-2 border-b border-current/15 w-full font-newspaper";
-    } else {
-      headerClasses = "scroll-mt-24 font-serif font-bold text-xl sm:text-2xl tracking-tight text-[#cc785c] mt-8 mb-3 w-full font-newspaper";
-    }
-    
-    return `<h${level} id="${slug}" class="${headerClasses}">${content}</h${level}>`;
-  });
-}
+
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -85,7 +66,7 @@ export default function BlogDetailPage({ params }: PageProps) {
   const [blog, setBlog] = useState<BlogItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [htmlContent, setHtmlContent] = useState<string>("");
+
   const [toc, setToc] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>("");
   const [readProgress, setReadProgress] = useState(0);
@@ -99,12 +80,7 @@ export default function BlogDetailPage({ params }: PageProps) {
     if (blog?.content) {
       setToc(parseToc(blog.content));
 
-      const parsed = marked.parse(blog.content);
-      if (parsed instanceof Promise) {
-        parsed.then((res) => setHtmlContent(injectHeaderIds(res))).catch(console.error);
-      } else {
-        setHtmlContent(injectHeaderIds(parsed));
-      }
+
 
       if (typeof window !== "undefined") {
         setShareUrl(window.location.origin + `/blog/${blog.slug}`);
@@ -112,7 +88,7 @@ export default function BlogDetailPage({ params }: PageProps) {
     }
   }, [blog]);
 
-  useMermaid([htmlContent]);
+
 
   // Load Blog Details
   useEffect(() => {
@@ -139,7 +115,7 @@ export default function BlogDetailPage({ params }: PageProps) {
 
   // Scroll spy to find active header based on viewport scroll position
   useEffect(() => {
-    if (!htmlContent || toc.length === 0) return;
+    if (!blog?.content || toc.length === 0) return;
 
     const handleScrollSpy = () => {
       const articleEl = document.querySelector(".markdown-content");
@@ -173,7 +149,7 @@ export default function BlogDetailPage({ params }: PageProps) {
       clearTimeout(timer);
       window.removeEventListener("scroll", handleScrollSpy);
     };
-  }, [htmlContent, toc]);
+  }, [blog?.content, toc]);
 
   // Track overall scroll progress of the article container
   useEffect(() => {
@@ -199,7 +175,7 @@ export default function BlogDetailPage({ params }: PageProps) {
     window.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [htmlContent]);
+  }, [blog?.content]);
 
   // Number the headings based on hierarchy
   const getNumberedToc = () => {
@@ -486,8 +462,34 @@ export default function BlogDetailPage({ params }: PageProps) {
                 {/* Dynamic HTML Content parsed by marked - Visually optimized for long-form reading */}
                 <div 
                   className="markdown-content text-inherit text-base md:text-[18px] lg:text-[20px] leading-relaxed md:leading-[1.75] font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35 newspaper-body"
-                  dangerouslySetInnerHTML={{ __html: htmlContent }}
-                />
+                >
+                  <MarkdownRenderer
+                    content={blog.content}
+                    components={{
+                      h1({ node, children, ...props }: any) {
+                        return (
+                          <h1 {...props} className="scroll-mt-24 font-serif font-black text-3xl sm:text-4xl tracking-tight text-inherit mt-12 mb-6 pb-3 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
+                            {children}
+                          </h1>
+                        );
+                      },
+                      h2({ node, children, ...props }: any) {
+                        return (
+                          <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-2xl sm:text-3xl tracking-tight text-inherit mt-10 mb-4 pb-2 border-b border-current/15 w-full font-newspaper">
+                            {children}
+                          </h2>
+                        );
+                      },
+                      h3({ node, children, ...props }: any) {
+                        return (
+                          <h3 {...props} className="scroll-mt-24 font-serif font-bold text-xl sm:text-2xl tracking-tight text-[#cc785c] mt-8 mb-3 w-full font-newspaper">
+                            {children}
+                          </h3>
+                        );
+                      },
+                    }}
+                  />
+                </div>
 
                 {/* Bottom Actions */}
                 <div className="border-t border-[#e6dfd8] pt-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-xs font-mono">

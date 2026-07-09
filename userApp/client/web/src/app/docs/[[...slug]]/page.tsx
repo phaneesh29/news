@@ -25,8 +25,7 @@ import {
   X,
   Star
 } from "lucide-react";
-import { marked } from "marked";
-import { configureMermaidMarked, useMermaid } from "@/lib/mermaid";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import Navbar from "@/components/Navbar";
 import ShareBriefing from "@/components/ShareBriefing";
 import { useRouter } from "next/navigation";
@@ -36,7 +35,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-configureMermaidMarked();
+
 
 interface TocItem {
   id: string;
@@ -65,23 +64,7 @@ function parseToc(markdown: string): TocItem[] {
   return items;
 }
 
-function injectHeaderIds(html: string): string {
-  return html.replace(/<h([1-3])([^>]*?)>([\s\S]*?)<\/h[1-3]>/gi, (match, level, attrs, content) => {
-    const cleanText = content.replace(/<[^>]+>/g, "");
-    const slug = cleanText.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-    
-    let headerClasses = "";
-    if (level === "1") {
-      headerClasses = "scroll-mt-24 font-serif font-black text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b-2 border-double border-current/30 w-full uppercase font-newspaper";
-    } else if (level === "2") {
-      headerClasses = "scroll-mt-24 font-serif font-black italic text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1.5 border-b border-current/15 w-full font-newspaper";
-    } else {
-      headerClasses = "scroll-mt-24 font-serif font-bold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full font-newspaper";
-    }
-    
-    return `<h${level} id="${slug}" class="${headerClasses}">${content}</h${level}>`;
-  });
-}
+
 
 function buildDocTree(items: DocItem[]): DocNode[] {
   const map = new Map<string, DocNode>();
@@ -133,7 +116,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const [htmlContent, setHtmlContent] = useState("");
+
   const [toc, setToc] = useState<TocItem[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [readProgress, setReadProgress] = useState(0);
@@ -265,26 +248,18 @@ function DocsContent({ urlSlug }: DocsContentProps) {
     if (selectedDoc?.content) {
       setToc(parseToc(selectedDoc.content));
 
-      const parsed = marked.parse(selectedDoc.content);
-      if (parsed instanceof Promise) {
-        parsed.then((res) => setHtmlContent(injectHeaderIds(res))).catch(console.error);
-      } else {
-        setHtmlContent(injectHeaderIds(parsed));
-      }
-      
       setReadProgress(0);
       setActiveHeadingId("");
     } else {
-      setHtmlContent("");
       setToc([]);
     }
   }, [selectedDoc]);
 
-  useMermaid([htmlContent]);
+
 
   // Scrollspy & Progress tracking
   useEffect(() => {
-    if (!htmlContent || toc.length === 0) return;
+    if (!selectedDoc?.content || toc.length === 0) return;
 
     let rafId: number | null = null;
 
@@ -341,7 +316,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
       window.removeEventListener("scroll", handleScroll);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [htmlContent, toc]);
+  }, [selectedDoc?.content, toc]);
 
   const handleSelectDoc = (doc: DocItem) => {
     router.push(`/docs/${doc.slug}`);
@@ -753,8 +728,34 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                 {/* Parsed Markdown Body */}
                 <div 
                   className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35"
-                  dangerouslySetInnerHTML={{ __html: htmlContent }}
-                />
+                >
+                  <MarkdownRenderer
+                    content={selectedDoc.content}
+                    components={{
+                      h1({ node, children, ...props }: any) {
+                        return (
+                          <h1 {...props} className="scroll-mt-24 font-serif font-black text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
+                            {children}
+                          </h1>
+                        );
+                      },
+                      h2({ node, children, ...props }: any) {
+                        return (
+                          <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1.5 border-b border-current/15 w-full font-newspaper">
+                            {children}
+                          </h2>
+                        );
+                      },
+                      h3({ node, children, ...props }: any) {
+                        return (
+                          <h3 {...props} className="scroll-mt-24 font-serif font-bold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full font-newspaper">
+                            {children}
+                          </h3>
+                        );
+                      },
+                    }}
+                  />
+                </div>
 
                 {/* Operational Footer info */}
                 <div className="border-t border-current/15 pt-6 text-[10px] font-mono text-current/60 select-none text-left">

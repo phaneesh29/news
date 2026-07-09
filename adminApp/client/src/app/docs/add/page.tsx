@@ -4,12 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
-import { marked } from "marked";
-import { configureMermaidMarked, useMermaid } from "../../../lib/mermaid";
+import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-
-configureMermaidMarked();
 
 interface DocItem {
   id: string;
@@ -117,7 +114,7 @@ export default function AddDocPage() {
     return () => clearInterval(timer);
   }, []);
 
-  useMermaid([content, showPreview]);
+
 
   const handleLogout = async () => {
     try {
@@ -325,7 +322,9 @@ Please modify or rewrite the documentation page according to the user instructio
                     </button>
                   </div>
                   {showPreview ? (
-                    <div className="w-full bg-transparent border-2 border-stone-400 p-3 outline-none text-sm text-stone-950 flex-1 leading-relaxed prose prose-stone max-w-none overflow-y-auto" dangerouslySetInnerHTML={{ __html: marked.parse(content || "*No content*") as string }} />
+                    <div className="w-full bg-transparent border-2 border-stone-400 p-3 outline-none text-sm text-stone-955 flex-1 leading-relaxed prose prose-stone max-w-none overflow-y-auto">
+                      <MarkdownRenderer content={content || "*No content*"} />
+                    </div>
                   ) : (
                     <textarea required placeholder="Write documentation here. Supporting full markdown styling..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-transparent border-2 border-stone-400 p-3 outline-none text-sm text-stone-950 placeholder-stone-605/30 resize-none flex-1 leading-relaxed custom-paper-scrollbar font-serif" rows={15} />
                   )}

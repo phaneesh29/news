@@ -4,12 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
-import { marked } from "marked";
-import { configureMermaidMarked, useMermaid } from "../../../lib/mermaid";
+import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-
-configureMermaidMarked();
 
 export default function AddBlogPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -99,7 +96,7 @@ export default function AddBlogPage() {
     return () => clearInterval(timer);
   }, []);
 
-  useMermaid([content, showPreview]);
+
 
   const handleLogout = async () => {
     try {
@@ -277,7 +274,9 @@ Please modify or rewrite the blog post according to the user instructions. Make 
                     </button>
                   </div>
                   {showPreview ? (
-                    <div className="w-full bg-transparent border-none outline-none text-sm text-stone-950 min-h-[180px] leading-relaxed prose prose-stone max-w-none" dangerouslySetInnerHTML={{ __html: marked.parse(content || "*No content*") as string }} />
+                    <div className="w-full bg-transparent border-none outline-none text-sm text-stone-950 min-h-[180px] leading-relaxed prose prose-stone max-w-none">
+                      <MarkdownRenderer content={content || "*No content*"} />
+                    </div>
                   ) : (
                     <textarea required placeholder="Write blog content or dispatch records here..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full bg-transparent border-none outline-none text-sm text-stone-950 placeholder-stone-600/30 min-h-[180px] leading-relaxed custom-paper-scrollbar" />
                   )}

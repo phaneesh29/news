@@ -5,12 +5,9 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
 import Header from "../../../components/Header";
-import { marked } from "marked";
-import { configureMermaidMarked, useMermaid } from "../../../lib/mermaid";
+import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-
-configureMermaidMarked();
 
 interface DocItem {
   id: string;
@@ -116,7 +113,7 @@ export default function DocDetailPage() {
     return () => clearInterval(timer);
   }, []);
 
-  useMermaid([doc, isEditing, showPreview]);
+
 
   const fetchParentOptions = async () => {
     try {
@@ -419,9 +416,10 @@ Please modify or rewrite the documentation post according to the user instructio
                 </div>
                 {showPreview ? (
                   <div 
-                    className="w-full bg-transparent border-none outline-none text-sm text-stone-955 min-h-[300px] leading-relaxed prose prose-stone max-w-none overflow-y-auto custom-paper-scrollbar p-1" 
-                    dangerouslySetInnerHTML={{ __html: marked.parse(editContent || "*No content*") as string }} 
-                  />
+                    className="w-full bg-transparent border-none outline-none text-sm text-stone-955 min-h-[300px] leading-relaxed prose prose-stone max-w-none overflow-y-auto custom-paper-scrollbar p-1"
+                  >
+                    <MarkdownRenderer content={editContent || "*No content*"} />
+                  </div>
                 ) : (
                   <textarea 
                     required 
@@ -521,10 +519,9 @@ Please modify or rewrite the documentation post according to the user instructio
               </div>
 
               {/* Styled Newspaper Content */}
-              <div 
-                className="font-serif text-[17px] leading-relaxed text-justify space-y-6 markdown-content text-stone-900 selection:bg-red-800/10"
-                dangerouslySetInnerHTML={{ __html: marked.parse(doc.content) as string }}
-              />
+              <div className="font-serif text-[17px] leading-relaxed text-justify space-y-6 markdown-content text-stone-900 selection:bg-red-800/10">
+                <MarkdownRenderer content={doc.content} />
+              </div>
 
               {/* Sub-chronicles listed at the bottom of a parent */}
               {(() => {
