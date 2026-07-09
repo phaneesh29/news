@@ -64,6 +64,30 @@ function parseToc(markdown: string): TocItem[] {
   return items;
 }
 
+const DOCS_MARKDOWN_COMPONENTS = {
+  h1({ node, children, ...props }: any) {
+    return (
+      <h1 {...props} className="scroll-mt-24 font-serif font-black text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
+        {children}
+      </h1>
+    );
+  },
+  h2({ node, children, ...props }: any) {
+    return (
+      <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1.5 border-b border-current/15 w-full font-newspaper">
+        {children}
+      </h2>
+    );
+  },
+  h3({ node, children, ...props }: any) {
+    return (
+      <h3 {...props} className="scroll-mt-24 font-serif font-bold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full font-newspaper">
+        {children}
+      </h3>
+    );
+  },
+};
+
 
 
 function buildDocTree(items: DocItem[]): DocNode[] {
@@ -731,29 +755,7 @@ function DocsContent({ urlSlug }: DocsContentProps) {
                 >
                   <MarkdownRenderer
                     content={selectedDoc.content}
-                    components={{
-                      h1({ node, children, ...props }: any) {
-                        return (
-                          <h1 {...props} className="scroll-mt-24 font-serif font-black text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
-                            {children}
-                          </h1>
-                        );
-                      },
-                      h2({ node, children, ...props }: any) {
-                        return (
-                          <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1.5 border-b border-current/15 w-full font-newspaper">
-                            {children}
-                          </h2>
-                        );
-                      },
-                      h3({ node, children, ...props }: any) {
-                        return (
-                          <h3 {...props} className="scroll-mt-24 font-serif font-bold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full font-newspaper">
-                            {children}
-                          </h3>
-                        );
-                      },
-                    }}
+                    components={DOCS_MARKDOWN_COMPONENTS}
                   />
                 </div>
 

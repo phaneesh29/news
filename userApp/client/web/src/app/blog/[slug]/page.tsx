@@ -44,7 +44,29 @@ function parseToc(markdown: string): TocItem[] {
   return items;
 }
 
-
+const BLOG_MARKDOWN_COMPONENTS = {
+  h1({ node, children, ...props }: any) {
+    return (
+      <h1 {...props} className="scroll-mt-24 font-serif font-black text-3xl sm:text-4xl tracking-tight text-inherit mt-12 mb-6 pb-3 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
+        {children}
+      </h1>
+    );
+  },
+  h2({ node, children, ...props }: any) {
+    return (
+      <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-2xl sm:text-3xl tracking-tight text-inherit mt-10 mb-4 pb-2 border-b border-current/15 w-full font-newspaper">
+        {children}
+      </h2>
+    );
+  },
+  h3({ node, children, ...props }: any) {
+    return (
+      <h3 {...props} className="scroll-mt-24 font-serif font-bold text-xl sm:text-2xl tracking-tight text-[#cc785c] mt-8 mb-3 w-full font-newspaper">
+        {children}
+      </h3>
+    );
+  },
+};
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -465,29 +487,7 @@ export default function BlogDetailPage({ params }: PageProps) {
                 >
                   <MarkdownRenderer
                     content={blog.content}
-                    components={{
-                      h1({ node, children, ...props }: any) {
-                        return (
-                          <h1 {...props} className="scroll-mt-24 font-serif font-black text-3xl sm:text-4xl tracking-tight text-inherit mt-12 mb-6 pb-3 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
-                            {children}
-                          </h1>
-                        );
-                      },
-                      h2({ node, children, ...props }: any) {
-                        return (
-                          <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-2xl sm:text-3xl tracking-tight text-inherit mt-10 mb-4 pb-2 border-b border-current/15 w-full font-newspaper">
-                            {children}
-                          </h2>
-                        );
-                      },
-                      h3({ node, children, ...props }: any) {
-                        return (
-                          <h3 {...props} className="scroll-mt-24 font-serif font-bold text-xl sm:text-2xl tracking-tight text-[#cc785c] mt-8 mb-3 w-full font-newspaper">
-                            {children}
-                          </h3>
-                        );
-                      },
-                    }}
+                    components={BLOG_MARKDOWN_COMPONENTS}
                   />
                 </div>
 
