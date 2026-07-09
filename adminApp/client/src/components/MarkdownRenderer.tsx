@@ -8,9 +8,18 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeHighlight from "rehype-highlight";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import "highlight.js/styles/github-dark.css";
 import "katex/dist/katex.min.css";
+
+const REMARK_PLUGINS = [remarkGfm, remarkMath];
+const REHYPE_PLUGINS: any[] = [
+  rehypeIgnoreMermaid,
+  rehypeKatex,
+  rehypeSlug,
+  [rehypeAutolinkHeadings, { behavior: "wrap" }],
+  rehypeHighlight,
+];
 
 // --- Custom Client-Side Mermaid Renderer ---
 function Mermaid({ chart }: { chart: string }) {
@@ -109,26 +118,22 @@ interface MarkdownRendererProps {
 }
 
 export default function MarkdownRenderer({ content, components }: MarkdownRendererProps) {
+  const mergedComponents = useMemo(() => ({
+    div({ className, children, ...props }: any) {
+      if (className?.includes("mermaid-raw")) {
+        const chart = decodeURIComponent(props["data-code"] || "");
+        return <Mermaid chart={chart} />;
+      }
+      return <div className={className} {...props}>{children}</div>;
+    },
+    ...components,
+  }), [components]);
+
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkMath]}
-      rehypePlugins={[
-        rehypeIgnoreMermaid,
-        rehypeKatex,
-        rehypeSlug,
-        [rehypeAutolinkHeadings, { behavior: "wrap" }],
-        rehypeHighlight,
-      ]}
-      components={{
-        div({ className, children, ...props }: any) {
-          if (className?.includes("mermaid-raw")) {
-            const chart = decodeURIComponent(props["data-code"] || "");
-            return <Mermaid chart={chart} />;
-          }
-          return <div className={className} {...props}>{children}</div>;
-        },
-        ...components,
-      }}
+      remarkPlugins={REMARK_PLUGINS}
+      rehypePlugins={REHYPE_PLUGINS}
+      components={mergedComponents}
     >
       {content}
     </ReactMarkdown>
