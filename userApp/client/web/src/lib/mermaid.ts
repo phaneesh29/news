@@ -63,38 +63,17 @@ export function useMermaid(deps: unknown[] = []) {
   }, deps);
 }
 
-// ---- Mermaid instance loader (loads from CDN once) ----
+// ---- Mermaid instance loader (loads npm package dynamically) ----
 
 let _mermaidPromise: Promise<any> | null = null;
 
 function getMermaidInstance(): Promise<any> {
   if (_mermaidPromise) return _mermaidPromise;
 
-  _mermaidPromise = new Promise((resolve, reject) => {
-    // Check if already loaded
-    if ((window as any).mermaid) {
-      (window as any).mermaid.initialize({ startOnLoad: false, theme: "neutral" });
-      resolve((window as any).mermaid);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
-    script.async = true;
-    script.onload = () => {
-      const m = (window as any).mermaid;
-      if (m) {
-        m.initialize({ startOnLoad: false, theme: "neutral" });
-        resolve(m);
-      } else {
-        reject(new Error("Mermaid script loaded but instance not found"));
-      }
-    };
-    script.onerror = () => {
-      _mermaidPromise = null;
-      reject(new Error("Failed to load mermaid from CDN"));
-    };
-    document.head.appendChild(script);
+  _mermaidPromise = import("mermaid").then((m) => {
+    const mermaidInstance = m.default || m;
+    mermaidInstance.initialize({ startOnLoad: false, theme: "neutral" });
+    return mermaidInstance;
   });
 
   return _mermaidPromise;

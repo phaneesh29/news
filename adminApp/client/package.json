@@ -12,6 +12,7 @@
     "@ai-sdk/react": "^4.0.9",
     "@vercel/analytics": "^2.0.1",
     "marked": "^18.0.5",
+    "mermaid": "^11.16.0",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
