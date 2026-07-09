@@ -6,8 +6,11 @@ import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
 import Header from "../../../components/Header";
 import { marked } from "marked";
+import { configureMermaidMarked, useMermaid } from "../../../lib/mermaid";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
+
+configureMermaidMarked();
 
 interface DocItem {
   id: string;
@@ -112,6 +115,8 @@ export default function DocDetailPage() {
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useMermaid([doc, isEditing, showPreview]);
 
   const fetchParentOptions = async () => {
     try {

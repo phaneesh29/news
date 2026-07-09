@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "../../../config";
 import { marked } from "marked";
+import { configureMermaidMarked, useMermaid } from "../../../lib/mermaid";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
+
+configureMermaidMarked();
 
 export default function AddBlogPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -95,6 +98,8 @@ export default function AddBlogPage() {
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useMermaid([content, showPreview]);
 
   const handleLogout = async () => {
     try {

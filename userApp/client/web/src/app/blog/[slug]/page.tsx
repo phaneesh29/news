@@ -17,9 +17,12 @@ import {
   ArrowRight
 } from "lucide-react";
 import { marked } from "marked";
+import { configureMermaidMarked, useMermaid } from "@/lib/mermaid";
 import Navbar from "@/components/Navbar";
 import { useSettings } from "@/components/SettingsProvider";
 import { useRouter } from "next/navigation";
+
+configureMermaidMarked();
 
 interface TocItem {
   id: string;
@@ -108,6 +111,8 @@ export default function BlogDetailPage({ params }: PageProps) {
       }
     }
   }, [blog]);
+
+  useMermaid([htmlContent]);
 
   // Load Blog Details
   useEffect(() => {

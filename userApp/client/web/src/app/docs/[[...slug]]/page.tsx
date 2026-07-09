@@ -26,6 +26,7 @@ import {
   Star
 } from "lucide-react";
 import { marked } from "marked";
+import { configureMermaidMarked, useMermaid } from "@/lib/mermaid";
 import Navbar from "@/components/Navbar";
 import ShareBriefing from "@/components/ShareBriefing";
 import { useRouter } from "next/navigation";
@@ -34,6 +35,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+configureMermaidMarked();
 
 interface TocItem {
   id: string;
@@ -276,6 +279,8 @@ function DocsContent({ urlSlug }: DocsContentProps) {
       setToc([]);
     }
   }, [selectedDoc]);
+
+  useMermaid([htmlContent]);
 
   // Scrollspy & Progress tracking
   useEffect(() => {
