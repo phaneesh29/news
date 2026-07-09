@@ -75,30 +75,36 @@ function Mermaid({ chart }: { chart: string }) {
         `}</style>
 
         {/* Floating Controls */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-stone-100/90 dark:bg-stone-800/90 backdrop-blur-sm px-2.5 py-1 rounded-full border border-stone-200/60 dark:border-stone-700/60 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm px-2 py-1 rounded-full border border-stone-200 dark:border-stone-800 shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
             onClick={() => setZoom(prev => Math.max(50, prev - 25))}
-            className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-[10px]"
+            className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors duration-150"
             title="Zoom Out"
           >
-            ➖
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+            </svg>
           </button>
-          <span className="text-[10px] font-mono font-bold px-1.5 text-stone-600 dark:text-stone-300 min-w-[36px] text-center select-none">
+          <span className="text-[10px] font-mono font-bold px-1 text-stone-600 dark:text-stone-400 min-w-[36px] text-center select-none">
             {zoom}%
           </span>
           <button 
             onClick={() => setZoom(prev => Math.min(300, prev + 25))}
-            className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-[10px]"
+            className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors duration-150"
             title="Zoom In"
           >
-            ➕
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
           </button>
           <button 
             onClick={() => setZoom(100)}
-            className="p-1 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-[10px]"
+            className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors duration-150"
             title="Reset Zoom"
           >
-            🔄
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
           </button>
         </div>
 
