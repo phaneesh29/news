@@ -7,8 +7,9 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypePrettyCode from "rehype-pretty-code";
+import rehypeHighlight from "rehype-highlight";
 import { useEffect, useRef, useState } from "react";
+import "highlight.js/styles/github-dark.css";
 import "katex/dist/katex.min.css";
 
 // --- Custom Client-Side Mermaid Renderer ---
@@ -116,13 +117,7 @@ export default function MarkdownRenderer({ content, components }: MarkdownRender
         rehypeKatex,
         rehypeSlug,
         [rehypeAutolinkHeadings, { behavior: "wrap" }],
-        [
-          rehypePrettyCode,
-          {
-            theme: "one-dark-pro",
-            keepBackground: true,
-          },
-        ],
+        rehypeHighlight,
       ]}
       components={{
         div({ className, children, ...props }: any) {
