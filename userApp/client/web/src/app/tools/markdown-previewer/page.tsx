@@ -670,7 +670,11 @@ export default function MarkdownPreviewer() {
                 onScroll={handleEditorScroll}
                 onKeyDown={handleKeyDown}
                 placeholder="Compose your markdown manuscript here..."
-                className="flex-1 h-full p-4 font-mono text-sm leading-[1.6] bg-transparent border-none resize-none focus:outline-none focus:ring-0 overflow-y-auto selection:bg-[#cc785c]/35 selection:text-black select-text text-foreground [scrollbar-width:thin]"
+                className={`flex-1 h-full p-4 font-mono text-sm leading-[1.6] bg-transparent border-none resize-none focus:outline-none focus:ring-0 overflow-y-auto selection:bg-[#cc785c]/35 selection:text-black select-text text-foreground ${
+                  viewMode === "split" 
+                    ? "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" 
+                    : "[scrollbar-width:thin]"
+                }`}
                 style={{ tabSize: 2 }}
               />
             </div>
@@ -708,7 +712,11 @@ export default function MarkdownPreviewer() {
             <div 
               ref={previewRef}
               onScroll={handlePreviewScroll}
-              className="flex-1 overflow-y-auto p-8 md:p-12 [scrollbar-width:thin] select-text"
+              className={`flex-1 overflow-y-auto p-8 md:p-12 select-text ${
+                viewMode === "split" 
+                  ? "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" 
+                  : "[scrollbar-width:thin]"
+              }`}
             >
               {markdown.trim() === "" ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-45 select-none py-12">
