@@ -103,6 +103,7 @@ export default function MarkdownPreviewer() {
   }, [markdown]);
 
   // Refs
+  const pageRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
@@ -113,6 +114,31 @@ export default function MarkdownPreviewer() {
   const isScrollingEditor = useRef(false);
   const isScrollingPreview = useRef(false);
   const [isResizing, setIsResizing] = useState(false);
+
+  const toggleFullscreen = async () => {
+    if (!pageRef.current) return;
+    try {
+      if (!document.fullscreenElement) {
+        await pageRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      console.error("Error attempting to toggle fullscreen:", err);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   const startResizing = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -383,7 +409,7 @@ export default function MarkdownPreviewer() {
   }, []);
 
   return (
-    <div className={`flex flex-col bg-background text-foreground overflow-hidden font-newspaper selection:bg-[#cc785c]/35 selection:text-black ${
+    <div ref={pageRef} className={`flex flex-col bg-background text-foreground overflow-hidden font-newspaper selection:bg-[#cc785c]/35 selection:text-black ${
       isFullscreen ? "fixed inset-0 z-50 h-screen w-screen" : "h-[calc(100vh-0px)]"
     } ${isResizing ? "cursor-col-resize select-none" : ""}`}>
       {/* Dynamic print-only style overrides */}
@@ -596,7 +622,7 @@ export default function MarkdownPreviewer() {
 
           {/* Fullscreen Toggle */}
           <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
+            onClick={toggleFullscreen}
             className="border-2 border-current px-2.5 py-1.5 font-mono text-[10px] font-bold hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center bg-transparent"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
