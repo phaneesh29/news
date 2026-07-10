@@ -685,10 +685,10 @@ export default function MarkdownPreviewer() {
         {viewMode === "split" && (
           <div 
             onMouseDown={startResizing}
-            className="w-2.5 self-stretch cursor-col-resize shrink-0 select-none no-print relative group flex items-center justify-center transition-colors hover:bg-[#cc785c]/25 active:bg-[#cc785c]/40 z-10 font-sans"
+            className="w-2.5 self-stretch cursor-col-resize shrink-0 select-none no-print relative group flex items-center justify-center bg-[#cc785c]/10 transition-colors hover:bg-[#cc785c]/20 active:bg-[#cc785c]/35 z-10 font-sans"
             title="Drag to resize panels"
           >
-            <div className="w-0.5 h-16 bg-current/20 group-hover:bg-[#cc785c] group-active:bg-[#cc785c] transition-colors" />
+            <div className="w-0.5 h-16 bg-[#cc785c]/30 group-hover:bg-[#cc785c] group-active:bg-[#cc785c] transition-colors" />
           </div>
         )}
 
