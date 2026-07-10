@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Code2, Terminal, Database, Activity, Globe } from "lucide-react";
+import { ArrowLeft, ArrowRight, Code2, Terminal, Activity, Globe, FileText } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -127,6 +127,39 @@ export default function ToolsHub() {
             <div className="flex flex-wrap gap-2 mb-8">
               <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">DNS Lookup</span>
               <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Protected</span>
+            </div>
+
+            <div className="flex items-center text-[#cc785c] font-bold uppercase tracking-wider text-sm">
+              Open Tool <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
+            </div>
+          </Link>
+
+          {/* Markdown Previewer Tool Card */}
+          <Link 
+            href="/tools/markdown-previewer" 
+            className="group block border-4 border-[#111111] dark:border-[#e6dfd8] bg-[#fcfaf2] dark:bg-[#252320] p-8 vintage-shadow-lg transition-all hover:-translate-y-1 hover:border-[#cc785c] duration-300 relative overflow-hidden"
+          >
+            {/* Decorative corners */}
+            <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+            <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-current opacity-50 group-hover:border-[#cc785c] transition-colors"></div>
+
+            <div className="flex items-start justify-between mb-6">
+              <FileText className="h-10 w-10 text-current group-hover:text-[#cc785c] transition-colors" />
+              <div className="bg-current text-background text-[10px] font-bold uppercase tracking-widest px-2 py-1 font-mono">
+                Editor
+              </div>
+            </div>
+
+            <h2 className="font-blackletter text-3xl mb-3 group-hover:text-[#cc785c] transition-colors">Markdown Previewer</h2>
+            <p className="font-mono text-sm opacity-80 leading-relaxed mb-6">
+              Draft and preview rich Markdown dispatches. Supports GFM, LaTeX math equations, code highlighting, and interactive, zoomable Mermaid diagrams.
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-8">
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Mermaid</span>
+              <span className="text-[10px] font-mono border border-current/20 px-2 py-1 rounded-sm uppercase tracking-widest bg-black/5 dark:bg-white/5">Export HTML/PDF</span>
             </div>
 
             <div className="flex items-center text-[#cc785c] font-bold uppercase tracking-wider text-sm">
