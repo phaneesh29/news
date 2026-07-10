@@ -14,7 +14,6 @@ import {
   Edit2, 
   Trash2, 
   Newspaper,
-  BookOpen,
   Maximize2,
   Minimize2,
   Printer,
@@ -89,7 +88,6 @@ export default function MarkdownPreviewer() {
   // State Variables
   const [markdown, setMarkdown] = useState(DEFAULT_SAMPLE_MD);
   const [viewMode, setViewMode] = useState<"split" | "edit" | "preview">("split");
-  const [renderStyle, setRenderStyle] = useState<"newspaper" | "modern">("newspaper");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -320,58 +318,32 @@ export default function MarkdownPreviewer() {
     setExportDropdownOpen(false);
   };
 
-  // Config custom styles depending on theme
+  // Config custom styles to match Docs/Blog aesthetics
   const customMarkdownComponents = useMemo(() => {
-    if (renderStyle === "newspaper") {
-      return {
-        h1({ children, ...props }: React.ComponentPropsWithoutRef<"h1">) {
-          return (
-            <h1 {...props} className="scroll-mt-24 font-serif font-black text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
-              {children}
-            </h1>
-          );
-        },
-        h2({ children, ...props }: React.ComponentPropsWithoutRef<"h2">) {
-          return (
-            <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1.5 border-b border-current/15 w-full font-newspaper">
-              {children}
-            </h2>
-          );
-        },
-        h3({ children, ...props }: React.ComponentPropsWithoutRef<"h3">) {
-          return (
-            <h3 {...props} className="scroll-mt-24 font-serif font-bold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full font-newspaper">
-              {children}
-            </h3>
-          );
-        },
-      };
-    } else {
-      return {
-        h1({ children, ...props }: React.ComponentPropsWithoutRef<"h1">) {
-          return (
-            <h1 {...props} className="scroll-mt-24 font-sans font-extrabold text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b border-current/10 w-full">
-              {children}
-            </h1>
-          );
-        },
-        h2({ children, ...props }: React.ComponentPropsWithoutRef<"h2">) {
-          return (
-            <h2 {...props} className="scroll-mt-24 font-sans font-bold text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1 w-full">
-              {children}
-            </h2>
-          );
-        },
-        h3({ children, ...props }: React.ComponentPropsWithoutRef<"h3">) {
-          return (
-            <h3 {...props} className="scroll-mt-24 font-sans font-semibold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full">
-              {children}
-            </h3>
-          );
-        },
-      };
-    }
-  }, [renderStyle]);
+    return {
+      h1({ children, ...props }: React.ComponentPropsWithoutRef<"h1">) {
+        return (
+          <h1 {...props} className="scroll-mt-24 font-serif font-black text-2xl sm:text-3xl tracking-tight text-inherit mt-8 mb-4 pb-2 border-b-2 border-double border-current/30 w-full uppercase font-newspaper">
+            {children}
+          </h1>
+        );
+      },
+      h2({ children, ...props }: React.ComponentPropsWithoutRef<"h2">) {
+        return (
+          <h2 {...props} className="scroll-mt-24 font-serif font-black italic text-xl sm:text-2xl tracking-tight text-inherit mt-6 mb-3 pb-1.5 border-b border-current/15 w-full font-newspaper">
+            {children}
+          </h2>
+        );
+      },
+      h3({ children, ...props }: React.ComponentPropsWithoutRef<"h3">) {
+        return (
+          <h3 {...props} className="scroll-mt-24 font-serif font-bold text-lg sm:text-xl tracking-tight text-[#cc785c] mt-5 mb-2 w-full font-newspaper">
+            {children}
+          </h3>
+        );
+      },
+    };
+  }, []);
 
   return (
     <div className={`flex flex-col bg-background text-foreground overflow-hidden font-newspaper selection:bg-[#cc785c] selection:text-white ${
@@ -470,29 +442,6 @@ export default function MarkdownPreviewer() {
             >
               <Eye className="h-3 w-3" />
               Proof
-            </button>
-          </div>
-
-          <div className="flex rounded-none border-2 border-current p-0.5 bg-background select-none">
-            <button
-              onClick={() => setRenderStyle("newspaper")}
-              className={`px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${
-                renderStyle === "newspaper" ? "bg-[#cc785c] text-white" : "hover:bg-[#cc785c]/10 text-current"
-              }`}
-              title="Newspaper Press Layout"
-            >
-              <Newspaper className="h-3 w-3" />
-              Press
-            </button>
-            <button
-              onClick={() => setRenderStyle("modern")}
-              className={`px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${
-                renderStyle === "modern" ? "bg-[#cc785c] text-white" : "hover:bg-[#cc785c]/10 text-current"
-              }`}
-              title="Standard Document Style"
-            >
-              <BookOpen className="h-3 w-3" />
-              Doc
             </button>
           </div>
         </div>
@@ -665,7 +614,7 @@ export default function MarkdownPreviewer() {
             {/* Panel Label */}
             <div className="px-4 py-1.5 bg-[#fcfaf2] dark:bg-[#252320] border-b-2 border-current/25 font-mono text-[9px] uppercase tracking-wider text-current/60 flex items-center justify-between shrink-0 select-none">
               <span>EDITORIAL PROOF</span>
-              <span>{renderStyle === "newspaper" ? "RETRO PRESS LAYOUT" : "STANDARD DOCUMENT"}</span>
+              <span>STANDARD DOCUMENT</span>
             </div>
 
             {/* Rendered View */}
@@ -683,11 +632,7 @@ export default function MarkdownPreviewer() {
               ) : (
                 <div 
                   id="printable-preview-area"
-                  className={`mx-auto max-w-3xl ${
-                    renderStyle === "newspaper" 
-                      ? "markdown-content text-inherit text-base md:text-[18px] lg:text-[19px] leading-relaxed md:leading-[1.75] font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35 newspaper-body font-newspaper" 
-                      : "markdown-content text-inherit text-sm md:text-base leading-relaxed font-sans prose dark:prose-invert py-4 selection:bg-[#cc785c]/35 text-left"
-                  }`}
+                  className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35"
                 >
                   <MarkdownRenderer
                     content={markdown}
@@ -714,7 +659,7 @@ export default function MarkdownPreviewer() {
         <div className="flex items-center gap-4 flex-wrap">
           <span>Speed: CLIENT-SIDE INSTANT</span>
           <span>Est. Reading: {stats.readTime} min</span>
-          <span className="text-[#cc785c]">{renderStyle === "newspaper" ? "Newspaper Core Style" : "GFM Clean Style"}</span>
+          <span className="text-[#cc785c]">GFM Document Style</span>
         </div>
       </footer>
     </div>
