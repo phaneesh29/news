@@ -66,17 +66,33 @@ Specialized tools are implemented in `tools/agentTools.js` and registered with t
 *   `search_security_advisories`: Scans CVE and GitHub Advisories for packages/system compromises.
 *   `fetch_academic_papers`: Fetches curated preprints/papers from Hugging Face Daily Papers (with automatic fallback to latest if date is empty).
 
+### 4. Self-Correction & Quality Gate Loop
+To ensure maximum signal reliability and strict adherence to formatting instructions, `index.js` routes the drafted output through an automated quality validation pipeline:
+* **Validation Rules:**
+  * Checks that at least 5 stories are compiled.
+  * Verifies that no raw score metrics or ranking breakdowns are visible.
+  * Ensures each story has associated tag lines.
+  * Confirms there are no placeholder URLs (`example.com`, `#`, etc.).
+  * Verifies the "Last updated:" header contains the correct current year.
+* **Feedback Retries:** If any verification check fails, the pipeline feeds the diagnostics back to the manager agent and triggers a retry, supporting up to 3 self-correction iterations.
+
+### 5. Automated Email Broadcast (Resend)
+* Once the draft successfully passes the quality gate, it is promoted to production (`content/news.md`).
+* The system instantly invokes `utils/emailHelper.js` to parse the markdown into responsive, custom-styled HTML.
+* Using the **Resend API**, the compiled briefing newsletter is broadcasted to all registered operative coordinates listed in `whitelistEmails.js`.
+
 ---
 
 ## 📂 Project Structure
 
 ```text
-D:/news/newsAgent/
+newsAgent/
 ├── .env                  # Local API keys (git-ignored)
 ├── .env.example          # Sample environment template
 ├── .gitignore            # Git exclusions
 ├── package.json          # Dependency definition & run scripts
-├── index.js              # Entry point to execute the pipeline
+├── index.js              # Entry point to execute the pipeline, quality gate, and email trigger
+├── whitelistEmails.js    # Whitelist coordinates for email dispatch broadcasts
 ├── README.md             # Project overview
 ├── config/
 │   ├── config.js         # Loads environment configs and defaults
@@ -93,6 +109,8 @@ D:/news/newsAgent/
 │   ├── fileWriter.js     # news.md file writer
 │   └── agentTools.js     # Wrapped agent-ready tools with Zod parameters
 └── utils/
+    ├── disable-tracing.js# Disables telemetry traces in agent SDK
+    ├── emailHelper.js    # Compiles markdown to responsive HTML and broadcasts via Resend
     └── llm.js            # Registers OpenAIProvider globally using setDefaultModelProvider
 ```
 
@@ -100,7 +118,7 @@ D:/news/newsAgent/
 
 ## ⚙️ Setup & Execution
 
-1. Configure your `.env` file with `OLLAMA_API_KEY`, `EXA_API_KEY`, and `TAVILY_API_KEY`.
+1. Configure your `.env` file with `OLLAMA_API_KEY`, `EXA_API_KEY`, `TAVILY_API_KEY`, and `RESEND_API_KEY`.
 2. Run the pipeline:
    ```bash
    npm start
