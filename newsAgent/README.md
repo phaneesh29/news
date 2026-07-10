@@ -2,7 +2,7 @@
 
 A premium, highly-predictable multi-agent news retrieval and synthesis system built using the official `@openai/agents` SDK, `zod` for type-safe tool parameters, and the Exa & Tavily SDKs. 
 
-It is designed for personal use, hardcoded to connect to **Ollama Cloud** (`https://ollama.com/v1`) using the **`nemotron-3-ultra`** model to retrieve, validate, deduplicate, score, and format software development and AI updates into a premium `news.md` bulletin.
+It is designed for personal use, hardcoded to connect to **Ollama Cloud** (`https://ollama.com/v1`) using the **`gemma4:31b`** model to retrieve, validate, deduplicate, score, and format software development and AI updates into a premium `news.md` bulletin.
 
 ---
 

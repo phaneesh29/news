@@ -10,11 +10,11 @@
 The project has transitioned into a highly modular, AI-powered production stage:
 
 1. **AI Agent Operatives (Vercel AI SDK):**
-   - Integrated intelligent agent systems (`@ai-sdk/google`, `@tavily/ai-sdk`) to autonomously research, draft, and refine both News dispatches and Blog publications.
-   - Dedicated `blog-agent.ts` and `news-agent.ts` modules process raw intel into formatted, production-ready payloads.
+   - Integrated intelligent agent systems (`@ai-sdk/google`, `@tavily/ai-sdk`) to autonomously research, draft, and refine News dispatches, Blog publications, and platform Documentation.
+   - Dedicated `blog-agent.ts`, `news-agent.ts`, and `doc-agent.ts` modules process raw intel into formatted, production-ready payloads.
 
-2. **Expanded Content Horizons (Blogs & Feedback):**
-   - Added a full **Blogs** administration interface alongside the News feed for long-form content generation.
+2. **Expanded Content Horizons (Blogs, Docs & Feedback):**
+   - Added full **Blogs** and **Docs** administration interfaces alongside the News feed for long-form content generation and platform documentation.
    - Introduced a **Feedback** terminal for telemetry and operative insights.
 
 3. **Fortified Security & Transport Layer:**
@@ -40,7 +40,7 @@ The project has transitioned into a highly modular, AI-powered production stage:
 - Search functionality querying the database news indices in real-time.
 - Interactive detailed inspection dossier overlay. Operatives with clearance can modify details (`Edit Payload`) or purge transmission files completely (`Purge Transmission`).
 
-### 🧠 4. AI-Assisted Payload Injectors (News & Blogs)
+### 🧠 4. AI-Assisted Payload Injectors (News, Blogs & Docs)
 - Teletype manual drafting screens structured around Manila folder aesthetics.
 - **AI Co-Pilot:** Operatives can invoke integrated AI agents to research topics (via Tavily) and draft robust content automatically.
 - Interactive payload injection loader showing packet compilation progress, encryption phases, and final grid broadcast sync.
