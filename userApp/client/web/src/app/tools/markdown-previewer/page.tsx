@@ -92,6 +92,9 @@ export default function MarkdownPreviewer() {
   const [isDragging, setIsDragging] = useState(false);
   const [copied, setCopied] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  
+  // Resizing Panel Width state
+  const [splitWidth, setSplitWidth] = useState(50); // percentage
 
   // Gutter/Line Numbers computed dynamically
   const lineNumbers = useMemo(() => {
@@ -100,6 +103,7 @@ export default function MarkdownPreviewer() {
   }, [markdown]);
 
   // Refs
+  const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -108,6 +112,39 @@ export default function MarkdownPreviewer() {
   
   const isScrollingEditor = useRef(false);
   const isScrollingPreview = useRef(false);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+      
+      // Clamp panels between 15% and 85% to prevent complete collapse
+      if (newWidth >= 15 && newWidth <= 85) {
+        setSplitWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing]);
 
   // Sync scroll between Editor and Gutter, and optionally Preview
   const handleEditorScroll = () => {
@@ -346,9 +383,9 @@ export default function MarkdownPreviewer() {
   }, []);
 
   return (
-    <div className={`flex flex-col bg-background text-foreground overflow-hidden font-newspaper selection:bg-[#cc785c] selection:text-white ${
+    <div className={`flex flex-col bg-background text-foreground overflow-hidden font-newspaper selection:bg-[#cc785c]/35 selection:text-black ${
       isFullscreen ? "fixed inset-0 z-50 h-screen w-screen" : "h-[calc(100vh-0px)]"
-    }`}>
+    } ${isResizing ? "cursor-col-resize select-none" : ""}`}>
       {/* Dynamic print-only style overrides */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
@@ -451,7 +488,7 @@ export default function MarkdownPreviewer() {
           {/* Load Sample & Clear */}
           <button
             onClick={() => setMarkdown(DEFAULT_SAMPLE_MD)}
-            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background transition-colors flex items-center gap-1.5"
+            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center gap-1.5 bg-transparent"
             title="Load Demo template"
           >
             <Sparkles className="h-3 w-3" />
@@ -462,7 +499,7 @@ export default function MarkdownPreviewer() {
             onClick={() => {
               if (confirm("Clear current draft?")) setMarkdown("");
             }}
-            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:bg-red-800 hover:text-white hover:border-red-800 transition-colors flex items-center gap-1.5 text-red-700 dark:text-red-400"
+            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:bg-red-800 hover:text-white hover:border-red-800 transition-colors flex items-center gap-1.5 text-red-700 dark:text-red-400 bg-transparent"
             title="Clear manuscript"
           >
             <Trash2 className="h-3 w-3" />
@@ -472,7 +509,7 @@ export default function MarkdownPreviewer() {
           {/* Upload Button */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background transition-colors flex items-center gap-1.5"
+            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center gap-1.5 bg-transparent"
             title="Import Markdown file"
           >
             <Upload className="h-3.5 w-3.5" />
@@ -489,7 +526,7 @@ export default function MarkdownPreviewer() {
           {/* Copy Button */}
           <button
             onClick={handleCopyMarkdown}
-            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background transition-colors flex items-center gap-1.5"
+            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center gap-1.5 bg-transparent"
             title="Copy Markdown Source"
           >
             {copied ? (
@@ -509,7 +546,7 @@ export default function MarkdownPreviewer() {
           <div className="relative" ref={exportDropdownRef}>
             <button
               onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-              className="border-2 border-current bg-[#cc785c] text-white px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:bg-[#b06349] transition-colors flex items-center gap-1.5"
+              className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center gap-1.5 bg-transparent"
               title="Export File"
             >
               <Download className="h-3.5 w-3.5" />
@@ -519,28 +556,28 @@ export default function MarkdownPreviewer() {
               <div className="absolute right-0 mt-2 w-48 border-2 border-current bg-background divide-y-2 divide-current/10 shadow-[4px_4px_0px_#111111] z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <button
                   onClick={downloadMd}
-                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:bg-[#cc785c]/10 flex items-center gap-2 transition-colors duration-150"
                 >
                   <FileText className="h-3.5 w-3.5" />
                   Markdown (.md)
                 </button>
                 <button
                   onClick={downloadHtml}
-                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:bg-[#cc785c]/10 flex items-center gap-2 transition-colors duration-150"
                 >
                   <FileDown className="h-3.5 w-3.5" />
                   Static HTML (.html)
                 </button>
                 <button
                   onClick={handleCopyHtml}
-                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:bg-[#cc785c]/10 flex items-center gap-2 transition-colors duration-150"
                 >
                   <Copy className="h-3.5 w-3.5" />
                   HTML Content
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:bg-current hover:text-background flex items-center gap-2 border-t border-current/10"
+                  className="w-full text-left px-4 py-2 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:bg-[#cc785c]/10 flex items-center gap-2 border-t border-current/10 transition-colors duration-150"
                 >
                   <Printer className="h-3.5 w-3.5" />
                   Print / Save PDF
@@ -552,7 +589,7 @@ export default function MarkdownPreviewer() {
           {/* Fullscreen Toggle */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="border-2 border-current px-2.5 py-1.5 font-mono text-[10px] font-bold hover:bg-current hover:text-background transition-colors flex items-center"
+            className="border-2 border-current px-2.5 py-1.5 font-mono text-[10px] font-bold hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center bg-transparent"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
@@ -561,13 +598,18 @@ export default function MarkdownPreviewer() {
       </header>
 
       {/* Editor & Preview Pane Workspace */}
-      <main className="flex-1 flex min-h-0 relative no-print select-text bg-[#faf9f5] dark:bg-[#181715]">
+      <main ref={containerRef} className="flex-1 flex min-h-0 relative no-print select-text bg-[#faf9f5] dark:bg-[#181715]">
         
         {/* Editor Area (Visible in 'split' and 'edit' modes) */}
         {(viewMode === "split" || viewMode === "edit") && (
-          <div className={`flex flex-col h-full min-w-0 flex-1 relative ${
-            viewMode === "edit" ? "w-full" : "w-1/2"
-          } bg-[#fdfdfc] dark:bg-[#1a1917]`}>
+          <div 
+            className="flex flex-col h-full min-w-0 bg-[#fdfdfc] dark:bg-[#1a1917] relative"
+            style={{ 
+              width: viewMode === "split" ? `${splitWidth}%` : "100%",
+              flexGrow: 0,
+              flexShrink: 0
+            }}
+          >
             {/* Panel Label */}
             <div className="px-4 py-1.5 bg-[#fcfaf2] dark:bg-[#252320] border-b-2 border-current/25 font-mono text-[9px] uppercase tracking-wider text-current/60 flex items-center justify-between shrink-0 select-none">
               <span>MANUSCRIPT TERMINAL</span>
@@ -594,7 +636,7 @@ export default function MarkdownPreviewer() {
                 onScroll={handleEditorScroll}
                 onKeyDown={handleKeyDown}
                 placeholder="Compose your markdown manuscript here..."
-                className="flex-1 h-full p-4 font-mono text-sm leading-[1.6] bg-transparent border-none resize-none focus:outline-none focus:ring-0 overflow-y-auto selection:bg-[#cc785c]/35 select-text text-foreground [scrollbar-width:thin]"
+                className="flex-1 h-full p-4 font-mono text-sm leading-[1.6] bg-transparent border-none resize-none focus:outline-none focus:ring-0 overflow-y-auto selection:bg-[#cc785c]/35 selection:text-black select-text text-foreground [scrollbar-width:thin]"
                 style={{ tabSize: 2 }}
               />
             </div>
@@ -603,14 +645,25 @@ export default function MarkdownPreviewer() {
 
         {/* Separator Line (Only in Split View) */}
         {viewMode === "split" && (
-          <div className="w-1 self-stretch bg-current/15 shrink-0 select-none no-print pointer-events-none" />
+          <div 
+            onMouseDown={startResizing}
+            className="w-2.5 self-stretch cursor-col-resize shrink-0 select-none no-print relative group flex items-center justify-center transition-colors hover:bg-[#cc785c]/25 active:bg-[#cc785c]/40 z-10 font-sans"
+            title="Drag to resize panels"
+          >
+            <div className="w-0.5 h-16 bg-current/20 group-hover:bg-[#cc785c] group-active:bg-[#cc785c] transition-colors" />
+          </div>
         )}
 
         {/* Preview Area (Visible in 'split' and 'preview' modes) */}
         {(viewMode === "split" || viewMode === "preview") && (
-          <div className={`flex flex-col h-full min-w-0 flex-1 relative ${
-            viewMode === "preview" ? "w-full" : "w-1/2"
-          } bg-[#faf9f5] dark:bg-[#181715]`}>
+          <div 
+            className="flex flex-col h-full min-w-0 bg-[#faf9f5] dark:bg-[#181715] relative"
+            style={{ 
+              width: viewMode === "split" ? `${100 - splitWidth}%` : "100%",
+              flexGrow: 0,
+              flexShrink: 0
+            }}
+          >
             {/* Panel Label */}
             <div className="px-4 py-1.5 bg-[#fcfaf2] dark:bg-[#252320] border-b-2 border-current/25 font-mono text-[9px] uppercase tracking-wider text-current/60 flex items-center justify-between shrink-0 select-none">
               <span>EDITORIAL PROOF</span>
@@ -632,7 +685,7 @@ export default function MarkdownPreviewer() {
               ) : (
                 <div 
                   id="printable-preview-area"
-                  className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35"
+                  className="markdown-content text-inherit text-sm md:text-base leading-relaxed font-serif prose dark:prose-invert py-4 selection:bg-[#cc785c]/35 selection:text-black"
                 >
                   <MarkdownRenderer
                     content={markdown}
