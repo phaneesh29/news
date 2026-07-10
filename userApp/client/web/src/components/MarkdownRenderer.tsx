@@ -26,7 +26,7 @@ function Mermaid({ chart }: { chart: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [zoom, setZoom] = useState<number>(100);
+  const [zoom, setZoom] = useState<number>(50);
 
   useEffect(() => {
     let active = true;
@@ -77,7 +77,7 @@ function Mermaid({ chart }: { chart: string }) {
         {/* Floating Controls */}
         <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#fcfaf2] px-2 py-1 rounded-full border-2 border-stone-950 shadow-[2px_2px_0px_#111111] z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
-            onClick={() => setZoom(prev => Math.max(50, prev - 25))}
+            onClick={() => setZoom(prev => Math.max(25, prev - 25))}
             className="p-1 text-stone-800 hover:text-stone-950 hover:bg-stone-200/60 rounded-full transition-colors duration-150"
             title="Zoom Out"
           >
@@ -98,7 +98,7 @@ function Mermaid({ chart }: { chart: string }) {
             </svg>
           </button>
           <button 
-            onClick={() => setZoom(100)}
+            onClick={() => setZoom(50)}
             className="p-1.5 text-stone-800 hover:text-stone-950 hover:bg-stone-200/60 rounded-full transition-colors duration-150"
             title="Reset Zoom"
           >
