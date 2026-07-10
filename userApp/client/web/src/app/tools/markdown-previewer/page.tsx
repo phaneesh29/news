@@ -17,76 +17,13 @@ import {
   Maximize2,
   Minimize2,
   Printer,
-  Sparkles,
   FileDown
 } from "lucide-react";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 
-const DEFAULT_SAMPLE_MD = `# 📰 Archival Intelligence Dispatch
-> **Status**: Verified Gateway Encryption Active
-> **Priority**: Critical Clearance Level
-
-Welcome to the **Premium Markdown Previewer**. This utility allows you to draft, preview, and audit documents using the editorial design system of *DevBits Chronicles*.
-
----
-
-## 🛠️ Integrated Feature Dossier
-Here is a demonstration of the formatting capabilities:
-
-1. **Rich Typography**: Styled headings, blockquotes, and lists.
-2. **Mermaid Diagrams**: Dynamic rendering of flowcharts, sequence diagrams, and mindmaps.
-3. **Interactive Codeblocks**: Syntax highlighting using theme-specific variables.
-4. **Mathematical Expressions**: LaTeX rendering support via KaTeX.
-
-### 📊 Process Flow Diagram (Mermaid)
-
-\`\`\`mermaid
-graph TD
-    A[Markdown Text Input] -->|Parsing AST| B(Remark / Rehype AST)
-    B -->|Ignore Code Blocks| C{Is Mermaid?}
-    C -->|Yes| D[Render via Mermaid.js]
-    C -->|No| E[Apply Highlight.js]
-    D --> F[Inject SVG Vector Node]
-    E --> G[Inject Highlighted Code]
-    F & G --> H[Display Premium Article Preview]
-\`\`\`
-
-### 🧠 Mathematical Formula
-The quadratic formula is rendered inline as $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ or as a block:
-
-$$
-I(\\theta) = \\int_{-\\infty}^{\\infty} e^{-\\theta x^2} \\, dx = \\sqrt{\\frac{\\pi}{\\theta}}
-$$
-
-### 💻 Code Snippet
-Here is an example JavaScript class:
-
-\`\`\`javascript
-class CourierGateway {
-  constructor(clearance) {
-    this.clearance = clearance;
-  }
-  
-  verify() {
-    return this.clearance >= 4;
-  }
-}
-\`\`\`
-
-### 📋 Technical Metadata Matrix
-
-| Dispatch ID | Node Source | Latency | Authorization |
-| :--- | :--- | :--- | :--- |
-| DB-402 | US-EAST-4 | \`12ms\` | **GRANTED** |
-| DB-908 | EU-WEST-1 | \`84ms\` | *PENDING* |
-| DB-112 | AP-NE-2 | \`198ms\` | **DENIED** |
-
----
-`;
-
 export default function MarkdownPreviewer() {
   // State Variables
-  const [markdown, setMarkdown] = useState(DEFAULT_SAMPLE_MD);
+  const [markdown, setMarkdown] = useState("");
   const [viewMode, setViewMode] = useState<"split" | "edit" | "preview">("split");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -519,16 +456,6 @@ export default function MarkdownPreviewer() {
 
         {/* Toolbar Right / Document Actions */}
         <div className="flex items-center justify-end gap-2 w-full md:w-auto">
-          {/* Load Sample & Clear */}
-          <button
-            onClick={() => setMarkdown(DEFAULT_SAMPLE_MD)}
-            className="border-2 border-current px-3 py-1.5 font-mono text-[10px] font-bold uppercase hover:text-[#cc785c] hover:border-[#cc785c] hover:bg-[#cc785c]/10 transition-colors duration-150 flex items-center gap-1.5 bg-transparent"
-            title="Load Demo template"
-          >
-            <Sparkles className="h-3 w-3" />
-            Sample
-          </button>
-          
           <button
             onClick={() => {
               if (confirm("Clear current draft?")) setMarkdown("");
