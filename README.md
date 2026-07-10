@@ -22,7 +22,7 @@
 | **Clearance Level** | `LEVEL 4 (CLASSIFIED)` | `0xEF99A2` |
 | **Grid Status** | `ONLINE / SYNCED` | `🟢 ACTIVE` |
 | **Core Processor** | `@openai/agents SDK`, `Vercel AI SDK` | `Ollama Cloud (nemotron-3-ultra)` |
-| **Visual Framework** | `CRT / Scanline / Manila Dossier` | See [DESIGN.md](file:///D:/news/DESIGN.md) |
+| **Visual Framework** | `CRT / Scanline / Manila Dossier` | See [DESIGN.md](./DESIGN.md) |
 
 ---
 
@@ -74,23 +74,23 @@ graph TD
 
 ## 📂 SUB-SYSTEM DIRECTORY DOSSIERS
 
-### 🛰️ [newsAgent](file:///D:/news/newsAgent) — Autonomous Curation Swarm
+### 🛰️ [newsAgent](./newsAgent) — Autonomous Curation Swarm
 Operates a sequential parent-child LLM agent workflow configured to scrape hacker updates, trending releases, exploits, and academic briefs, compiling them into ranked dispatch feeds.
-- **Coordination Hub:** [newsAgent/index.js](file:///D:/news/newsAgent/index.js) orchestrates the agentic workflow via `@openai/agents`.
-- **Architectural Specs:** Read [newsAgent/README.md](file:///D:/news/newsAgent/README.md) for data flow specifications.
-- **Output Vault:** [content/news.md](file:///D:/news/content/news.md) holds the raw telemetry outputs compiled by the editor agent.
+- **Coordination Hub:** [newsAgent/index.js](./newsAgent/index.js) orchestrates the agentic workflow via `@openai/agents`.
+- **Architectural Specs:** Read [newsAgent/README.md](./newsAgent/README.md) for data flow specifications.
+- **Output Vault:** [content/news.md](./content/news.md) holds the raw telemetry outputs compiled by the editor agent.
 
-### 🎛️ [adminApp](file:///D:/news/adminApp) — Classified Command Terminal
+### 🎛️ [adminApp](./adminApp) — Classified Command Terminal
 The Win95/Y2K-themed operational environment allowing grid operators to audit, write, and purge Chronicles dispatches, alongside managing long-form Manifests (Blogs) and addressing User Feedback.
-- **Hono Backend Node Engine:** [adminApp/server](file:///D:/news/adminApp/server) coordinates session access, OTP verification via **Resend**, PostgreSQL schemas via Drizzle ORM, and integrated **Vercel AI SDK** drafting agents.
-- **Next.js Web Command Client:** [adminApp/client](file:///D:/news/adminApp/client) displays CRT sweeps, interactive folders, telemetry metrics, and AI Co-Pilot integrations.
-- **Sub-System Readme:** Read [adminApp/README.md](file:///D:/news/adminApp/README.md) for environment presets.
+- **Hono Backend Node Engine:** [adminApp/server](./adminApp/server) coordinates session access, OTP verification via **Resend**, PostgreSQL schemas via Drizzle ORM, and integrated **Vercel AI SDK** drafting agents.
+- **Next.js Web Command Client:** [adminApp/client](./adminApp/client) displays CRT sweeps, interactive folders, telemetry metrics, and AI Co-Pilot integrations.
+- **Sub-System Readme:** Read [adminApp/README.md](./adminApp/README.md) for environment presets.
 
-### 📖 [userApp](file:///D:/news/userApp) — Public Grid Terminal
+### 📖 [userApp](./userApp) — Public Grid Terminal
 A sleek, cormorant garamond serif-based user interface following warm-editorial design systems, allowing authorized operatives to review active broadcasts, blogs, liked posts, and submit feedback. **Includes advanced utility tools (DevBits IDE, split-pane Markdown Previewer, client-side Image Compressor, DNS Resolver), interactive playables, and intelligence digests.**
-- **Next.js Interface:** [userApp/client/web](file:///D:/news/userApp/client/web) handles bookmarks, profile settings, dispatch reading, execution sandboxing (`/tools/code`), live markdown-previewer (`/tools/markdown-previewer`), and documentation.
-- **Express Backend Adapter:** [userApp/server](file:///D:/news/userApp/server) manages robust user authentication logic using `better-auth` and secure Neon PostgreSQL transactions via Drizzle ORM.
-- **Sub-System Readme:** Read [userApp/README.md](file:///D:/news/userApp/README.md) for architectural and setup instructions.
+- **Next.js Interface:** [userApp/client/web](./userApp/client/web) handles bookmarks, profile settings, dispatch reading, execution sandboxing (`/tools/code`), live markdown-previewer (`/tools/markdown-previewer`), and documentation.
+- **Express Backend Adapter:** [userApp/server](./userApp/server) manages robust user authentication logic using `better-auth` and secure Neon PostgreSQL transactions via Drizzle ORM.
+- **Sub-System Readme:** Read [userApp/README.md](./userApp/README.md) for architectural and setup instructions.
 
 ---
 
@@ -115,7 +115,7 @@ $$\text{Final Score} = 0.40 \times \text{Impact} + 0.25 \times \text{Community} 
 
 ## 🎨 RETRO-CYBER STYLING MATRIX
 
-All modules follow the specifications outlined in the master [DESIGN.md](file:///D:/news/DESIGN.md):
+All modules follow the specifications outlined in the master [DESIGN.md](./DESIGN.md):
 
 | Aesthetic Component | Implementation Token | Visual Hex |
 | :--- | :--- | :--- |
@@ -136,7 +136,7 @@ cd D:/news/newsAgent
 npm install
 npm start
 ```
-*Creates the [news.md](file:///D:/news/content/news.md) dispatch archive.*
+*Creates the [news.md](./content/news.md) dispatch archive.*
 
 ### Phase 2: Launch Command Mainframe (adminApp)
 1. Initialize the PostgreSQL schema via Drizzle ORM:

@@ -73,21 +73,21 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
 
 ## 📂 Project Repository Structure
 
-- [client/web](file:///D:/news/userApp/client/web) — Next.js Public Interface
-  - [src/app/news](file:///D:/news/userApp/client/web/src/app/news) — News broadcast reader.
-  - [src/app/liked](file:///D:/news/userApp/client/web/src/app/liked) — Curated list of liked intel dispatches.
-  - [src/app/blog](file:///D:/news/userApp/client/web/src/app/blog) — Long-form manifest browser.
-  - [src/app/profile](file:///D:/news/userApp/client/web/src/app/profile) & [settings](file:///D:/news/userApp/client/web/src/app/settings) — Operative account management.
-  - [src/app/tools/code](file:///D:/news/userApp/client/web/src/app/tools/code) — DevBits IDE WebContainer Sandbox.
-  - [src/app/tools/markdown-previewer](file:///D:/news/userApp/client/web/src/app/tools/markdown-previewer) — Split-pane live Markdown previewer with Mermaid & KaTeX.
-  - [src/app/tools/image-compressor](file:///D:/news/userApp/client/web/src/app/tools/image-compressor) — Client-side image compression tool.
-  - [src/app/tools/dns-resolver](file:///D:/news/userApp/client/web/src/app/tools/dns-resolver) — Multi-record DNS query investigator.
-  - [src/app/playables](file:///D:/news/userApp/client/web/src/app/playables) — Interactive incidents and quizzes.
-  - [src/app/digest](file:///D:/news/userApp/client/web/src/app/digest) & [docs](file:///D:/news/userApp/client/web/src/app/docs) — Intelligence digests and platform documentation.
-  - [src/app/privacy](file:///D:/news/userApp/client/web/src/app/privacy) & [terms](file:///D:/news/userApp/client/web/src/app/terms) — Compliance documentation.
-- [server](file:///D:/news/userApp/server) — Express.js Backend & Database Interface
-  - [src/routes](file:///D:/news/userApp/server/src/routes) — API route definitions for handling auth, news, blogs, feedback, digests, and docs.
-  - [src/db/schema.js](file:///D:/news/userApp/server/src/db/schema.js) — Drizzle ORM schema defining User Auth, `dev_news`, `blogs`, `news_likes`, and `feedbacks` tables.
+- [client/web](./client/web) — Next.js Public Interface
+  - [src/app/news](./client/web/src/app/news) — News broadcast reader.
+  - [src/app/liked](./client/web/src/app/liked) — Curated list of liked intel dispatches.
+  - [src/app/blog](./client/web/src/app/blog) — Long-form manifest browser.
+  - [src/app/profile](./client/web/src/app/profile) & [settings](./client/web/src/app/settings) — Operative account management.
+  - [src/app/tools/code](./client/web/src/app/tools/code) — DevBits IDE WebContainer Sandbox.
+  - [src/app/tools/markdown-previewer](./client/web/src/app/tools/markdown-previewer) — Split-pane live Markdown previewer with Mermaid & KaTeX.
+  - [src/app/tools/image-compressor](./client/web/src/app/tools/image-compressor) — Client-side image compression tool.
+  - [src/app/tools/dns-resolver](./client/web/src/app/tools/dns-resolver) — Multi-record DNS query investigator.
+  - [src/app/playables](./client/web/src/app/playables) — Interactive incidents and quizzes.
+  - [src/app/digest](./client/web/src/app/digest) & [docs](./client/web/src/app/docs) — Intelligence digests and platform documentation.
+  - [src/app/privacy](./client/web/src/app/privacy) & [terms](./client/web/src/app/terms) — Compliance documentation.
+- [server](./server) — Express.js Backend & Database Interface
+  - [src/routes](./server/src/routes) — API route definitions for handling auth, news, blogs, feedback, digests, and docs.
+  - [src/db/schema.js](./server/src/db/schema.js) — Drizzle ORM schema defining User Auth, `dev_news`, `blogs`, `news_likes`, and `feedbacks` tables.
 
 ---
 
@@ -98,7 +98,7 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
 - **Neon Postgres Database URL** (or any Postgres instance)
 
 ### 2. Setting up the Backend
-1. Navigate to the [server](file:///D:/news/userApp/server) directory.
+1. Navigate to the [server](./server) directory.
 2. Install dependencies:
    ```bash
    npm install
@@ -115,7 +115,7 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
    ```
 
 ### 3. Setting up the Frontend
-1. Navigate to the [client/web](file:///D:/news/userApp/client/web) directory.
+1. Navigate to the [client/web](./client/web) directory.
 2. Install dependencies:
    ```bash
    npm install

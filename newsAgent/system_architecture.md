@@ -97,4 +97,4 @@ Run the pipeline using npm:
 npm start
 ```
 
-The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[news.md](file:///D:/news/content/news.md)**.
+The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[news.md](../content/news.md)**.

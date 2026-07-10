@@ -100,20 +100,20 @@ graph TD
 
 ## 📂 Project Repository Structure
 
-- [client](file:///D:/news/adminApp/client) — Next.js Y2K Command Interface
-  - [src/app](file:///D:/news/adminApp/client/src/app) — Main Next.js route folders
-    - [dashboard](file:///D:/news/adminApp/client/src/app/dashboard) — Central telemetry and navigation launchpad
-    - [login](file:///D:/news/adminApp/client/src/app/login) & [verify](file:///D:/news/adminApp/client/src/app/verify) — Secure OTP entry protocols
-    - [news](file:///D:/news/adminApp/client/src/app/news) — Live feed monitoring Chronicles deck
-    - [blogs](file:///D:/news/adminApp/client/src/app/blogs) — Long-form manifesto drafting and publishing deck
-    - [feedback](file:///D:/news/adminApp/client/src/app/feedback) — User feedback analysis and telemetry
-    - [settings](file:///D:/news/adminApp/client/src/app/settings) — Security whitelist deck for grid access
-- [server](file:///D:/news/adminApp/server) — Hono Backend & Database Engine
-  - [src/schemas](file:///D:/news/adminApp/server/src/schemas) — Centrally exported Zod schemas (Auth, News, Blogs, Whitelist, Agent)
-  - [src/routes](file:///D:/news/adminApp/server/src/routes) — API route definitions leveraging zValidator validation middleware
-  - [src/controllers](file:///D:/news/adminApp/server/src/controllers) — Server-side operations and database querying logic
-  - [src/lib/agents](file:///D:/news/adminApp/server/src/lib/agents) — AI logic defining generation tasks for news and blogs
-  - [src/db](file:///D:/news/adminApp/server/src/db) — PostgreSQL schema mapping declarations and Drizzle ORM configs
+- [client](./client) — Next.js Y2K Command Interface
+  - [src/app](./client/src/app) — Main Next.js route folders
+    - [dashboard](./client/src/app/dashboard) — Central telemetry and navigation launchpad
+    - [login](./client/src/app/login) & [verify](./client/src/app/verify) — Secure OTP entry protocols
+    - [news](./client/src/app/news) — Live feed monitoring Chronicles deck
+    - [blogs](./client/src/app/blogs) — Long-form manifesto drafting and publishing deck
+    - [feedback](./client/src/app/feedback) — User feedback analysis and telemetry
+    - [settings](./client/src/app/settings) — Security whitelist deck for grid access
+- [server](./server) — Hono Backend & Database Engine
+  - [src/schemas](./server/src/schemas) — Centrally exported Zod schemas (Auth, News, Blogs, Whitelist, Agent)
+  - [src/routes](./server/src/routes) — API route definitions leveraging zValidator validation middleware
+  - [src/controllers](./server/src/controllers) — Server-side operations and database querying logic
+  - [src/lib/agents](./server/src/lib/agents) — AI logic defining generation tasks for news and blogs
+  - [src/db](./server/src/db) — PostgreSQL schema mapping declarations and Drizzle ORM configs
 
 ---
 
@@ -124,7 +124,7 @@ graph TD
 - **PostgreSQL** database instance running locally or hosted
 
 ### 2. Setting up the Backend
-1. Go to the [server](file:///D:/news/adminApp/server) directory.
+1. Go to the [server](./server) directory.
 2. Initialize environment parameters inside `.env` (using `.env.example` as a template). Ensure to add keys for Resend and AI services if utilizing agent operatives.
 3. Install dependencies:
    ```bash
@@ -141,7 +141,7 @@ graph TD
    ```
 
 ### 3. Setting up the Frontend
-1. Go to the [client](file:///D:/news/adminApp/client) directory.
+1. Go to the [client](./client) directory.
 2. Install dependencies:
    ```bash
    npm install

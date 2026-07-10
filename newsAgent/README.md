@@ -105,4 +105,4 @@ D:/news/newsAgent/
    ```bash
    npm start
    ```
-The newsletter will be saved in the content directory as [news.md](file:///D:/news/content/news.md).
+The newsletter will be saved in the content directory as [news.md](../content/news.md).
