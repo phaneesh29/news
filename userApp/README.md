@@ -31,13 +31,24 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
    - Fully functional, browser-based Node.js micro-OS powered by WebContainers.
    - Integrated Monaco Editor and xterm.js terminal for in-browser script execution and prototyping.
 
-6. **Interactive Playables & Quizzes**
+6. **Premium Markdown Previewer**
+   - Live Markdown document editor and previewer with dual split-pane drafting, synchronized scrolling, and custom zoom controls.
+   - Rich support for Mermaid diagrams, Math expressions (KaTeX LaTeX rendering), and highlight.js code syntax highlighting.
+   - Interactive document actions including file imports (.md, .txt), source copying, fullscreen API views, and HTML/MD local file downloads.
+
+7. **Image Compressor**
+   - High-speed client-side image optimizer allowing drag/drop and copy/paste compression configurations with no server uploads.
+
+8. **Network Investigator (DNS Resolver)**
+   - Secure DNS queries dashboard resolving A, AAAA, MX, TXT, and CNAME records with low latency.
+
+9. **Interactive Playables & Quizzes**
    - Engage operatives with training scenarios, interactive incidents, and knowledge quizzes.
 
-7. **Intelligence Digests & Documentation**
+10. **Intelligence Digests & Documentation**
    - Subscription-based intelligence digests and a comprehensive documentation hub.
 
-8. **Legal & Compliance Interfaces**
+11. **Legal & Compliance Interfaces**
    - Built-in `privacy` and `terms` terminals ensuring operational compliance.
 
 ---
@@ -68,6 +79,9 @@ The `userApp` is a modern, modular application providing a seamless front-end ex
   - [src/app/blog](file:///D:/news/userApp/client/web/src/app/blog) — Long-form manifest browser.
   - [src/app/profile](file:///D:/news/userApp/client/web/src/app/profile) & [settings](file:///D:/news/userApp/client/web/src/app/settings) — Operative account management.
   - [src/app/tools/code](file:///D:/news/userApp/client/web/src/app/tools/code) — DevBits IDE WebContainer Sandbox.
+  - [src/app/tools/markdown-previewer](file:///D:/news/userApp/client/web/src/app/tools/markdown-previewer) — Split-pane live Markdown previewer with Mermaid & KaTeX.
+  - [src/app/tools/image-compressor](file:///D:/news/userApp/client/web/src/app/tools/image-compressor) — Client-side image compression tool.
+  - [src/app/tools/dns-resolver](file:///D:/news/userApp/client/web/src/app/tools/dns-resolver) — Multi-record DNS query investigator.
   - [src/app/playables](file:///D:/news/userApp/client/web/src/app/playables) — Interactive incidents and quizzes.
   - [src/app/digest](file:///D:/news/userApp/client/web/src/app/digest) & [docs](file:///D:/news/userApp/client/web/src/app/docs) — Intelligence digests and platform documentation.
   - [src/app/privacy](file:///D:/news/userApp/client/web/src/app/privacy) & [terms](file:///D:/news/userApp/client/web/src/app/terms) — Compliance documentation.

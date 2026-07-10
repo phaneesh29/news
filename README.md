@@ -87,8 +87,8 @@ The Win95/Y2K-themed operational environment allowing grid operators to audit, w
 - **Sub-System Readme:** Read [adminApp/README.md](file:///D:/news/adminApp/README.md) for environment presets.
 
 ### 📖 [userApp](file:///D:/news/userApp) — Public Grid Terminal
-A sleek, cormorant garamond serif-based user interface following warm-editorial design systems, allowing authorized operatives to review active broadcasts, blogs, liked posts, and submit feedback. **Includes the DevBits IDE (in-browser Node.js WebContainer sandbox), interactive playables, and intelligence digests.**
-- **Next.js Interface:** [userApp/client/web](file:///D:/news/userApp/client/web) handles bookmarks, profile settings, dispatch reading, execution sandboxing (`/tools/code`), and documentation.
+A sleek, cormorant garamond serif-based user interface following warm-editorial design systems, allowing authorized operatives to review active broadcasts, blogs, liked posts, and submit feedback. **Includes advanced utility tools (DevBits IDE, split-pane Markdown Previewer, client-side Image Compressor, DNS Resolver), interactive playables, and intelligence digests.**
+- **Next.js Interface:** [userApp/client/web](file:///D:/news/userApp/client/web) handles bookmarks, profile settings, dispatch reading, execution sandboxing (`/tools/code`), live markdown-previewer (`/tools/markdown-previewer`), and documentation.
 - **Express Backend Adapter:** [userApp/server](file:///D:/news/userApp/server) manages robust user authentication logic using `better-auth` and secure Neon PostgreSQL transactions via Drizzle ORM.
 - **Sub-System Readme:** Read [userApp/README.md](file:///D:/news/userApp/README.md) for architectural and setup instructions.
 

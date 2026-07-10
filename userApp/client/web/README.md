@@ -35,6 +35,12 @@ DevBits is styled using custom theme definitions inside [globals.css](file:///ho
 │   │   ├── privacy/       # Static privacy policy compliance page
 │   │   ├── terms/         # Static terms of service compliance page
 │   │   ├── profile/       # Protected account and session security details page
+│   │   ├── tools/         # Interactive tools and sandboxes
+│   │   │   ├── page.tsx                # Tools hub selector page
+│   │   │   ├── code/                   # DevBits IDE WebContainer sandbox
+│   │   │   ├── markdown-previewer/     # Split-pane Markdown editor and previewer
+│   │   │   ├── image-compressor/       # Client-side image compressor
+│   │   │   └── dns-resolver/           # Low-latency multi-record DNS query investigator
 │   │   └── globals.css    # Tailwind CSS v4 @theme configurations
 │   ├── components/
 │   │   └── ui/            # UI components (Button, Card, Badge, Avatar, Dialog, Tabs)
