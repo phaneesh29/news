@@ -389,24 +389,32 @@ export default function MarkdownPreviewer() {
       {/* Dynamic print-only style overrides */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body {
-            background-color: white !important;
-            color: black !important;
+          /* Hide all elements on body */
+          body * {
+            visibility: hidden !important;
           }
-          header, nav, footer, button, .no-print {
-            display: none !important;
+          /* Show only the target preview area and its children */
+          #printable-preview-area, #printable-preview-area * {
+            visibility: visible !important;
           }
+          /* Position printable area at top-left and ensure it fills the page */
           #printable-preview-area {
+            visibility: visible !important;
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
             height: auto !important;
             overflow: visible !important;
+            background-color: white !important;
+            color: black !important;
             padding: 0 !important;
             margin: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
+          }
+          /* Break container height restrictions during print */
+          html, body, #devbits-settings-root, main, div {
+            height: auto !important;
+            overflow: visible !important;
           }
         }
       `}} />
@@ -598,7 +606,7 @@ export default function MarkdownPreviewer() {
       </header>
 
       {/* Editor & Preview Pane Workspace */}
-      <main ref={containerRef} className="flex-1 flex min-h-0 relative no-print select-text bg-[#faf9f5] dark:bg-[#181715]">
+      <main ref={containerRef} className="flex-1 flex min-h-0 relative select-text bg-[#faf9f5] dark:bg-[#181715]">
         
         {/* Editor Area (Visible in 'split' and 'edit' modes) */}
         {(viewMode === "split" || viewMode === "edit") && (
