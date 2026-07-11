@@ -309,7 +309,11 @@ export default function DocsDashboardPage() {
                                             className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between bg-white hover:bg-stone-50/80 border-2 border-stone-955/20 hover:border-stone-955 p-3.5 rounded shadow-[2px_2px_0px_rgba(0,0,0,0.05)] hover:shadow-[3px_3px_0px_#111] cursor-pointer transition-all gap-2 text-left"
                                           >
                                             <div className="flex items-center gap-2.5 min-w-0">
-                                              <span className="font-mono text-[9px] bg-red-800/10 text-red-900 border border-red-900/20 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0">
+                                              <span className={`font-mono text-[9px] border px-1.5 py-0.5 rounded font-bold uppercase tracking-wider flex-shrink-0 ${
+                                                child.isPublished 
+                                                  ? "bg-green-600/10 text-green-700 border-green-700/20" 
+                                                  : "bg-red-800/10 text-red-900 border-red-900/20"
+                                              }`}>
                                                 Sub {idx + 1}
                                               </span>
                                               <svg className="w-4 h-4 text-stone-500 group-hover:text-red-900 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
