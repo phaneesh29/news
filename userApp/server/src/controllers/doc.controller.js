@@ -1,4 +1,4 @@
-import { desc, eq, lt, or, and, ilike, isNull } from "drizzle-orm";
+import { desc, eq, lt, or, and, ilike, isNull, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { docs } from "../db/schema.js";
 
@@ -38,7 +38,10 @@ export const getPublishedDocs = async (req, res) => {
 
   const decoded = cursorParam ? decodeCursor(cursorParam) : null;
 
-  let condition = eq(docs.isPublished, true);
+  let condition = and(
+    eq(docs.isPublished, true),
+    sql`(${docs.parentId} IS NULL OR ${docs.parentId} IN (SELECT ${docs.id} FROM ${docs} WHERE ${docs.isPublished} = true))`
+  );
 
   const parentCondition = parentIdParam === "null"
     ? isNull(docs.parentId)
@@ -92,7 +95,13 @@ export const getPublishedDocBySlug = async (req, res) => {
   const docItems = await db
     .select(docSelect)
     .from(docs)
-    .where(and(eq(docs.slug, slug), eq(docs.isPublished, true)))
+    .where(
+      and(
+        eq(docs.slug, slug),
+        eq(docs.isPublished, true),
+        sql`(${docs.parentId} IS NULL OR ${docs.parentId} IN (SELECT ${docs.id} FROM ${docs} WHERE ${docs.isPublished} = true))`
+      )
+    )
     .limit(1);
 
   const doc = docItems[0];
@@ -121,6 +130,7 @@ export const searchPublishedDocs = async (req, res) => {
     .where(
       and(
         eq(docs.isPublished, true),
+        sql`(${docs.parentId} IS NULL OR ${docs.parentId} IN (SELECT ${docs.id} FROM ${docs} WHERE ${docs.isPublished} = true))`,
         or(
           ilike(docs.title, `%${search}%`),
           ilike(docs.content, `%${search}%`),
