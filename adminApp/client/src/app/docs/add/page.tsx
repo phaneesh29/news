@@ -25,6 +25,16 @@ export default function AddDocPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [parentId, setParentId] = useState<string | null>(null);
   const [orderIndex, setOrderIndex] = useState<number>(0);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const pId = params.get("parentId");
+      const idx = params.get("orderIndex");
+      if (pId) setParentId(pId);
+      if (idx) setOrderIndex(parseInt(idx, 10) || 0);
+    }
+  }, []);
   
   const [parentOptions, setParentOptions] = useState<DocItem[]>([]);
   const [injectionStatus, setInjectionStatus] = useState({ active: false, phase: "", progress: 0 });
