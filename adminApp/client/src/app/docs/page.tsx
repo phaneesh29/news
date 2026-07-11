@@ -338,20 +338,9 @@ export default function DocsDashboardPage() {
                                           </div>
                                           
                                           <div className="flex items-center gap-3 font-mono text-[10px] text-stone-500">
-                                            <span className="font-bold text-stone-400 group-hover:text-red-900 mr-2">
+                                            <span className="font-bold text-stone-400 group-hover:text-red-900">
                                               ORDER Index: {child.orderIndex}
                                             </span>
-                                            {canAdd && (
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  router.push(`/docs/add?parentId=${item.id}&orderIndex=${nextOrderIndex}`);
-                                                }}
-                                                className="font-mono text-[9px] font-bold text-red-900 border border-red-900 bg-red-50 hover:bg-red-900 hover:text-white px-2 py-0.5 rounded transition-all cursor-pointer shadow-[1px_1px_0px_#7f1d1d] hover:shadow-none active:translate-x-[0.5px] active:translate-y-[0.5px]"
-                                              >
-                                                + ADD SIBLING
-                                              </button>
-                                            )}
                                           </div>
                                         </div>
                                       </div>
