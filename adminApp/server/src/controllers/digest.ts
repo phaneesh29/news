@@ -7,7 +7,7 @@ export const getDigest = async (c: Context) => {
     const digestData = await redis.hgetall('news:latest');
     return c.json({
       success: true,
-      data: digestData
+      data: digestData || {}
     });
   } catch (error: any) {
     throw new HTTPException(500, { message: `Failed to fetch digest: ${error.message}` });
