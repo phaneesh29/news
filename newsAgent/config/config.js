@@ -15,6 +15,6 @@ export const config = {
   llmModelSettings: {},
 
   freshnessHours: Number(process.env.FRESHNESS_HOURS || 24),
-  outputFile: path.resolve(__dirname, '..', '..', 'content', 'news.md'),
-  draftOutputFile: path.resolve(__dirname, '..', '..', 'content', 'news.draft.md'),
+  upstashRedisRestUrl: process.env.UPSTASH_REDIS_REST_URL || '',
+  upstashRedisRestToken: process.env.UPSTASH_REDIS_REST_TOKEN || '',
 };

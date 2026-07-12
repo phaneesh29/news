@@ -1,9 +1,9 @@
 import './utils/disable-tracing.js';
-import fs from 'fs/promises';
 import { run } from '@openai/agents';
 import './utils/llm.js';
 import { managerAgent } from './agents/managerAgent.js';
 import { config } from './config/config.js';
+import { storeNewsInRedis } from './utils/redis.js';
 import { sendEmail } from './utils/emailHelper.js';
 
 const query = 'latest developer-focused AI releases, chips, acquisitions, devtools, infrastructure, and security advisories';
@@ -41,53 +41,62 @@ Quality bar:
 - Cross-reference important news with multiple sources whenever possible.
 - Every story must have a title, clear summary, tags, confidence, and real source URLs.
 - Reject stale stories outside the freshness window unless a primary source proves the update is fresh.
-- The markdown header MUST start exactly like this:
-
-# NewsFetch Digest
-### Developer-Focused AI and Tech Briefing - ${nowUtc}
-
-Last updated: ${nowUtc}
-Freshness window: last ${config.freshnessHours} hours
-
-- The Pipeline Stats Generated At must use ${nowUtc} or ${nowIso}.
-- If calling fetch_academic_papers with a date, use ${currentDate}; otherwise omit the date. Never use a 2025 date.
-- Do not include scoring, score tables, score breakdowns, or ranking formulas in news.md or email.
-- Write the final markdown through the write_news_bulletin tool. It will save a draft that is promoted to ${config.outputFile} only after validation.
+- Do not use any markdown formatting inside string fields like title or summary. Keep them clean.
+- Match the schema fields exactly: use "sources" (not "source_urls"), "category", "title", "summary", "tags", and "confidence" ('High', 'Medium', or 'Low').
+- CRITICAL: Return the final output as raw JSON only. Do not wrap the response in markdown blocks like \`\`\`json or \`\`\`. Start your output directly with [ and end with ].
 
 ${previousFeedback ? `Previous quality feedback to fix:\n${previousFeedback}` : ''}`;
 }
 
-async function evaluateNewsFile(filePath = config.draftOutputFile) {
-  const content = await fs.readFile(filePath, 'utf-8');
+function evaluateNewsData(newsArray) {
   const failures = [];
-  const storyCount = (content.match(/^### (?!Developer-Focused)/gm) || []).length;
-  const sourceCount = (content.match(/^- \[[^\]]+\]\(https?:\/\//gm) || []).length;
-  const tagCount = (content.match(/^Tags:\s*`/gm) || []).length;
-
-  if (storyCount < 5) failures.push(`Only ${storyCount} stories found; publish at least 5 high-quality stories if fresh sources exist.`);
-  if (tagCount < storyCount) failures.push('Some stories are missing tag lines.');
-  if (/\bscore\b|scoring breakdown|impact:\s*\d|authority:\s*\d/i.test(content)) failures.push('Visible scoring language found; remove all scores and scoring breakdowns.');
-  if (/\]\(#\)|placeholder|example\.com/i.test(content)) failures.push('Placeholder links found; use only real source URLs.');
-  if (!/Freshness window:/i.test(content)) failures.push('Freshness window is missing from the digest header.');
-  const currentYear = new Date().getUTCFullYear();
-  const headerMatch = content.match(/Last updated: (.*)/i);
-  if (!headerMatch || !headerMatch[1].includes(String(currentYear))) {
-    failures.push(`The 'Last updated:' header must include the current year ${currentYear}.`);
+  if (!Array.isArray(newsArray)) {
+    failures.push('Output is not a valid array of news objects.');
+    return { ok: false, failures };
   }
+
+  if (newsArray.length < 5) {
+    failures.push(`Only ${newsArray.length} stories found; publish at least 5 high-quality stories if fresh sources exist.`);
+  }
+
+  newsArray.forEach((story, index) => {
+    if (!story.title || story.title.trim().length === 0) {
+      failures.push(`Story at index ${index} is missing a title.`);
+    }
+    if (!story.summary || story.summary.trim().length === 0) {
+      failures.push(`Story at index ${index} is missing a summary.`);
+    }
+    if (!story.category) {
+      failures.push(`Story at index ${index} is missing a category.`);
+    }
+    if (!story.tags || story.tags.length < 2) {
+      failures.push(`Story at index ${index} must have at least 2 tags.`);
+    }
+    if (!story.sources || story.sources.length === 0) {
+      failures.push(`Story at index ${index} must have at least 1 verified source URL.`);
+    }
+
+   if (story.title && (story.title.includes('#') || story.title.includes('*') || story.title.includes('`') || story.title.includes('[') || story.title.includes(']'))) {
+      failures.push(`Story at index ${index} title contains markdown formatting.`);
+    }
+    if (story.summary && (story.summary.includes('**') || story.summary.includes('`') || story.summary.includes('[') || story.summary.includes(']'))) {
+      failures.push(`Story at index ${index} summary contains markdown formatting.`);
+    }
+
+    if (story.sources) {
+      story.sources.forEach(src => {
+        if (/example\.com|placeholder|#/i.test(src)) {
+          failures.push(`Story at index ${index} contains placeholder source URL: ${src}`);
+        }
+      });
+    }
+  });
 
   return {
     ok: failures.length === 0,
     failures,
-    storyCount,
-    sourceCount,
-    tagCount,
+    storyCount: newsArray.length,
   };
-}
-
-async function promoteDraft() {
-  const content = await fs.readFile(config.draftOutputFile, 'utf-8');
-  await fs.copyFile(config.draftOutputFile, config.outputFile);
-  return content;
 }
 
 async function main() {
@@ -107,19 +116,17 @@ async function main() {
       console.log('Manager output:');
       console.log(result.finalOutput);
 
-      const evaluation = await evaluateNewsFile();
+      const evaluation = evaluateNewsData(result.finalOutput);
       if (evaluation.ok) {
-        const content = await promoteDraft();
-        const emailResult = await sendEmail(content);
+        await storeNewsInRedis(result.finalOutput);
+        const emailResult = await sendEmail(result.finalOutput);
         if (!emailResult.success) {
-          throw new Error(`Digest passed quality gate and was promoted, but email failed: ${emailResult.error}`);
+          throw new Error(`Digest saved to Redis, but email failed: ${emailResult.error}`);
         }
 
         console.log('\n================================================================');
         console.log('PIPELINE RUN COMPLETED');
-        console.log(`Output file: ${config.outputFile}`);
-        console.log(`Email ID: ${emailResult.emailId}`);
-        console.log(`Stories: ${evaluation.storyCount}, sources: ${evaluation.sourceCount}, tag lines: ${evaluation.tagCount}`);
+        console.log(`Stories stored and email dispatched: ${evaluation.storyCount}`);
         console.log('================================================================\n');
         return;
       }

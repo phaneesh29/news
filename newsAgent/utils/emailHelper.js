@@ -73,11 +73,59 @@ function markdownToHtml(md) {
   return html;
 }
 
-export function buildEmailHtml(markdownContent) {
-  const bodyHtml = markdownToHtml(markdownContent);
-  const now = new Date().toISOString();
+export function buildEmailHtml(newsArray) {
   const ink = '#000000';
   const bg = '#ffffff';
+  const accent = '#0055ff'; // sharp dev-blue
+  const fontBody = "'JetBrains Mono', monospace";
+  const fontHeadline = "'Space Grotesk', sans-serif";
+  const fontSans = "'JetBrains Mono', monospace";
+
+  const categories = [
+    'Developer Tools & Platforms',
+    'AI & Machine Learning',
+    'Chips, Infrastructure & Acquisitions',
+    'Security & Advisories'
+  ];
+
+  let bodyHtml = '';
+
+  categories.forEach(category => {
+    const stories = newsArray.filter(s => s.category === category);
+    if (stories.length === 0) return;
+    
+    // Category Header
+    bodyHtml += `<div style="font-family:${fontHeadline};font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1.1;text-transform:uppercase;text-align:left;margin:40px 0 20px 0;border-bottom:4px solid ${ink};padding-bottom:10px;color:${ink};">${category}</div>`;
+    
+    stories.forEach(story => {
+      const tagsHtml = (story.tags || []).map(t => `<span style="background-color:#eeff00;padding:2px 6px;margin-right:6px;font-size:11px;font-weight:700;border:1px solid ${ink};">${t}</span>`).join('');
+      
+      const sourcesHtml = (story.sources || []).map(src => {
+        let hostname = 'Link';
+        try {
+          hostname = new URL(src).hostname.replace('www.', '');
+        } catch (e) {}
+        return `<li><a href="${src}" style="color:${bg};background-color:${accent};text-decoration:none;padding:0 4px;font-weight:700;">${hostname}</a></li>`;
+      }).join('');
+
+      bodyHtml += `
+        <div style="margin-bottom: 30px;">
+          <div style="font-family:${fontHeadline};font-size:22px;font-weight:700;letter-spacing:-0.5px;text-transform:uppercase;margin:25px 0 10px 0;color:${ink};">${story.title}</div>
+          <div style="margin-bottom:12px;">
+            ${tagsHtml}
+            <span style="font-family:${fontSans}; font-size:11px; letter-spacing:1px; border:1px solid ${ink}; background-color:#fff; padding:2px 8px; text-transform:uppercase; margin-left:8px; font-weight:700;">CONFIDENCE: ${story.confidence}</span>
+          </div>
+          <p style="margin:0 0 15px 0;color:${ink};font-family:${fontBody};font-size:14px;line-height:1.6;text-align:left;">${story.summary}</p>
+          <ul style="margin:10px 0;padding-left:20px;color:${ink};font-family:${fontBody};font-size:13px;list-style-type:square;">
+            ${sourcesHtml}
+          </ul>
+          <hr style="border: 0; border-top: 1px solid ${ink}; margin-top: 20px;" />
+        </div>
+      `;
+    });
+  });
+
+  const now = new Date().toISOString();
 
   return `
 <!DOCTYPE html>
@@ -117,11 +165,11 @@ export function buildEmailHtml(markdownContent) {
 </html>`;
 }
 
-export async function sendEmail(content, subject) {
+export async function sendEmail(newsArray, subject) {
   try {
-    if (!content || content.trim().length === 0) {
-      console.log('⚠️ [Email Sender] Content is empty. Skipping email.');
-      return { success: false, error: 'Content is empty.' };
+    if (!newsArray || !Array.isArray(newsArray) || newsArray.length === 0) {
+      console.log('⚠️ [Email Sender] News array is empty or not an array. Skipping email.');
+      return { success: false, error: 'News array is empty.' };
     }
 
     if (!whitelistedEmails || whitelistedEmails.length === 0) {
@@ -138,7 +186,7 @@ export async function sendEmail(content, subject) {
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
     });
     const emailSubject = subject || `The Daily Dispatch — ${today}`;
-    const htmlContent = buildEmailHtml(content);
+    const htmlContent = buildEmailHtml(newsArray);
 
     console.log(`📧 Sending news digest to ${whitelistedEmails.length} recipient(s) via Resend...`);
 

@@ -4,7 +4,6 @@ import Exa from 'exa-js';
 import { tavily } from '@tavily/core';
 import { exaSearch } from './exaSearch.js';
 import { tavilySearch } from './tavilySearch.js';
-import { writeNewsFile } from './fileWriter.js';
 import { config } from '../config/config.js';
 
 function mergeResults(...groups) {
@@ -402,20 +401,5 @@ export const fetchOpenRouterModelsTool = tool({
       console.error('[OpenRouter] Failed to fetch models:', error.message);
       return `Error: Failed to retrieve OpenRouter models. ${error.message}`;
     }
-  },
-});
-
-export const writeFileTool = tool({
-  name: 'write_news_bulletin',
-  description: 'Saves the formatted markdown news bulletin to a draft file. The outer quality gate promotes it to news.md and sends email only after validation passes.',
-  parameters: z.object({
-    content: z.string().describe('The complete markdown news bulletin content to write to the file'),
-  }),
-  execute: async ({ content }) => {
-    const success = await writeNewsFile(config.draftOutputFile, content);
-    if (success) {
-      return `Successfully saved draft news bulletin to ${config.draftOutputFile}.`;
-    }
-    return `Error: Failed to write draft news bulletin to ${config.draftOutputFile}`;
   },
 });
