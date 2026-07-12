@@ -90,8 +90,33 @@ export function buildEmailHtml(newsArray) {
 
   let bodyHtml = '';
 
+  const matchedStories = new Set();
+
   categories.forEach(category => {
-    const stories = newsArray.filter(s => s.category === category);
+    const stories = newsArray.filter(s => {
+      if (!s.category) return false;
+      const cat = s.category.toLowerCase();
+      let isMatch = false;
+      
+      if (category.includes('AI') && (cat.includes('ai') || cat.includes('machine learning'))) {
+        isMatch = true;
+      } else if (category.includes('Developer') && (cat.includes('dev') || cat.includes('platform'))) {
+        isMatch = true;
+      } else if (category.includes('Chips') && (cat.includes('chip') || cat.includes('infra') || cat.includes('acquisit'))) {
+        isMatch = true;
+      } else if (category.includes('Security') && cat.includes('secur')) {
+        isMatch = true;
+      } else if (cat === category.toLowerCase()) {
+        isMatch = true;
+      }
+
+      if (isMatch) {
+        matchedStories.add(s);
+        return true;
+      }
+      return false;
+    });
+
     if (stories.length === 0) return;
     
     // Category Header
@@ -124,6 +149,39 @@ export function buildEmailHtml(newsArray) {
       `;
     });
   });
+
+  // Render any unmatched stories
+  const unmatched = newsArray.filter(s => !matchedStories.has(s));
+  if (unmatched.length > 0) {
+    bodyHtml += `<div style="font-family:${fontHeadline};font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1.1;text-transform:uppercase;text-align:left;margin:40px 0 20px 0;border-bottom:4px solid ${ink};padding-bottom:10px;color:${ink};">Other Updates</div>`;
+    
+    unmatched.forEach(story => {
+      const tagsHtml = (story.tags || []).map(t => `<span style="background-color:#eeff00;padding:2px 6px;margin-right:6px;font-size:11px;font-weight:700;border:1px solid ${ink};">${t}</span>`).join('');
+      
+      const sourcesHtml = (story.sources || []).map(src => {
+        let hostname = 'Link';
+        try {
+          hostname = new URL(src).hostname.replace('www.', '');
+        } catch (e) {}
+        return `<li><a href="${src}" style="color:${bg};background-color:${accent};text-decoration:none;padding:0 4px;font-weight:700;">${hostname}</a></li>`;
+      }).join('');
+
+      bodyHtml += `
+        <div style="margin-bottom: 30px;">
+          <div style="font-family:${fontHeadline};font-size:22px;font-weight:700;letter-spacing:-0.5px;text-transform:uppercase;margin:25px 0 10px 0;color:${ink};">${story.title}</div>
+          <div style="margin-bottom:12px;">
+            ${tagsHtml}
+            <span style="font-family:${fontSans}; font-size:11px; letter-spacing:1px; border:1px solid ${ink}; background-color:#fff; padding:2px 8px; text-transform:uppercase; margin-left:8px; font-weight:700;">CONFIDENCE: ${story.confidence}</span>
+          </div>
+          <p style="margin:0 0 15px 0;color:${ink};font-family:${fontBody};font-size:14px;line-height:1.6;text-align:left;">${story.summary}</p>
+          <ul style="margin:10px 0;padding-left:20px;color:${ink};font-family:${fontBody};font-size:13px;list-style-type:square;">
+            ${sourcesHtml}
+          </ul>
+          <hr style="border: 0; border-top: 1px solid ${ink}; margin-top: 20px;" />
+        </div>
+      `;
+    });
+  }
 
   const now = new Date().toISOString();
 
