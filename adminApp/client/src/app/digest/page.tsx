@@ -211,7 +211,82 @@ export default function DigestPage() {
         }
         const digestResponse = await digestRes.json();
         if (digestResponse.success && digestResponse.data) {
-          setDigest(digestResponse.data);
+          const rawStories = Object.values(digestResponse.data);
+          
+          const newsArray = rawStories.map((s: any) => {
+            if (typeof s === 'string') {
+              try {
+                return JSON.parse(s);
+              } catch (e) {
+                return s;
+              }
+            }
+            return s;
+          });
+
+          const categoriesMap: Record<string, any[]> = {};
+          newsArray.forEach((story: any) => {
+            const storyCategory = story.category || 'Other Updates';
+            if (!categoriesMap[storyCategory]) {
+              categoriesMap[storyCategory] = [];
+            }
+            
+            const sourcesList = (story.sources || []).map((src: string) => {
+              let hostname = 'Link';
+              try {
+                hostname = new URL(src).hostname.replace('www.', '');
+              } catch (e) {}
+              return { name: hostname, url: src };
+            });
+
+            const article = {
+              type: '',
+              emoji: '',
+              confidence: story.confidence || 'Medium',
+              title: story.title || '',
+              impact: null,
+              sourceName: sourcesList[0]?.name || 'Link',
+              sourceUrl: sourcesList[0]?.url || '',
+              summary: story.summary || '',
+              tags: story.tags || [],
+              score: null,
+              scoringBreakdown: {},
+              sources: sourcesList
+            };
+
+            categoriesMap[storyCategory].push(article);
+          });
+
+          const categoriesList = Object.keys(categoriesMap).map(name => {
+            let emoji = '✦';
+            if (name.includes('AI') || name.includes('Machine Learning')) emoji = '🧠';
+            else if (name.includes('Developer') || name.includes('Tool')) emoji = '🛠️';
+            else if (name.includes('Chip') || name.includes('Infrastructure')) emoji = '💾';
+            else if (name.includes('Security')) emoji = '🔒';
+            
+            return {
+              name: name,
+              emoji: emoji,
+              articles: categoriesMap[name]
+            };
+          });
+
+          const mappedDigest: DigestData = {
+            title: 'NewsFetch Digest',
+            subtitle: 'Developer-Focused AI and Tech Briefing',
+            lastUpdated: new Date().toUTCString(),
+            executiveSummary: 'Latest verified updates in Developer Tools, AI, Chips, and Security.',
+            trends: [],
+            categories: categoriesList,
+            stats: {
+              totalItemsVerified: String(newsArray.length),
+              highConfidence: String(newsArray.filter((s: any) => s.confidence === 'High').length),
+              mediumConfidence: String(newsArray.filter((s: any) => s.confidence === 'Medium').length),
+              lowConfidence: String(newsArray.filter((s: any) => s.confidence === 'Low').length)
+            }
+          };
+
+          setDigest(mappedDigest);
         } else {
           throw new Error("Invalid response schema from wire");
         }
