@@ -1,17 +1,16 @@
 import AppError from "../utils/appError.js";
-import { parseMarkdown } from "../utils/markdownParser.js";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
 
 export const getDigest = async (req, res, next) => {
-  const url = "https://raw.githubusercontent.com/phaneesh29/news/master/content/news.md";
-  const response = await fetch(url);
-  if (!response.ok) {
-    return next(new AppError(`Failed to fetch digest content: ${response.statusText}`, response.status));
+  try {
+    const digestData = await redis.hgetall('news:latest');
+    res.status(200).json({
+      status: "success",
+      data: digestData
+    });
+  } catch (error) {
+    return next(new AppError(`Failed to fetch digest: ${error.message}`, 500));
   }
-  const md = await response.text();
-  const digestData = parseMarkdown(md);
-  
-  res.status(200).json({
-    status: "success",
-    data: digestData
-  });
 };
