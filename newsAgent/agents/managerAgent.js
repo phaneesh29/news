@@ -42,5 +42,6 @@ export const managerAgent = new Agent({
       toolDescription: 'Asks the SynthesisAgent to take all raw data, deduplicate, cross-reference, tag, internally score, and return ranked JSON.'
     })
   ],
-  outputType: NewsArraySchema,
+  // No strict outputType: local models (gemma) wrap JSON in markdown fences,
+  // which crashes the SDK's structured parser. index.js parses defensively instead.
 });
