@@ -1,6 +1,6 @@
 # Multi-Agent News System
 
-A premium, highly-predictable multi-agent news retrieval and synthesis system built using the official `@openai/agents` SDK, `zod` for type-safe tool parameters, and the Exa & Tavily SDKs. 
+A premium, highly-predictable multi-agent news retrieval and synthesis system built using the official `@openai/agents` SDK, `zod` for type-safe tool parameters, and the Scoutify & Tavily APIs. 
 
 It is designed for personal use, hardcoded to connect to **Ollama Cloud** (`https://ollama.com/v1`) using the **`gemma4:31b`** model to retrieve, validate, deduplicate, score, and format software development and AI updates into a premium `news.md` bulletin.
 
@@ -22,16 +22,16 @@ The project utilizes the **Agents as Tools (Subagents)** pattern where a parent 
          │
          ├─► Step 1: Search
          │   └─► [SearchAgent]
-         │       ├─► Exa Search API (with AI summary)
+         │       ├─► Scoutify Search API
          │       └─► Tavily Search API (Fallback)
          │
          ├─► Step 2: Enrich
          │   └─► [EnrichAgent]
-         │       ├─► Exa: GitHub Releases
+         │       ├─► Scoutify: GitHub Releases
          │       ├─► GitHub API: Trending Repos
          │       ├─► Hacker News: Stories >150 points
-         │       ├─► Exa/Tavily: Target Subreddits
-         │       ├─► Exa/Tavily: Security Advisories
+         │       ├─► Scoutify/Tavily: Target Subreddits
+         │       ├─► Scoutify/Tavily: Security Advisories
          │       └─► HF Daily Papers API
          │
          ├─► Step 3: Synthesis
@@ -58,7 +58,7 @@ $$\text{Score} = (0.40 \times \text{Impact}) + (0.25 \times \text{Community}) + 
 
 ### 3. Integrated Agent Tools
 Specialized tools are implemented in `tools/agentTools.js` and registered with the subagents:
-*   `search_web` / `search_news`: Queries Exa/Tavily APIs for developer/AI updates.
+*   `search_web` / `search_news`: Queries Scoutify/Tavily APIs for developer/AI updates.
 *   `search_github_releases`: Fetches changelogs for specified repositories (e.g. `vercel/next.js`).
 *   `fetch_github_trending`: Retrieves top-starred repositories created in the past 12 hours.
 *   `fetch_hacker_news`: Retrieves stories hitting >=150 points in the last 12 hours.
@@ -104,7 +104,7 @@ newsAgent/
 │   ├── synthesisAgent.js # SynthesisAgent subagent (Deduplication & Scoring)
 │   └── editorAgent.js    # EditorAgent subagent (news.md writing)
 ├── tools/
-│   ├── exaSearch.js      # Exa SDK search client
+│   ├── scoutifySearch.js # Scoutify API client helper
 │   ├── tavilySearch.js   # Tavily SDK search client
 │   ├── fileWriter.js     # news.md file writer
 │   └── agentTools.js     # Wrapped agent-ready tools with Zod parameters
@@ -118,7 +118,7 @@ newsAgent/
 
 ## ⚙️ Setup & Execution
 
-1. Configure your `.env` file with `OLLAMA_API_KEY`, `EXA_API_KEY`, `TAVILY_API_KEY`, and `RESEND_API_KEY`.
+1. Configure your `.env` file with `OLLAMA_API_KEY`, `SCOUTIFY_API_KEY`, `TAVILY_API_KEY`, and `RESEND_API_KEY`.
 2. Run the pipeline:
    ```bash
    npm start

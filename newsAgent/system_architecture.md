@@ -25,7 +25,7 @@ D:/news/newsAgent/
 │   ├── synthesisAgent.js # SynthesisAgent (Deduplication, Scoring, Clustering)
 │   └── editorAgent.js    # EditorAgent (news.md writing)
 ├── tools/
-│   ├── exaSearch.js      # Primary Exa search client
+│   ├── scoutifySearch.js # Primary Scoutify search client
 │   ├── tavilySearch.js   # Fallback Tavily search client
 │   ├── fileWriter.js     # Helper to write news.md
 │   └── agentTools.js     # Wrapped agent-ready tools with Zod parameters
@@ -51,16 +51,16 @@ The system runs a **centralized parent-child subagent pipeline** (Agents as Tool
          │
          ├─► Step 1: Search
          │   └─► [SearchAgent]
-         │       ├─► Exa Search API (with AI summary)
+         │       ├─► Scoutify Search API
          │       └─► Tavily Search API (Fallback)
          │
          ├─► Step 2: Enrich
          │   └─► [EnrichAgent]
-         │       ├─► Exa: GitHub Releases
+         │       ├─► Scoutify: GitHub Releases
          │       ├─► GitHub API: Trending Repos
          │       ├─► Hacker News: Stories >150 points
-         │       ├─► Exa/Tavily: Target Subreddits
-         │       ├─► Exa/Tavily: Security Advisories
+         │       ├─► Scoutify/Tavily: Target Subreddits
+         │       ├─► Scoutify/Tavily: Security Advisories
          │       └─► HF Daily Papers API
          │
          ├─► Step 3: Synthesis

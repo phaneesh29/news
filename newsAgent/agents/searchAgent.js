@@ -6,7 +6,11 @@ import {
   searchWebTool,
   searchNewsTool,
   searchGitHubReleasesTool,
-  extractPageContentTool
+  extractPageContentTool,
+  scoutifySearchTool,
+  scoutifyExtractTool,
+  scoutifyMapTool,
+  scoutifyCrawlTool
 } from '../tools/agentTools.js';
 
 export const searchAgent = new Agent({
@@ -18,7 +22,11 @@ export const searchAgent = new Agent({
     searchWebTool,
     searchNewsTool,
     searchGitHubReleasesTool,
-    extractPageContentTool
+    extractPageContentTool,
+    scoutifySearchTool,
+    scoutifyExtractTool,
+    scoutifyMapTool,
+    scoutifyCrawlTool
   ],
-  handoffDescription: 'Use this agent to search the web, news feeds, GitHub releases, and extract page contents using Exa/Tavily SDKs.',
+  handoffDescription: 'Use this agent to search the web, news feeds, GitHub releases, and extract or map page contents using Scoutify and Tavily SDKs.',
 });

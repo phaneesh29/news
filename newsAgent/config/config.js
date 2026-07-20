@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const config = {
   tavilyApiKey: process.env.TAVILY_API_KEY || '',
-  exaApiKey: process.env.EXA_API_KEY || '',
+  scoutifyApiKey: process.env.SCOUTIFY_API_KEY || '',
 
   llmProvider: 'ollama',
   llmBaseUrl: 'https://ollama.com/v1',

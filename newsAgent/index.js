@@ -36,8 +36,8 @@ Focus hard on:
 - Security, but keep it lean: critical CVEs, active exploitation, package malware, GitHub/NVD/CISA advisories, supply-chain attacks.
 
 Quality bar:
-- Use Tavily search and Exa search together, not as fallbacks.
-- Use extraction for primary/important links; extraction should attempt both Exa and Tavily.
+- Use Tavily search and Scoutify search together, not as fallbacks.
+- Use extraction for primary/important links; extraction should attempt both Scoutify and Tavily.
 - Cross-reference important news with multiple sources whenever possible.
 - Every story must have a title, clear summary, tags, confidence, and real source URLs.
 - Reject stale stories outside the freshness window unless a primary source proves the update is fresh.

@@ -1,8 +1,7 @@
 import { tool } from '@openai/agents';
 import { z } from 'zod';
-import Exa from 'exa-js';
 import { tavily } from '@tavily/core';
-import { exaSearch } from './exaSearch.js';
+import { scoutifySearch, scoutifyRequest, pollJob } from './scoutifySearch.js';
 import { tavilySearch } from './tavilySearch.js';
 import { config } from '../config/config.js';
 
@@ -20,15 +19,15 @@ function mergeResults(...groups) {
 }
 
 async function searchWithBothProviders(query) {
-  const [exaResults, tavilyResults] = await Promise.all([
-    exaSearch(query),
+  const [scoutifyResults, tavilyResults] = await Promise.all([
+    scoutifySearch(query),
     tavilySearch(query),
   ]);
 
-  return mergeResults(exaResults, tavilyResults).map((item) => ({
+  return mergeResults(scoutifyResults, tavilyResults).map((item) => ({
     ...item,
     corroborationProviders: [
-      ...(item.source === 'Exa' ? ['Exa'] : []),
+      ...(item.source === 'Scoutify' ? ['Scoutify'] : []),
       ...(item.source === 'Tavily' || item.source === 'Tavily AI Answer' ? ['Tavily'] : []),
     ],
   }));
@@ -36,7 +35,7 @@ async function searchWithBothProviders(query) {
 
 export const searchWebTool = tool({
   name: 'search_web',
-  description: 'Search Exa and Tavily together for general tech and AI news updates. Returns merged raw results for cross-reference.',
+  description: 'Search Scoutify and Tavily together for general tech and AI news updates. Returns merged raw results for cross-reference.',
   parameters: z.object({
     query: z.string().describe('The search query for retrieving news (e.g. "React 19 release updates")'),
   }),
@@ -72,18 +71,17 @@ export const searchGitHubReleasesTool = tool({
     let searchResults = [];
     const freshAfter = new Date(Date.now() - config.freshnessHours * 60 * 60 * 1000);
 
-    if (config.exaApiKey) {
+    if (config.scoutifyApiKey) {
       try {
-        const exa = new Exa(config.exaApiKey);
-        const searchRes = await exa.searchAndContents(query, {
-          type: 'keyword',
-          numResults: 2,
-          startPublishedDate: freshAfter.toISOString(),
-          contents: { summary: true, text: true }
-        });
-        searchResults = searchRes.results || [];
+        const scoutifyResults = await scoutifySearch(query);
+        searchResults = scoutifyResults.slice(0, 2).map(r => ({
+          title: r.title,
+          url: r.url,
+          content: r.snippet,
+          source: 'Scoutify GitHub Search'
+        }));
       } catch (e) {
-        console.warn('[GitHub Releases Tool] Exa search failed:', e.message);
+        console.warn('[GitHub Releases Tool] Scoutify search failed:', e.message);
       }
     }
 
@@ -122,34 +120,33 @@ export const searchGitHubReleasesTool = tool({
 
 export const extractPageContentTool = tool({
   name: 'extract_page_content',
-  description: 'Extracts clean, LLM-ready text content from a URL using both Exa getContents and Tavily Extract when configured.',
+  description: 'Extracts clean, LLM-ready text content from a URL using both Scoutify Extract and Tavily Extract when configured.',
   parameters: z.object({
     url: z.string().url().describe('The exact webpage URL to scrape (e.g., official doc or announcement page)'),
   }),
   execute: async ({ url }) => {
     const extractions = [];
 
-    if (config.exaApiKey) {
-      console.log(`[Content Extractor] Scrape via Exa getContents: ${url}`);
+    if (config.scoutifyApiKey) {
+      console.log(`[Content Extractor] Scrape via Scoutify Extract: ${url}`);
       try {
-        const exa = new Exa(config.exaApiKey);
-        const response = await exa.getContents([url], {
-          text: true,
-          summary: true,
+        const response = await scoutifyRequest('/v1/extract', {
+          urls: [url],
+          output_format: 'markdown'
         });
 
         if (response && response.results && response.results.length > 0) {
           const result = response.results[0];
           extractions.push({
-            provider: 'Exa',
+            provider: 'Scoutify',
             title: result.title || 'Extracted Page',
             url: result.url,
-            summary: result.summary || 'No summary available.',
-            content: result.text ? result.text.substring(0, 25000) : 'No content retrieved.'
+            summary: 'Summary not supported in Scoutify extract natively.',
+            content: result.content ? result.content.substring(0, 25000) : 'No content retrieved.'
           });
         }
       } catch (e) {
-        console.warn(`[Content Extractor] Exa getContents failed for ${url}:`, e.message);
+        console.warn(`[Content Extractor] Scoutify Extract failed for ${url}:`, e.message);
       }
     }
 
@@ -175,7 +172,7 @@ export const extractPageContentTool = tool({
     }
 
     if (extractions.length === 0) {
-      return `Error: Failed to extract content from ${url} using Exa and Tavily SDKs.`;
+      return `Error: Failed to extract content from ${url} using Scoutify and Tavily SDKs.`;
     }
 
     return JSON.stringify({
@@ -402,4 +399,84 @@ export const fetchOpenRouterModelsTool = tool({
       return `Error: Failed to retrieve OpenRouter models. ${error.message}`;
     }
   },
+});
+
+export const scoutifySearchTool = tool({
+  name: 'scoutify_search',
+  description: 'Search the web using Scoutify Search API for structured web results.',
+  parameters: z.object({
+    query: z.string().describe('The natural-language search query'),
+    limit: z.number().optional().describe('Maximum number of results to return (1-20, defaults to 10)'),
+    time_range: z.enum(['day', 'month', 'year']).optional().describe('Recency filter: day | month | year'),
+  }),
+  execute: async ({ query, limit, time_range }) => {
+    console.log(`[Scoutify Tool] Searching: "${query}" (limit: ${limit}, time_range: ${time_range})`);
+    const payload = { query };
+    if (limit !== undefined) payload.limit = limit;
+    if (time_range !== undefined) payload.time_range = time_range;
+    const res = await scoutifyRequest('/v1/search', payload);
+    return JSON.stringify(res, null, 2);
+  }
+});
+
+export const scoutifyExtractTool = tool({
+  name: 'scoutify_extract',
+  description: 'Extract clean, main text content from one or more known URLs using Scoutify Extract.',
+  parameters: z.object({
+    urls: z.array(z.string().url()).describe('One or more absolute URLs to extract content from'),
+    output_format: z.enum(['markdown', 'text']).optional().default('markdown').describe('Output format of extracted content'),
+    include_links: z.boolean().optional().describe('Whether to extract and return links found on the page'),
+  }),
+  execute: async ({ urls, output_format, include_links }) => {
+    console.log(`[Scoutify Tool] Extracting URLs: ${urls.join(', ')}`);
+    const payload = { urls };
+    if (output_format !== undefined) payload.output_format = output_format;
+    if (include_links !== undefined) payload.include_links = include_links;
+    const res = await scoutifyRequest('/v1/extract', payload);
+    return JSON.stringify(res, null, 2);
+  }
+});
+
+export const scoutifyMapTool = tool({
+  name: 'scoutify_map',
+  description: 'Discover and map URLs across a website starting from a base URL using Scoutify Map.',
+  parameters: z.object({
+    url: z.string().url().describe('The absolute starting URL of the site to map'),
+    max_depth: z.number().optional().describe('Maximum crawling depth'),
+    max_urls: z.number().optional().describe('Maximum number of URLs to discover and return'),
+    include_subdomains: z.boolean().optional().describe('Whether to include subdomains'),
+    async_mode: z.boolean().optional().default(false).describe('Whether to run as a background job and poll for completion'),
+  }),
+  execute: async (args) => {
+    console.log(`[Scoutify Tool] Mapping: ${args.url} (async_mode: ${args.async_mode})`);
+    const res = await scoutifyRequest('/v1/map', args);
+    if (args.async_mode && res.id) {
+      const result = await pollJob(res.id);
+      return JSON.stringify(result, null, 2);
+    }
+    return JSON.stringify(res, null, 2);
+  }
+});
+
+export const scoutifyCrawlTool = tool({
+  name: 'scoutify_crawl',
+  description: 'Map a website and extract content from accepted pages using Scoutify Crawl.',
+  parameters: z.object({
+    url: z.string().url().describe('The absolute starting URL of the site to crawl'),
+    max_depth: z.number().optional().describe('Maximum crawling depth'),
+    max_pages: z.number().optional().describe('Maximum number of pages to process'),
+    include_subdomains: z.boolean().optional().describe('Whether to include subdomains'),
+    output_format: z.enum(['markdown', 'text']).optional().default('markdown').describe('Content format of extracted pages'),
+    include_links: z.boolean().optional().describe('Whether to include links in extraction'),
+    async_mode: z.boolean().optional().default(false).describe('Whether to run as a background job and poll for completion'),
+  }),
+  execute: async (args) => {
+    console.log(`[Scoutify Tool] Crawling: ${args.url} (async_mode: ${args.async_mode})`);
+    const res = await scoutifyRequest('/v1/crawl', args);
+    if (args.async_mode && res.id) {
+      const result = await pollJob(res.id);
+      return JSON.stringify(result, null, 2);
+    }
+    return JSON.stringify(res, null, 2);
+  }
 });
