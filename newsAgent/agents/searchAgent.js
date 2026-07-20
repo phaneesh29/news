@@ -3,8 +3,6 @@ import { SEARCH_AGENT_INSTRUCTIONS } from '../config/instructions.js';
 import { config } from '../config/config.js';
 import '../utils/llm.js';
 import {
-  searchWebTool,
-  searchNewsTool,
   searchGitHubReleasesTool,
   extractPageContentTool,
   scoutifySearchTool,
@@ -19,8 +17,6 @@ export const searchAgent = new Agent({
   model: config.llmModel, 
   modelSettings: config.llmModelSettings,
   tools: [
-    searchWebTool,
-    searchNewsTool,
     searchGitHubReleasesTool,
     extractPageContentTool,
     scoutifySearchTool,

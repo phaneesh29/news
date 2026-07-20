@@ -22,7 +22,6 @@ async function runSerial(task) {
   }
 }
 
-// Scoutify time_range only accepts day | month | year.
 function getFreshnessValue() {
   if (config.freshnessHours <= 24) return 'day';
   if (config.freshnessHours <= 720) return 'month';
@@ -66,9 +65,8 @@ export async function fetchWithRetry(url, options = {}, retries = 3, baseBackoff
           console.warn(`[Scoutify] Got status ${response.status}. Retrying in ${Math.round(retryAfter)}ms (attempt ${i + 1}/${retries})...`);
           await sleep(retryAfter);
           continue;
-        } else {
-          return response;
         }
+        return response;
       }
 
       return response;
@@ -79,7 +77,6 @@ export async function fetchWithRetry(url, options = {}, retries = 3, baseBackoff
       await sleep(retryAfter);
     }
   }
-  return fetch(url, options);
 }
 
 export async function scoutifyRequest(path, body, method = 'POST') {

@@ -3,53 +3,6 @@ import { z } from 'zod';
 import { scoutifySearch, scoutifyRequest, pollJob } from './scoutifySearch.js';
 import { config } from '../config/config.js';
 
-function mergeResults(...groups) {
-  const seen = new Set();
-  return groups
-    .flat()
-    .filter(Boolean)
-    .filter((item) => {
-      const key = (item.url || item.title || JSON.stringify(item)).trim().toLowerCase();
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-}
-
-async function searchWithScoutify(query) {
-  const scoutifyResults = await scoutifySearch(query);
-
-  return mergeResults(scoutifyResults).map((item) => ({
-    ...item,
-    corroborationProviders: ['Scoutify'],
-  }));
-}
-
-export const searchWebTool = tool({
-  name: 'search_web',
-  description: 'Search Scoutify for general tech and AI news updates.',
-  parameters: z.object({
-    query: z.string().describe('The search query for retrieving news (e.g. "React 19 release updates")'),
-  }),
-  execute: async ({ query }) => {
-    const results = await searchWithScoutify(query);
-    return JSON.stringify(results, null, 2);
-  },
-});
-
-export const searchNewsTool = tool({
-  name: 'search_news',
-  description: 'Searches specifically for recent news stories, blog posts, and articles on a topic.',
-  parameters: z.object({
-    topic: z.string().describe('The news topic to search for (e.g. "Nemotron model releases")'),
-  }),
-  execute: async ({ topic }) => {
-    const query = `latest news and articles about ${topic}`;
-    const results = await searchWithScoutify(query);
-    return JSON.stringify(results, null, 2);
-  },
-});
-
 export const searchGitHubReleasesTool = tool({
   name: 'search_github_releases',
   description: 'Finds and extracts release logs or changelogs for a specific repository. Repo must be "owner/repo" (e.g. "facebook/react").',
@@ -60,21 +13,13 @@ export const searchGitHubReleasesTool = tool({
     const query = `site:github.com/${repo}/releases latest release changelog`;
     console.log(`[GitHub Releases Tool] Searching for releases of ${repo} (last ${config.freshnessHours}h)...`);
 
-    let searchResults = [];
-
-    if (config.scoutifyApiKey) {
-      try {
-        const scoutifyResults = await scoutifySearch(query);
-        searchResults = scoutifyResults.slice(0, 2).map(r => ({
-          title: r.title,
-          url: r.url,
-          content: r.snippet,
-          source: 'Scoutify GitHub Search'
-        }));
-      } catch (e) {
-        console.warn('[GitHub Releases Tool] Scoutify search failed:', e.message);
-      }
-    }
+    const scoutifyResults = await scoutifySearch(query);
+    const searchResults = scoutifyResults.slice(0, 2).map(r => ({
+      title: r.title,
+      url: r.url,
+      content: r.snippet,
+      source: 'Scoutify GitHub Search'
+    }));
 
     if (searchResults.length === 0) {
       return `No release announcements found in the last ${config.freshnessHours} hours for ${repo} on GitHub.`;
@@ -83,7 +28,7 @@ export const searchGitHubReleasesTool = tool({
     const formatted = searchResults.map(res => ({
       title: res.title || 'GitHub Release',
       url: res.url,
-      snippet: res.summary || res.content || (res.text ? res.text.substring(0, 500) : 'Release changelog details.'),
+      snippet: res.snippet || res.content || 'Release changelog details.',
       source: 'GitHub Search'
     }));
 
@@ -95,43 +40,25 @@ export const extractPageContentTool = tool({
   name: 'extract_page_content',
   description: 'Extracts clean, LLM-ready text content from a URL using Scoutify Extract.',
   parameters: z.object({
-    url: z.string().url().describe('The exact webpage URL to scrape (e.g., official doc or announcement page)'),
+    url: z.string().url().describe('The exact webpage URL to scrape'),
   }),
   execute: async ({ url }) => {
-    const extractions = [];
-
-    if (config.scoutifyApiKey) {
-      console.log(`[Content Extractor] Scrape via Scoutify Extract: ${url}`);
-      try {
-        const response = await scoutifyRequest('/v1/extract', {
-          urls: [url]
-        });
-
-        const results = response.results;
-        if (results && results.length > 0) {
-          const result = results[0];
-          extractions.push({
-            provider: 'Scoutify',
-            title: result.title || 'Extracted Page',
-            url: result.url || url,
-            summary: 'Summary not supported in Scoutify extract natively.',
-            content: result.content ? result.content.substring(0, 25000) : 'No content retrieved.'
-          });
-        }
-      } catch (e) {
-        console.warn(`[Content Extractor] Scoutify Extract failed for ${url}:`, e.message);
+    console.log(`[Content Extractor] Scrape via Scoutify Extract: ${url}`);
+    try {
+      const response = await scoutifyRequest('/v1/extract', { urls: [url] });
+      const results = response.results;
+      if (!results || results.length === 0) {
+        return `Error: Failed to extract content from ${url}.`;
       }
+      const result = results[0];
+      return JSON.stringify({
+        url: result.url || url,
+        title: result.title || 'Extracted Page',
+        content: result.content ? result.content.substring(0, 25000) : 'No content retrieved.',
+      }, null, 2);
+    } catch (e) {
+      return `Error: Failed to extract content from ${url}: ${e.message}`;
     }
-
-    if (extractions.length === 0) {
-      return `Error: Failed to extract content from ${url} using Scoutify Extract.`;
-    }
-
-    return JSON.stringify({
-      url,
-      extractedBy: extractions.map((item) => item.provider),
-      extractions,
-    }, null, 2);
   },
 });
 
@@ -265,26 +192,14 @@ export const fetchAcademicPapersTool = tool({
         ? `https://huggingface.co/api/daily_papers?date=${date}`
         : 'https://huggingface.co/api/daily_papers';
       console.log(`[Academic Papers] Fetching curated Hugging Face Daily Papers (date: ${date || 'latest'})...`);
-      let response = await fetch(url);
-      let data;
 
-      if (!response.ok) {
-        console.warn(`[Academic Papers] Hugging Face API returned status ${response.status} for URL ${url}. Falling back to the latest curated papers...`);
-        const fallbackResponse = await fetch('https://huggingface.co/api/daily_papers');
-        if (!fallbackResponse.ok) {
-          throw new Error(`Hugging Face API fallback returned status ${fallbackResponse.status}`);
-        }
-        data = await fallbackResponse.json();
-      } else {
-        data = await response.json();
-        
-        if (date && (!data || data.length === 0)) {
-          console.log(`[Academic Papers] No papers found for date ${date}. Falling back to the latest curated papers...`);
-          const fallbackResponse = await fetch('https://huggingface.co/api/daily_papers');
-          if (fallbackResponse.ok) {
-            data = await fallbackResponse.json();
-          }
-        }
+      let response = await fetch(url);
+      let data = response.ok ? await response.json() : null;
+
+      if (!data || data.length === 0) {
+        const fallback = await fetch('https://huggingface.co/api/daily_papers');
+        if (!fallback.ok) throw new Error(`Hugging Face API returned status ${fallback.status}`);
+        data = await fallback.json();
       }
 
       if (!data || data.length === 0) return 'No academic papers found.';
@@ -298,7 +213,6 @@ export const fetchAcademicPapersTool = tool({
           url: paperId ? `https://huggingface.co/papers/${paperId}` : '',
           pdfUrl: paperId ? `https://arxiv.org/pdf/${paperId}.pdf` : '',
           publishedAt: item.publishedAt || item.paper?.publishedAt || '',
-          submittedOnDailyAt: item.paper?.submittedOnDailyAt || '',
           authors: item.paper?.authors?.map(a => a.name) || [],
           source: 'Hugging Face Daily Papers / arXiv'
         };

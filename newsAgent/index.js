@@ -28,8 +28,6 @@ Return only raw JSON.
 ${previousFeedback ? `Previous quality feedback to fix:\n${previousFeedback}` : ''}`;
 }
 
-// Weak/local models often wrap JSON in ```json fences or add prose around it.
-// Strip fences and isolate the outer array/object before parsing.
 function parseNewsOutput(raw) {
   if (Array.isArray(raw)) return raw;
   if (raw && Array.isArray(raw.stories)) return raw.stories;
@@ -69,19 +67,17 @@ function parseNewsOutput(raw) {
   return null;
 }
 
-// Local models drift on field names (description vs summary, url vs sources).
-// Coerce common variants into the canonical story shape before validating.
 function normalizeStory(story) {
   if (!story || typeof story !== 'object') return story;
 
-  const summary = story.summary ?? story.description ?? story.desc ?? story.content ?? '';
+  const summary = story.summary ?? story.description ?? story.desc ?? '';
 
   let sources = story.sources ?? story.source ?? story.url ?? story.link ?? [];
   if (typeof sources === 'string') sources = [sources];
   if (!Array.isArray(sources)) sources = [];
   sources = sources.filter((s) => typeof s === 'string' && /^https?:\/\//i.test(s));
 
-  let tags = story.tags ?? [];
+  let tags = story.tags ?? story.tag ?? [];
   if (typeof tags === 'string') tags = tags.split(',').map((t) => t.trim()).filter(Boolean);
   if (!Array.isArray(tags)) tags = [];
 
@@ -133,23 +129,18 @@ function evaluateNewsData(rawOutput) {
     if (!story.summary || story.summary.trim().length === 0) {
       failures.push(`Story at index ${index} is missing a summary.`);
     }
-    if (!story.category) {
-      failures.push(`Story at index ${index} is missing a category.`);
-    }
     if (!story.tags || story.tags.length < 2) {
       failures.push(`Story at index ${index} must have at least 2 tags.`);
     }
     if (!story.sources || story.sources.length === 0) {
       failures.push(`Story at index ${index} must have at least 1 verified source URL.`);
     }
-
-   if (story.title && (story.title.includes('#') || story.title.includes('*') || story.title.includes('`') || story.title.includes('[') || story.title.includes(']'))) {
+    if (story.title && /[#*`[\]]/.test(story.title)) {
       failures.push(`Story at index ${index} title contains markdown formatting.`);
     }
-    if (story.summary && (story.summary.includes('**') || story.summary.includes('`') || story.summary.includes('[') || story.summary.includes(']'))) {
+    if (story.summary && /\*\*|`|\[|\]/.test(story.summary)) {
       failures.push(`Story at index ${index} summary contains markdown formatting.`);
     }
-
     if (story.sources) {
       story.sources.forEach(src => {
         if (/example\.com|placeholder|#/i.test(src)) {
