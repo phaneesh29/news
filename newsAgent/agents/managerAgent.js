@@ -31,7 +31,7 @@ export const managerAgent = new Agent({
   tools: [
     searchAgent.asTool({
       toolName: 'invoke_SearchAgent',
-      toolDescription: 'Asks the SearchAgent to query both Scoutify and Tavily for general developer, AI, chip, acquisition, and security updates.'
+      toolDescription: 'Asks the SearchAgent to query Scoutify for general developer, AI, chip, acquisition, and security updates.'
     }),
     enrichAgent.asTool({
       toolName: 'invoke_EnrichAgent',

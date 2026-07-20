@@ -1,8 +1,6 @@
 import { tool } from '@openai/agents';
 import { z } from 'zod';
-import { tavily } from '@tavily/core';
 import { scoutifySearch, scoutifyRequest, pollJob } from './scoutifySearch.js';
-import { tavilySearch } from './tavilySearch.js';
 import { config } from '../config/config.js';
 
 function mergeResults(...groups) {
@@ -18,29 +16,23 @@ function mergeResults(...groups) {
     });
 }
 
-async function searchWithBothProviders(query) {
-  const [scoutifyResults, tavilyResults] = await Promise.all([
-    scoutifySearch(query),
-    tavilySearch(query),
-  ]);
+async function searchWithScoutify(query) {
+  const scoutifyResults = await scoutifySearch(query);
 
-  return mergeResults(scoutifyResults, tavilyResults).map((item) => ({
+  return mergeResults(scoutifyResults).map((item) => ({
     ...item,
-    corroborationProviders: [
-      ...(item.source === 'Scoutify' ? ['Scoutify'] : []),
-      ...(item.source === 'Tavily' || item.source === 'Tavily AI Answer' ? ['Tavily'] : []),
-    ],
+    corroborationProviders: ['Scoutify'],
   }));
 }
 
 export const searchWebTool = tool({
   name: 'search_web',
-  description: 'Search Scoutify and Tavily together for general tech and AI news updates. Returns merged raw results for cross-reference.',
+  description: 'Search Scoutify for general tech and AI news updates.',
   parameters: z.object({
     query: z.string().describe('The search query for retrieving news (e.g. "React 19 release updates")'),
   }),
   execute: async ({ query }) => {
-    const results = await searchWithBothProviders(query);
+    const results = await searchWithScoutify(query);
     return JSON.stringify(results, null, 2);
   },
 });
@@ -53,7 +45,7 @@ export const searchNewsTool = tool({
   }),
   execute: async ({ topic }) => {
     const query = `latest news and articles about ${topic}`;
-    const results = await searchWithBothProviders(query);
+    const results = await searchWithScoutify(query);
     return JSON.stringify(results, null, 2);
   },
 });
@@ -69,7 +61,6 @@ export const searchGitHubReleasesTool = tool({
     console.log(`[GitHub Releases Tool] Searching for releases of ${repo} (last ${config.freshnessHours}h)...`);
 
     let searchResults = [];
-    const freshAfter = new Date(Date.now() - config.freshnessHours * 60 * 60 * 1000);
 
     if (config.scoutifyApiKey) {
       try {
@@ -82,24 +73,6 @@ export const searchGitHubReleasesTool = tool({
         }));
       } catch (e) {
         console.warn('[GitHub Releases Tool] Scoutify search failed:', e.message);
-      }
-    }
-
-    if (config.tavilyApiKey && config.tavilyApiKey !== 'your_api_key_here') {
-      try {
-        const tvly = tavily({ apiKey: config.tavilyApiKey });
-        const searchRes = await tvly.search(query, { maxResults: 2 });
-
-        const freshAfterMs = freshAfter.getTime();
-        const tavilyResults = (searchRes.results || []).filter((result) => {
-          const dateStr = result.publishedDate || result.published_date;
-          if (!dateStr) return true;
-          const pubTime = new Date(dateStr).getTime();
-          return Number.isFinite(pubTime) && pubTime >= freshAfterMs;
-        }).map((result) => ({ ...result, source: 'Tavily GitHub Search' }));
-        searchResults = mergeResults(searchResults, tavilyResults);
-      } catch (e) {
-        console.warn('[GitHub Releases Tool] Tavily search failed:', e.message);
       }
     }
 
@@ -120,7 +93,7 @@ export const searchGitHubReleasesTool = tool({
 
 export const extractPageContentTool = tool({
   name: 'extract_page_content',
-  description: 'Extracts clean, LLM-ready text content from a URL using both Scoutify Extract and Tavily Extract when configured.',
+  description: 'Extracts clean, LLM-ready text content from a URL using Scoutify Extract.',
   parameters: z.object({
     url: z.string().url().describe('The exact webpage URL to scrape (e.g., official doc or announcement page)'),
   }),
@@ -150,29 +123,8 @@ export const extractPageContentTool = tool({
       }
     }
 
-    if (config.tavilyApiKey && config.tavilyApiKey !== 'your_api_key_here') {
-      console.log(`[Content Extractor] Fallback scrape via Tavily Extract: ${url}`);
-      try {
-        const tvly = tavily({ apiKey: config.tavilyApiKey });
-        const response = await tvly.extract(url);
-
-        if (response && response.results && response.results.length > 0) {
-          const result = response.results[0];
-          extractions.push({
-            provider: 'Tavily',
-            title: 'Extracted Page',
-            url: result.url,
-            summary: 'Summary not supported in Tavily extract natively.',
-            content: result.rawContent || result.content ? (result.rawContent || result.content).substring(0, 25000) : 'No content retrieved.'
-          });
-        }
-      } catch (e) {
-        console.error(`[Content Extractor] Tavily Extract failed for ${url}:`, e.message);
-      }
-    }
-
     if (extractions.length === 0) {
-      return `Error: Failed to extract content from ${url} using Scoutify and Tavily SDKs.`;
+      return `Error: Failed to extract content from ${url} using Scoutify Extract.`;
     }
 
     return JSON.stringify({
@@ -275,7 +227,7 @@ export const searchRedditSignalsTool = tool({
     const searchQuery = `site:reddit.com/r/${subreddit} ${query}`;
     console.log(`[Reddit Signals] Searching r/${subreddit} (${config.freshnessHours}h limit) for: "${query}"...`);
 
-    const results = await searchWithBothProviders(searchQuery);
+    const results = await searchWithScoutify(searchQuery);
     return JSON.stringify(results, null, 2);
   },
 });
@@ -295,7 +247,7 @@ export const searchSecurityAdvisoriesTool = tool({
     }
 
     console.log(`[Security Advisories] Searching for security alerts (${config.freshnessHours}h limit) in ecosystem: ${ecosystem}...`);
-    const results = await searchWithBothProviders(query);
+    const results = await searchWithScoutify(query);
     return JSON.stringify(results, null, 2);
   },
 });

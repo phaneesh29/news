@@ -28,5 +28,5 @@ export const searchAgent = new Agent({
     scoutifyMapTool,
     scoutifyCrawlTool
   ],
-  handoffDescription: 'Use this agent to search the web, news feeds, GitHub releases, and extract or map page contents using Scoutify and Tavily SDKs.',
+  handoffDescription: 'Use this agent to search the web, news feeds, GitHub releases, and extract or map page contents using the Scoutify SDK.',
 });

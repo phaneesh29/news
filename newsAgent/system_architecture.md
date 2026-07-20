@@ -17,17 +17,14 @@ D:/news/newsAgent/
 ├── system_architecture.md # Architecture pattern documentation
 ├── config/
 │   ├── config.js         # Configuration manager loading environment variables
-│   └── instructions.js   # Prompt instructions for all 5 agents
+│   └── instructions.js   # Prompt instructions for all agents
 ├── agents/
 │   ├── managerAgent.js   # NewsManagerAgent (Parent Orchestrator)
 │   ├── searchAgent.js    # SearchAgent (General Web/News search)
 │   ├── enrichAgent.js    # EnrichAgent (GitHub releases, trending, HN, Reddit, exploits, academic papers)
-│   ├── synthesisAgent.js # SynthesisAgent (Deduplication, Scoring, Clustering)
-│   └── editorAgent.js    # EditorAgent (news.md writing)
+│   └── synthesisAgent.js # SynthesisAgent (Deduplication, Scoring, Clustering)
 ├── tools/
-│   ├── scoutifySearch.js # Primary Scoutify search client
-│   ├── tavilySearch.js   # Fallback Tavily search client
-│   ├── fileWriter.js     # Helper to write news.md
+│   ├── scoutifySearch.js # Scoutify search client
 │   └── agentTools.js     # Wrapped agent-ready tools with Zod parameters
 └── utils/
     └── llm.js            # Registers default model provider globally
@@ -51,27 +48,21 @@ The system runs a **centralized parent-child subagent pipeline** (Agents as Tool
          │
          ├─► Step 1: Search
          │   └─► [SearchAgent]
-         │       ├─► Scoutify Search API
-         │       └─► Tavily Search API (Fallback)
+         │       └─► Scoutify Search API
          │
          ├─► Step 2: Enrich
          │   └─► [EnrichAgent]
          │       ├─► Scoutify: GitHub Releases
          │       ├─► GitHub API: Trending Repos
          │       ├─► Hacker News: Stories >150 points
-         │       ├─► Scoutify/Tavily: Target Subreddits
-         │       ├─► Scoutify/Tavily: Security Advisories
+         │       ├─► Scoutify: Target Subreddits
+         │       ├─► Scoutify: Security Advisories
          │       └─► HF Daily Papers API
          │
-         ├─► Step 3: Synthesis
-         │   └─► [SynthesisAgent]
-         │       ├─► Deduplication & Clustering
-         │       └─► Scoring Rank Layer
-         │
-         └─► Step 4: Formatting
-             └─► [EditorAgent]
-                 ├─► Write news.md Output File
-                 └─► Confirmation to Manager
+         └─► Step 3: Synthesis
+             └─► [SynthesisAgent]
+                 ├─► Deduplication & Clustering
+                 └─► Scoring Rank Layer
 ```
 
 ---
@@ -97,4 +88,4 @@ Run the pipeline using npm:
 npm start
 ```
 
-The system will retrieve data from all subagents, rank them, and save the formatted bulletin to **[news.md](../content/news.md)**.
+The system will retrieve data from all subagents, rank them, store them in Upstash Redis, and send the HTML digest to whitelisted email recipients via Resend.

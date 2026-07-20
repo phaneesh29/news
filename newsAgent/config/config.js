@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const config = {
-  tavilyApiKey: process.env.TAVILY_API_KEY || '',
   scoutifyApiKey: process.env.SCOUTIFY_API_KEY || '',
 
   llmProvider: 'ollama',

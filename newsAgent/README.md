@@ -1,8 +1,8 @@
 # Multi-Agent News System
 
-A premium, highly-predictable multi-agent news retrieval and synthesis system built using the official `@openai/agents` SDK, `zod` for type-safe tool parameters, and the Scoutify & Tavily APIs. 
+A premium, highly-predictable multi-agent news retrieval and synthesis system built using the official `@openai/agents` SDK, `zod` for type-safe tool parameters, and the Scoutify API. 
 
-It is designed for personal use, hardcoded to connect to **Ollama Cloud** (`https://ollama.com/v1`) using the **`gemma4:31b`** model to retrieve, validate, deduplicate, score, and format software development and AI updates into a premium `news.md` bulletin.
+It is designed for personal use, hardcoded to connect to **Ollama Cloud** (`https://ollama.com/v1`) using the **`gemma4:31b`** model to retrieve, validate, deduplicate, score, and format software development and AI updates into a premium email digest and Redis store.
 
 ---
 
@@ -22,27 +22,21 @@ The project utilizes the **Agents as Tools (Subagents)** pattern where a parent 
          │
          ├─► Step 1: Search
          │   └─► [SearchAgent]
-         │       ├─► Scoutify Search API
-         │       └─► Tavily Search API (Fallback)
+         │       └─► Scoutify Search API
          │
          ├─► Step 2: Enrich
          │   └─► [EnrichAgent]
          │       ├─► Scoutify: GitHub Releases
          │       ├─► GitHub API: Trending Repos
          │       ├─► Hacker News: Stories >150 points
-         │       ├─► Scoutify/Tavily: Target Subreddits
-         │       ├─► Scoutify/Tavily: Security Advisories
+         │       ├─► Scoutify: Target Subreddits
+         │       ├─► Scoutify: Security Advisories
          │       └─► HF Daily Papers API
          │
-         ├─► Step 3: Synthesis
-         │   └─► [SynthesisAgent]
-         │       ├─► Deduplication & Clustering
-         │       └─► Scoring Rank Layer
-         │
-         └─► Step 4: Formatting
-             └─► [EditorAgent]
-                 ├─► Write news.md Output File
-                 └─► Confirmation to Manager
+         └─► Step 3: Synthesis
+             └─► [SynthesisAgent]
+                 ├─► Deduplication & Clustering
+                 └─► Scoring Rank Layer
 ```
 
 ### 1. Centralized Subagent Orchestration
@@ -50,7 +44,6 @@ The project utilizes the **Agents as Tools (Subagents)** pattern where a parent 
 *   **SearchAgent**: Retrieves general AI and dev company blog news.
 *   **EnrichAgent**: Gathers GitHub releases, trending repositories, Hacker News stories with >150 points (using a public JSON endpoint), Reddit signals (r/LocalLLaMA, r/MachineLearning, etc.), package compromises/CVEs, and Hugging Face Daily Papers/arXiv preprints.
 *   **SynthesisAgent**: Deduplicates news and runs the **Scoring & Ranking Layer**.
-*   **EditorAgent**: Formats details and writes the final markdown file.
 
 ### 2. Weighted Scoring Layer
 The `SynthesisAgent` ranks news using a custom weighted formula:
@@ -58,7 +51,7 @@ $$\text{Score} = (0.40 \times \text{Impact}) + (0.25 \times \text{Community}) + 
 
 ### 3. Integrated Agent Tools
 Specialized tools are implemented in `tools/agentTools.js` and registered with the subagents:
-*   `search_web` / `search_news`: Queries Scoutify/Tavily APIs for developer/AI updates.
+*   `search_web` / `search_news`: Queries the Scoutify API for developer/AI updates.
 *   `search_github_releases`: Fetches changelogs for specified repositories (e.g. `vercel/next.js`).
 *   `fetch_github_trending`: Retrieves top-starred repositories created in the past 12 hours.
 *   `fetch_hacker_news`: Retrieves stories hitting >=150 points in the last 12 hours.
@@ -77,8 +70,8 @@ To ensure maximum signal reliability and strict adherence to formatting instruct
 * **Feedback Retries:** If any verification check fails, the pipeline feeds the diagnostics back to the manager agent and triggers a retry, supporting up to 3 self-correction iterations.
 
 ### 5. Automated Email Broadcast (Resend)
-* Once the draft successfully passes the quality gate, it is promoted to production (`content/news.md`).
-* The system instantly invokes `utils/emailHelper.js` to parse the markdown into responsive, custom-styled HTML.
+* Once the draft successfully passes the quality gate, it is stored in Upstash Redis.
+* The system instantly invokes `utils/emailHelper.js` to build a responsive, custom-styled HTML newsletter.
 * Using the **Resend API**, the compiled briefing newsletter is broadcasted to all registered operative coordinates listed in `whitelistEmails.js`.
 
 ---
@@ -96,17 +89,14 @@ newsAgent/
 ├── README.md             # Project overview
 ├── config/
 │   ├── config.js         # Loads environment configs and defaults
-│   └── instructions.js   # Prompt instructions for all 5 agents
+│   └── instructions.js   # Prompt instructions for all agents
 ├── agents/
 │   ├── managerAgent.js   # NewsManagerAgent (Parent Orchestrator)
 │   ├── searchAgent.js    # SearchAgent subagent (General Web/News search)
 │   ├── enrichAgent.js    # EnrichAgent subagent (Releases, HN, Reddit, exploits, academic papers)
-│   ├── synthesisAgent.js # SynthesisAgent subagent (Deduplication & Scoring)
-│   └── editorAgent.js    # EditorAgent subagent (news.md writing)
+│   └── synthesisAgent.js # SynthesisAgent subagent (Deduplication & Scoring)
 ├── tools/
 │   ├── scoutifySearch.js # Scoutify API client helper
-│   ├── tavilySearch.js   # Tavily SDK search client
-│   ├── fileWriter.js     # news.md file writer
 │   └── agentTools.js     # Wrapped agent-ready tools with Zod parameters
 └── utils/
     ├── disable-tracing.js# Disables telemetry traces in agent SDK
@@ -118,9 +108,9 @@ newsAgent/
 
 ## ⚙️ Setup & Execution
 
-1. Configure your `.env` file with `OLLAMA_API_KEY`, `SCOUTIFY_API_KEY`, `TAVILY_API_KEY`, and `RESEND_API_KEY`.
+1. Configure your `.env` file with `OLLAMA_API_KEY`, `SCOUTIFY_API_KEY`, and `RESEND_API_KEY`.
 2. Run the pipeline:
    ```bash
    npm start
    ```
-The newsletter will be saved in the content directory as [news.md](../content/news.md).
+The newsletter digest will be stored in Redis and dispatched to whitelisted email coordinates.
