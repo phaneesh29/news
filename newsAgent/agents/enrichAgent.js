@@ -10,7 +10,9 @@ import {
   searchSecurityAdvisoriesTool,
   extractPageContentTool,
   fetchAcademicPapersTool,
-  fetchOpenRouterModelsTool
+  fetchOpenRouterModelsTool,
+  fetchLobstersNewsTool,
+  fetchSpecializedDevNewsTool
 } from '../tools/agentTools.js';
 
 export const enrichAgent = new Agent({
@@ -26,7 +28,9 @@ export const enrichAgent = new Agent({
     searchSecurityAdvisoriesTool,
     extractPageContentTool,
     fetchAcademicPapersTool,
-    fetchOpenRouterModelsTool
+    fetchOpenRouterModelsTool,
+    fetchLobstersNewsTool,
+    fetchSpecializedDevNewsTool
   ],
-  handoffDescription: 'Use this agent to fetch GitHub releases, trending repositories, Hacker News discussions, Reddit signals, security advisories, Hugging Face daily papers/arXiv preprints, and newly added AI models from OpenRouter.',
+  handoffDescription: 'Use this agent to fetch GitHub releases, trending repositories, Hacker News discussions, Reddit signals, security advisories, Hugging Face daily papers/arXiv preprints, newly added AI models from OpenRouter, programming discussions from Lobste.rs, and specialized developer portal updates.',
 });

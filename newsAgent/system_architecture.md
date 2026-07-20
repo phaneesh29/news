@@ -55,9 +55,11 @@ The system runs a **centralized parent-child subagent pipeline** (Agents as Tool
          │       ├─► Scoutify: GitHub Releases
          │       ├─► GitHub API: Trending Repos
          │       ├─► Hacker News: Stories >150 points
-         │       ├─► Scoutify: Target Subreddits
+         │       ├─► Scoutify: Target Subreddits (expanded)
          │       ├─► Scoutify: Security Advisories
-         │       └─► HF Daily Papers API
+         │       ├─► HF Daily Papers API & OpenRouter Models
+         │       ├─► Lobste.rs API: Hot stories
+         │       └─► Scoutify: Specialized Dev Portals (InfoQ, Phoronix, HackerNoon, Dev.to)
          │
          └─► Step 3: Synthesis
              └─► [SynthesisAgent]

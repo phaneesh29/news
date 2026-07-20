@@ -35,7 +35,7 @@ export const managerAgent = new Agent({
     }),
     enrichAgent.asTool({
       toolName: 'invoke_EnrichAgent',
-      toolDescription: 'Asks the EnrichAgent to retrieve GitHub releases, trending repositories, Hacker News (stories >150 points), Reddit signals, package compromises/CVEs, and Hugging Face Daily Papers/arXiv preprints.'
+      toolDescription: 'Asks the EnrichAgent to retrieve GitHub releases, trending repositories, Hacker News, Reddit signals, Lobste.rs discussions, security advisories, Hugging Face papers, OpenRouter models, and specialized developer portals.'
     }),
     synthesisAgent.asTool({
       toolName: 'invoke_SynthesisAgent',

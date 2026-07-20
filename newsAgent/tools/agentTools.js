@@ -218,9 +218,9 @@ export const fetchHackerNewsTool = tool({
 
 export const searchRedditSignalsTool = tool({
   name: 'search_reddit_signals',
-  description: 'Searches developer subreddits (r/LocalLLaMA, r/MachineLearning, r/programming, r/webdev, r/selfhosted) for hot discussions in the configured freshness window.',
+  description: 'Searches developer subreddits (r/LocalLLaMA, r/MachineLearning, r/programming, r/webdev, r/selfhosted, r/node, r/reactjs, r/golang, r/rust, r/devops, r/nextjs) for hot discussions in the configured freshness window.',
   parameters: z.object({
-    subreddit: z.enum(['LocalLLaMA', 'MachineLearning', 'artificial', 'programming', 'webdev', 'selfhosted']).describe('The subreddit to monitor'),
+    subreddit: z.enum(['LocalLLaMA', 'MachineLearning', 'artificial', 'programming', 'webdev', 'selfhosted', 'node', 'reactjs', 'golang', 'rust', 'devops', 'nextjs']).describe('The subreddit to monitor'),
     query: z.string().optional().default('launch OR release OR new model').describe('Target query within subreddit'),
   }),
   execute: async ({ subreddit, query }) => {
@@ -351,6 +351,53 @@ export const fetchOpenRouterModelsTool = tool({
       return `Error: Failed to retrieve OpenRouter models. ${error.message}`;
     }
   },
+});
+
+export const fetchLobstersNewsTool = tool({
+  name: 'fetch_lobsters_news',
+  description: 'Fetches hot developer-focused stories and programming discussions from Lobste.rs.',
+  parameters: z.object({
+    limit: z.number().optional().default(15).describe('Max number of stories to retrieve'),
+  }),
+  execute: async ({ limit }) => {
+    try {
+      console.log(`[Lobsters] Fetching hot stories...`);
+      const response = await fetch('https://lobste.rs/hottest.json');
+      if (!response.ok) {
+        throw new Error(`Lobsters API returned status ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data || data.length === 0) return 'No stories found on Lobsters.';
+
+      const stories = data.slice(0, limit).map(item => ({
+        title: item.title,
+        url: item.url || item.comments_url,
+        commentsUrl: item.comments_url,
+        score: item.score,
+        tags: item.tags,
+        created: item.created_at,
+        source: 'Lobsters'
+      }));
+      return JSON.stringify(stories, null, 2);
+    } catch (error) {
+      console.error('[Lobsters] Failed to fetch hot stories:', error.message);
+      return `Error: Failed to retrieve Lobsters stories. ${error.message}`;
+    }
+  }
+});
+
+export const fetchSpecializedDevNewsTool = tool({
+  name: 'fetch_specialized_dev_news',
+  description: 'Searches specialized high-signal developer news portals (InfoQ, Phoronix, HackerNoon, Dev.to) for recent updates.',
+  parameters: z.object({
+    query: z.string().describe('The topic or technology keyword to search (e.g. "WebAssembly", "PostgreSQL")'),
+  }),
+  execute: async ({ query }) => {
+    const siteQuery = `(site:infoq.com OR site:phoronix.com OR site:hackernoon.com OR site:dev.to) ${query}`;
+    console.log(`[Specialized Dev News] Searching dev portals for: "${query}"...`);
+    const results = await searchWithScoutify(siteQuery);
+    return JSON.stringify(results, null, 2);
+  }
 });
 
 export const scoutifySearchTool = tool({

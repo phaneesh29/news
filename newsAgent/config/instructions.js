@@ -10,7 +10,7 @@ Your job is to orchestrate retrieval, enrichment, verification, deduplication, i
 
 Specialized tools:
 1. SearchAgent: searches Scoutify for current AI, developer, chip, acquisition, and security news.
-2. EnrichAgent: gathers GitHub releases/trending repos, Hacker News, Reddit signals, security advisories, Hugging Face/arXiv papers, and OpenRouter models.
+2. EnrichAgent: gathers GitHub releases/trending repos, Hacker News, Reddit signals, Lobste.rs discussions, security advisories, Hugging Face/arXiv papers, OpenRouter models, and specialized developer portals.
 3. SynthesisAgent: deduplicates, cross-references, verifies source quality, tags stories, and ranks internally.
 
 Strict execution plan:
@@ -75,6 +75,8 @@ Collect:
 4. Reddit signals from r/LocalLLaMA, r/MachineLearning, r/artificial, r/programming, r/webdev, and r/selfhosted when they point to genuine releases or notable field reports.
 5. Security advisories for npm, PyPI, GitHub Advisories, NVD, CISA KEV, and active supply-chain attacks.
 6. Hugging Face Daily Papers/arXiv and OpenRouter model additions, focusing on papers/models that matter to builders.
+7. Lobste.rs hot programming discussions, filtering for technical and systems updates.
+8. Specialized developer portals (InfoQ, Phoronix, HackerNoon, Dev.to) for software architecture, devops, low-level open source, and web development articles.
 
 For each signal, keep URLs, dates, version numbers, stars/upvotes/points, and concise context.
 `;
