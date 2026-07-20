@@ -11,39 +11,19 @@ const maxAttempts = 3;
 
 function buildPrompt(attempt, previousFeedback = '') {
   const now = new Date();
-  const nowUtc = now.toUTCString();
-  const nowIso = now.toISOString();
-  const currentYear = now.getUTCFullYear();
-  const currentDate = nowIso.slice(0, 10);
   const freshAfterUtc = new Date(Date.now() - config.freshnessHours * 60 * 60 * 1000).toUTCString();
 
-  return `Current UTC time: ${nowUtc}
-Current ISO timestamp: ${nowIso}
-Current YYYY-MM-DD date: ${currentDate}
-Current year: ${currentYear}
+  return `Current UTC time: ${now.toUTCString()}
 Freshness cutoff: ${freshAfterUtc}
-Freshness window: last ${config.freshnessHours} hours.
 Attempt: ${attempt}/${maxAttempts}
 
-Run the full multi-agent developer and AI news briefing pipeline.
+Run the 3-step news pipeline.
+Keep it simple:
+- search fresh developer/AI news
+- enrich with releases and discussion
+- synthesize into clean JSON
 
-Focus hard on:
-- AI and LLM releases from OpenAI, Anthropic, Google DeepMind, Mistral, Meta/Llama, Qwen, DeepSeek, NVIDIA AI, Hugging Face, Ollama, vLLM, LM Studio, and OpenRouter.
-- Agentic AI and coding-agent updates: OpenAI Agents SDK, LangChain/LangGraph, LlamaIndex, tool calling, evals, IDE agents, workflow orchestration.
-- Developer tools and web platforms: TypeScript, Node.js, Bun, Deno, Vite, React, Next.js, npm, VS Code, Cursor, Windsurf, Vercel, Cloudflare, Supabase, Turso, PostgreSQL.
-- Chips and infrastructure: NVIDIA, AMD, Intel, hyperscaler AI chips, inference hardware, model-serving platforms.
-- Developer-relevant acquisitions and partnerships.
-- Security, but keep it lean: critical CVEs, active exploitation, package malware, GitHub/NVD/CISA advisories, supply-chain attacks.
-
-Quality bar:
-- Use Scoutify search.
-- Use extraction for primary/important links; extraction should attempt Scoutify.
-- Cross-reference important news with multiple sources whenever possible.
-- Every story must have a title, clear summary, tags, confidence, and real source URLs.
-- Reject stale stories outside the freshness window unless a primary source proves the update is fresh.
-- Do not use any markdown formatting inside string fields like title or summary. Keep them clean.
-- Match the schema fields exactly: use "sources" (not "source_urls"), "category", "title", "summary", "tags", and "confidence" ('High', 'Medium', or 'Low').
-- CRITICAL: Return the final output as raw JSON only. Do not wrap the response in markdown blocks like \`\`\`json or \`\`\`. Start your output directly with [ and end with ].
+Return only raw JSON.
 
 ${previousFeedback ? `Previous quality feedback to fix:\n${previousFeedback}` : ''}`;
 }

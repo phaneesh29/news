@@ -107,13 +107,13 @@ export const extractPageContentTool = tool({
           urls: [url]
         });
 
-        const results = response.data || response.results;
-        if (response && results && results.length > 0) {
+        const results = response.results;
+        if (results && results.length > 0) {
           const result = results[0];
           extractions.push({
             provider: 'Scoutify',
             title: result.title || 'Extracted Page',
-            url: result.url,
+            url: result.url || url,
             summary: 'Summary not supported in Scoutify extract natively.',
             content: result.content ? result.content.substring(0, 25000) : 'No content retrieved.'
           });
@@ -406,15 +406,27 @@ export const scoutifySearchTool = tool({
   parameters: z.object({
     query: z.string().describe('The natural-language search query'),
     max_results: z.number().optional().describe('Maximum number of results to return (1-20, defaults to 10)'),
-    freshness: z.enum(['day', 'week', 'month', 'year']).optional().describe('Recency filter: day | week | month | year'),
+    freshness: z.enum(['day', 'month', 'year']).optional().describe('Recency filter: day | month | year'),
   }),
   execute: async ({ query, max_results, freshness }) => {
     console.log(`[Scoutify Tool] Searching: "${query}" (max_results: ${max_results}, freshness: ${freshness})`);
-    const payload = { query };
-    if (max_results !== undefined) payload.max_results = max_results;
-    if (freshness !== undefined) payload.freshness = freshness;
-    const res = await scoutifyRequest('/v1/search', payload);
-    return JSON.stringify(res, null, 2);
+    try {
+      const payload = { query };
+      if (max_results !== undefined) payload.limit = Math.min(50, Math.max(1, Math.trunc(max_results)));
+      if (freshness !== undefined) payload.time_range = freshness;
+      const res = await scoutifyRequest('/v1/search', payload);
+
+      const results = (res.results || []).map((r) => ({
+        title: r.title || 'Untitled',
+        url: r.url,
+        date: r.published_date || null,
+        snippet: r.content || '',
+        score: r.score,
+      }));
+      return JSON.stringify({ query: res.query || query, result_count: results.length, results }, null, 2);
+    } catch (e) {
+      return `Scoutify search failed for "${query}": ${e.message}`;
+    }
   }
 });
 
@@ -422,15 +434,25 @@ export const scoutifyExtractTool = tool({
   name: 'scoutify_extract',
   description: 'Extract clean, main text content from one or more known URLs using Scoutify Extract.',
   parameters: z.object({
-    urls: z.array(z.string().url()).describe('One or more absolute URLs to extract content from'),
-    include_html: z.boolean().optional().describe('Return sanitized HTML too. Default false.'),
+    urls: z.array(z.string().url()).describe('One or more absolute URLs to extract content from (max 20)'),
+    output_format: z.enum(['markdown', 'text']).optional().describe('Output format. Default markdown.'),
   }),
-  execute: async ({ urls, include_html }) => {
+  execute: async ({ urls, output_format }) => {
     console.log(`[Scoutify Tool] Extracting URLs: ${urls.join(', ')}`);
-    const payload = { urls };
-    if (include_html !== undefined) payload.include_html = include_html;
-    const res = await scoutifyRequest('/v1/extract', payload);
-    return JSON.stringify(res, null, 2);
+    try {
+      const payload = { urls: urls.slice(0, 20) };
+      if (output_format !== undefined) payload.output_format = output_format;
+      const res = await scoutifyRequest('/v1/extract', payload);
+
+      const pages = (res.results || []).map((p) => ({
+        url: p.url,
+        title: p.title || 'Extracted Page',
+        content: p.content ? p.content.substring(0, 25000) : '',
+      }));
+      return JSON.stringify({ extracted_count: pages.length, pages }, null, 2);
+    } catch (e) {
+      return `Scoutify extract failed: ${e.message}`;
+    }
   }
 });
 
@@ -447,12 +469,17 @@ export const scoutifyMapTool = tool({
     const payload = { url };
     if (max_urls !== undefined) payload.max_urls = max_urls;
     if (async_mode !== undefined) payload.async_mode = async_mode;
-    const res = await scoutifyRequest('/v1/map', payload);
-    if (async_mode && res.id) {
-      const result = await pollJob(res.id);
-      return JSON.stringify(result, null, 2);
+    try {
+      const res = await scoutifyRequest('/v1/map', payload);
+      const jobId = res.id || res.job_id;
+      if (async_mode && jobId) {
+        const result = await pollJob(jobId);
+        return JSON.stringify(result, null, 2);
+      }
+      return JSON.stringify(res, null, 2);
+    } catch (e) {
+      return `Scoutify map failed for ${url}: ${e.message}`;
     }
-    return JSON.stringify(res, null, 2);
   }
 });
 
@@ -469,11 +496,16 @@ export const scoutifyCrawlTool = tool({
     const payload = { url };
     if (max_pages !== undefined) payload.max_pages = max_pages;
     if (async_mode !== undefined) payload.async_mode = async_mode;
-    const res = await scoutifyRequest('/v1/crawl', payload);
-    if (async_mode && res.id) {
-      const result = await pollJob(res.id);
-      return JSON.stringify(result, null, 2);
+    try {
+      const res = await scoutifyRequest('/v1/crawl', payload);
+      const jobId = res.id || res.job_id;
+      if (async_mode && jobId) {
+        const result = await pollJob(jobId);
+        return JSON.stringify(result, null, 2);
+      }
+      return JSON.stringify(res, null, 2);
+    } catch (e) {
+      return `Scoutify crawl failed for ${url}: ${e.message}`;
     }
-    return JSON.stringify(res, null, 2);
   }
 });
