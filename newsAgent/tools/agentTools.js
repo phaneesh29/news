@@ -104,12 +104,12 @@ export const extractPageContentTool = tool({
       console.log(`[Content Extractor] Scrape via Scoutify Extract: ${url}`);
       try {
         const response = await scoutifyRequest('/v1/extract', {
-          urls: [url],
-          output_format: 'markdown'
+          urls: [url]
         });
 
-        if (response && response.results && response.results.length > 0) {
-          const result = response.results[0];
+        const results = response.data || response.results;
+        if (response && results && results.length > 0) {
+          const result = results[0];
           extractions.push({
             provider: 'Scoutify',
             title: result.title || 'Extracted Page',
@@ -405,14 +405,14 @@ export const scoutifySearchTool = tool({
   description: 'Search the web using Scoutify Search API for structured web results.',
   parameters: z.object({
     query: z.string().describe('The natural-language search query'),
-    limit: z.number().optional().describe('Maximum number of results to return (1-20, defaults to 10)'),
-    time_range: z.enum(['day', 'month', 'year']).optional().describe('Recency filter: day | month | year'),
+    max_results: z.number().optional().describe('Maximum number of results to return (1-20, defaults to 10)'),
+    freshness: z.enum(['day', 'week', 'month', 'year']).optional().describe('Recency filter: day | week | month | year'),
   }),
-  execute: async ({ query, limit, time_range }) => {
-    console.log(`[Scoutify Tool] Searching: "${query}" (limit: ${limit}, time_range: ${time_range})`);
+  execute: async ({ query, max_results, freshness }) => {
+    console.log(`[Scoutify Tool] Searching: "${query}" (max_results: ${max_results}, freshness: ${freshness})`);
     const payload = { query };
-    if (limit !== undefined) payload.limit = limit;
-    if (time_range !== undefined) payload.time_range = time_range;
+    if (max_results !== undefined) payload.max_results = max_results;
+    if (freshness !== undefined) payload.freshness = freshness;
     const res = await scoutifyRequest('/v1/search', payload);
     return JSON.stringify(res, null, 2);
   }
@@ -423,14 +423,12 @@ export const scoutifyExtractTool = tool({
   description: 'Extract clean, main text content from one or more known URLs using Scoutify Extract.',
   parameters: z.object({
     urls: z.array(z.string().url()).describe('One or more absolute URLs to extract content from'),
-    output_format: z.enum(['markdown', 'text']).optional().default('markdown').describe('Output format of extracted content'),
-    include_links: z.boolean().optional().describe('Whether to extract and return links found on the page'),
+    include_html: z.boolean().optional().describe('Return sanitized HTML too. Default false.'),
   }),
-  execute: async ({ urls, output_format, include_links }) => {
+  execute: async ({ urls, include_html }) => {
     console.log(`[Scoutify Tool] Extracting URLs: ${urls.join(', ')}`);
     const payload = { urls };
-    if (output_format !== undefined) payload.output_format = output_format;
-    if (include_links !== undefined) payload.include_links = include_links;
+    if (include_html !== undefined) payload.include_html = include_html;
     const res = await scoutifyRequest('/v1/extract', payload);
     return JSON.stringify(res, null, 2);
   }
@@ -441,15 +439,16 @@ export const scoutifyMapTool = tool({
   description: 'Discover and map URLs across a website starting from a base URL using Scoutify Map.',
   parameters: z.object({
     url: z.string().url().describe('The absolute starting URL of the site to map'),
-    max_depth: z.number().optional().describe('Maximum crawling depth'),
     max_urls: z.number().optional().describe('Maximum number of URLs to discover and return'),
-    include_subdomains: z.boolean().optional().describe('Whether to include subdomains'),
     async_mode: z.boolean().optional().default(false).describe('Whether to run as a background job and poll for completion'),
   }),
-  execute: async (args) => {
-    console.log(`[Scoutify Tool] Mapping: ${args.url} (async_mode: ${args.async_mode})`);
-    const res = await scoutifyRequest('/v1/map', args);
-    if (args.async_mode && res.id) {
+  execute: async ({ url, max_urls, async_mode }) => {
+    console.log(`[Scoutify Tool] Mapping: ${url} (async_mode: ${async_mode})`);
+    const payload = { url };
+    if (max_urls !== undefined) payload.max_urls = max_urls;
+    if (async_mode !== undefined) payload.async_mode = async_mode;
+    const res = await scoutifyRequest('/v1/map', payload);
+    if (async_mode && res.id) {
       const result = await pollJob(res.id);
       return JSON.stringify(result, null, 2);
     }
@@ -462,17 +461,16 @@ export const scoutifyCrawlTool = tool({
   description: 'Map a website and extract content from accepted pages using Scoutify Crawl.',
   parameters: z.object({
     url: z.string().url().describe('The absolute starting URL of the site to crawl'),
-    max_depth: z.number().optional().describe('Maximum crawling depth'),
-    max_pages: z.number().optional().describe('Maximum number of pages to process'),
-    include_subdomains: z.boolean().optional().describe('Whether to include subdomains'),
-    output_format: z.enum(['markdown', 'text']).optional().default('markdown').describe('Content format of extracted pages'),
-    include_links: z.boolean().optional().describe('Whether to include links in extraction'),
+    max_pages: z.number().optional().describe('Maximum pages to process'),
     async_mode: z.boolean().optional().default(false).describe('Whether to run as a background job and poll for completion'),
   }),
-  execute: async (args) => {
-    console.log(`[Scoutify Tool] Crawling: ${args.url} (async_mode: ${args.async_mode})`);
-    const res = await scoutifyRequest('/v1/crawl', args);
-    if (args.async_mode && res.id) {
+  execute: async ({ url, max_pages, async_mode }) => {
+    console.log(`[Scoutify Tool] Crawling: ${url} (async_mode: ${async_mode})`);
+    const payload = { url };
+    if (max_pages !== undefined) payload.max_pages = max_pages;
+    if (async_mode !== undefined) payload.async_mode = async_mode;
+    const res = await scoutifyRequest('/v1/crawl', payload);
+    if (async_mode && res.id) {
       const result = await pollJob(res.id);
       return JSON.stringify(result, null, 2);
     }
